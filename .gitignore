@@ -1,0 +1,7 @@
+node_modules
+.idea
+*.log
+properties.json
+.vim*
+*.swp
+.tern-project
