@@ -29,7 +29,8 @@
 		"one-variable-per-declaration": false,
 		"max-line-length": [true, 150],
 		"member-access": false,
-		"max-classes-per-file": false
+		"max-classes-per-file": false,
+		"jsx-no-multiline-js": false
 	},
     "rulesDirectory": []
 }

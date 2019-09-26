@@ -3,6 +3,8 @@ const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import ApiClient from "./ApiClientImplementation";
 import _Spinner from "react-spinner";
 
+const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
+
 //declare module "react-spinner" {
 //		//	interface Spinner {
 //		//		style: any;
@@ -95,14 +97,17 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 }
 
-export interface HasStyle {
+const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
+	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames("clickable", className)}>{children || <span>&#8203;</span>}</span>
+);
+
+export interface Stylable {
 	style?: React.CSSProperties;
 }
-
-export interface AppProps {
-	style?: React.CSSProperties;
+export interface Classable {
 	className?: string;
 }
+export interface AppProps extends Stylable, Classable { }
 
 export interface LajiFormEditorProps {
 	schemas: any;
@@ -110,17 +115,26 @@ export interface LajiFormEditorProps {
 		fields: FieldProps[];
 	};
 }
-
-class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & HasStyle> {
+export interface LajiFormEditorState {
+	selected?: string;
+}
+class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
+	state = {selected: undefined};
 	render() {
-		return <Fields fields={this.props.json.fields} />;
+		return <Fields fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />;
+	}
+
+	onFieldSelected = (field: string) => {
+		this.setState({selected: field});
 	}
 }
 
+type OnSelectedCB = (field: string) => void;
+
 const Fields = React.memo(
-	({fields = []}: {fields: FieldProps[]}) => (
+	({fields = [], onSelected, selected, pointer}: {fields: FieldProps[], onSelected: OnSelectedCB, selected?: string, pointer: string}) => (
 		<div style={{display: "flex", flexDirection: "column", paddingLeft: 20}}>
-			{fields.map((f: FieldProps) => <Field key={f.name} {...f} />)}
+			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} selected={selected} pointer={`${pointer}/${f.name}`} />)}
 		</div>
 ));
 
@@ -133,30 +147,57 @@ interface FieldOptions {
 	fields: FieldProps[];
 }
 interface FieldProps extends FieldOptions {
-	selected: boolean;
+	pointer: string;
+	selected?: string;
+	onSelected: OnSelectedCB;
 }
 interface FieldState {
 	expanded: boolean;
 }
 class Field extends React.PureComponent<FieldProps, FieldState> {
 	state = {
-		expanded: this.props.selected
+		expanded: this.isSelected() || false
 	};
+
+	isSelected(): boolean {
+		return (this.props.selected || "") === this.props.pointer;
+	}
 
 	toggleExpand = () => {
 		this.setState({expanded: !this.state.expanded});
 	}
 
+	onThisSelected = () => {
+		this.props.onSelected(this.props.pointer);
+	}
+
+	onChildSelected = (pointer: string) => {
+		this.props.onSelected(pointer);
+	}
+
 	render() {
-		const {label, name, fields = []} = this.props;
-		const prefix = fields.length
+		const {label, name, fields = [], selected, pointer} = this.props;
+		const className = fields.length
 			? this.state.expanded
-				? "▼"
-				: "►"
-			: "   ";
-		return [
-			<span key="field" onClick={this.toggleExpand}>{`${prefix} ${name} ${label ? `(${label})` : ""}`}</span>,
-			this.state.expanded ? <Fields key="fields" fields={fields} /> : null
-		];
+				? "expanded"
+				: "contracted"
+			: "nonexpandable";
+		return (
+			<div className="field">
+				<div className={classNames(this.isSelected() && "selected")}>
+					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={`field-${className}`} />
+					<Clickable onClick={this.onThisSelected}>{`${name} ${label ? `(${label})` : ""}`}</Clickable>
+				</div>
+				{this.state.expanded && (
+					<Fields
+						key="fields"
+						fields={fields}
+						onSelected={this.onChildSelected}
+						selected={selected}
+						pointer={pointer}
+					/>
+				)}
+			</div>
+		);
 	}
 }
