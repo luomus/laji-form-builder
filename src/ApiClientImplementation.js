@@ -3,15 +3,18 @@ import queryString from "querystring";
 import merge from "deepmerge";
 
 export default class ApiClient {
-	constructor(baseUrl, accessToken, userToken, lang = "en") {
+	constructor(baseUrl, accessToken, lang = "en") {
 		this.BASE_URL =  baseUrl;
 		this.lang = lang;
 		this.accessToken = accessToken;
-		this.userToken = userToken;
+	}
+
+	setLang(lang) {
+		this.lang = lang;
 	}
 
 	getBaseQuery() {
-		return {access_token: this.accessToken, personToken: this.userToken};
+		return {access_token: this.accessToken};
 	}
 
 	fetch(path, query, options) {

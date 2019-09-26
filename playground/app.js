@@ -22,19 +22,4 @@ function getJsonFromUrl() {
 	return result;
 }
 
-const { id = "JX.519", lang = "fi" } = getJsonFromUrl();
-
-const apiClient = new ApiClient(
-	"https://apitest.laji.fi/v0",
-	properties.accessToken,
-	properties.userToken,
-	lang
-);
-const promise = apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => {
-	return response.json();
-});
-
-promise.then(data => {
-	new LajiFormBuilder({...data, lang, apiClient, rootElem: document.querySelector("#app")});
-});
-
+new LajiFormBuilder({...getJsonFromUrl(), ...properties, rootElem: document.querySelector("#app")});
