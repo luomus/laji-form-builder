@@ -2,6 +2,8 @@ import * as React from "react";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import ApiClient from "./ApiClientImplementation";
 import _Spinner from "react-spinner";
+import * as LajiFormUtils from "laji-form/lib/utils";
+const { parseJSONPointer, parseUiSchemaFromFormDataPointer, parseSchemaFromFormDataPointer, uiSchemaJSONPointer, updateSafelyWithJSONPath } = LajiFormUtils;
 
 const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -29,13 +31,14 @@ export interface LajiFormBuilderState {
 	id?: string;
 	schemas?: "loading" | any;
 	json?: "loading" | any;
+	uiSchema?: any;
 }
 
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: any;
 	state: LajiFormBuilderState = {
 		schemas: "loading",
-		json: "loading"
+		json: "loading",
 	};
 
 	static defaultProps = {
@@ -84,16 +87,23 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	renderLajiForm() {
+		const uiSchema = this.state.uiSchema || this.state.schemas.uiSchema;
 		return this.state.schemas === "loading"
 			? <Spinner color="black" />
-			: <LajiForm {...this.props} {...this.state.schemas} apiClient={this.apiClient} />;
+			: <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} />;
 	}
 
 	renderEditor() {
-		const {json, schemas} = this.state;
+		const {json, schemas, uiSchema} = this.state;
 		return json === "loading"
 			? <Spinner color="black" />
-			: <LajiFormEditor json={json} schemas={schemas}/>;
+			: <LajiFormEditor json={json} schemas={schemas} onChange={this.onEditorChange}/>;
+	}
+
+	onEditorChange = ({uiSchema, field}: {uiSchema?: any, field?: FieldOptions}) => {
+		if (uiSchema) {
+			this.setState({schemas: {...this.state.schemas, uiSchema}});
+		}
 	}
 }
 
@@ -114,6 +124,11 @@ export interface LajiFormEditorProps {
 	json: {
 		fields: FieldProps[];
 	};
+	onChange: (changed: {uiSchema?: any, json?: any}) => void;
+}
+
+export interface FieldMap {
+	[field: string]: FieldMap;
 }
 export interface LajiFormEditorState {
 	selected?: string;
@@ -121,11 +136,160 @@ export interface LajiFormEditorState {
 class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	state = {selected: undefined};
 	render() {
-		return <Fields fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />;
+		return (
+			<div style={{display: "flex", flexDirection: "column"}}>
+				<FieldEditor onChange={this.onEditorChange} {...this.getEditorProps()} />
+				<Fields fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />;
+			</div>
+		);
+	}
+
+	getFieldsMap(props: LajiFormEditorProps) {
+		function fieldsMapper(container: any, fields: FieldOptions[]) {
+			return fields.reduce((_container, field) => {
+				const _field = field.fields
+					? {...field, fields: fieldsMapper({}, field.fields)}
+					: field;
+				_container[field.name] = _field;
+				return _container;
+			}, container);
+		}
+		return fieldsMapper({}, props.json.fields)
 	}
 
 	onFieldSelected = (field: string) => {
 		this.setState({selected: field});
+	}
+
+	getEditorProps(): any {
+		const { schemas, json } = this.props;
+		const { selected = "" } = this.state;
+		if (!selected) {
+			return {};
+		}
+		const fieldsMap = this.getFieldsMap(this.props);
+		return {
+			schema: parseSchemaFromFormDataPointer(schemas.schema, selected || ""),
+			uiSchema: parseUiSchemaFromFormDataPointer(schemas.uiSchema, selected || ""),
+			field: parseJSONPointer({fields: fieldsMap}, (this.state.selected || "").replace(/\//g, "/fields/"))
+		}
+	}
+
+	onEditorChange = ({uiSchema, field}: {uiSchema?: any, field?: FieldOptions}) => {
+		const {selected = ""} = this.state;
+		if (uiSchema) {
+			const uiSchemaPointer = uiSchemaJSONPointer(this.props.schemas.uiSchema, selected);
+			this.props.onChange({uiSchema: updateSafelyWithJSONPath(this.props.schemas.uiSchema, uiSchema, selected)});
+		}
+	}
+
+}
+
+// const Button = React.memo(({children, ...props}: {children: React.ReactNode, props?: React.HTMLAttributes<HTMLButtonElement>}) =>
+const Button = React.memo(({children, active, className, ...props}: any) =>
+	<button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>
+);
+
+interface FieldEditorProps {
+	schema?: any;
+	uiSchema?: any;
+	field?: FieldOptions;
+	onChange: (changed: {uiSchema?: any, field?: any}) => void;
+}
+interface FieldEditorState {
+	active: "uiSchema" | "editor";
+}
+class FieldEditor extends React.PureComponent<FieldEditorProps, FieldEditorState> {
+	state: FieldEditorState = {
+		active: "uiSchema"
+	};
+
+	setEditorActive = () => {
+		this.setState({active: "editor"});
+	}
+
+	setUiSchemaActive = () => {
+		this.setState({active: "uiSchema"});
+	}
+
+	render() {
+		return (
+			<React.Fragment>
+				<div className="btn-group">
+					<Button active={this.state.active === "editor"} onClick={this.setEditorActive}>editor</Button>
+					<Button active={this.state.active === "uiSchema"} onClick={this.setUiSchemaActive}>uiSchema</Button>
+				</div>
+				{this.renderEditor()}
+			</React.Fragment>
+		);
+	}
+
+	getFieldName(): string {
+		const {uiSchema = {}, field} = this.props;
+		if (!field) {
+			return "";
+		}
+		const { "ui:title": uiTitle } = uiSchema;
+		return typeof uiTitle === "string"
+			? uiTitle
+			: typeof field.label === "string"
+				? field.label
+				: field.name;
+	}
+
+	onFieldNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const { value } = e.target;
+		this.props.onChange({uiSchema: {...(this.props.uiSchema || {}), "ui:title": value}});
+	}
+
+	renderEditor() {
+		//return this.state.active === "uiSchema"
+		//	? this.renderUiSchemaEditor()
+		//	: this.renderAdvancedEditor();
+		const schema = {
+			type: "object",
+			properties: {
+				uiSchema: {
+					type: "object",
+					properties: {
+						"ui:title": {
+							type: "string",
+							label: "Otsikko"
+						},
+						"ui:description": {
+							type: "string",
+							label: "Kuvaus"
+						},
+						"ui:help": {
+							type: "string"
+							label: "Aputeksti"
+						}
+					}
+				}
+			}
+		};
+		const formData = {
+			uiSchema: {
+				...this.props.uiSchema,
+				"ui:title": this.getFieldName()
+			}
+		};
+		return <LajiForm schema={schema} formData={formData} />;
+			//return (
+			//	<React.Fragment>
+			//		<input type="text" value={this.getFieldName()} onChange={this.onFieldNameChange} />
+			//	</React.Fragment>
+			//)
+	}
+
+	renderUiSchemaEditor() {
+		//console.log(this.props.uiSchema);
+		return (
+			<textarea value={JSON.stringify(this.props.uiSchema)} />
+		);
+	}
+
+	renderAdvancedEditor() {
 	}
 }
 
@@ -144,12 +308,13 @@ interface FieldOptions {
 	options: any;
 	type: string;
 	validators: any;
-	fields: FieldProps[];
+	fields: FieldOptions[];
 }
 interface FieldProps extends FieldOptions {
 	pointer: string;
 	selected?: string;
 	onSelected: OnSelectedCB;
+	fields: FieldProps[];
 }
 interface FieldState {
 	expanded: boolean;
