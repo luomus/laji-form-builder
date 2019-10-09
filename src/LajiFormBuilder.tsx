@@ -7,6 +7,7 @@ const { parseJSONPointer, parseUiSchemaFromFormDataPointer, parseSchemaFromFormD
 import PropTypes from "prop-types";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
+import JSONEditor from "react-json-editor-ajrm";
 
 const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -318,6 +319,14 @@ const Button = React.memo(({children, active, className, ...props}: any) =>
 	<button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>
 );
 
+const TextareaEditorField = (props: any) => (
+	<JSONEditor
+		placeholder={props.formData || props.value}
+		onChange={React.useCallback(((value: any) => props.onChange(value)), [props.onChange])}
+		locale="en"
+	/>
+);
+
 interface FieldEditorProps extends CommonEditorProps {
 	uiSchema?: any;
 	viewUiSchema?: any;
@@ -327,7 +336,7 @@ interface FieldEditorProps extends CommonEditorProps {
 	onChange: (changed: FieldEditorChangeEvent[]) => void;
 }
 class FieldEditor extends React.PureComponent<FieldEditorProps> {
-	getSchemaForUiSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
+	getEditorSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
 		if (!lajiFormInstance) {
 			return null;
 		}
@@ -349,6 +358,12 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 						return {type: "array", items: propTypesToSchema(propTypes.type.value)};
 					case "oneOf":
 						return {type: "string", enum: propTypes.value, enumNames: propTypes.value}
+					case "object":
+					case "custom":
+						return {type: "object", properties: {}};
+					default:
+						console.warn(`Unhandled PropType type ${propTypes.type.name}`);
+						return {type: "object", properties: {}};
 				}
 			}
 			if (propTypes.name) {
@@ -378,7 +393,33 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			}
 		};
 		return schema;
-	})
+	});
+	getEditorUiSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
+		if (!lajiFormInstance) {
+			return null;
+		}
+		const registry = lajiFormInstance.formRef.getRegistry.call({
+			props: lajiFormInstance.formRef.props
+		});
+		const {"ui:field": uiField, "ui:widget": uiWidget} = this.props.uiSchema;
+		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
+		const componentPropTypes = component && parsePropTypes(component);
+		const propTypesToUiSchema = (propTypes: any): any => {
+			if (propTypes.type) {
+				switch (propTypes.type.name) {
+					case "shape":
+						return Object.keys(propTypes.type.value).reduce((properties, prop) => ({
+							...properties,
+							[prop]: propTypesToUiSchema(propTypes.type.value[prop])
+						}), {});
+					default:
+						return {["ui:field"]: "TextareaEditorField"};
+				}
+			}
+			return {};
+		}
+		return componentPropTypes.uiSchema ? propTypesToUiSchema(componentPropTypes.uiSchema) : {};
+	});
 
 	render() {
 		return this.renderEditor();
@@ -390,7 +431,6 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			return "";
 		}
 		const { "ui:title": uiTitle } = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
-;
 		return typeof uiTitle === "string"
 			? uiTitle
 			: typeof field.label === "string"
@@ -407,12 +447,14 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 
 		const lajiFormInstance = this.getLajiFormInstance();
 
-		const schema = this.getSchemaForUiSchema(lajiFormInstance, this.props.uiSchema);
+		const schema = this.getEditorSchema(lajiFormInstance, this.props.uiSchema);
+		const uiSchema = this.getEditorUiSchema(lajiFormInstance, this.props.uiSchema);
 		const formData = {
 			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations),
 			"ui:title": this.getFieldName()
 		};
-		return <LajiForm schema={schema} formData={formData} onChange={this.onEditorLajiFormChange}/>;
+		const fields = { TextareaEditorField };
+		return <LajiForm schema={schema} uiSchema={uiSchema} formData={formData} onChange={this.onEditorLajiFormChange} fields={fields}/>;
 	}
 
 	onEditorLajiFormChange = (newViewUiSchema: any) => {
@@ -441,7 +483,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		let masterUiSchemaChanged = false;
 		let translationKey, translationValue;
 		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getSchemaForUiSchema(lajiFormInstance, uiSchema), changedPath);
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(lajiFormInstance, uiSchema), changedPath);
 			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
 				translationsChanged = true;
 				const masterValue = parseJSONPointer(uiSchema, changedPath);
