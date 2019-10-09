@@ -3,9 +3,10 @@ const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import ApiClient from "./ApiClientImplementation";
 import _Spinner from "react-spinner";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, parseUiSchemaFromFormDataPointer, parseSchemaFromFormDataPointer, uiSchemaJSONPointer, updateSafelyWithJSONPath } = LajiFormUtils;
+const { parseJSONPointer, parseUiSchemaFromFormDataPointer, parseSchemaFromFormDataPointer, uiSchemaJSONPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
 import PropTypes from "prop-types";
 import parsePropTypes from "parse-prop-types";
+import memoize from "memoizee";
 
 const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -23,26 +24,54 @@ const Spinner = React.memo(({color = "white"}: {color: "white" | "black"}) =>
 	//<_Spinner className={color === "black" ? "bg-black" : ""} /> // TODO typescrit can't dig it...
 )
 
+type Lang = "fi" | "sv" | "en";
+
 export interface LajiFormBuilderProps {
 	id: string;
-	lang: "fi" | "sv" | "en";
+	lang: Lang;
 	accessToken: string;
 }
 
 export interface LajiFormBuilderState {
 	id?: string;
+	master?: "loading" | any;
 	schemas?: "loading" | any;
 	json?: "loading" | any;
 	uiSchema?: any;
+	lang: Lang;
 }
+
+const getTranslatedUiSchema = memoize((uiSchema: any, translations: any): any => {
+	function translate(obj: any): any {
+		if (isObject(obj)) {
+			return Object.keys(obj).reduce((translated, key) => ({
+				...translated,
+				[key]: translate(obj[key])
+			}), {});
+		} else if (Array.isArray(obj)) {
+			return obj.map(translate);
+		}
+		if (typeof obj === "string" && obj[0] === "@") {
+			return translations[obj];
+		}
+		return obj;
+	}
+	return translate(uiSchema);
+});
 
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: any;
+	formApiClient: any;
 	state: LajiFormBuilderState = {
+		master: "loading",
 		schemas: "loading",
 		json: "loading",
+		lang: this.props.lang
 	};
 	lajiFormRef: React.Ref<any>;
+	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
+		...fns, [lang]: () => this.setState({lang})
+	}), {} as any);
 
 	static defaultProps = {
 		lang: "fi",
@@ -56,6 +85,10 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			"https://apitest.laji.fi/v0",
 			accessToken,
 			lang
+		);
+		this.formApiClient = new ApiClient(
+			"https://cors-anywhere.herokuapp.com/http://formtest.laji.fi/lajiform",
+			accessToken,
 		);
 		this.lajiFormRef = React.createRef();
 	}
@@ -71,12 +104,14 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	updateFromId(id: string) {
 		if (id !== this.state.id) {
-			this.setState({schemas: "loading", json: "loading"}, () =>
-				[["schemas", "schema"], ["json"]].forEach(
+			this.setState({master: "loading", schemas: "loading", json: "loading"}, () => {
+				this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
+				[["schemas", "schema"], ["schemas", "schema"], ["json"]].forEach(
 					([stateProp, format]) => this.apiClient.fetch(`/forms/${id}`, {lang: this.props.lang, format: format || stateProp})
 						.then((response: any) => response.json())
-						.then((data: any) => this.setState({id, [stateProp]: data}))
-				)
+					.then((data: any) => this.setState({id, [stateProp]: data} as Pick<LajiFormBuilderState, "id" | "schemas" | "json">))
+				);
+			}
 			);
 		}
 	}
@@ -84,36 +119,111 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	render() {
 		return (
 			<div style={{ display: "flex", flexDirection: "row" }}>
-				{this.renderEditor()}
+				<div style={{ display: "flex", flexDirection: "column" }}>
+					{this.renderLangChooser()}
+					{this.renderEditor()}
+				</div>
 				{this.renderLajiForm()}
 			</div>
 		);
 	}
 
 	renderLajiForm() {
-		const uiSchema = this.state.uiSchema || this.state.schemas.uiSchema;
-		return this.state.schemas === "loading"
-			? <Spinner color="black" />
-			: <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} ref={this.lajiFormRef} />;
+		if (this.state.schemas === "loading" || this.state.master === "loading") {
+			return <Spinner color="black" />;
+		}
+		const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
+		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} ref={this.lajiFormRef} />;
 	}
 
 	renderEditor() {
-		const {json, schemas, uiSchema} = this.state;
-		return json === "loading"
+		const {json, schemas, uiSchema, master} = this.state;
+		return json === "loading" || master === "loading"
 			? <Spinner color="black" />
-			: <LajiFormEditor json={json} schemas={schemas} onChange={this.onEditorChange} lajiFormRef={this.lajiFormRef}/>;
+				: (
+					<LajiFormEditor
+							master={master}
+							json={json}
+							schemas={schemas}
+							onChange={this.onEditorChange}
+							lajiFormRef={this.lajiFormRef}
+							lang={this.state.lang}
+					/>
+				);
 	}
 
-	onEditorChange = ({uiSchema, field}: {uiSchema?: any, field?: FieldOptions}) => {
-		if (uiSchema) {
-			this.setState({schemas: {...this.state.schemas, uiSchema}});
-		}
+	renderLangChooser = () => {
+		return (
+			<div className="btn-group">{
+				["fi", "sv", "en"].map((lang: Lang) => (
+					<Button
+						active={this.state.lang === lang}
+						onClick={this.getSetLangFor[lang]}
+						key={lang}
+					>{lang}
+					</Button>
+					))
+			}</div>
+		);
+	}
+
+	onEditorChange = (events: ChangeEvent[]) => {
+		const changed: any = {master: this.state.master};
+		events.forEach(event => {
+			if (isUiSchemaChangeEvent(event)) {
+				changed.master = {
+					...(changed.master || {}),
+					uiSchema: updateSafelyWithJSONPath(
+						this.state.master.uiSchema,
+						event.uiSchema,
+						uiSchemaJSONPointer(this.state.master.uiSchema, event.selected)
+					)
+				};
+			} else {
+				const {key, value} = event;
+				changed.master = {
+					...(changed.master || {}),
+					translations: ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
+						...translations,
+						[lang]: {
+							...translations[lang],
+							[key]: lang === this.state.lang
+							? value
+							: this.state.master.translations[lang][key]
+							|| value
+						}
+					}), this.state.master.translations)
+				};
+			}
+		});
+		this.setState(changed);
 	}
 }
 
 const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
 	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames("clickable", className)}>{children || <span>&#8203;</span>}</span>
 );
+
+interface UiSchemaChangeEvent {
+	type: "uiSchema";
+	uiSchema: any;
+	selected: string;
+}
+interface TranslationsChangeEvent {
+	type: "translations";
+	key: any;
+	value: any;
+}
+
+function isUiSchemaChangeEvent(event: ChangeEvent): event is UiSchemaChangeEvent {
+	return event.type === "uiSchema";
+}
+function isTranslationsChangeEvent(event: ChangeEvent): event is TranslationsChangeEvent {
+	return event.type === "translations";
+}
+
+type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent;
+type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent;
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -123,10 +233,17 @@ export interface Classable {
 }
 export interface AppProps extends Stylable, Classable { }
 
+interface Schemas {
+	schema: any;
+	uiSchema: any;
+}
+
 export interface CommonEditorProps {
-	schemas: any;
-	onChange: (changed: {uiSchema?: any, json?: any}) => void;
+	master: any;
+	schemas: Schemas;
+	onChange: (changed: ChangeEvent[]) => void;
 	lajiFormRef: React.Ref<any>;
+	lang: Lang;
 }
 
 export interface LajiFormEditorProps extends CommonEditorProps {
@@ -170,7 +287,7 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 	}
 
 	getEditorProps(): any {
-		const { schemas, json } = this.props;
+		const { schemas, json, master, lang } = this.props;
 		const { selected = "" } = this.state;
 		if (!selected) {
 			return {};
@@ -178,17 +295,20 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 		const fieldsMap = this.getFieldsMap(this.props);
 		return {
 			schema: parseSchemaFromFormDataPointer(schemas.schema, selected || ""),
-			uiSchema: parseUiSchemaFromFormDataPointer(schemas.uiSchema, selected || ""),
-			field: parseJSONPointer({fields: fieldsMap}, (this.state.selected || "").replace(/\//g, "/fields/"))
+			uiSchema: parseUiSchemaFromFormDataPointer(master.uiSchema, selected || ""),
+			field: parseJSONPointer({fields: fieldsMap}, (this.state.selected || "").replace(/\//g, "/fields/")),
+			translations: master.translations[lang],
+			path: selected
 		};
 	}
 
-	onEditorChange = ({uiSchema, field}: {uiSchema?: any, field?: FieldOptions}) => {
-		const {selected = ""} = this.state;
-		if (uiSchema) {
-			const uiSchemaPointer = uiSchemaJSONPointer(this.props.schemas.uiSchema, selected);
-			this.props.onChange({uiSchema: updateSafelyWithJSONPath(this.props.schemas.uiSchema, uiSchema, selected)});
-		}
+	onEditorChange = (events: ChangeEvent[]) => {
+		events = events.map(event => {
+			const {selected = ""} = this.state;
+			return { ...event, selected };
+		});
+
+		this.props.onChange(events);
 	}
 
 }
@@ -200,65 +320,17 @@ const Button = React.memo(({children, active, className, ...props}: any) =>
 
 interface FieldEditorProps extends CommonEditorProps {
 	uiSchema?: any;
+	viewUiSchema?: any;
 	field?: FieldOptions;
+	translations?: any;
+	path?: string;
+	onChange: (changed: FieldEditorChangeEvent[]) => void;
 }
-// interface FieldEditorState {
-// 	active: "uiSchema" | "editor";
-// }
 class FieldEditor extends React.PureComponent<FieldEditorProps> {
-	// state: FieldEditorState = {
-	// 	active: "uiSchema"
-	// };
-
-	// setEditorActive = () => {
-	// 	this.setState({active: "editor"});
-	// }
-
-	// setUiSchemaActive = () => {
-	// 	this.setState({active: "uiSchema"});
-	// }
-
-	render() {
-		return this.renderEditor();
-		// return (
-		// 	<React.Fragment>
-		// 		<div className="btn-group">
-		// 			<Button active={this.state.active === "editor"} onClick={this.setEditorActive}>editor</Button>
-		// 			<Button active={this.state.active === "uiSchema"} onClick={this.setUiSchemaActive}>uiSchema</Button>
-		// 		</div>
-		// 		{this.renderEditor()}
-		// 	</React.Fragment>
-		// );
-	}
-
-	getFieldName(): string {
-		const {uiSchema = {}, field} = this.props;
-		if (!field) {
-			return "";
-		}
-		const { "ui:title": uiTitle } = uiSchema;
-		return typeof uiTitle === "string"
-			? uiTitle
-			: typeof field.label === "string"
-				? field.label
-				: field.name;
-	}
-
-	// onFieldNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-	// 	const { value } = e.target;
-	// 	this.props.onChange({uiSchema: {...(this.props.uiSchema || {}), "ui:title": value}});
-	// }
-
-	renderEditor() {
-		if (!this.props.uiSchema) {
-			return null;
-		}
-
-		const lajiFormInstance = (this.props.lajiFormRef as any).current; // TODO fix as any
+	getSchemaForUiSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
 		if (!lajiFormInstance) {
 			return null;
 		}
-
 		const registry = lajiFormInstance.formRef.getRegistry.call({
 			props: lajiFormInstance.formRef.props
 		});
@@ -305,29 +377,94 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 				}
 			}
 		};
+		return schema;
+	})
 
+	render() {
+		return this.renderEditor();
+	}
+
+	getFieldName(): string {
+		const {uiSchema = {}, field} = this.props;
+		if (!field) {
+			return "";
+		}
+		const { "ui:title": uiTitle } = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
+;
+		return typeof uiTitle === "string"
+			? uiTitle
+			: typeof field.label === "string"
+				? field.label
+				: field.name;
+	}
+
+	getLajiFormInstance = () => ((this.props.lajiFormRef as any).current);
+
+	renderEditor() {
+		if (!this.props.uiSchema) {
+			return null;
+		}
+
+		const lajiFormInstance = this.getLajiFormInstance();
+
+		const schema = this.getSchemaForUiSchema(lajiFormInstance, this.props.uiSchema);
 		const formData = {
-		//	uiSchema: {
-				...this.props.uiSchema,
-				"ui:title": this.getFieldName()
-		//	}
+			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations),
+			"ui:title": this.getFieldName()
 		};
-		return <LajiForm schema={schema} formData={formData} />;
-			//return (
-			//	<React.Fragment>
-			//		<input type="text" value={this.getFieldName()} onChange={this.onFieldNameChange} />
-			//	</React.Fragment>
-			//)
+		return <LajiForm schema={schema} formData={formData} onChange={this.onEditorLajiFormChange}/>;
 	}
 
-	renderUiSchemaEditor() {
-		//console.log(this.props.uiSchema);
-		return (
-			<textarea value={JSON.stringify(this.props.uiSchema)} />
-		);
-	}
-
-	renderAdvancedEditor() {
+	onEditorLajiFormChange = (newViewUiSchema: any) => {
+		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
+		let { uiSchema, translations } = this.props;
+		const detectChangePaths = (_uiSchema: any, path: string): string[] => {
+			if (isObject(_uiSchema)) {
+				return Object.keys(_uiSchema).reduce((paths, key) => {
+					const changes = detectChangePaths(_uiSchema[key], `${path}/${key}`);
+					return changes.length ? [...paths, ...changes] : paths;
+				}, []);
+			} else if (Array.isArray(_uiSchema)) {
+				return _uiSchema.reduce((paths, item, idx) => {
+					const changes = detectChangePaths(item, `${path}/${idx}`);
+					return changes.length ? [...paths, ...changes] : paths;
+				}, []);
+			}
+			if (parseJSONPointer(newViewUiSchema, path) !== parseJSONPointer(viewUiSchema, path)) {
+				return [path];
+			}
+			return [];
+		};
+		const changedPaths = detectChangePaths(newViewUiSchema, "");
+		const lajiFormInstance = this.getLajiFormInstance();
+		let translationsChanged = false;
+		let masterUiSchemaChanged = false;
+		let translationKey, translationValue;
+		changedPaths.forEach(changedPath => {
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getSchemaForUiSchema(lajiFormInstance, uiSchema), changedPath);
+			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
+				translationsChanged = true;
+				const masterValue = parseJSONPointer(uiSchema, changedPath);
+				const newValue = parseJSONPointer(newViewUiSchema, changedPath);
+				if (masterValue && masterValue[0] === "@") {
+					translations = {...translations, [masterValue]: newValue};
+				} else {
+					translationKey = `@${this.props.path}${changedPath}`;
+					translationValue = newValue;
+					translations = {...translations, [translationKey]:  newValue};
+					uiSchema = updateSafelyWithJSONPath(uiSchema, translationKey, changedPath);
+					masterUiSchemaChanged = true;
+				}
+			}
+		});
+		const events: FieldEditorChangeEvent[] = [];
+		if (translationsChanged) {
+			events.push({type: "translations", key: translationKey, value: translationValue});
+		}
+		if (masterUiSchemaChanged) {
+			events.push({type: "uiSchema", uiSchema});
+		}
+		(translationsChanged || masterUiSchemaChanged) && this.props.onChange(events);
 	}
 }
 
