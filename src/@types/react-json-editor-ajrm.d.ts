@@ -1,5 +1,5 @@
 declare module "react-json-editor-ajrm" {
-	import React from "react";
+	import * as React from "react";
 
 	interface JSONEditorProps {
 		onChange: (value: any) => void;

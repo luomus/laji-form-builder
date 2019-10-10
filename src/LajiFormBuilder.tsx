@@ -319,24 +319,46 @@ const Button = React.memo(({children, active, className, ...props}: any) =>
 	<button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>
 );
 
-const TextareaEditorField = (props: any) => (
-	<JSONEditor
-		placeholder={props.formData || props.value}
-		onChange={React.useCallback(((value: any) => props.onChange(value)), [props.onChange])}
-		locale="en"
-	/>
-);
+const TextareaEditorField = (props: any) => {
+	const label = props.label || props.title || props.name;
+	const value = props.hasOwnProperty("formData") ? props.formData : props.value;
+	let _lajiFormId: any;
+	const filterLajiFormId = (_value: any) => {
+		if (isObject(_value) && _value._lajiFormId) {
+			const {_lajiFormId: lajiFormId, ...remaining} = _value;
+			_lajiFormId = lajiFormId;
+			return remaining;
+		}
+		return _value;
+	};
+	const onChange = React.useCallback((({jsObject}: any) => props.onChange(_lajiFormId ? {...jsObject, _lajiFormId} : jsObject)), [props.onChange])
+	return  (
+		<React.Fragment>
+			{label}
+			{isObject(value) || Array.isArray(value) ? (
+				<JSONEditor
+					placeholder={filterLajiFormId(props.formData || props.value)}
+					onChange={onChange}
+					locale="en"
+					height={100}
+				/>
+				) : (
+					<input value={value} />
+			)}
+		</React.Fragment>
+	);
+};
 
 interface FieldEditorProps extends CommonEditorProps {
 	uiSchema?: any;
-	viewUiSchema?: any;
+	schema?: any;
 	field?: FieldOptions;
 	translations?: any;
 	path?: string;
 	onChange: (changed: FieldEditorChangeEvent[]) => void;
 }
 class FieldEditor extends React.PureComponent<FieldEditorProps> {
-	getEditorSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
+	getEditorSchema = memoize((lajiFormInstance: any, uiSchema: any, schema: any): any => {
 		if (!lajiFormInstance) {
 			return null;
 		}
@@ -347,52 +369,56 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 		const componentPropTypes = component && parsePropTypes(component);
 		const propTypesToSchema = (propTypes: any): any => {
-			if (propTypes.type) {
-				switch (propTypes.type.name) {
-					case "shape":
-						return {type: "object", properties: Object.keys(propTypes.type.value).reduce((properties, prop) => ({
-							...properties,
-							[prop]: propTypesToSchema(propTypes.type.value[prop])
-						}), {})};
-					case "arrayOf":
-						return {type: "array", items: propTypesToSchema(propTypes.type.value)};
-					case "oneOf":
-						return {type: "string", enum: propTypes.value, enumNames: propTypes.value}
-					case "object":
-					case "custom":
-						return {type: "object", properties: {}};
-					default:
-						console.warn(`Unhandled PropType type ${propTypes.type.name}`);
-						return {type: "object", properties: {}};
-				}
-			}
-			if (propTypes.name) {
-				switch (propTypes.name) {
-					case "string":
-						return {type: "string"}
-				}
-			}
-		}
-		const schema = (componentPropTypes || {}).uiSchema
-			? propTypesToSchema(componentPropTypes.uiSchema)
-		: {
-			type: "object",
-			properties: {
-				"ui:title": {
-					type: "string",
-					label: "Otsikko"
-				},
-				"ui:description": {
-					type: "string",
-					label: "Kuvaus"
-				},
-				"ui:help": {
-					type: "string",
-					label: "Aputeksti"
-				}
+			const name = propTypes.name || (propTypes.type || {}).name;
+			const value = propTypes.value || (propTypes.type || {}).value;
+			switch (name) {
+				case "shape":
+					return {type: "object", properties: Object.keys(value).reduce((properties, prop) => ({
+						...properties,
+						[prop]: propTypesToSchema(value[prop])
+					}), {})};
+				case "arrayOf":
+					return {type: "array", items: propTypesToSchema(value)};
+				case "oneOf":
+					return {type: "string", enum: value, enumNames: value};
+				case "string":
+					return {type: "string"};
+				case "number":
+					return {type: "number"};
+				case "object":
+				case "custom":
+					return {type: "object", properties: {}};
+				default:
+					console.warn(`Unhandled PropType type ${name}`);
+					return {type: "object", properties: {}};
 			}
 		};
-		return schema;
+		const addWidgetOrField = ((_schema: any) => {
+			return (_schema.type === "object" || _schema.type === "array")
+				? {..._schema, properties: {..._schema.properties, "ui:field": {type: "string"}}}
+				: {..._schema, properties: {..._schema.properties, "ui:widget": {type: "string"}}};
+		});
+		const defaultProps = addWidgetOrField({
+			type: "object",
+			properties: {
+				"ui:title": { type: "string", },
+				"ui:description": { type: "string", },
+				"ui:help": { type: "string", },
+				"className": { type: "string", }
+			}
+		});
+		if ((componentPropTypes || {}).uiSchema) {
+			const _schema = propTypesToSchema(componentPropTypes.uiSchema);
+			return {
+				..._schema,
+				properties: {
+					...defaultProps.properties,
+					..._schema.properties
+				}
+			}
+		} else {
+			return defaultProps;
+		}
 	});
 	getEditorUiSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
 		if (!lajiFormInstance) {
@@ -405,17 +431,23 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 		const componentPropTypes = component && parsePropTypes(component);
 		const propTypesToUiSchema = (propTypes: any): any => {
-			if (propTypes.type) {
-				switch (propTypes.type.name) {
-					case "shape":
-						return Object.keys(propTypes.type.value).reduce((properties, prop) => ({
-							...properties,
-							[prop]: propTypesToUiSchema(propTypes.type.value[prop])
-						}), {});
-					default:
-						return {["ui:field"]: "TextareaEditorField"};
-				}
-			}
+			const name = propTypes.name || (propTypes.type || {}).name;
+			const value = propTypes.value || (propTypes.type || {}).value;
+			switch (name) {
+				case "shape":
+					return Object.keys(value).reduce((properties, prop) => ({
+						...properties,
+						[prop]: propTypesToUiSchema(value[prop])
+					}), {});
+				case "arrayOf":
+					return {items: propTypesToUiSchema(value)};
+				case "string":
+				case "number":
+				case "oneOf":
+					return {};
+				default:
+					return {["ui:field"]: "TextareaEditorField"};
+			};
 			return {};
 		}
 		return componentPropTypes.uiSchema ? propTypesToUiSchema(componentPropTypes.uiSchema) : {};
@@ -447,7 +479,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 
 		const lajiFormInstance = this.getLajiFormInstance();
 
-		const schema = this.getEditorSchema(lajiFormInstance, this.props.uiSchema);
+		const schema = this.getEditorSchema(lajiFormInstance, this.props.uiSchema, this.props.schema);
 		const uiSchema = this.getEditorUiSchema(lajiFormInstance, this.props.uiSchema);
 		const formData = {
 			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations),
@@ -460,6 +492,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 	onEditorLajiFormChange = (newViewUiSchema: any) => {
 		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
 		let { uiSchema, translations } = this.props;
+		const { schema } = this.props;
 		const detectChangePaths = (_uiSchema: any, path: string): string[] => {
 			if (isObject(_uiSchema)) {
 				return Object.keys(_uiSchema).reduce((paths, key) => {
@@ -483,7 +516,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		let masterUiSchemaChanged = false;
 		let translationKey, translationValue;
 		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(lajiFormInstance, uiSchema), changedPath);
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(lajiFormInstance, uiSchema, schema), changedPath);
 			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
 				translationsChanged = true;
 				const masterValue = parseJSONPointer(uiSchema, changedPath);
