@@ -618,6 +618,8 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 					return {type: "string"};
 				case "number":
 					return {type: "number"};
+				case "bool":
+					return {type: "number"};
 				case "object":
 				case "custom":
 					return {type: "object", properties: {}};
@@ -677,6 +679,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 				case "string":
 				case "number":
 				case "oneOf":
+				case "bool":
 					return {};
 				default:
 					return {["ui:field"]: "TextareaEditorField"};
