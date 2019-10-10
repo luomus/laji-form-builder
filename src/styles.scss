@@ -1,0 +1,26 @@
+.ljb {
+	&-field {
+		&-expanded, &-contracted {
+			width: 0px;
+			padding-right: 4px;
+			margin-left: -20px;
+		}
+		&-expanded:before, &-contracted:before {
+			color: black;
+		}
+		&-expanded:before {
+			content: "▼";
+		}
+		&-contracted:before {
+			content: "►";
+		}
+		&-selected {
+			background-color: #337ab7;
+			color: white;
+		}
+	}
+
+	&-clickable {
+		cursor: pointer;
+	}
+}

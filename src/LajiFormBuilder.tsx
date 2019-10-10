@@ -10,6 +10,13 @@ import memoize from "memoizee";
 import JSONEditor from "react-json-editor-ajrm";
 
 const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
+const CSS_NAMESPACE = "ljb";
+const nmspc = (_nmspc?: string) => (s?: any) => s === undefined
+		? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}`
+		: s
+			? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}-${s}`
+			: "";
+const gnmspc  = nmspc();
 
 const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {
 	let schemaPointer = schema;
@@ -148,12 +155,12 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	render() {
 		return (
-			<div style={{ display: "flex", flexDirection: "row" }}>
-				<div style={{ display: "flex", flexDirection: "column" }}>
+			<div>
+					{this.renderLajiForm()}
+				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
 					{this.renderLangChooser()}
 					{this.renderEditor()}
 				</div>
-				{this.renderLajiForm()}
 			</div>
 		);
 	}
@@ -231,7 +238,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 }
 
 const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
-	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames("clickable", className)}>{children || <span>&#8203;</span>}</span>
+	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames(gnmspc("clickable"), className)}>{children || <span>&#8203;</span>}</span>
 );
 
 interface UiSchemaChangeEvent {
@@ -291,10 +298,36 @@ export interface LajiFormEditorState {
 class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	state = {selected: undefined};
 	render() {
+		const containerStyle: React.CSSProperties = {
+				display: "flex",
+				flexDirection: "row",
+				position: "fixed",
+				bottom: 0,
+				background: "white",
+				zIndex: 10000,
+				width: "100%",
+				height: "200px",
+				borderTop: "1px solid gray",
+				left: 0,
+		}
+		const fieldsStyle: React.CSSProperties = {
+			overflowY: "scroll",
+			display: "flex",
+			flexDirection: "column",
+			paddingLeft: "20px",
+			overflowX: "auto",
+		};
+		const fieldEditorStyle: React.CSSProperties = {
+			overflowY: "scroll",
+			overflowX: "auto",
+			width: "100%"
+		};
 		return (
-			<div style={{display: "flex", flexDirection: "column"}}>
-				<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
-				<Fields fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />;
+			<div style={containerStyle}>
+				<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
+					<div style={fieldEditorStyle}>
+						<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
+					</div>
 			</div>
 		);
 	}
@@ -485,10 +518,6 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		return (componentPropTypes || {}).uiSchema ? propTypesToUiSchema((componentPropTypes || {}).uiSchema) : {};
 	});
 
-	render() {
-		return this.renderEditor();
-	}
-
 	getFieldName(): string {
 		const {uiSchema = {}, field} = this.props;
 		if (!field) {
@@ -504,7 +533,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 
 	getLajiFormInstance = () => ((this.props.lajiFormRef as any).current);
 
-	renderEditor() {
+	render() {
 		if (!this.props.schema) {
 			return null;
 		}
@@ -577,9 +606,9 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 
 type OnSelectedCB = (field: string) => void;
 
-const Fields = React.memo(
-	({fields = [], onSelected, selected, pointer}: {fields: FieldProps[], onSelected: OnSelectedCB, selected?: string, pointer: string}) => (
-		<div style={{display: "flex", flexDirection: "column", paddingLeft: 20}}>
+const Fields = React.memo(({fields = [], onSelected, selected, pointer, style = {}}
+	: {fields: FieldProps[], onSelected: OnSelectedCB, selected?: string, pointer: string} & Stylable) => (
+		<div style={{...style, display: "flex", flexDirection: "column", paddingLeft: 20}}>
 			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} selected={selected} pointer={`${pointer}/${f.name}`} />)}
 		</div>
 ));
@@ -606,6 +635,8 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		expanded: this.isSelected() || false
 	};
 
+	nmspc = nmspc("field");
+
 	isSelected(): boolean {
 		return (this.props.selected || "") === this.props.pointer;
 	}
@@ -630,9 +661,9 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 				: "contracted"
 			: "nonexpandable";
 		return (
-			<div className="field">
-				<div className={classNames(this.isSelected() && "selected")}>
-					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={`field-${className}`} />
+			<div className={this.nmspc()}>
+				<div className={classNames(this.nmspc(this.isSelected() && "selected"))}>
+					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={this.nmspc(className)} />
 					<Clickable onClick={this.onThisSelected}>{`${name} ${label ? `(${label})` : ""}`}</Clickable>
 				</div>
 				{this.state.expanded && (

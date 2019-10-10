@@ -3,7 +3,7 @@ import properties from "../properties.json";
 import ApiClient from "./ApiClientImplementation";
 
 import "laji-form/dist/styles.css";
-import "../src/styles.css";
+import "../src/styles.scss";
 
 function getJsonFromUrl() {
 	const type = (value) => {
