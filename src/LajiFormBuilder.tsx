@@ -96,6 +96,21 @@ const getTranslatedUiSchema = memoize((uiSchema: any, translations: any): any =>
 	return translate(uiSchema);
 });
 
+const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) => {
+	return (
+		<div className="btn-group">{
+			["fi", "sv", "en"].map((_lang: Lang) => (
+				<Button
+					active={_lang === lang}
+					onClick={React.useCallback(() => onChange(_lang), [_lang])}
+					key={_lang}
+				>{_lang}
+			</Button>
+				))
+		}</div>
+	);
+});
+
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: any;
 	formApiClient: any;
@@ -153,12 +168,15 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		}
 	}
 
+	onLangChange = (lang: Lang) => {
+		this.setState({lang});
+	}
+
 	render() {
 		return (
 			<div>
 					{this.renderLajiForm()}
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
-					{this.renderLangChooser()}
 					{this.renderEditor()}
 				</div>
 			</div>
@@ -185,6 +203,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							onChange={this.onEditorChange}
 							lajiFormRef={this.lajiFormRef}
 							lang={this.state.lang}
+							onLangChange={this.onLangChange}
 					/>
 				);
 	}
@@ -234,6 +253,63 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			}
 		});
 		this.setState(changed);
+	}
+}
+
+
+interface DraggableHeightProps {
+	height?: number
+	color?: string
+}
+interface DraggableHeightState {
+	height: number
+}
+class DraggableHeight extends React.Component<DraggableHeightProps & Stylable, DraggableHeightState> {
+	state = {
+		height: this.props.height || 100
+	};
+	static defaultProps = {
+		color: "black"
+	};
+	dragging = false;
+	startY: number;
+	heightAtStart: number;
+
+	render() {
+		const dragLineStyle: React.CSSProperties = {
+			position: "absolute",
+			width: "100%",
+			cursor: "row-resize",
+			height: 1,
+			backgroundColor: this.props.color,
+			marginTop: -1
+		};
+		return (
+			<div style={{ ...(this.props.style || {}), height: this.state.height }}>
+				<div style={dragLineStyle} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp} />
+				{this.props.children}
+			</div>
+		);
+	}
+
+	onMouseDown = (e: React.MouseEvent) => {
+		if (this.dragging) {
+			return;
+		}
+		this.dragging = true;
+		this.startY = e.clientY;
+		this.heightAtStart = this.state.height;
+		document.addEventListener("mousemove", this.onMouseMove);
+	}
+	onMouseUp = (e: React.MouseEvent) => {
+		if (!this.dragging) {
+			return;
+		}
+		this.dragging = false;
+		document.removeEventListener("mousemove", this.onMouseMove);
+	}
+	onMouseMove = (e: MouseEvent) => {
+		this.setState({height: this.heightAtStart + (this.startY - e.clientY)});
 	}
 }
 
@@ -287,6 +363,7 @@ export interface LajiFormEditorProps extends CommonEditorProps {
 	json: {
 		fields: FieldProps[];
 	};
+	onLangChange: (lang: Lang) => void;
 }
 
 export interface FieldMap {
@@ -307,7 +384,6 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 				zIndex: 10000,
 				width: "100%",
 				height: "200px",
-				borderTop: "1px solid gray",
 				left: 0,
 		}
 		const fieldsStyle: React.CSSProperties = {
@@ -322,13 +398,20 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 			overflowX: "auto",
 			width: "100%"
 		};
+		const fieldsBlockStyle: React.CSSProperties = {
+			display: "flex",
+			flexDirection: "column"
+		};
 		return (
-			<div style={containerStyle}>
-				<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
-					<div style={fieldEditorStyle}>
-						<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
-					</div>
-			</div>
+			<DraggableHeight style={containerStyle}>
+				<div style={fieldsBlockStyle}>
+					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
+					<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
+				</div>
+				<div style={fieldEditorStyle}>
+					<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
+				</div>
+			</DraggableHeight>
 		);
 	}
 
