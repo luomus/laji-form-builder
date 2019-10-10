@@ -4,7 +4,8 @@ declare module "laji-form/lib/utils" {
 		function parseUiSchemaFromFormDataPointer(uiSchema: any, pointer: string): any;
 		function parseSchemaFromFormDataPointer(uiSchema: any, pointer: string): any;
 		function updateSafelyWithJSONPath(obj: any, value: any, path: string, immutably?: boolean, createNew?: (obj: any, split: string) => any): any
-		function uiSchemaJSONPointer(schema: any, JSONPointer: string): string;
+		function uiSchemaJSONPointer(uiSchema: any, JSONPointer: string): string;
+		function schemaJSONPointer(schema: any, JSONPointer: string): string;
 		function isObject(maybeObject: any): boolean;
 	}
 	export = utils;

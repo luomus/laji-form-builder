@@ -3,13 +3,42 @@ const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import ApiClient from "./ApiClientImplementation";
 import _Spinner from "react-spinner";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, parseUiSchemaFromFormDataPointer, parseSchemaFromFormDataPointer, uiSchemaJSONPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
+const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
 import PropTypes from "prop-types";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import JSONEditor from "react-json-editor-ajrm";
 
 const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
+
+const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {
+	let schemaPointer = schema;
+	return pointer.split("/").filter(s => s).reduce((resultPointer: string, s): string => {
+		if (schemaPointer.items && schemaPointer.items.properties) {
+			schemaPointer = schemaPointer.items.properties[s];
+			return `${resultPointer}/items/properties/${s}`;
+		}
+		if (schemaPointer.properties) {
+			schemaPointer = schemaPointer.properties[s];
+			return `${resultPointer}/properties/${s}`;
+		}
+		throw new Error(`failed to parse field schema pointer ${pointer}`);
+	}, "");
+}
+const fieldPointerToUiSchemaPointer = (schema: any, pointer: string): string => {
+	let schemaPointer = schema;
+	return pointer.split("/").filter(s => s).reduce((resultPointer: string, s): string => {
+		if (schemaPointer.items && schemaPointer.items.properties) {
+			schemaPointer = schemaPointer.items.properties[s];
+			return `${resultPointer}/items/${s}`;
+		}
+		if (schemaPointer.properties) {
+			schemaPointer = schemaPointer.properties[s];
+			return `${resultPointer}/${s}`;
+		}
+		throw new Error(`failed to parse field uischema pointer ${pointer}`);
+	}, "");
+}
 
 //declare module "react-spinner" {
 //		//	interface Spinner {
@@ -177,7 +206,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 					uiSchema: updateSafelyWithJSONPath(
 						this.state.master.uiSchema,
 						event.uiSchema,
-						uiSchemaJSONPointer(this.state.master.uiSchema, event.selected)
+						fieldPointerToUiSchemaPointer(this.state.schemas.schema, event.selected)
 					)
 				};
 			} else {
@@ -295,8 +324,8 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 		}
 		const fieldsMap = this.getFieldsMap(this.props);
 		return {
-			schema: parseSchemaFromFormDataPointer(schemas.schema, selected || ""),
-			uiSchema: parseUiSchemaFromFormDataPointer(master.uiSchema, selected || ""),
+			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected || "")),
+			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected || ""), !!"safely"),
 			field: parseJSONPointer({fields: fieldsMap}, (this.state.selected || "").replace(/\//g, "/fields/")),
 			translations: master.translations[lang],
 			path: selected
@@ -358,6 +387,9 @@ interface FieldEditorProps extends CommonEditorProps {
 	onChange: (changed: FieldEditorChangeEvent[]) => void;
 }
 class FieldEditor extends React.PureComponent<FieldEditorProps> {
+	static defaultProps = {
+		uiSchema: {}
+	};
 	getEditorSchema = memoize((lajiFormInstance: any, uiSchema: any, schema: any): any => {
 		if (!lajiFormInstance) {
 			return null;
@@ -365,7 +397,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		const registry = lajiFormInstance.formRef.getRegistry.call({
 			props: lajiFormInstance.formRef.props
 		});
-		const {"ui:field": uiField, "ui:widget": uiWidget} = this.props.uiSchema;
+		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
 		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 		const componentPropTypes = component && parsePropTypes(component);
 		const propTypesToSchema = (propTypes: any): any => {
@@ -393,10 +425,10 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 					return {type: "object", properties: {}};
 			}
 		};
-		const addWidgetOrField = ((_schema: any) => {
+		const addWidgetOrField = ((schemaForUiSchema: any, _schema: any) => {
 			return (_schema.type === "object" || _schema.type === "array")
-				? {..._schema, properties: {..._schema.properties, "ui:field": {type: "string"}}}
-				: {..._schema, properties: {..._schema.properties, "ui:widget": {type: "string"}}};
+				? {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, "ui:field": {type: "string"}}}
+				: {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, "ui:widget": {type: "string"}}};
 		});
 		const defaultProps = addWidgetOrField({
 			type: "object",
@@ -406,9 +438,9 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 				"ui:help": { type: "string", },
 				"className": { type: "string", }
 			}
-		});
+		}, schema);
 		if ((componentPropTypes || {}).uiSchema) {
-			const _schema = propTypesToSchema(componentPropTypes.uiSchema);
+			const _schema = propTypesToSchema((componentPropTypes || {}).uiSchema);
 			return {
 				..._schema,
 				properties: {
@@ -450,7 +482,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			};
 			return {};
 		}
-		return componentPropTypes.uiSchema ? propTypesToUiSchema(componentPropTypes.uiSchema) : {};
+		return (componentPropTypes || {}).uiSchema ? propTypesToUiSchema((componentPropTypes || {}).uiSchema) : {};
 	});
 
 	render() {
@@ -473,7 +505,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 	getLajiFormInstance = () => ((this.props.lajiFormRef as any).current);
 
 	renderEditor() {
-		if (!this.props.uiSchema) {
+		if (!this.props.schema) {
 			return null;
 		}
 
