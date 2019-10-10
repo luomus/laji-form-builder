@@ -273,8 +273,8 @@ interface DraggableWidthHeightState {
 }
 class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & Stylable & HasChildren, DraggableWidthHeightState> {
 	state = {
-		height: this.props.dragHeight ? this.props.height || 100 : undefined,
-		width: this.props.dragWidth ? this.props.width || 100 : undefined
+		height: this.props.dragHeight ? this.props.height || 200 : undefined,
+		width: this.props.dragWidth ? this.props.width || 200 : undefined
 	};
 	static defaultProps = {
 		color: "black",
@@ -287,29 +287,20 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 	heightAtStart?: number;
 	widthAtStart?: number;
 	_onMouseDown: {height?: React.MouseEventHandler, width?: React.MouseEventHandler} = {};
-	_onMouseUp: {height?: React.MouseEventHandler, width?: React.MouseEventHandler} = {};
+	_onMouseUp: {height?: EventListener, width?: EventListener} = {};
 	_onMouseMove: {height?: EventListener, width?: EventListener} = {};
 
 	render() {
-		const dragLineStyle: React.CSSProperties = {
-			position: "absolute",
-			width: this.props.dragWidth ? 1 : "100%",
-			cursor: "row-resize",
-			height: this.props.dragHeight ? 1 : "100%",
-			backgroundColor: this.props.color,
-			marginTop: -1
-		};
 		let { style = {} } = this.props;
 		if (this.props.dragHeight) {
 			style = {...style, height: this.state.height };
 		}
-		if (this.props.dragWidth) {
-			style = {...style, width: this.state.width };
-		}
 		const content = this.props.dragWidth ? (
-				<div style={{display: "flex", flexDirection: "row", width: this.state.width}}>
+				<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
+			<div style={style}>
 					{this.props.children}
 					{this.getWidthDragLine()}
+			</div>
 				</div>
 		) : this.props.children;
 
@@ -333,7 +324,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			backgroundColor: this.props.color,
 			marginTop: -1
 		};
-		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("height")} onMouseUp={this.onMouseUp("height")} />
+		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("height")} />
 	}
 
 	getWidthDragLine() {
@@ -346,8 +337,10 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			height: "100%",
 			backgroundColor: this.props.color,
 			paddingLeft: 1,
+			position: "absolute",
+			left: (this.state.width || 0) - 1
 		};
-		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("width")} onMouseUp={this.onMouseUp("width")} />
+		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("width")} />
 	}
 
 	onMouseDown = (dir: "height" | "width") => {
@@ -361,22 +354,24 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 				this.startX = e.clientX;
 				this.heightAtStart = this.state.height;
 				this.widthAtStart = this.state.width;
+				document.addEventListener("mouseup", this.onMouseUp(dir));
 				document.addEventListener("mousemove", this.onMouseMove(dir));
 			}
 		}
 		return this._onMouseDown[dir];
 	}
-	onMouseUp = (dir: "height" | "width") => {
+	onMouseUp = (dir: "height" | "width"): EventListener => {
 		if (!this._onMouseUp[dir]) {
-			this._onMouseUp[dir] = (e: React.MouseEvent) => {
+			this._onMouseUp[dir] = (e: MouseEvent) => {
 				if (!this.dragging) {
 					return;
 				}
 				this.dragging = false;
+				document.removeEventListener("mouseup", this.onMouseUp(dir));
 				document.removeEventListener("mousemove", this.onMouseMove(dir));
 			}
 		}
-		return this._onMouseUp[dir];
+		return this._onMouseUp[dir] as EventListener;
 	}
 	onMouseMove = (dir: "height" | "width"): EventListener => {
 		if (!this._onMouseMove[dir]) {
@@ -480,6 +475,7 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 			flexDirection: "column",
 			paddingLeft: "20px",
 			overflowX: "auto",
+			height: "100%"
 		};
 		const fieldEditorStyle: React.CSSProperties = {
 			overflowY: "scroll",
@@ -488,10 +484,11 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 		};
 		const fieldsBlockStyle: React.CSSProperties = {
 			display: "flex",
-			flexDirection: "column"
+			flexDirection: "column",
+			height: "100%"
 		};
 		return (
-			<DraggableHeight style={containerStyle}>
+			<DraggableHeight style={containerStyle} height={400}>
 				<DraggableWidth style={fieldsBlockStyle}>
 					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
 					<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
