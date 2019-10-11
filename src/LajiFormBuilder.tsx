@@ -256,26 +256,66 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 }
 
-
 interface DraggableHeightProps {
-	height?: number
-	color?: string
+	height?: number;
 }
-interface DraggableHeightState {
-	height: number
+interface DraggableWidthProps {
+	width?: number;
 }
-class DraggableHeight extends React.Component<DraggableHeightProps & Stylable, DraggableHeightState> {
+interface DraggableWidthHeightProps extends DraggableWidthProps, DraggableHeightProps {
+	color?: string;
+	dragHeight: boolean;
+	dragWidth: boolean;
+}
+interface DraggableWidthHeightState {
+	height?: number;
+	width?: number;
+}
+class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & Stylable & HasChildren, DraggableWidthHeightState> {
 	state = {
-		height: this.props.height || 100
+		height: this.props.dragHeight ? this.props.height || 200 : undefined,
+		width: this.props.dragWidth ? this.props.width || 200 : undefined
 	};
 	static defaultProps = {
-		color: "black"
+		color: "black",
+		dragHeight: false,
+		dragWidth: false,
 	};
 	dragging = false;
 	startY: number;
-	heightAtStart: number;
+	startX: number;
+	heightAtStart?: number;
+	widthAtStart?: number;
+	_onMouseDown: {height?: React.MouseEventHandler, width?: React.MouseEventHandler} = {};
+	_onMouseUp: {height?: EventListener, width?: EventListener} = {};
+	_onMouseMove: {height?: EventListener, width?: EventListener} = {};
 
 	render() {
+		let { style = {} } = this.props;
+		if (this.props.dragHeight) {
+			style = {...style, height: this.state.height };
+		}
+		const content = this.props.dragWidth ? (
+				<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
+			<div style={style}>
+					{this.props.children}
+					{this.getWidthDragLine()}
+			</div>
+				</div>
+		) : this.props.children;
+
+		return (
+			<div style={style}>
+				{this.getHeightDragLine()}
+				{content}
+			</div>
+		);
+	}
+
+	getHeightDragLine() {
+		if (!this.props.dragHeight) {
+			return null;
+		}
 		const dragLineStyle: React.CSSProperties = {
 			position: "absolute",
 			width: "100%",
@@ -284,34 +324,74 @@ class DraggableHeight extends React.Component<DraggableHeightProps & Stylable, D
 			backgroundColor: this.props.color,
 			marginTop: -1
 		};
-		return (
-			<div style={{ ...(this.props.style || {}), height: this.state.height }}>
-				<div style={dragLineStyle} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp} />
-				{this.props.children}
-			</div>
-		);
+		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("height")} />
 	}
 
-	onMouseDown = (e: React.MouseEvent) => {
-		if (this.dragging) {
-			return;
+	getWidthDragLine() {
+		if (!this.props.dragWidth) {
+			return null;
 		}
-		this.dragging = true;
-		this.startY = e.clientY;
-		this.heightAtStart = this.state.height;
-		document.addEventListener("mousemove", this.onMouseMove);
+		const dragLineStyle: React.CSSProperties = {
+			width: 1,
+			cursor: "ew-resize",
+			height: "100%",
+			backgroundColor: this.props.color,
+			paddingLeft: 1,
+			position: "absolute",
+			left: (this.state.width || 0) - 1
+		};
+		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("width")} />
 	}
-	onMouseUp = (e: React.MouseEvent) => {
-		if (!this.dragging) {
-			return;
+
+	onMouseDown = (dir: "height" | "width") => {
+		if (!this._onMouseDown[dir]) {
+			this._onMouseDown[dir] = (e: React.MouseEvent) => {
+				if (this.dragging) {
+					return;
+				}
+				this.dragging = true;
+				this.startY = e.clientY;
+				this.startX = e.clientX;
+				this.heightAtStart = this.state.height;
+				this.widthAtStart = this.state.width;
+				document.addEventListener("mouseup", this.onMouseUp(dir));
+				document.addEventListener("mousemove", this.onMouseMove(dir));
+			}
 		}
-		this.dragging = false;
-		document.removeEventListener("mousemove", this.onMouseMove);
+		return this._onMouseDown[dir];
 	}
-	onMouseMove = (e: MouseEvent) => {
-		this.setState({height: this.heightAtStart + (this.startY - e.clientY)});
+	onMouseUp = (dir: "height" | "width"): EventListener => {
+		if (!this._onMouseUp[dir]) {
+			this._onMouseUp[dir] = (e: MouseEvent) => {
+				if (!this.dragging) {
+					return;
+				}
+				this.dragging = false;
+				document.removeEventListener("mouseup", this.onMouseUp(dir));
+				document.removeEventListener("mousemove", this.onMouseMove(dir));
+			}
+		}
+		return this._onMouseUp[dir] as EventListener;
+	}
+	onMouseMove = (dir: "height" | "width"): EventListener => {
+		if (!this._onMouseMove[dir]) {
+			this._onMouseMove[dir] = (e: MouseEvent) => {
+				const _state: DraggableWidthHeightState = {};
+				if (dir === "height" && this.props.dragHeight) {
+					_state.height = (this.heightAtStart || 0) + (this.startY - e.clientY);
+				}
+				if (dir === "width" && this.props.dragWidth) {
+					_state.width = (this.widthAtStart || 0) - (this.startX - e.clientX);
+				}
+				this.setState(_state);
+			};
+		}
+		return this._onMouseMove[dir] as EventListener;
 	}
 }
+
+const DraggableHeight = React.memo((props: DraggableHeightProps & Stylable & HasChildren) => <DraggableWidthHeight {...props} dragHeight={true} />);
+const DraggableWidth = React.memo((props: DraggableHeightProps & Stylable & HasChildren) => <DraggableWidthHeight {...props} dragWidth={true} />);
 
 const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
 	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames(gnmspc("clickable"), className)}>{children || <span>&#8203;</span>}</span>
@@ -343,6 +423,9 @@ export interface Stylable {
 }
 export interface Classable {
 	className?: string;
+}
+export interface HasChildren {
+	children?: React.ReactNode;
 }
 export interface AppProps extends Stylable, Classable { }
 
@@ -392,6 +475,7 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 			flexDirection: "column",
 			paddingLeft: "20px",
 			overflowX: "auto",
+			height: "100%"
 		};
 		const fieldEditorStyle: React.CSSProperties = {
 			overflowY: "scroll",
@@ -400,14 +484,15 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 		};
 		const fieldsBlockStyle: React.CSSProperties = {
 			display: "flex",
-			flexDirection: "column"
+			flexDirection: "column",
+			height: "100%"
 		};
 		return (
-			<DraggableHeight style={containerStyle}>
-				<div style={fieldsBlockStyle}>
+			<DraggableHeight style={containerStyle} height={400}>
+				<DraggableWidth style={fieldsBlockStyle}>
 					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
 					<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
-				</div>
+				</DraggableWidth>
 				<div style={fieldEditorStyle}>
 					<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
 				</div>
@@ -513,9 +598,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		const registry = lajiFormInstance.formRef.getRegistry.call({
 			props: lajiFormInstance.formRef.props
 		});
-		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
-		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
-		const componentPropTypes = component && parsePropTypes(component);
+		const getComponentPropTypes = (field: React.Component) => field && parsePropTypes(field);
 		const propTypesToSchema = (propTypes: any): any => {
 			const name = propTypes.name || (propTypes.type || {}).name;
 			const value = propTypes.value || (propTypes.type || {}).value;
@@ -533,6 +616,8 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 					return {type: "string"};
 				case "number":
 					return {type: "number"};
+				case "bool":
+					return {type: "number"};
 				case "object":
 				case "custom":
 					return {type: "object", properties: {}};
@@ -541,6 +626,48 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 					return {type: "object", properties: {}};
 			}
 		};
+		const walkTypesToComponents = (
+			registryFields: {[fieldName: string]: React.Component},
+		): {[fieldType: string]: {[fieldName: string]: true}} => Object.keys(registryFields).reduce((types, field) => {
+			const _componentPropTypes = getComponentPropTypes(registryFields[field]);
+			const _schema = propTypesToSchema((_componentPropTypes || {}).schema || {});
+			const _ = (fieldTypes: string[]) => fieldTypes.reduce((_fieldTypes, fieldType) => ({
+				...types, [fieldType]: {...(types[fieldType] || {}), [field]: true}
+			}), {});
+			if (_schema) {
+				if (_schema && _schema.type === "object" && _schema.properties.type
+					&& _schema.properties.type.enum) {
+					return _(_schema.properties.type.enum);
+				}
+			}
+			return _(["unknown"]);
+		}, {} as any);
+		const typesToFields = walkTypesToComponents(registry.fields);
+		const typesToWidgets = walkTypesToComponents(registry.widgets);
+		console.log(typesToFields, typesToWidgets);
+		//const typesToFields = Object.keys(registry.fields).reduce((types, field) => {
+		//	const _componentPropTypes = getComponentPropTypes(registry.fields[field]);
+		//	const _schema = propTypesToSchema((_componentPropTypes || {}).schema || {});
+		//	const _ = (v: "object" | "array") => {
+		//		return {...types, [v]: {...types[v], [field]: true}};
+		//	};
+		//	if (_schema) {
+		//		if (_schema.type === "object" && _schema.properties.type && (_schema.properties.type.enum || []).length === 1) {
+		//			if (_schema.properties.type.enum[0] === "object") {
+		//				console.log(field);
+		//				return _("object");
+		//			} else if (_schema.properties.type.enum[0] === "array") {
+		//				console.log(field);
+		//				return _("array");
+		//			}
+		//		}
+		//	}
+		//	return types;
+
+		//}, {array: {}, object: {}});
+		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
+		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
+		const componentPropTypes = getComponentPropTypes(component);
 		const addWidgetOrField = ((schemaForUiSchema: any, _schema: any) => {
 			return (_schema.type === "object" || _schema.type === "array")
 				? {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, "ui:field": {type: "string"}}}
@@ -592,6 +719,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 				case "string":
 				case "number":
 				case "oneOf":
+				case "bool":
 					return {};
 				default:
 					return {["ui:field"]: "TextareaEditorField"};
