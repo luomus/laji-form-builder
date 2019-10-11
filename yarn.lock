@@ -2934,10 +2934,10 @@ kind-of@^6.0.0, kind-of@^6.0.2:
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-6.0.2.tgz#01146b36a6218e64e58f3a8d66de5d7fc6f6d051"
   integrity sha512-s5kLOcnH0XqDO+FvuaLX8DDjZ18CGFk7VygH40QoKPUQhW4e2rvM0rwUq0t8IQDOwYSeLK01U90OjzBTme2QqA==
 
-laji-form@2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/laji-form/-/laji-form-2.0.5.tgz#217b3c83ea0fe5e181a55ee44f19895520076554"
-  integrity sha512-JzlV6m5CbbasUlW5vojZcIlfpvTE2dxk2Ifx2vVmNraheCeELnzaM+b1ZlivljMwJk9SD2ks3h36lUB4QnEcHA==
+laji-form@2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/laji-form/-/laji-form-2.0.6.tgz#a90286cfa8f32fb6cfed929f7a29b2548e2e59bb"
+  integrity sha512-m9BFwnSdcgZeK4Ewq1wLtF/QT4lSXxWQzSjbJek7knMke2zbuI1VOqwOjgGUPiJiNpbnh7yKtmDe5ja7dOv9/A==
   dependencies:
     babel-runtime "^6.18.0"
     deep-equal "^1.0.1"

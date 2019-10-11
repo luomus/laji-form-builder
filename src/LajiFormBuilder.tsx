@@ -1,5 +1,6 @@
 import * as React from "react";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
+const RJSF = require("react-jsonschema-form").default;
 import ApiClient from "./ApiClientImplementation";
 import _Spinner from "react-spinner";
 import * as LajiFormUtils from "laji-form/lib/utils";
@@ -45,7 +46,73 @@ const fieldPointerToUiSchemaPointer = (schema: any, pointer: string): string => 
 		}
 		throw new Error(`failed to parse field uischema pointer ${pointer}`);
 	}, "");
+};
+
+const getComponentPropTypes = (field: React.Component) => field && parsePropTypes(field);
+
+const propTypesToSchema = (propTypes: any): any => {
+	const name = propTypes.name || (propTypes.type || {}).name;
+	const value = propTypes.value || (propTypes.type || {}).value;
+	switch (name) {
+		case "shape":
+			return {type: "object", properties: Object.keys(value).reduce((properties, prop) => ({
+				...properties,
+				[prop]: propTypesToSchema(value[prop])
+			}), {})};
+		case "arrayOf":
+			return {type: "array", items: propTypesToSchema(value)};
+		case "oneOf":
+			return {type: "string", enum: value, enumNames: value};
+		case "string":
+			return {type: "string"};
+		case "number":
+			return {type: "number"};
+		case "bool":
+			return {type: "number"};
+		case "object":
+		case "custom":
+			return {type: "object", properties: {}};
+		default:
+			console.warn(`Unhandled PropType type ${name}`);
+			return {type: "object", properties: {}};
+	}
+};
+
+class _LajiFormInterface {
+	lajiForm: any;
+	rjsf: any;
+
+	getRegistry = memoize((): ({
+		fields: {[field: string]: React.Component},
+		widgets: {[field: string]: React.Component}
+	}) => {
+		const lajiForm = new LajiForm({schema: {}, uiSchema: {}, apiClient: {}});
+		return new RJSF({
+			schema: {},
+			uiSchema: {},
+			fields: lajiForm.getFields(),
+			widgets: lajiForm.getWidgets()
+		}).getRegistry();
+	})
+
+	walkTypesToComponents = memoize((registryFields: {[fieldName: string]: React.Component})
+		: {[fieldType: string]: {[fieldName: string]: true}} =>
+		Object.keys(registryFields).reduce((types, field) => {
+			const _componentPropTypes = getComponentPropTypes(registryFields[field]);
+			const _schema = propTypesToSchema((_componentPropTypes || {}).schema || {});
+			const _ = (fieldTypes: string[]) => fieldTypes.reduce((_fieldTypes, fieldType) => ({
+				...types, [fieldType]: {...(types[fieldType] || {}), [field]: true}
+			}), {});
+			if (_schema && _schema.type === "object" && _schema.properties.type && _schema.properties.type.enum) {
+				return _(_schema.properties.type.enum);
+			}
+			return _(["unknown"]);
+		}, {} as any))
+
+	getFieldTypes = () => this.walkTypesToComponents(this.getRegistry().fields);
+	getWidgetTypes = () => this.walkTypesToComponents(this.getRegistry().widgets);
 }
+const LajiFormInterface = new _LajiFormInterface();
 
 //declare module "react-spinner" {
 //		//	interface Spinner {
@@ -120,7 +187,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		json: "loading",
 		lang: this.props.lang
 	};
-	lajiFormRef: React.Ref<any>;
 	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
 		...fns, [lang]: () => this.setState({lang})
 	}), {} as any);
@@ -142,7 +208,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			"https://cors-anywhere.herokuapp.com/http://formtest.laji.fi/lajiform",
 			accessToken,
 		);
-		this.lajiFormRef = React.createRef();
 	}
 
 	componentDidMount() {
@@ -188,7 +253,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			return <Spinner color="black" />;
 		}
 		const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
-		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} ref={this.lajiFormRef} />;
+		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} />;
 	}
 
 	renderEditor() {
@@ -201,7 +266,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							json={json}
 							schemas={schemas}
 							onChange={this.onEditorChange}
-							lajiFormRef={this.lajiFormRef}
 							lang={this.state.lang}
 							onLangChange={this.onLangChange}
 					/>
@@ -438,7 +502,6 @@ export interface CommonEditorProps {
 	master: any;
 	schemas: Schemas;
 	onChange: (changed: ChangeEvent[]) => void;
-	lajiFormRef: React.Ref<any>;
 	lang: Lang;
 }
 
@@ -494,7 +557,7 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 					<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
 				</DraggableWidth>
 				<div style={fieldEditorStyle}>
-					<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
+					<FieldEditor onChange={this.onEditorChange} {...this.getEditorProps()} />
 				</div>
 			</DraggableHeight>
 		);
@@ -587,84 +650,13 @@ interface FieldEditorProps extends CommonEditorProps {
 	path?: string;
 	onChange: (changed: FieldEditorChangeEvent[]) => void;
 }
+
 class FieldEditor extends React.PureComponent<FieldEditorProps> {
 	static defaultProps = {
 		uiSchema: {}
 	};
-	getEditorSchema = memoize((lajiFormInstance: any, uiSchema: any, schema: any): any => {
-		if (!lajiFormInstance) {
-			return null;
-		}
-		const registry = lajiFormInstance.formRef.getRegistry.call({
-			props: lajiFormInstance.formRef.props
-		});
-		const getComponentPropTypes = (field: React.Component) => field && parsePropTypes(field);
-		const propTypesToSchema = (propTypes: any): any => {
-			const name = propTypes.name || (propTypes.type || {}).name;
-			const value = propTypes.value || (propTypes.type || {}).value;
-			switch (name) {
-				case "shape":
-					return {type: "object", properties: Object.keys(value).reduce((properties, prop) => ({
-						...properties,
-						[prop]: propTypesToSchema(value[prop])
-					}), {})};
-				case "arrayOf":
-					return {type: "array", items: propTypesToSchema(value)};
-				case "oneOf":
-					return {type: "string", enum: value, enumNames: value};
-				case "string":
-					return {type: "string"};
-				case "number":
-					return {type: "number"};
-				case "bool":
-					return {type: "number"};
-				case "object":
-				case "custom":
-					return {type: "object", properties: {}};
-				default:
-					console.warn(`Unhandled PropType type ${name}`);
-					return {type: "object", properties: {}};
-			}
-		};
-		const walkTypesToComponents = (
-			registryFields: {[fieldName: string]: React.Component},
-		): {[fieldType: string]: {[fieldName: string]: true}} => Object.keys(registryFields).reduce((types, field) => {
-			const _componentPropTypes = getComponentPropTypes(registryFields[field]);
-			const _schema = propTypesToSchema((_componentPropTypes || {}).schema || {});
-			const _ = (fieldTypes: string[]) => fieldTypes.reduce((_fieldTypes, fieldType) => ({
-				...types, [fieldType]: {...(types[fieldType] || {}), [field]: true}
-			}), {});
-			if (_schema) {
-				if (_schema && _schema.type === "object" && _schema.properties.type
-					&& _schema.properties.type.enum) {
-					return _(_schema.properties.type.enum);
-				}
-			}
-			return _(["unknown"]);
-		}, {} as any);
-		const typesToFields = walkTypesToComponents(registry.fields);
-		const typesToWidgets = walkTypesToComponents(registry.widgets);
-		console.log(typesToFields, typesToWidgets);
-		//const typesToFields = Object.keys(registry.fields).reduce((types, field) => {
-		//	const _componentPropTypes = getComponentPropTypes(registry.fields[field]);
-		//	const _schema = propTypesToSchema((_componentPropTypes || {}).schema || {});
-		//	const _ = (v: "object" | "array") => {
-		//		return {...types, [v]: {...types[v], [field]: true}};
-		//	};
-		//	if (_schema) {
-		//		if (_schema.type === "object" && _schema.properties.type && (_schema.properties.type.enum || []).length === 1) {
-		//			if (_schema.properties.type.enum[0] === "object") {
-		//				console.log(field);
-		//				return _("object");
-		//			} else if (_schema.properties.type.enum[0] === "array") {
-		//				console.log(field);
-		//				return _("array");
-		//			}
-		//		}
-		//	}
-		//	return types;
-
-		//}, {array: {}, object: {}});
+	getEditorSchema = memoize((uiSchema: any, schema: any): any => {
+		const registry = LajiFormInterface.getRegistry();
 		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
 		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 		const componentPropTypes = getComponentPropTypes(component);
@@ -695,13 +687,8 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			return defaultProps;
 		}
 	});
-	getEditorUiSchema = memoize((lajiFormInstance: any, uiSchema: any): any => {
-		if (!lajiFormInstance) {
-			return null;
-		}
-		const registry = lajiFormInstance.formRef.getRegistry.call({
-			props: lajiFormInstance.formRef.props
-		});
+	getEditorUiSchema = memoize((uiSchema: any): any => {
+		const registry = LajiFormInterface.getRegistry();
 		const {"ui:field": uiField, "ui:widget": uiWidget} = this.props.uiSchema;
 		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 		const componentPropTypes = component && parsePropTypes(component);
@@ -723,9 +710,9 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 					return {};
 				default:
 					return {["ui:field"]: "TextareaEditorField"};
-			};
+			}
 			return {};
-		}
+		};
 		return (componentPropTypes || {}).uiSchema ? propTypesToUiSchema((componentPropTypes || {}).uiSchema) : {};
 	});
 
@@ -742,17 +729,13 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 				: field.name;
 	}
 
-	getLajiFormInstance = () => ((this.props.lajiFormRef as any).current);
-
 	render() {
 		if (!this.props.schema) {
 			return null;
 		}
 
-		const lajiFormInstance = this.getLajiFormInstance();
-
-		const schema = this.getEditorSchema(lajiFormInstance, this.props.uiSchema, this.props.schema);
-		const uiSchema = this.getEditorUiSchema(lajiFormInstance, this.props.uiSchema);
+		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema);
+		const uiSchema = this.getEditorUiSchema(this.props.uiSchema);
 		const formData = {
 			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations),
 			"ui:title": this.getFieldName()
@@ -783,12 +766,11 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			return [];
 		};
 		const changedPaths = detectChangePaths(newViewUiSchema, "");
-		const lajiFormInstance = this.getLajiFormInstance();
 		let translationsChanged = false;
 		let masterUiSchemaChanged = false;
 		let translationKey, translationValue;
 		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(lajiFormInstance, uiSchema, schema), changedPath);
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(uiSchema, schema), changedPath);
 			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
 				translationsChanged = true;
 				const masterValue = parseJSONPointer(uiSchema, changedPath);
