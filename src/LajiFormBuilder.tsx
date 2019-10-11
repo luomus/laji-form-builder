@@ -651,6 +651,52 @@ interface FieldEditorProps extends CommonEditorProps {
 	onChange: (changed: FieldEditorChangeEvent[]) => void;
 }
 
+const customPropTypeSchemaMappings: {
+	[propName: string]: {
+		schema?: (schema: any, rootSchema: any) => any,
+		uiSchema?: (schema: any, rootSchema: any) => any
+	}} = {
+	"ui:widget": {
+		schema: (_schema, rootSchema: any): any => {
+			const {type: _type} = rootSchema;
+			const _enum = ["", ...Object.keys(LajiFormInterface.getWidgetTypes()[_type])];
+			return {type: "string", enum: [], enumNames: []};
+		}
+	},
+	"ui:field": {
+		schema: (_schema, rootSchema): any => {
+			const {type: _type} = rootSchema;
+			const _enum = ["", ...Object.keys(LajiFormInterface.getFieldTypes()[_type])];
+			return {type: "string", enum: _enum, enumNames: _enum};
+		}
+	}
+};
+
+const customize = (schemaForUiSchema: any, rootSchema: any): any => {
+	if (schemaForUiSchema.properties) {
+		return {...schemaForUiSchema, properties: Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
+			let propSchema = schemaForUiSchema.properties[prop];
+			const {schema: replace} = customPropTypeSchemaMappings[prop] || {};
+			if (replace) {
+				propSchema = replace(schemaForUiSchema.properties[prop], rootSchema);
+			}
+			return {...properties, [prop]: customize(propSchema, rootSchema)};
+		}, {})};
+	} else if (schemaForUiSchema.type === "array" && schemaForUiSchema.items.properties) {
+		return {
+			...schemaForUiSchema,
+			items: {
+				...schemaForUiSchema.items,
+				properties: Object.keys(schemaForUiSchema.items.properties).reduce((properties, prop) => ({
+					...properties,
+					[prop]: customize(schemaForUiSchema.items.properties[prop], rootSchema)
+				}), {})
+			}
+		};
+	}
+	return schemaForUiSchema;
+};
+
 class FieldEditor extends React.PureComponent<FieldEditorProps> {
 	static defaultProps = {
 		uiSchema: {}
@@ -676,15 +722,15 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		}, schema);
 		if ((componentPropTypes || {}).uiSchema) {
 			const _schema = propTypesToSchema((componentPropTypes || {}).uiSchema);
-			return {
+			return customize({
 				..._schema,
 				properties: {
 					...defaultProps.properties,
 					..._schema.properties
 				}
-			}
+			}, schema)
 		} else {
-			return defaultProps;
+			return customize(defaultProps, schema);
 		}
 	});
 	getEditorUiSchema = memoize((uiSchema: any): any => {
