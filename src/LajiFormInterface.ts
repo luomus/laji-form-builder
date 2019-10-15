@@ -26,11 +26,12 @@ class _LajiFormInterface {
 			const _componentPropTypes = getComponentPropTypes(registryFields[field]);
 			const _schema = propTypesToSchema((_componentPropTypes || {}).schema || {});
 			const _ = (fieldTypes: string[]) => fieldTypes.reduce((_fieldTypes, fieldType) => ({
-				...types, [fieldType]: {...(types[fieldType] || {}), [field]: true}
-			}), {});
+				..._fieldTypes, [fieldType]: {...(_fieldTypes[fieldType] || {}), [field]: true}
+			}), types);
 			if (_schema && _schema.type === "object" && _schema.properties.type && _schema.properties.type.enum) {
 				return _(_schema.properties.type.enum);
 			}
+			console.warn(`${field} doesn't have schema type in prop types set"`)
 			return _(["unknown"]);
 		}, {} as any))
 

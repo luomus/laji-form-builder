@@ -36,7 +36,7 @@ export const propTypesToSchema = (propTypes: any): any => {
 		case "number":
 			return {type: "number"};
 		case "bool":
-			return {type: "number"};
+			return {type: "boolean"};
 		case "object":
 		case "custom":
 			return {type: "object", properties: {}};

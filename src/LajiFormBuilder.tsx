@@ -138,7 +138,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 					...(changed.master || {}),
 					uiSchema: updateSafelyWithJSONPath(
 						this.state.master.uiSchema,
-						event.uiSchema,
+						event.value,
 						fieldPointerToUiSchemaPointer(this.state.schemas.schema, event.selected)
 					)
 				};
@@ -151,9 +151,8 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						[lang]: {
 							...translations[lang],
 							[key]: lang === this.state.lang
-							? value
-							: this.state.master.translations[lang][key]
-							|| value
+								? value
+								: (this.state.master.translations[lang][key] || value)
 						}
 					}), this.state.master.translations)
 				};
@@ -167,7 +166,7 @@ export type Lang = "fi" | "sv" | "en";
 
 export interface UiSchemaChangeEvent {
 	type: "uiSchema";
-	uiSchema: any;
+	value: any;
 	selected: string;
 }
 export interface TranslationsChangeEvent {

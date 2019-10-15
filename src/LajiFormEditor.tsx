@@ -169,7 +169,7 @@ const customPropTypeSchemaMappings: {
 		schema: (_schema, rootSchema: any): any => {
 			const {type: _type} = rootSchema;
 			const _enum = ["", ...Object.keys(LajiFormInterface.getWidgetTypes()[_type])];
-			return {type: "string", enum: [], enumNames: []};
+			return {type: "string", enum: _enum, enumNames: _enum};
 		}
 	},
 	"ui:field": {
@@ -296,12 +296,21 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			"ui:title": this.getFieldName()
 		};
 		const fields = { TextareaEditorField };
-		return <LajiForm schema={schema} uiSchema={uiSchema} formData={formData} onChange={this.onEditorLajiFormChange} fields={fields}/>;
+		return (
+			<LajiForm
+				schema={schema}
+				uiSchema={uiSchema}
+				formData={formData}
+				onChange={this.onEditorLajiFormChange}
+				fields={fields}
+				lang={this.props.lang}
+			/>
+		);
 	}
 
 	onEditorLajiFormChange = (newViewUiSchema: any) => {
 		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
-		let { uiSchema, translations } = this.props;
+		const { uiSchema } = this.props;
 		const { schema } = this.props;
 		const detectChangePaths = (_uiSchema: any, path: string): string[] => {
 			if (isObject(_uiSchema)) {
@@ -321,34 +330,28 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			return [];
 		};
 		const changedPaths = detectChangePaths(newViewUiSchema, "");
-		let translationsChanged = false;
-		let masterUiSchemaChanged = false;
-		let translationKey, translationValue;
+		const events: FieldEditorChangeEvent[] = [];
+		let newUiSchema = uiSchema;
 		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(uiSchema, schema), changedPath);
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(this.getEditorSchema(newUiSchema, schema), changedPath);
+			const currentValue = parseJSONPointer(newUiSchema, changedPath);
+			const newValue = parseJSONPointer(newViewUiSchema, changedPath);
 			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
-				translationsChanged = true;
-				const masterValue = parseJSONPointer(uiSchema, changedPath);
-				const newValue = parseJSONPointer(newViewUiSchema, changedPath);
-				if (masterValue && masterValue[0] === "@") {
-					translations = {...translations, [masterValue]: newValue};
+				if (currentValue && currentValue[0] === "@") {
+					events.push({type: "translations", key: currentValue, value: newValue});
 				} else {
-					translationKey = `@${this.props.path}${changedPath}`;
-					translationValue = newValue;
-					translations = {...translations, [translationKey]:  newValue};
-					uiSchema = updateSafelyWithJSONPath(uiSchema, translationKey, changedPath);
-					masterUiSchemaChanged = true;
+					const translationKey =  `@${this.props.path}${changedPath}`;
+					newUiSchema = updateSafelyWithJSONPath(newUiSchema, translationKey, changedPath);
+					events.push({type: "translations", key: translationKey, value: newValue});
 				}
+			} else {
+				newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
 			}
 		});
-		const events: FieldEditorChangeEvent[] = [];
-		if (translationsChanged) {
-			events.push({type: "translations", key: translationKey, value: translationValue});
+		if (newUiSchema !== uiSchema) {
+			events.push({type: "uiSchema", value: newUiSchema});
 		}
-		if (masterUiSchemaChanged) {
-			events.push({type: "uiSchema", uiSchema});
-		}
-		(translationsChanged || masterUiSchemaChanged) && this.props.onChange(events);
+		(events.length) && this.props.onChange(events);
 	}
 }
 
