@@ -31,7 +31,7 @@ class _LajiFormInterface {
 			if (_schema && _schema.type === "object" && _schema.properties.type && _schema.properties.type.enum) {
 				return _(_schema.properties.type.enum);
 			}
-			console.warn(`${field} doesn't have schema type in prop types set"`)
+			//console.warn(`${field} doesn't have schema type in prop types set"`)
 			return _(["unknown"]);
 		}, {} as any))
 

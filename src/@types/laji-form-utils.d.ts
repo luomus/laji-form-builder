@@ -7,6 +7,7 @@ declare module "laji-form/lib/utils" {
 		function uiSchemaJSONPointer(uiSchema: any, JSONPointer: string): string;
 		function schemaJSONPointer(schema: any, JSONPointer: string): string;
 		function isObject(maybeObject: any): boolean;
+		function getInnerUiSchema(uiSchema: any): any;
 	}
 	export = utils;
 }

@@ -18,17 +18,17 @@ export const gnmspc  = nmspc();
 
 export const getComponentPropTypes = (field: React.Component) => field && parsePropTypes(field);
 
-export const propTypesToSchema = (propTypes: any): any => {
+export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	const name = propTypes.name || (propTypes.type || {}).name;
 	const value = propTypes.value || (propTypes.type || {}).value;
 	switch (name) {
 		case "shape":
 			return {type: "object", properties: Object.keys(value).reduce((properties, prop) => ({
 				...properties,
-				[prop]: propTypesToSchema(value[prop])
+				[typeof propPrefix === "string" ? `${propPrefix}${prop}` : prop]: propTypesToSchema(value[prop], propPrefix)
 			}), {})};
 		case "arrayOf":
-			return {type: "array", items: propTypesToSchema(value)};
+			return {type: "array", items: propTypesToSchema(value, propPrefix)};
 		case "oneOf":
 			return {type: "string", enum: value, enumNames: value};
 		case "string":
@@ -41,17 +41,17 @@ export const propTypesToSchema = (propTypes: any): any => {
 		case "custom":
 			return {type: "object", properties: {}};
 		default:
-			console.warn(`Unhandled PropType type ${name}`);
+			//console.warn(`Unhandled PropType type ${name}`);
 			return {type: "object", properties: {}};
 	}
 };
 
-export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any): any => {
+export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, prefix?: string): any => {
 	function translate(obj: any): any {
 		if (isObject(obj)) {
 			return Object.keys(obj).reduce((translated, key) => ({
 				...translated,
-				[key]: translate(obj[key])
+				[prefix ? `${prefix}${key}` : key]: translate(obj[key])
 			}), {});
 		} else if (Array.isArray(obj)) {
 			return obj.map(translate);
@@ -93,3 +93,98 @@ export const fieldPointerToUiSchemaPointer = (schema: any, pointer: string): str
 	}, "");
 };
 
+export const alterObjectKeys = (obj: any, replace: (key: string) => string): any => {
+	if (isObject(obj)) {
+		return Object.keys(obj).reduce((translated, key) => ({
+			...translated,
+			[replace(key)]: alterObjectKeys(obj[key], replace)
+		}), {});
+	} else if (Array.isArray(obj)) {
+		return obj.map(i => alterObjectKeys(i, replace));
+	}
+	return obj;
+};
+export const unprefixDeeply = (obj: any, prefix: string): any => {
+	return alterObjectKeys(obj, (key => key.startsWith(prefix) ? key.substr(prefix.length, key.length) : key));
+}
+export const prefixDeeply = (obj: any, prefix?: string): any => {
+	if (prefix === undefined) {
+		return obj;
+	}
+	return alterObjectKeys(obj, (key => `${prefix}${key}`));
+}
+
+export const alterSchemaKeys = (schema: any, replace: (key: string) => string): any => {
+	if (schema.type === "object") {
+		return {
+			...schema,
+			properties: Object.keys(schema.properties).reduce((translated, key) => ({
+				...translated,
+				[replace(key)]: alterSchemaKeys(schema.properties[key], replace)
+			}), {})
+		};
+	} else if (schema.type === "array" && schema.items.type === "object") {
+		return {
+			...schema,
+			items: {
+				...schema.items,
+				properties: Object.keys(schema.items.properties).reduce((translated, key) => ({
+					...translated,
+					[replace(key)]: alterSchemaKeys(schema.items.properties[key], replace)
+				}), {})
+			}
+		};
+	}
+	return schema;
+};
+export const unprefixSchemaDeeply = (schema: any, prefix: string): any => {
+	return alterSchemaKeys(schema, (key => key.startsWith(prefix) ? key.substr(prefix.length, key.length) : key));
+};
+export const prefixSchemaDeeply = (schema: any, prefix?: string): any => {
+	if (prefix === undefined) {
+		return schema;
+	}
+	return alterSchemaKeys(schema, (key => `${prefix}${key}`));
+};
+
+export const alterUiSchemaKeys = (uiSchema: any, schema: any, replace: (key: string) => string): any => {
+	if (schema
+		&& schema.type === "object"
+		&& Object.keys(schema.properties).length // For 'custom' prop type
+	) {
+		return Object.keys(uiSchema).reduce((translated, key) => ({
+			...translated,
+			[replace(key)]: alterUiSchemaKeys(uiSchema[key], schema.properties[key], replace)
+		}), {});
+	} else if (schema
+		&& schema.type === "array"
+		&& schema.items.type === "object"
+		&& Object.keys(schema.items.properties).length // For 'custom' prop type
+	) {
+		if (!uiSchema.items) {
+			return uiSchema;
+		}
+		return {
+			...uiSchema,
+			items: {
+				...uiSchema.items,
+				...Object.keys(schema.items.properties).reduce((translated: any, key) => {
+					if (uiSchema.items[key] && Object.keys(uiSchema.items[key]).length) {
+						translated[key] = alterUiSchemaKeys(uiSchema.items[key], schema.items.properties[key], replace);
+					}
+					return translated;
+				}, {})
+			}
+		};
+	}
+	return uiSchema;
+};
+export const unprefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix: string): any => {
+	return alterUiSchemaKeys(uiSchema, schema, (key => key.startsWith(prefix) ? key.substr(prefix.length, key.length) : key));
+};
+export const prefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix?: string): any => {
+	if (prefix === undefined) {
+		return uiSchema;
+	}
+	return alterUiSchemaKeys(uiSchema, schema, (key => `${prefix}${key}`));
+};
