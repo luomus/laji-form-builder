@@ -95,7 +95,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	}
 
 	getEditorProps(): any {
-		const { schemas, json, master, lang } = this.props;
+		const { schemas, master, lang } = this.props;
 		const { selected = "" } = this.state;
 		if (!selected) {
 			return {};
@@ -123,7 +123,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 const TextareaEditorField = (props: any) => {
 	const label = props.label || props.title || props.name;
-	const value = props.hasOwnProperty("formData") ? props.formData : props.value;
+	const value = props.formData ?? props.value;
 	let _lajiFormId: any;
 	const filterLajiFormId = (_value: any) => {
 		if (isObject(_value) && _value._lajiFormId) {
@@ -144,8 +144,8 @@ const TextareaEditorField = (props: any) => {
 					locale="en"
 					height={100}
 				/>
-				) : (
-					<input value={value} />
+			) : (
+				<input value={value} />
 			)}
 		</React.Fragment>
 	);
@@ -190,7 +190,7 @@ const customPropTypeSchemaMappings: {
 		}
 	},
 	"ui:functions": {
-		schema: (_schema: any, rootSchema: any, prefix?: string): any => {
+		schema: (_schema: any, rootSchema: any): any => {
 			return {type: "array", items: {
 				type: "object",
 				properties: {
@@ -202,13 +202,8 @@ const customPropTypeSchemaMappings: {
 			//const _enum = ["", ...Object.keys(LajiFormInterface.getFieldTypes()[_type])];
 			//return {type: "string", enum: _enum, enumNames: _enum};
 		},
-		uiSchema:  (_schema: any): any => {
+		uiSchema:  (): any => {
 			return {items: {"ui:field": "UiFieldEditor"}};
-			//return {
-			//	items: {
-			//		customPropTypeSchemaMappings["$ui:field"].schema
-			//	}
-			//}
 		}
 	}
 };
@@ -250,7 +245,7 @@ const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any): any => {
 				propUiSchema = replace(schemaForUiSchema.properties[prop]);
 			}
 			propUiSchema = customizeUiSchema(propSchema, propUiSchema);
-			if (propUiSchema && Object.keys(propUiSchema).length) {
+			if (Object.keys(propUiSchema || {}).length) {
 				return {...properties, [prop]: propUiSchema};
 			}
 			return properties;
@@ -261,7 +256,7 @@ const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any): any => {
 	} else if (schemaForUiSchema.type === "array" && schemaForUiSchema.items.properties) {
 		const itemsUiSchema = Object.keys(schemaForUiSchema.items.properties).reduce((properties, prop) => {
 			const propUiSchema = customizeUiSchema(schemaForUiSchema.items.properties[prop], (((uiSchema || {}).items || {}).items || {})[prop]);
-			if (propUiSchema && Object.keys(propUiSchema).length) {
+			if (Object.keys(propUiSchema || {}).length) {
 				return {...properties, [prop]: propUiSchema};
 			}
 			return properties;
@@ -367,12 +362,8 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 		if (!field) {
 			return "";
 		}
-		const { "ui:title": uiTitle } = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
-		return typeof uiTitle === "string"
-			? uiTitle
-			: typeof field.label === "string"
-				? field.label
-				: field.name;
+		const { "ui:title": uiTitle } = getTranslatedUiSchema(uiSchema, this.props.translations);
+		return uiTitle ?? field.label ?? field.name;
 	}
 
 	render() {
@@ -434,7 +425,7 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 			const currentValue = parseJSONPointer(newUiSchema, changedPath);
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
 			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
-				if (currentValue && currentValue[0] === "@") {
+				if (currentValue?.[0] === "@") {
 					events.push({type: "translations", key: currentValue, value: newValue});
 				} else {
 					const translationKey =  `@${this.props.path}${changedPath}`;

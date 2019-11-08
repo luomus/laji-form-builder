@@ -58,7 +58,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	componentWillReceiveProps({id, lang}: LajiFormBuilderProps) {
-		lang !== this.props.lang && this.apiClient && this.apiClient.setLang(lang);
+		lang !== this.props.lang && this.apiClient?.setLang(lang);
 		this.updateFromId(id);
 	}
 
@@ -105,16 +105,16 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		const {json, schemas, uiSchema, master} = this.state;
 		return json === "loading" || master === "loading"
 			? <Spinner color="black" />
-				: (
-					<LajiFormEditor
-							master={master}
-							json={json}
-							schemas={schemas}
-							onChange={this.onEditorChange}
-							lang={this.state.lang}
-							onLangChange={this.onLangChange}
-					/>
-				);
+			: (
+				<LajiFormEditor
+						master={master}
+						json={json}
+						schemas={schemas}
+						onChange={this.onEditorChange}
+						lang={this.state.lang}
+						onLangChange={this.onLangChange}
+				/>
+			);
 	}
 
 	renderLangChooser = () => {
