@@ -65,7 +65,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	updateFromId(id: string) {
 		if (id !== this.state.id) {
 			this.setState({master: "loading", schemas: "loading", json: "loading"}, () => {
-				this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
+				// TODO fix formtest
+				this.setState({master: require(`../forms/${id}.json`)});
+				//this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
 				[["schemas", "schema"], ["schemas", "schema"], ["json"]].forEach(
 					([stateProp, format]) => this.apiClient.fetch(`/forms/${id}`, {lang: this.props.lang, format: format || stateProp})
 						.then((response: any) => response.json())
