@@ -256,75 +256,26 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 }
 
+
 interface DraggableHeightProps {
-	height?: number;
+	height?: number
+	color?: string
 }
-interface DraggableWidthProps {
-	width?: number;
+interface DraggableHeightState {
+	height: number
 }
-interface DraggableWidthHeightProps extends DraggableWidthProps, DraggableHeightProps {
-	color?: string;
-	dragHeight: boolean;
-	dragWidth: boolean;
-}
-interface DraggableWidthHeightState {
-	height?: number;
-	width?: number;
-}
-class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & Stylable & HasChildren, DraggableWidthHeightState> {
+class DraggableHeight extends React.Component<DraggableHeightProps & Stylable, DraggableHeightState> {
 	state = {
-		height: this.props.dragHeight ? this.props.height || 100 : undefined,
-		width: this.props.dragWidth ? this.props.width || 100 : undefined
+		height: this.props.height || 100
 	};
 	static defaultProps = {
-		color: "black",
-		dragHeight: false,
-		dragWidth: false,
+		color: "black"
 	};
 	dragging = false;
 	startY: number;
-	startX: number;
-	heightAtStart?: number;
-	widthAtStart?: number;
-	_onMouseDown: {height?: React.MouseEventHandler, width?: React.MouseEventHandler} = {};
-	_onMouseUp: {height?: React.MouseEventHandler, width?: React.MouseEventHandler} = {};
-	_onMouseMove: {height?: EventListener, width?: EventListener} = {};
+	heightAtStart: number;
 
 	render() {
-		const dragLineStyle: React.CSSProperties = {
-			position: "absolute",
-			width: this.props.dragWidth ? 1 : "100%",
-			cursor: "row-resize",
-			height: this.props.dragHeight ? 1 : "100%",
-			backgroundColor: this.props.color,
-			marginTop: -1
-		};
-		let { style = {} } = this.props;
-		if (this.props.dragHeight) {
-			style = {...style, height: this.state.height };
-		}
-		if (this.props.dragWidth) {
-			style = {...style, width: this.state.width };
-		}
-		const content = this.props.dragWidth ? (
-				<div style={{display: "flex", flexDirection: "row", width: this.state.width}}>
-					{this.props.children}
-					{this.getWidthDragLine()}
-				</div>
-		) : this.props.children;
-
-		return (
-			<div style={style}>
-				{this.getHeightDragLine()}
-				{content}
-			</div>
-		);
-	}
-
-	getHeightDragLine() {
-		if (!this.props.dragHeight) {
-			return null;
-		}
 		const dragLineStyle: React.CSSProperties = {
 			position: "absolute",
 			width: "100%",
@@ -333,70 +284,34 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			backgroundColor: this.props.color,
 			marginTop: -1
 		};
-		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("height")} onMouseUp={this.onMouseUp("height")} />
+		return (
+			<div style={{ ...(this.props.style || {}), height: this.state.height }}>
+				<div style={dragLineStyle} onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp} />
+				{this.props.children}
+			</div>
+		);
 	}
 
-	getWidthDragLine() {
-		if (!this.props.dragWidth) {
-			return null;
+	onMouseDown = (e: React.MouseEvent) => {
+		if (this.dragging) {
+			return;
 		}
-		const dragLineStyle: React.CSSProperties = {
-			width: 1,
-			cursor: "ew-resize",
-			height: "100%",
-			backgroundColor: this.props.color,
-			paddingLeft: 1,
-		};
-		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("width")} onMouseUp={this.onMouseUp("width")} />
+		this.dragging = true;
+		this.startY = e.clientY;
+		this.heightAtStart = this.state.height;
+		document.addEventListener("mousemove", this.onMouseMove);
 	}
-
-	onMouseDown = (dir: "height" | "width") => {
-		if (!this._onMouseDown[dir]) {
-			this._onMouseDown[dir] = (e: React.MouseEvent) => {
-				if (this.dragging) {
-					return;
-				}
-				this.dragging = true;
-				this.startY = e.clientY;
-				this.startX = e.clientX;
-				this.heightAtStart = this.state.height;
-				this.widthAtStart = this.state.width;
-				document.addEventListener("mousemove", this.onMouseMove(dir));
-			}
+	onMouseUp = (e: React.MouseEvent) => {
+		if (!this.dragging) {
+			return;
 		}
-		return this._onMouseDown[dir];
+		this.dragging = false;
+		document.removeEventListener("mousemove", this.onMouseMove);
 	}
-	onMouseUp = (dir: "height" | "width") => {
-		if (!this._onMouseUp[dir]) {
-			this._onMouseUp[dir] = (e: React.MouseEvent) => {
-				if (!this.dragging) {
-					return;
-				}
-				this.dragging = false;
-				document.removeEventListener("mousemove", this.onMouseMove(dir));
-			}
-		}
-		return this._onMouseUp[dir];
-	}
-	onMouseMove = (dir: "height" | "width"): EventListener => {
-		if (!this._onMouseMove[dir]) {
-			this._onMouseMove[dir] = (e: MouseEvent) => {
-				const _state: DraggableWidthHeightState = {};
-				if (dir === "height" && this.props.dragHeight) {
-					_state.height = (this.heightAtStart || 0) + (this.startY - e.clientY);
-				}
-				if (dir === "width" && this.props.dragWidth) {
-					_state.width = (this.widthAtStart || 0) - (this.startX - e.clientX);
-				}
-				this.setState(_state);
-			};
-		}
-		return this._onMouseMove[dir] as EventListener;
+	onMouseMove = (e: MouseEvent) => {
+		this.setState({height: this.heightAtStart + (this.startY - e.clientY)});
 	}
 }
-
-const DraggableHeight = React.memo((props: DraggableHeightProps & Stylable & HasChildren) => <DraggableWidthHeight {...props} dragHeight={true} />);
-const DraggableWidth = React.memo((props: DraggableHeightProps & Stylable & HasChildren) => <DraggableWidthHeight {...props} dragWidth={true} />);
 
 const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
 	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames(gnmspc("clickable"), className)}>{children || <span>&#8203;</span>}</span>
@@ -428,9 +343,6 @@ export interface Stylable {
 }
 export interface Classable {
 	className?: string;
-}
-export interface HasChildren {
-	children?: React.ReactNode;
 }
 export interface AppProps extends Stylable, Classable { }
 
@@ -492,10 +404,10 @@ class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable,
 		};
 		return (
 			<DraggableHeight style={containerStyle}>
-				<DraggableWidth style={fieldsBlockStyle}>
+				<div style={fieldsBlockStyle}>
 					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
 					<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
-				</DraggableWidth>
+				</div>
 				<div style={fieldEditorStyle}>
 					<FieldEditor onChange={this.onEditorChange} lajiFormRef={this.props.lajiFormRef} {...this.getEditorProps()} />
 				</div>
