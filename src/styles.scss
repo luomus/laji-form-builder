@@ -1,4 +1,9 @@
+$def: #f2f6ff;
+$def_accent: darken($def, 30%);
+$darker: #47494e;
+
 .ljb {
+	$root: &;
 	&-field {
 		&-expanded, &-contracted {
 			width: 0px;
@@ -22,5 +27,30 @@
 
 	&-clickable {
 		cursor: pointer;
+	}
+
+	&-editor {
+		zoom: 85%;
+		background-color: $def;
+		#{$root}-draggable-line {
+			background-color: $def_accent;
+		}
+	}
+	&-editor-nav-bar {
+		padding: 10px;
+		background-color: $darker;
+	}
+	&-field-editor {
+		padding: 10px;
+	}
+	&-field-chooser {
+		background: white;
+		border: 1px solid $def_accent;
+		margin-top: 5px;
+		border-radius: 2px;
+	}
+
+	&-draggable-line {
+		background-color: black;
 	}
 }

@@ -1,6 +1,6 @@
 import * as React from "react";
 import _Spinner from "react-spinner";
-import { classNames, gnmspc } from "./utils";
+import { classNames, nmspc, gnmspc } from "./utils";
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -12,8 +12,10 @@ export interface HasChildren {
 	children?: React.ReactNode;
 }
 
+type Position = "bottom";
 interface DraggableHeightProps {
 	height?: number;
+	fixed?: Position;
 }
 interface DraggableWidthProps {
 	width?: number;
@@ -22,12 +24,13 @@ interface DraggableWidthHeightProps extends DraggableWidthProps, DraggableHeight
 	color?: string;
 	dragHeight: boolean;
 	dragWidth: boolean;
+	dragClassName?: string;
 }
 interface DraggableWidthHeightState {
 	height?: number;
 	width?: number;
 }
-class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & Stylable & HasChildren, DraggableWidthHeightState> {
+class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & Stylable & Classable & HasChildren, DraggableWidthHeightState> {
 	state = {
 		height: this.props.dragHeight ? this.props.height || 200 : undefined,
 		width: this.props.dragWidth ? this.props.width || 200 : undefined
@@ -42,26 +45,40 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 	startX: number;
 	heightAtStart?: number;
 	widthAtStart?: number;
+	fixed: Position;
 	_onMouseDown: {height?: React.MouseEventHandler, width?: React.MouseEventHandler} = {};
 	_onMouseUp: {height?: EventListener, width?: EventListener} = {};
 	_onMouseMove: {height?: EventListener, width?: EventListener} = {};
 
+	nmspc = nmspc("draggable");
+
 	render() {
-		let { style = {} } = this.props;
-		if (this.props.dragHeight) {
-			style = {...style, height: this.state.height };
-		}
+		const { style, fixed } = this.props;
+		const children = (
+			<div style={style} className={this.props.className}>
+				{this.props.children}
+			</div>
+		);
 		const content = this.props.dragWidth ? (
 				<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
-			<div style={style}>
-					{this.props.children}
+			<div>
+					{children}
 					{this.getWidthDragLine()}
 			</div>
 				</div>
-		) : this.props.children;
+		) : children;
 
+		const heightContainerStyle = fixed === "bottom"
+			?  {
+			display: "flex",
+			flexDirection: "row",
+			position: "fixed",
+			bottom: 0,
+			left: 0,
+			zIndex: 10000,
+		} as React.CSSProperties : {};
 		return (
-			<div style={style}>
+			<div style={this.props.dragHeight && {...heightContainerStyle, height: this.state.height || 0, width: "100%"} || {}}>
 				{this.getHeightDragLine()}
 				{content}
 			</div>
@@ -77,10 +94,15 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			width: "100%",
 			cursor: "row-resize",
 			height: 1,
-			backgroundColor: this.props.color,
 			marginTop: -1
 		};
-		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("height")} />
+		return (
+			<div
+				style={dragLineStyle}
+				className={classNames(this.nmspc("line"), this.nmspc("height"), this.props.dragClassName)}
+				onMouseDown={this.onMouseDown("height")}
+			/>
+		);
 	}
 
 	getWidthDragLine() {
@@ -91,12 +113,18 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			width: 1,
 			cursor: "ew-resize",
 			height: "100%",
-			backgroundColor: this.props.color,
 			paddingLeft: 1,
 			position: "absolute",
-			left: (this.state.width || 0) - 1
+			left: (this.state.width || 0) - 1,
+			top: 0
 		};
-		return <div style={dragLineStyle} onMouseDown={this.onMouseDown("width")} />
+		return (
+			<div
+				style={dragLineStyle}
+				className={classNames(this.nmspc("line"), this.nmspc("width"), this.props.dragClassName)}
+				onMouseDown={this.onMouseDown("width")}
+			/>
+		);
 	}
 
 	onMouseDown = (dir: "height" | "width") => {
@@ -146,8 +174,8 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 	}
 }
 
-export const DraggableHeight = React.memo((props: DraggableHeightProps & Stylable & HasChildren) => <DraggableWidthHeight {...props} dragHeight={true} />);
-export const DraggableWidth = React.memo((props: DraggableHeightProps & Stylable & HasChildren) => <DraggableWidthHeight {...props} dragWidth={true} />);
+export const DraggableHeight = React.memo((props: DraggableHeightProps & Stylable & Classable & HasChildren) => <DraggableWidthHeight {...props} dragHeight={true} />);
+export const DraggableWidth = React.memo((props: DraggableWidthProps & Stylable & Classable & HasChildren) => <DraggableWidthHeight {...props} dragWidth={true} />);
 
 export const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
 	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames(gnmspc("clickable"), className)}>{children || <span>&#8203;</span>}</span>

@@ -4,8 +4,8 @@ import parsePropTypes from "parse-prop-types";
 import JSONEditor from "react-json-editor-ajrm";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import LajiFormInterface from "./LajiFormInterface";
-import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable } from "./components";
-import { classNames, nmspc, propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixUiSchemaDeeply } from "./utils";
+import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable } from "./components";
+import { classNames, nmspc, gnmspc, propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixUiSchemaDeeply } from "./utils";
 import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, Lang, Schemas } from "./LajiFormBuilder";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
@@ -38,14 +38,8 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		const containerStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "row",
-			position: "fixed",
-			bottom: 0,
-			background: "white",
-			zIndex: 10000,
-			width: "100%",
-			height: "200px",
-			left: 0,
-		}
+			width: "100%"
+		};
 		const fieldsStyle: React.CSSProperties = {
 			overflowY: "scroll",
 			display: "flex",
@@ -65,12 +59,12 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			height: "100%"
 		};
 		return (
-			<DraggableHeight style={containerStyle} height={400}>
-				<DraggableWidth style={fieldsBlockStyle}>
+			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")}>
+				<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")}>
 					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
-					<Fields style={fieldsStyle} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
+					<Fields style={fieldsStyle} className={gnmspc("field-chooser")} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
 				</DraggableWidth>
-				<div style={fieldEditorStyle}>
+				<div style={fieldEditorStyle} className={gnmspc("field-editor")} >
 					<FieldEditor onChange={this.onEditorChange} {...this.getEditorProps()} />
 				</div>
 			</DraggableHeight>
@@ -445,9 +439,9 @@ class FieldEditor extends React.PureComponent<FieldEditorProps> {
 
 type OnSelectedCB = (field: string) => void;
 
-const Fields = React.memo(({fields = [], onSelected, selected, pointer, style = {}}
-	: {fields: FieldProps[], onSelected: OnSelectedCB, selected?: string, pointer: string} & Stylable) => (
-		<div style={{...style, display: "flex", flexDirection: "column", paddingLeft: 20}}>
+const Fields = React.memo(({fields = [], onSelected, selected, pointer, style = {}, className}
+	: {fields: FieldProps[], onSelected: OnSelectedCB, selected?: string, pointer: string} & Stylable & Classable) => (
+		<div style={{...style, display: "flex", flexDirection: "column", paddingLeft: 20}} className={className}>
 			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} selected={selected} pointer={`${pointer}/${f.name}`} />)}
 		</div>
 ));
@@ -523,6 +517,7 @@ const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: 
 		<div className="btn-group">{
 			["fi", "sv", "en"].map((_lang: Lang) => (
 				<Button
+					className="btn-xs"
 					active={_lang === lang}
 					onClick={React.useCallback(() => onChange(_lang), [_lang])}
 					key={_lang}
