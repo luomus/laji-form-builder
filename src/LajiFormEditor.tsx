@@ -1,25 +1,18 @@
 import * as React from "react";
-import memoize from "memoizee";
-import parsePropTypes from "parse-prop-types";
-import JSONEditor from "react-json-editor-ajrm";
-const LajiForm = require("laji-form/lib/components/LajiForm").default;
-import LajiFormInterface from "./LajiFormInterface";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable } from "./components";
-import { classNames, nmspc, gnmspc, propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixUiSchemaDeeply } from "./utils";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer } from "./utils";
 import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, Lang, Schemas } from "./LajiFormBuilder";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
+const { parseJSONPointer } = LajiFormUtils;
+import UiSchemaEditor from "./UiSchemaEditor";
 
-type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent;
+export type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent;
 
-export interface CommonEditorProps {
+export interface LajiFormEditorProps {
 	master: any;
 	schemas: Schemas;
 	onChange: (changed: ChangeEvent[]) => void;
 	lang: Lang;
-}
-
-export interface LajiFormEditorProps extends CommonEditorProps {
 	json: {
 		fields: FieldProps[];
 	};
@@ -31,9 +24,10 @@ export interface FieldMap {
 }
 export interface LajiFormEditorState {
 	selected?: string;
+	activeEditorMode: ActiveEditorMode;
 }
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
-	state = {selected: undefined};
+	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode};
 	render() {
 		const containerStyle: React.CSSProperties = {
 			display: "flex",
@@ -62,11 +56,21 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")}>
 				<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")}>
 					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
-					<Fields style={fieldsStyle} className={gnmspc("field-chooser")} fields={this.props.json.fields} onSelected={this.onFieldSelected} selected={this.state.selected} pointer="" />
+					<Fields
+						style={fieldsStyle}
+						className={gnmspc("field-chooser")}
+						fields={this.props.json.fields}
+						onSelected={this.onFieldSelected}
+						selected={this.state.selected}
+						pointer=""
+					/>
 				</DraggableWidth>
-				<div style={fieldEditorStyle} className={gnmspc("field-editor")} >
-					<FieldEditor onChange={this.onEditorChange} {...this.getEditorProps()} />
-				</div>
+			{this.state.selected &&	(
+					<div className={gnmspc("field-editor")} style={fieldEditorStyle}>
+						<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
+						<Editor active={this.state.activeEditorMode} {...this.getEditorProps()} />
+					</div>
+			)}
 			</DraggableHeight>
 		);
 	}
@@ -88,19 +92,18 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.setState({selected: field});
 	}
 
-	getEditorProps(): any {
+	getEditorProps(): FieldEditorProps {
 		const { schemas, master, lang } = this.props;
 		const { selected = "" } = this.state;
-		if (!selected) {
-			return {};
-		}
 		const fieldsMap = this.getFieldsMap(this.props);
 		return {
 			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected || "")),
 			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected || ""), !!"safely"),
 			field: parseJSONPointer({fields: fieldsMap}, (this.state.selected || "").replace(/\//g, "/fields/")),
 			translations: master.translations[lang],
-			path: selected
+			path: selected,
+			onChange: this.onEditorChange,
+			lang
 		};
 	}
 
@@ -113,328 +116,20 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.props.onChange(events);
 	}
 
+	onActiveEditorChange = (newActive: ActiveEditorMode) => {
+		this.setState({activeEditorMode: newActive});
+	}
+
 }
 
-const TextareaEditorField = (props: any) => {
-	const label = props.label || props.title || props.name;
-	const value = props.formData ?? props.value;
-	let _lajiFormId: any;
-	const filterLajiFormId = (_value: any) => {
-		if (isObject(_value) && _value._lajiFormId) {
-			const {_lajiFormId: lajiFormId, ...remaining} = _value;
-			_lajiFormId = lajiFormId;
-			return remaining;
-		}
-		return _value;
-	};
-	const onChange = React.useCallback((({jsObject}: any) => props.onChange(_lajiFormId ? {...jsObject, _lajiFormId} : jsObject)), [props.onChange])
-	return  (
-		<React.Fragment>
-			{label}
-			{isObject(value) || Array.isArray(value) ? (
-				<JSONEditor
-					placeholder={filterLajiFormId(props.formData || props.value)}
-					onChange={onChange}
-					locale="en"
-					height={100}
-				/>
-			) : (
-				<input value={value} />
-			)}
-		</React.Fragment>
-	);
-};
-
-const UiFieldEditor = (props: any) => {
-	const { SchemaField } = props.registry.fields;
-
-	const schema = customize(props.schema, props.formContext.rootSchema, "$");
-	const uiSchema = customize(LajiFormUtils.getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, "$");
-
-	return <SchemaField {...props} schema={schema} uiSchema={uiSchema}/>;
-};
-
-interface FieldEditorProps extends CommonEditorProps {
-	uiSchema?: any;
-	schema?: any;
-	field?: FieldOptions;
-	translations?: any;
-	path?: string;
+export interface FieldEditorProps {
+	uiSchema: any;
+	schema: any;
+	field: FieldOptions;
+	translations: any;
+	path: string;
 	onChange: (changed: FieldEditorChangeEvent[]) => void;
-}
-
-const customPropTypeSchemaMappings: {
-	[propName: string]: {
-		schema?: (schema: any, rootSchema: any) => any,
-		uiSchema?: (schema: any) => any
-	}
-} = {
-	"ui:widget": {
-		schema: (_schema, rootSchema: any): any => {
-			const {type: _type} = rootSchema;
-			const _enum = ["", ...Object.keys(LajiFormInterface.getWidgetTypes()[_type])];
-			return {type: "string", enum: _enum, enumNames: _enum};
-		}
-	},
-	"ui:field": {
-		schema: (_schema, rootSchema): any => {
-			const {type: _type} = rootSchema;
-			const _enum = ["", ...Object.keys(LajiFormInterface.getFieldTypes()[_type])];
-			return {type: "string", enum: _enum, enumNames: _enum};
-		}
-	},
-	"ui:functions": {
-		schema: (_schema: any, rootSchema: any): any => {
-			return {type: "array", items: {
-				type: "object",
-				properties: {
-					"ui:field": {type: "string"},
-					"ui:options": {type: "object", properties: {}}
-				}
-			}};
-			//const {"ui:functions": uiFunctions} = rootUiSchema;
-			//const _enum = ["", ...Object.keys(LajiFormInterface.getFieldTypes()[_type])];
-			//return {type: "string", enum: _enum, enumNames: _enum};
-		},
-		uiSchema:  (): any => {
-			return {items: {"ui:field": "UiFieldEditor"}};
-		}
-	}
-};
-
-const prefixer = (prefix?: string) => (key: string) => prefix ? `${prefix}${key}` : key;
-
-const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): any => {
-	if (schemaForUiSchema.properties) {
-		return {...schemaForUiSchema, properties: Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
-			let propSchema = schemaForUiSchema.properties[prop];
-			const {schema: replace} = customPropTypeSchemaMappings[prop] || {};
-			if (replace) {
-				propSchema = prefixSchemaDeeply(replace(schemaForUiSchema.properties[prop], rootSchema), prefix);
-			}
-			return {...properties, [prop]: customize(propSchema, rootSchema, prefix)};
-		}, {})};
-	} else if (schemaForUiSchema.type === "array" && schemaForUiSchema.items.properties) {
-		return {
-			...schemaForUiSchema,
-			items: {
-				...schemaForUiSchema.items,
-				properties: Object.keys(schemaForUiSchema.items.properties).reduce((properties, prop) => ({
-					...properties,
-					[prop]: customize(schemaForUiSchema.items.properties[prop], rootSchema, prefix)
-				}), {})
-			}
-		};
-	}
-	return schemaForUiSchema;
-};
-
-const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any): any => {
-	if (schemaForUiSchema.properties) {
-		const propertiesUiSchema = Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
-			const propSchema = schemaForUiSchema.properties[prop];
-			const {uiSchema: replace} = customPropTypeSchemaMappings[prop] || {};
-			let propUiSchema = properties[prop];
-			if (replace) {
-				propUiSchema = replace(schemaForUiSchema.properties[prop]);
-			}
-			propUiSchema = customizeUiSchema(propSchema, propUiSchema);
-			if (Object.keys(propUiSchema || {}).length) {
-				return {...properties, [prop]: propUiSchema};
-			}
-			return properties;
-		}, uiSchema || {});
-		if (Object.keys(propertiesUiSchema).length) {
-			return propertiesUiSchema;
-		}
-	} else if (schemaForUiSchema.type === "array" && schemaForUiSchema.items.properties) {
-		const itemsUiSchema = Object.keys(schemaForUiSchema.items.properties).reduce((properties, prop) => {
-			const propUiSchema = customizeUiSchema(schemaForUiSchema.items.properties[prop], (((uiSchema || {}).items || {}).items || {})[prop]);
-			if (Object.keys(propUiSchema || {}).length) {
-				return {...properties, [prop]: propUiSchema};
-			}
-			return properties;
-		}, (uiSchema || {}).items || {});
-		if (Object.keys(itemsUiSchema).length) {
-			return {
-				...uiSchema, items: itemsUiSchema
-			}
-		}
-		return uiSchema;
-	}
-};
-
-const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
-	const registry = LajiFormInterface.getRegistry();
-	const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
-	const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
-	const componentPropTypes = getComponentPropTypes(component);
-	const prependPrefix = prefixer(prefix);
-	const forBoth = {
-		[prependPrefix("ui:field")]: {type: "string"},
-		[prependPrefix("ui:functions")]: {
-			type: "array",
-			items: {
-				type: "object",
-				properties: {
-					[prependPrefix("ui:field")]: {type: "string"},
-					[prependPrefix("ui:options")]: {type: "object", properties: {}}
-				}
-			}
-		}
-	};
-	const addWidgetOrField = ((schemaForUiSchema: any, _schema: any) =>
-		(_schema.type === "object" || _schema.type === "array")
-			? {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth}}
-			: {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth, "$ui:widget": {type: "string"}}}
-	);
-	const defaultProps = addWidgetOrField({
-		type: "object",
-		properties: {
-			[prependPrefix("ui:title")]: { type: "string", },
-			[prependPrefix("ui:description")]: { type: "string", },
-			[prependPrefix("ui:help")]: { type: "string", },
-			[prependPrefix("className")]: { type: "string", }
-		}
-	}, schema);
-	if ((componentPropTypes || {}).uiSchema) {
-		const _schema = propTypesToSchema((componentPropTypes || {}).uiSchema, "$");
-		return customize({
-			..._schema,
-			properties: {
-				...defaultProps.properties,
-				..._schema.properties
-			}
-		}, schema, prefix)
-	} else {
-		return customize(defaultProps, schema, prefix);
-	}
-};
-
-class FieldEditor extends React.PureComponent<FieldEditorProps> {
-	static defaultProps = {
-		uiSchema: {}
-	};
-	getEditorSchema = memoize(getEditorSchema);
-	getEditorUiSchema = memoize((uiSchema: any, schemaForUiSchema: any): any => {
-		const registry = LajiFormInterface.getRegistry();
-		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
-		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
-		const componentPropTypes = component && parsePropTypes(component);
-		const propTypesForUiSchema = (propTypes: any): any => {
-			const name = propTypes.name || (propTypes.type || {}).name;
-			const value = propTypes.value || (propTypes.type || {}).value;
-			switch (name) {
-				case "shape":
-					return Object.keys(value).reduce((properties: any, prop) => {
-						const propUiSchema = propTypesForUiSchema(value[prop]);
-						if (Object.keys(propUiSchema).length) {
-							properties[prop] = propUiSchema;
-						}
-						return properties;
-					}, {});
-				case "arrayOf":
-					const itemUiSchema = propTypesForUiSchema(value);
-					return Object.keys(itemUiSchema).length
-						? {items: itemUiSchema}
-						: {};
-				case "string":
-				case "number":
-				case "oneOf":
-				case "bool":
-					return {};
-				default:
-					return {["ui:field"]: "TextareaEditorField"};
-			}
-		};
-		const _uiSchema = (componentPropTypes || {}).uiSchema ? propTypesForUiSchema((componentPropTypes || {}).uiSchema) : {};
-		return customizeUiSchema(schemaForUiSchema, prefixUiSchemaDeeply(_uiSchema, unprefixSchemaDeeply(schemaForUiSchema, "$"), "$"));
-	});
-
-	getFieldName(): string {
-		const {uiSchema = {}, field} = this.props;
-		if (!field) {
-			return "";
-		}
-		const { "ui:title": uiTitle } = getTranslatedUiSchema(uiSchema, this.props.translations);
-		return uiTitle ?? field.label ?? field.name;
-	}
-
-	render() {
-		if (!this.props.schema) {
-			return null;
-		}
-
-		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema, "$");
-		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
-		const formData = {
-			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations, "$"),
-			"$ui:title": this.getFieldName()
-		};
-		const fields = { TextareaEditorField, UiFieldEditor };
-		const formContext = {
-			path: this.props.path,
-			rootSchema: this.props.schema,
-			rootUiSchema: this.props.uiSchema
-		};
-		return (
-			<LajiForm
-				schema={schema}
-				uiSchema={uiSchema}
-				formData={formData}
-				onChange={this.onEditorLajiFormChange}
-				fields={fields}
-				lang={this.props.lang}
-				formContext={formContext}
-			/>
-		);
-	}
-
-	onEditorLajiFormChange = (eventUiSchema: any) => {
-		eventUiSchema = unprefixDeeply(eventUiSchema, "$");
-		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
-		const { schema, uiSchema } = this.props;
-		const detectChangePaths = (_uiSchema: any, path: string): string[] => {
-			if (isObject(_uiSchema)) {
-				return Object.keys(_uiSchema).reduce((paths, key) => {
-					const changes = detectChangePaths(_uiSchema[key], `${path}/${key}`);
-					return changes.length ? [...paths, ...changes] : paths;
-				}, []);
-			} else if (Array.isArray(_uiSchema)) {
-				return _uiSchema.reduce((paths, item, idx) => {
-					const changes = detectChangePaths(item, `${path}/${idx}`);
-					return changes.length ? [...paths, ...changes] : paths;
-				}, []);
-			}
-			if (parseJSONPointer(eventUiSchema, path) !== parseJSONPointer(viewUiSchema, path)) {
-				return [path];
-			}
-			return [];
-		};
-		const changedPaths = detectChangePaths(eventUiSchema, "");
-		const events: FieldEditorChangeEvent[] = [];
-		let newUiSchema = uiSchema;
-		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), "$"), changedPath);
-			const currentValue = parseJSONPointer(newUiSchema, changedPath);
-			const newValue = parseJSONPointer(eventUiSchema, changedPath);
-			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
-				if (currentValue?.[0] === "@") {
-					events.push({type: "translations", key: currentValue, value: newValue});
-				} else {
-					const translationKey =  `@${this.props.path}${changedPath}`;
-					newUiSchema = updateSafelyWithJSONPath(newUiSchema, translationKey, changedPath);
-					events.push({type: "translations", key: translationKey, value: newValue});
-				}
-			} else {
-				newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
-			}
-		});
-		if (newUiSchema !== uiSchema) {
-			events.push({type: "uiSchema", value: unprefixDeeply(newUiSchema, "$")});
-		}
-		(events.length) && this.props.onChange(events);
-	}
+	lang: Lang;
 }
 
 type OnSelectedCB = (field: string) => void;
@@ -512,19 +207,39 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		);
 	}
 }
-const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) => {
-	return (
-		<div className="btn-group">{
-			["fi", "sv", "en"].map((_lang: Lang) => (
-				<Button
-					className="btn-xs"
-					active={_lang === lang}
-					onClick={React.useCallback(() => onChange(_lang), [_lang])}
-					key={_lang}
-				>{_lang}
+const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) => (
+	<div className="btn-group">{
+		["fi", "sv", "en"].map((_lang: Lang) => (
+			<Button
+				className="btn-xs"
+				active={_lang === lang}
+				onClick={React.useCallback(() => onChange(_lang), [_lang])}
+				key={_lang}
+			>{_lang}
 			</Button>
-				))
-		}</div>
-	);
-});
+		))
+	}</div>
+));
 
+
+type ActiveEditorMode = "uiSchema" | "basic";
+const EditorChooser = React.memo(({active, onChange}: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) => (
+	<div className="btn-group">{
+		["basic", "uiSchema"].map((_active: ActiveEditorMode) => (
+			<Button
+				className="btn-xs"
+				active={_active === active}
+				onClick={React.useCallback(() => onChange(_active), [_active])}
+				key={_active}
+			>{_active}
+			</Button>
+		))
+	}</div>
+));
+
+interface EditorProps extends FieldEditorProps {
+	active: ActiveEditorMode;
+}
+const Editor = React.memo(({active, ...props}: EditorProps) => (
+	active === "uiSchema" && <UiSchemaEditor {...props} /> || null
+));
