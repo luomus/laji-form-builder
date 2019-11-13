@@ -236,13 +236,12 @@ type ActiveEditorMode = "uiSchema" | "basic";
 const EditorChooser = React.memo(({active, onChange}: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) => (
 	<div className={editorNmspc()} style={{display: "flex"}}>{
 		["basic", "uiSchema"].map((_active: ActiveEditorMode) => (
-			<div
+			<Clickable
 				className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
-				tabIndex={0}
 				onClick={React.useCallback(() => onChange(_active), [_active])}
 				key={_active}
 			>{capitalizeFirstLetter(_active)}
-			</div>
+			</Clickable>
 		))
 	}</div>
 ));
