@@ -188,16 +188,9 @@ export const Button = React.memo(({children, active, className, ...props}: any) 
 	<button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>
 );
 
-//declare module "react-spinner" {
-//		//	interface Spinner {
-//		//		style: any;
-//		//	}
-//		// or
-//	interface _Spinner extends AppProps { className?: string }
-//	interface Spinner extends AppProps { }
-//}
-//
-export const Spinner = React.memo(({color = "white"}: {color: "white" | "black"}) =>
-	<_Spinner  />
-	//<_Spinner className={color === "black" ? "bg-black" : ""} /> // TODO typescrit can't dig it...
-)
+export const Spinner = React.memo(({color = "white", size = 32}: {color: "white" | "black", size?: number}) => (
+	<_Spinner
+		style={size ? {width: size, height: size} : {}}
+		className={classNames(gnmspc("spinner-container"), gnmspc(color === "black" ? "spinner-black" : ""))}
+	/>
+))

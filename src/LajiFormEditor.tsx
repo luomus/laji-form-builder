@@ -1,10 +1,11 @@
 import * as React from "react";
-import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable } from "./components";
+import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer } from "./utils";
 import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, Lang, Schemas } from "./LajiFormBuilder";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, capitalizeFirstLetter } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
+import BasicEditor from "./BasicEditor";
 
 export type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent;
 
@@ -17,6 +18,7 @@ export interface LajiFormEditorProps {
 		fields: FieldProps[];
 	};
 	onLangChange: (lang: Lang) => void;
+	loading?: boolean;
 }
 
 export interface FieldMap {
@@ -54,24 +56,30 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		};
 		return (
 			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")}>
-				<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")}>
-					<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
-					<Fields
-						style={fieldsStyle}
-						className={gnmspc("field-chooser")}
-						fields={this.props.json.fields}
-						onSelected={this.onFieldSelected}
-						selected={this.state.selected}
-						pointer=""
-					/>
-				</DraggableWidth>
+				{this.props.loading
+				? <Spinner color="black" size={100} />
+				: (
+					<React.Fragment>
+						<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")}>
+							<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
+							<Fields
+								style={fieldsStyle}
+								className={gnmspc("field-chooser")}
+								fields={this.props.json.fields}
+								onSelected={this.onFieldSelected}
+								selected={this.state.selected}
+								pointer=""
+							/>
+						</DraggableWidth>
 
-				<div style={fieldEditorStyle}>
-					<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
-					{this.state.selected &&	(
-						<Editor active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
-					)}
-				</div>
+						<div style={fieldEditorStyle}>
+							<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
+							{this.state.selected &&	(
+								<Editor active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
+							)}
+						</div>
+					</React.Fragment>
+				)}
 			</DraggableHeight>
 		);
 	}
@@ -243,5 +251,7 @@ interface EditorProps extends FieldEditorProps {
 	active: ActiveEditorMode;
 }
 const Editor = React.memo(({active, ...props}: EditorProps) => (
-	active === "uiSchema" && <UiSchemaEditor {...props} /> || null
+	active === "uiSchema" && <UiSchemaEditor {...props} />
+	|| active === "basic" && <BasicEditor {...props} />
+	|| null
 ));

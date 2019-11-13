@@ -65,4 +65,7 @@ $def_accent: #337ab7;
 			border-bottom: 2px solid blue
 		}
 	}
+	&-spinner-black .react-spinner_bar {
+		background-color: black;
+	}
 }

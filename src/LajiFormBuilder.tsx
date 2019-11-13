@@ -103,10 +103,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	renderEditor() {
 		const {json, schemas, uiSchema, master} = this.state;
-		return json === "loading" || master === "loading"
-			? <Spinner color="black" />
-			: (
+		return (
 				<LajiFormEditor
+						loading={json === "loading" || master === "loading"}
 						master={master}
 						json={json}
 						schemas={schemas}
