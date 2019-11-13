@@ -3,14 +3,14 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import JSONEditor from "react-json-editor-ajrm";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
-import { Stylable, Classable } from "./components";
+import { Stylable } from "./components";
 import LajiFormInterface from "./LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply } from "./utils";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
 
-export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps & Stylable & Classable> {
+export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps & Stylable> {
 	static defaultProps = {
 		uiSchema: {}
 	};

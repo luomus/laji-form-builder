@@ -1,6 +1,7 @@
 $def: #f2f6ff;
-$def_accent: darken($def, 30%);
+$def_separating: darken($def, 30%);
 $darker: #47494e;
+$def_accent: #337ab7;
 
 .ljb {
 	$root: &;
@@ -33,7 +34,7 @@ $darker: #47494e;
 		zoom: 85%;
 		background-color: $def;
 		#{$root}-draggable-line {
-			background-color: $def_accent;
+			background-color: $def_separating;
 		}
 	}
 	&-editor-nav-bar {
@@ -45,12 +46,23 @@ $darker: #47494e;
 	}
 	&-field-chooser {
 		background: white;
-		border: 1px solid $def_accent;
+		border: 1px solid $def_separating;
 		margin-top: 5px;
 		border-radius: 2px;
 	}
 
 	&-draggable-line {
 		background-color: black;
+	}
+	&-editor-chooser {
+		background-color: darken($def, 4%);
+		border-bottom: 1px solid $def_accent;
+
+		&-button {
+			padding: 0px 6px;
+		}
+		&-button#{$root}-active {
+			border-bottom: 2px solid blue
+		}
 	}
 }

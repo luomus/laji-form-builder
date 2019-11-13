@@ -8,6 +8,7 @@ declare module "laji-form/lib/utils" {
 		function schemaJSONPointer(schema: any, JSONPointer: string): string;
 		function isObject(maybeObject: any): boolean;
 		function getInnerUiSchema(uiSchema: any): any;
+		function capitalizeFirstLetter(str: string): string;
 	}
 	export = utils;
 }

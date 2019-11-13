@@ -3,7 +3,7 @@ import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer } from "./utils";
 import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, Lang, Schemas } from "./LajiFormBuilder";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer } = LajiFormUtils;
+const { parseJSONPointer, capitalizeFirstLetter } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 
 export type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent;
@@ -65,12 +65,13 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 						pointer=""
 					/>
 				</DraggableWidth>
-			{this.state.selected &&	(
-					<div className={gnmspc("field-editor")} style={fieldEditorStyle}>
-						<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
-						<Editor active={this.state.activeEditorMode} {...this.getEditorProps()} />
-					</div>
-			)}
+
+				<div style={fieldEditorStyle}>
+					<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
+					{this.state.selected &&	(
+						<Editor active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
+					)}
+				</div>
 			</DraggableHeight>
 		);
 	}
@@ -122,7 +123,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 }
 
-export interface FieldEditorProps {
+export interface FieldEditorProps extends Classable {
 	uiSchema: any;
 	schema: any;
 	field: FieldOptions;
@@ -221,18 +222,19 @@ const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: 
 	}</div>
 ));
 
+const editorNmspc = nmspc("editor-chooser");
 
 type ActiveEditorMode = "uiSchema" | "basic";
 const EditorChooser = React.memo(({active, onChange}: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) => (
-	<div className="btn-group">{
+	<div className={editorNmspc()} style={{display: "flex"}}>{
 		["basic", "uiSchema"].map((_active: ActiveEditorMode) => (
-			<Button
-				className="btn-xs"
-				active={_active === active}
+			<div
+				className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
+				tabIndex={0}
 				onClick={React.useCallback(() => onChange(_active), [_active])}
 				key={_active}
-			>{_active}
-			</Button>
+			>{capitalizeFirstLetter(_active)}
+			</div>
 		))
 	}</div>
 ));
