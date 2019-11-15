@@ -2,11 +2,11 @@ import * as React from "react";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPath } = LajiFormUtils;
+const { updateSafelyWithJSONPath, immutableDelete } = LajiFormUtils;
 import { Button, Spinner } from "./components";
 import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer } from "./utils";
 import LajiFormInterface from "./LajiFormInterface";
-import { LajiFormEditor } from "./LajiFormEditor";
+import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
 
 export interface LajiFormBuilderProps {
 	id: string;
@@ -132,18 +132,18 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	onEditorChange = (events: ChangeEvent[]) => {
-		const changed: any = {master: this.state.master};
+		const changed: any = {master: this.state.master, schemas: this.state.schemas};
 		events.forEach(event => {
 			if (isUiSchemaChangeEvent(event)) {
 				changed.master = {
 					...(changed.master || {}),
 					uiSchema: updateSafelyWithJSONPath(
-						this.state.master.uiSchema,
+						changed.master.uiSchema,
 						event.value,
 						fieldPointerToUiSchemaPointer(this.state.schemas.schema, event.selected)
 					)
 				};
-			} else {
+			} else if (isTranslationsChangeEvent(event)) {
 				const {key, value} = event;
 				changed.master = {
 					...(changed.master || {}),
@@ -157,6 +157,51 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						}
 					}), this.state.master.translations)
 				};
+			} else if (isFieldEvent(event)) {
+				if (event.op === "delete") {
+					const filterFields = (field: FieldOptions, pointer: string[]): FieldOptions => {
+						const [p, ...remaining] = pointer;
+						return {
+							...field,
+							fields: remaining.length
+							? field.fields.map((f: FieldOptions) => f.name === p ? filterFields(f, remaining) : f)
+							: field.fields.filter((f: FieldOptions) => f.name !== p)
+						};
+					};
+					const filterSchema = (schema: any, pointer: string[]): any => {
+						const [p, ...remaining] = pointer;
+						if (remaining.length) {
+							if (schema.properties) {
+								return {...schema, properties: {...schema.properties, [p]: filterSchema(schema.properties[p], remaining)}};
+							} else {
+								return {
+									...schema,
+									items: {
+										...schema.items,
+										properties: {
+											...schema.items.properties,
+											[p]: filterSchema(schema.items.properties[p], remaining)
+										}
+									}
+								};
+							}
+						}
+						if (schema.properties) {
+							return {...schema, properties: immutableDelete(schema.properties, p)};
+						} else {
+							return {...schema, items: {...schema.items, properties: immutableDelete(schema.items.properties, p)}};
+						}
+					};
+					const splitted = event.selected.split("/").filter(s => s);
+					changed.master = {
+						...(changed.master || {}),
+						fields: filterFields(changed.master, splitted).fields
+					};
+					changed.schemas = {
+						...changed.schemas,
+						schema: filterSchema(changed.schemas.schema, splitted)
+					};
+				}
 			}
 		});
 		this.setState(changed);
@@ -170,19 +215,27 @@ export interface UiSchemaChangeEvent {
 	value: any;
 	selected: string;
 }
+function isUiSchemaChangeEvent(event: ChangeEvent): event is UiSchemaChangeEvent {
+	return event.type === "uiSchema";
+}
 export interface TranslationsChangeEvent {
 	type: "translations";
 	key: any;
 	value: any;
 }
-function isUiSchemaChangeEvent(event: ChangeEvent): event is UiSchemaChangeEvent {
-	return event.type === "uiSchema";
-}
 function isTranslationsChangeEvent(event: ChangeEvent): event is TranslationsChangeEvent {
 	return event.type === "translations";
 }
+export interface FieldEvent {
+	type: "field";
+	op: "delete";
+	selected: string;
+}
+function isFieldEvent(event: ChangeEvent): event is FieldEvent {
+	return event.type === "field" && event.op === "delete";
+}
 
-export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent;
+export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldEvent;
 
 export interface Schemas {
 	schema: any;

@@ -1,13 +1,13 @@
 import * as React from "react";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer } from "./utils";
-import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, Lang, Schemas } from "./LajiFormBuilder";
+import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldEvent, Lang, Schemas } from "./LajiFormBuilder";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, capitalizeFirstLetter } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 
-export type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent;
+export type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent | Omit<FieldEvent, "selected">;
 
 export interface LajiFormEditorProps {
 	master: any;
@@ -67,6 +67,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 								className={gnmspc("field-chooser")}
 								fields={this.props.json.fields}
 								onSelected={this.onFieldSelected}
+								onDeleted={this.onFieldDeleted}
 								selected={this.state.selected}
 								pointer=""
 							/>
@@ -99,6 +100,9 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 	onFieldSelected = (field: string) => {
 		this.setState({selected: field});
+	}
+	onFieldDeleted = (field: string) => {
+		this.props.onChange([{type: "field", op: "delete", selected: field}]);
 	}
 
 	getEditorProps(): FieldEditorProps {
@@ -143,14 +147,14 @@ export interface FieldEditorProps extends Classable {
 
 type OnSelectedCB = (field: string) => void;
 
-const Fields = React.memo(({fields = [], onSelected, selected, pointer, style = {}, className}
-	: {fields: FieldProps[], onSelected: OnSelectedCB, selected?: string, pointer: string} & Stylable & Classable) => (
+const Fields = React.memo(({fields = [], onSelected, onDeleted, selected, pointer, style = {}, className}
+	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string} & Stylable & Classable) => (
 		<div style={{...style, display: "flex", flexDirection: "column", paddingLeft: 20}} className={className}>
-			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} selected={selected} pointer={`${pointer}/${f.name}`} />)}
+			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${f.name}`} />)}
 		</div>
 ));
 
-interface FieldOptions {
+export interface FieldOptions {
 	label: string;
 	name: string;
 	options: any;
@@ -162,6 +166,7 @@ interface FieldProps extends FieldOptions {
 	pointer: string;
 	selected?: string;
 	onSelected: OnSelectedCB;
+	onDeleted: OnSelectedCB;
 	fields: FieldProps[];
 }
 interface FieldState {
@@ -190,6 +195,14 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		this.props.onSelected(pointer);
 	}
 
+	onThisDeleted = () => {
+		this.props.onDeleted(this.props.pointer);
+	}
+
+	onChildDeleted = (pointer: string) => {
+		this.props.onDeleted(pointer);
+	}
+
 	render() {
 		const {label, name, fields = [], selected, pointer} = this.props;
 		const className = fields.length
@@ -199,15 +212,17 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 			: "nonexpandable";
 		return (
 			<div className={this.nmspc()}>
-				<div className={classNames(this.nmspc(this.isSelected() && "selected"))}>
+				<Clickable className={classNames(this.nmspc("item"), this.nmspc(this.isSelected() && "selected"))}>
 					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={this.nmspc(className)} />
-					<Clickable onClick={this.onThisSelected}>{`${name} ${label ? `(${label})` : ""}`}</Clickable>
-				</div>
+					<Clickable className={this.nmspc("label")} onClick={this.onThisSelected}>{`${name} ${label ? `(${label})` : ""}`}</Clickable>
+					<Clickable onClick={this.onThisDeleted} className={this.nmspc("delete")} />
+				</Clickable>
 				{this.state.expanded && (
 					<Fields
 						key="fields"
 						fields={fields}
 						onSelected={this.onChildSelected}
+						onDeleted={this.onChildDeleted}
 						selected={selected}
 						pointer={pointer}
 					/>

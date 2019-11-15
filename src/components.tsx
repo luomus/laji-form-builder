@@ -61,7 +61,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 		);
 		const content = this.props.dragWidth ? (
 				<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
-			<div>
+			<div style={{width: "100%"}}>
 					{children}
 					{this.getWidthDragLine()}
 			</div>

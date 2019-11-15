@@ -9,6 +9,7 @@ declare module "laji-form/lib/utils" {
 		function isObject(maybeObject: any): boolean;
 		function getInnerUiSchema(uiSchema: any): any;
 		function capitalizeFirstLetter(str: string): string;
+		function immutableDelete(obj: any, pointer: string): any;
 	}
 	export = utils;
 }

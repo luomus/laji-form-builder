@@ -6,13 +6,15 @@ $def_accent: #337ab7;
 .ljb {
 	$root: &;
 	&-field {
+		& > span:hover:not(&-selected) {
+			background-color: #dcefff;
+		}
 		&-expanded, &-contracted {
 			width: 0px;
-			padding-right: 4px;
-			margin-left: -20px;
 		}
 		&-expanded:before, &-contracted:before {
 			color: black;
+			margin-left: -20px;
 		}
 		&-expanded:before {
 			content: "▼";
@@ -23,6 +25,22 @@ $def_accent: #337ab7;
 		&-selected {
 			background-color: #337ab7;
 			color: white;
+		}
+		&-delete:before {
+			content: "✕";
+			font-weight: bold;
+			color: lighten(red, 20%);
+		}
+		&-delete:hover:before {
+			color: #ff0000;
+		}
+		&-item {
+			display: flex;
+		}
+		&-label {
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
 		}
 	}
 
@@ -62,7 +80,7 @@ $def_accent: #337ab7;
 			padding: 0px 6px;
 		}
 		&-button#{$root}-active {
-			border-bottom: 2px solid blue
+			border-bottom: 2px solid blue;
 		}
 	}
 	&-spinner-black .react-spinner_bar {
