@@ -1,6 +1,7 @@
 import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
+import fetch from "isomorphic-fetch";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { isObject } = LajiFormUtils;
 
@@ -188,3 +189,29 @@ export const prefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix?: string
 	}
 	return alterUiSchemaKeys(uiSchema, schema, (key => `${prefix}${key}`));
 };
+
+export const fetchJSON = (path: string, options?: any) => fetch(path, options).then(r => r.json());
+
+export interface CancellablePromise<T> {
+	promise: Promise<T>,
+	cancel: () => void
+};
+export const makeCancellable = <T>(promise: Promise<T>): CancellablePromise<T> => {
+	let hasCancelled = false;
+
+	const wrappedPromise = new Promise<T>((resolve, reject) => {
+		promise.then(
+			val => hasCancelled ? reject({isCanceled: true}) : resolve(val),
+			error => hasCancelled ? reject({isCanceled: true}) : reject(error)
+		);
+	});
+
+	return {
+		promise: wrappedPromise,
+		cancel() {
+			hasCancelled = true;
+		},
+	};
+};
+
+export const unprefixProp = (s: string) => s.replace(/^.+\./, "");

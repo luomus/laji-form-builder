@@ -1,34 +1,35 @@
 import * as React from "react";
+import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer } from "./utils";
-import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldEvent, Lang, Schemas } from "./LajiFormBuilder";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fetchJSON } from "./utils";
+import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, Lang, Schemas } from "./LajiFormBuilder";
+import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, capitalizeFirstLetter } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
+import ApiClient from "./ApiClientImplementation";
 
-export type FieldEditorChangeEvent = Omit<UiSchemaChangeEvent, "selected"> | TranslationsChangeEvent | Omit<FieldEvent, "selected">;
+export type FieldEditorChangeEvent =
+	TranslationsChangeEvent
+	| Omit<UiSchemaChangeEvent, "selected">
+	| Omit<FieldDeleteEvent, "selected">
+	| Omit<FieldAddEvent, "selected">;
 
 export interface LajiFormEditorProps {
 	master: any;
 	schemas: Schemas;
 	onChange: (changed: ChangeEvent[]) => void;
-	lang: Lang;
-	json: {
-		fields: FieldProps[];
-	};
 	onLangChange: (lang: Lang) => void;
 	loading?: boolean;
 }
 
-export interface FieldMap {
-	[field: string]: FieldMap;
-}
 export interface LajiFormEditorState {
 	selected?: string;
 	activeEditorMode: ActiveEditorMode;
 }
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
+	static contextType = Context;
 	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode};
 	render() {
 		const containerStyle: React.CSSProperties = {
@@ -61,11 +62,11 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 				: (
 					<React.Fragment>
 						<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")}>
-							<LangChooser lang={this.props.lang} onChange={this.props.onLangChange} />
+							<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
 							<Fields
 								style={fieldsStyle}
 								className={gnmspc("field-chooser")}
-								fields={this.props.json.fields}
+								fields={this.props.master.fields}
 								onSelected={this.onFieldSelected}
 								onDeleted={this.onFieldDeleted}
 								selected={this.state.selected}
@@ -76,7 +77,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 						<div style={fieldEditorStyle}>
 							<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
 							{this.state.selected &&	(
-								<Editor active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
+								<Editor key={this.state.selected} active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
 							)}
 						</div>
 					</React.Fragment>
@@ -85,43 +86,44 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		);
 	}
 
-	getFieldsMap(props: LajiFormEditorProps) {
-		function fieldsMapper(container: any, fields: FieldOptions[]) {
-			return fields.reduce((_container, field) => {
-				const _field = field.fields
-					? {...field, fields: fieldsMapper({}, field.fields)}
-					: field;
-				_container[field.name] = _field;
-				return _container;
-			}, container);
-		}
-		return fieldsMapper({}, props.json.fields);
-	}
-
 	onFieldSelected = (field: string) => {
 		this.setState({selected: field});
 	}
+
 	onFieldDeleted = (field: string) => {
 		this.props.onChange([{type: "field", op: "delete", selected: field}]);
 	}
 
 	getEditorProps(): FieldEditorProps {
-		const { schemas, master, lang } = this.props;
+		const { schemas, master } = this.props;
+		const { lang, apiClient } = this.context;
 		const { selected = "" } = this.state;
-		const fieldsMap = this.getFieldsMap(this.props);
+		const findField = (_field: FieldOptions, path: string): FieldOptions => {
+			const [next, ...rest] = path.split("/").filter(s => s);
+			if (next === undefined) {
+				return _field;
+			}
+			const child  = (_field.fields as FieldOptions[]).find(_child => _child.name === next) as FieldOptions;
+			return findField(child, rest.join("/"));
+		};
+		const documentField: FieldOptions = {
+			name: "document",
+			type: "fieldset",
+			fields: this.props.master.fields
+		};
+		const field = findField(documentField, this.state.selected || "")
 		return {
 			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected || "")),
 			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected || ""), !!"safely"),
-			field: parseJSONPointer({fields: fieldsMap}, (this.state.selected || "").replace(/\//g, "/fields/")),
+			field: findField(documentField, (this.state.selected || "")),
 			translations: master.translations[lang],
 			path: selected,
-			onChange: this.onEditorChange,
-			lang
+			onChange: this.onEditorChange
 		};
 	}
 
-	onEditorChange = (events: ChangeEvent[]) => {
-		events = events.map(event => {
+	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
+		events = (events instanceof Array ? events : [events]).map(event => {
 			const {selected = ""} = this.state;
 			return { ...event, selected };
 		});
@@ -141,8 +143,7 @@ export interface FieldEditorProps extends Classable {
 	field: FieldOptions;
 	translations: any;
 	path: string;
-	onChange: (changed: FieldEditorChangeEvent[]) => void;
-	lang: Lang;
+	onChange: (changed: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => void;
 }
 
 type OnSelectedCB = (field: string) => void;
@@ -155,12 +156,20 @@ const Fields = React.memo(({fields = [], onSelected, onDeleted, selected, pointe
 ));
 
 export interface FieldOptions {
+	label?: string;
+	name: string;
+	options?: any;
+	type?: string;
+	validators?: any;
+	fields?: FieldOptions[];
+}
+export interface FieldMap {
 	label: string;
 	name: string;
 	options: any;
 	type: string;
 	validators: any;
-	fields: FieldOptions[];
+	fields: {[field: string]: FieldMap};
 }
 interface FieldProps extends FieldOptions {
 	pointer: string;
@@ -176,6 +185,8 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	state = {
 		expanded: this.isSelected() || false
 	};
+
+	static contextType = Context;
 
 	nmspc = nmspc("field");
 
@@ -204,7 +215,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	}
 
 	render() {
-		const {label, name, fields = [], selected, pointer} = this.props;
+		const {name, fields = [], selected, pointer} = this.props;
 		const className = fields.length
 			? this.state.expanded
 				? "expanded"
@@ -214,7 +225,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 			<div className={this.nmspc()}>
 				<Clickable className={classNames(this.nmspc("item"), this.nmspc(this.isSelected() && "selected"))}>
 					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={this.nmspc(className)} />
-					<Clickable className={this.nmspc("label")} onClick={this.onThisSelected}>{`${name} ${label ? `(${label})` : ""}`}</Clickable>
+					<Clickable className={this.nmspc("label")} onClick={this.onThisSelected}>{name}</Clickable>
 					<Clickable onClick={this.onThisDeleted} className={this.nmspc("delete")} />
 				</Clickable>
 				{this.state.expanded && (
@@ -231,6 +242,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		);
 	}
 }
+
 const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) => (
 	<div className="btn-group">{
 		["fi", "sv", "en"].map((_lang: Lang) => (

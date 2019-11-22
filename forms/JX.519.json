@@ -3120,7 +3120,8 @@
 "observationDays",
 "observationMinutes",
 "trapCount",
-"taxonCensus"
+"taxonCensus",
+"*"
 ]
 }
 }

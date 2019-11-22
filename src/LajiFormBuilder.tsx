@@ -2,11 +2,13 @@ import * as React from "react";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPath, immutableDelete } = LajiFormUtils;
+const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button, Spinner } from "./components";
-import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer } from "./utils";
+import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp } from "./utils";
 import LajiFormInterface from "./LajiFormInterface";
 import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
+import { Context } from "./Context";
+import translations from "./translations";
 
 export interface LajiFormBuilderProps {
 	id: string;
@@ -17,22 +19,22 @@ export interface LajiFormBuilderState {
 	id?: string;
 	master?: "loading" | any;
 	schemas?: "loading" | any;
-	json?: "loading" | any;
 	uiSchema?: any;
 	lang: Lang;
 }
+
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: any;
 	formApiClient: any;
 	state: LajiFormBuilderState = {
 		master: "loading",
 		schemas: "loading",
-		json: "loading",
 		lang: this.props.lang
 	};
 	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
 		...fns, [lang]: () => this.setState({lang})
 	}), {} as any);
+	translations: {[key: string]: {[lang in Lang]: string}};
 
 	static defaultProps = {
 		lang: "fi",
@@ -51,6 +53,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			"https://cors-anywhere.herokuapp.com/http://formtest.laji.fi/lajiform",
 			accessToken,
 		);
+		this.translations = constructTranslations(translations)
 	}
 
 	componentDidMount() {
@@ -64,14 +67,13 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	updateFromId(id: string) {
 		if (id !== this.state.id) {
-			this.setState({master: "loading", schemas: "loading", json: "loading"}, () => {
+			this.setState({master: "loading", schemas: "loading"}, () => {
 				// TODO fix formtest
 				this.setState({master: require(`../forms/${id}.json`)});
 				//this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
-				[["schemas", "schema"], ["schemas", "schema"], ["json"]].forEach(
-					([stateProp, format]) => this.apiClient.fetch(`/forms/${id}`, {lang: this.props.lang, format: format || stateProp})
-						.then((response: any) => response.json())
-					.then((data: any) => this.setState({id, [stateProp]: data} as Pick<LajiFormBuilderState, "id" | "schemas" | "json">))
+				[["schemas", "schema"], ["schemas", "schema"]].forEach(
+					([stateProp, format]) => this.apiClient.fetchJSON(`/forms/${id}`, {lang: this.props.lang, format: format || stateProp})
+						.then((data: any) => this.setState({id, [stateProp]: data} as Pick<LajiFormBuilderState, "id" | "schemas">))
 				);
 			}
 			);
@@ -84,12 +86,12 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	render() {
 		return (
-			<div>
+			<Context.Provider value={{apiClient: this.apiClient, lang: this.state.lang, translations: this.translations[this.state.lang]}}>
 					{this.renderLajiForm()}
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
 					{this.renderEditor()}
 				</div>
-			</div>
+			</Context.Provider>
 		);
 	}
 
@@ -102,15 +104,13 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	renderEditor() {
-		const {json, schemas, uiSchema, master} = this.state;
+		const {schemas, uiSchema, master} = this.state;
 		return (
 				<LajiFormEditor
-						loading={json === "loading" || master === "loading"}
+						loading={master === "loading"}
 						master={master}
-						json={json}
 						schemas={schemas}
 						onChange={this.onEditorChange}
-						lang={this.state.lang}
 						onLangChange={this.onLangChange}
 				/>
 			);
@@ -157,15 +157,16 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						}
 					}), this.state.master.translations)
 				};
-			} else if (isFieldEvent(event)) {
-				if (event.op === "delete") {
+			} else if (event.type === "field") {
+				const splitted = event.selected.split("/").filter(s => s);
+				if (isFieldDeleteEvent(event)) {
 					const filterFields = (field: FieldOptions, pointer: string[]): FieldOptions => {
 						const [p, ...remaining] = pointer;
 						return {
 							...field,
 							fields: remaining.length
-							? field.fields.map((f: FieldOptions) => f.name === p ? filterFields(f, remaining) : f)
-							: field.fields.filter((f: FieldOptions) => f.name !== p)
+							? (field.fields as FieldOptions[]).map((f: FieldOptions) => f.name === p ? filterFields(f, remaining) : f)
+							: (field.fields as FieldOptions[]).filter((f: FieldOptions) => f.name !== p)
 						};
 					};
 					const filterSchema = (schema: any, pointer: string[]): any => {
@@ -192,7 +193,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							return {...schema, items: {...schema.items, properties: immutableDelete(schema.items.properties, p)}};
 						}
 					};
-					const splitted = event.selected.split("/").filter(s => s);
 					changed.master = {
 						...(changed.master || {}),
 						fields: filterFields(changed.master, splitted).fields
@@ -201,6 +201,54 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						...changed.schemas,
 						schema: filterSchema(changed.schemas.schema, splitted)
 					};
+				} else if (isFieldAddEvent(event)) {
+					const propertyModel = event.value;
+					if (propertyModel.range[0] !== PropertyRange.Id) {
+						const addField = (fields: FieldOptions[], path: string[], property: string): FieldOptions[] => {
+							if (!path.length) {
+								return [...fields, {name: property}];
+							}
+							const [next, ...remaining] = path;
+							return fields.map(field => field.name === next
+								? {...field, fields: addField(field.fields as FieldOptions[], remaining, property)}
+								: field
+							);
+						};
+						const getSchemaForProperty = (property: PropertyModel) => {
+							switch (property.range[0]) {
+							case PropertyRange.String:
+								return {type: "string"};
+							case PropertyRange.Boolean:
+								return {type: "boolean"};
+							case PropertyRange.Int:
+								return {type: "integer"};
+							case PropertyRange.PositiveInteger: // TODO validator
+								return {type: "number"};
+							case PropertyRange.DateTime: // TODO datetime uiSchema
+								return {type: "string"};
+							default:
+								throw new Error("Unknown property range");
+							}
+						}
+						const addSchemaField = (schema: any, path: string[], property: PropertyModel): any => {
+							const [next, ...remaining] = path;
+							const propName = next || unprefixProp(property.property)
+							const schemaForNext = !next
+								? getSchemaForProperty(property)
+								: addSchemaField(schema.items?.properties[next] || schema.properties[next], remaining, property);
+							return schema.type === "object"
+								? {...schema, properties: {...schema.properties, [propName]: schemaForNext}}
+								: {...schema, items: {...schema.items, properties: {...schema.items.properties, [propName]: schemaForNext}}};
+						};
+						changed.master = {
+							...changed.master,
+							fields: addField(changed.master.fields, splitted, event.value.property),
+						};
+						changed.schemas = {
+							...changed.schemas,
+							schema: addSchemaField(changed.schemas.schema, splitted, event.value)
+						};
+					}
 				}
 			}
 		});
@@ -228,16 +276,40 @@ function isTranslationsChangeEvent(event: ChangeEvent): event is TranslationsCha
 }
 export interface FieldEvent {
 	type: "field";
-	op: "delete";
 	selected: string;
+	op: string;
 }
-function isFieldEvent(event: ChangeEvent): event is FieldEvent {
-	return event.type === "field" && event.op === "delete";
+export interface FieldDeleteEvent extends FieldEvent {
+	op: "delete";
+}
+export interface FieldAddEvent extends FieldEvent {
+	op: "add";
+	value: PropertyModel
+}
+function isFieldDeleteEvent(event: ChangeEvent): event is FieldDeleteEvent {
+	return event.type === "field" &&  event.op === "delete";
+}
+function isFieldAddEvent(event: ChangeEvent): event is FieldAddEvent {
+	return event.type === "field" &&  event.op === "add";
 }
 
-export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldEvent;
+export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldDeleteEvent | FieldAddEvent;
 
 export interface Schemas {
 	schema: any;
 	uiSchema: any;
+}
+
+export enum PropertyRange {
+	Int= "xsd:integer",
+	Boolean= "xsd:boolean",
+	String= "xsd:string",
+	Id= "@id",
+	PositiveInteger = "xsd:positiveInteger",
+	DateTime = "xsd:dateTime"
+}
+export interface PropertyModel {
+	property: string;
+	label: string;
+	range: PropertyRange[]
 }

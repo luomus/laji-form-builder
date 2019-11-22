@@ -1,3 +1,4 @@
+
 declare module "laji-form/lib/utils" {
 	namespace utils {
 		function parseJSONPointer(object: any, jsonPointer: string, safeMode?: boolean): any;
@@ -10,6 +11,10 @@ declare module "laji-form/lib/utils" {
 		function getInnerUiSchema(uiSchema: any): any;
 		function capitalizeFirstLetter(str: string): string;
 		function immutableDelete(obj: any, pointer: string): any;
+		function constructTranslations(obj: any): {[key: string]: {[lang in "en" | "sv" | "fi"]: string}};
+		function dictionarify<T, V>(arr: T[], getKey?: (item: T) => string, getValue?: (item: T) => V): {[key: string]: T | V};
+		function dictionarify<T, V>(arr: T[], getKey?: (item: T) => string, getValue?: (item: T) => V): {[key: string]: V};
+		function dictionarify<T>(arr: T[], getKey?: (item: T) => string): {[key: string]: T};
 	}
 	export = utils;
 }

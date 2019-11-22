@@ -83,8 +83,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 					uiSchema={uiSchema}
 					formData={formData}
 					onChange={this.onEditorLajiFormChange}
-					fields={fields}
-					lang={this.props.lang}
+					lang={this.context.lang}
 					formContext={formContext}
 				/>
 			</div>
