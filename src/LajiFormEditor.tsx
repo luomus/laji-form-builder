@@ -254,7 +254,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	}
 }
 
-const LangChooser = React.memo(function _LangChooser({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) {
+const LangChooser = React.memo(function LangChooser({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) {
 	return (
 	<div className="btn-group">{
 		["fi", "sv", "en"].map((_lang: Lang) => (
@@ -273,17 +273,23 @@ const LangChooser = React.memo(function _LangChooser({lang, onChange}: {lang: La
 const editorNmspc = nmspc("editor-chooser");
 
 type ActiveEditorMode = "uiSchema" | "basic";
-const EditorChooser = React.memo(function _EditorChooser({active, onChange}: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) {
+const tabs = {basic: "Basic", uiSchema: "Editor.tab.uiSchema"};
+const EditorChooser = React.memo(function EditorChooser(
+	{active, onChange}
+	: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) {
 	return (
 		<div className={editorNmspc()} style={{display: "flex"}}>{
-			["basic", "uiSchema"].map((_active: ActiveEditorMode) => (
-				<Clickable
-					className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
-					onClick={React.useCallback(() => onChange(_active), [_active])}
-					key={_active}
-				>{capitalizeFirstLetter(_active)}
-				</Clickable>
-			))
+			Object.keys(tabs).map((_active: ActiveEditorMode) => {
+				const translation = (React.useContext(Context).translations as any)[tabs[_active]];
+				return (
+					<Clickable
+						className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
+						onClick={React.useCallback(() => onChange(_active), [_active])}
+						key={_active}
+					>{translation}
+					</Clickable>
+				);
+			})
 		}</div>
 	);
 });
@@ -291,7 +297,7 @@ const EditorChooser = React.memo(function _EditorChooser({active, onChange}: {ac
 interface EditorProps extends FieldEditorProps {
 	active: ActiveEditorMode;
 }
-const Editor = React.memo(function _Editor({active, style, className, ...props}: EditorProps & Classable & Stylable) {
+const Editor = React.memo(function Editor({active, style, className, ...props}: EditorProps & Classable & Stylable) {
 	return (
 		<div style={style} className={className}>{
 			active === "uiSchema" && <UiSchemaEditor {...props} />
