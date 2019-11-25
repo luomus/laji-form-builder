@@ -12,7 +12,7 @@ import { Spinner } from "./components";
 
 interface PropertyContext {
 	"@id": string;
-	"@type": PropertyRange;
+	"@type"?: PropertyRange;
 	"@container"?: "@set";
 }
 
@@ -122,6 +122,12 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		return new Promise((resolve, reject) =>
 			this.getPropertiesContext().then(propertiesContext => {
 				const splits = path.split("/");
+				if (splits.length === 1) {
+					return resolve({
+						"@id": "http://tun.fi/MY.document",
+						"@container": "@set",
+					});
+				}
 				const propertyContext = propertiesContext[splits[splits.length - 1]];
 				resolve(propertyContext);
 			}, reject)
