@@ -30,7 +30,8 @@
 		"max-line-length": [true, 150],
 		"member-access": false,
 		"max-classes-per-file": false,
-		"jsx-no-multiline-js": false
+		"jsx-no-multiline-js": false,
+		"no-shadowed-variable": false
 	},
     "rulesDirectory": []
 }

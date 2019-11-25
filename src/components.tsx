@@ -13,24 +13,27 @@ export interface HasChildren {
 }
 
 type Position = "bottom";
-interface DraggableHeightProps {
+interface DraggablePublicProps extends Stylable, Classable, HasChildren {
+	color?: string;
+	thickness?: number;
+	dragClassName?: string;
+}
+interface DraggableHeightProps extends DraggablePublicProps {
 	height?: number;
 	fixed?: Position;
 }
-interface DraggableWidthProps {
+interface DraggableWidthProps extends DraggablePublicProps  {
 	width?: number;
 }
 interface DraggableWidthHeightProps extends DraggableWidthProps, DraggableHeightProps {
-	color?: string;
 	dragHeight: boolean;
 	dragWidth: boolean;
-	dragClassName?: string;
 }
 interface DraggableWidthHeightState {
 	height?: number;
 	width?: number;
 }
-class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & Stylable & Classable & HasChildren, DraggableWidthHeightState> {
+class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, DraggableWidthHeightState> {
 	state = {
 		height: this.props.dragHeight ? this.props.height || 200 : undefined,
 		width: this.props.dragWidth ? this.props.width || 200 : undefined
@@ -39,6 +42,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 		color: "black",
 		dragHeight: false,
 		dragWidth: false,
+		thickness: 1
 	};
 	dragging = false;
 	startY: number;
@@ -93,8 +97,8 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			position: "absolute",
 			width: "100%",
 			cursor: "row-resize",
-			height: 1,
-			marginTop: -1
+			height: this.props.thickness,
+			marginTop: -(this.props.thickness as number)
 		};
 		return (
 			<div
@@ -110,12 +114,12 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 			return null;
 		}
 		const dragLineStyle: React.CSSProperties = {
-			width: 1,
+			width: this.props.thickness,
 			cursor: "ew-resize",
 			height: "100%",
 			paddingLeft: 1,
 			position: "absolute",
-			left: (this.state.width || 0) - 1,
+			left: (this.state.width || 0) - (this.props.thickness as number),
 			top: 0
 		};
 		return (
@@ -174,23 +178,37 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps & S
 	}
 }
 
-export const DraggableHeight = React.memo((props: DraggableHeightProps & Stylable & Classable & HasChildren) => <DraggableWidthHeight {...props} dragHeight={true} />);
-export const DraggableWidth = React.memo((props: DraggableWidthProps & Stylable & Classable & HasChildren) => <DraggableWidthHeight {...props} dragWidth={true} />);
+export const DraggableHeight = React.memo(function DraggableHeight(props: DraggableHeightProps & Stylable & Classable & HasChildren) {
+	return <DraggableWidthHeight {...props} dragHeight={true} />;
+});
 
-export const Clickable = React.memo(({children, onClick, className}: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) =>
-	<span onClick={onClick} tabIndex={onClick ? 0 : undefined} className={classNames(gnmspc("clickable"), className)}>{children || <span>&#8203;</span>}</span>
-);
+export const DraggableWidth = React.memo(function DraggableWidth(props: DraggableWidthProps & Stylable & Classable & HasChildren) {
+	return <DraggableWidthHeight {...props} dragWidth={true} />;
+});
 
+export const Clickable = React.memo(function Clickable(
+	{children, onClick, className}
+	: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) {
+	return (
+		<span
+			onClick={onClick}
+			tabIndex={onClick ? 0 : undefined}
+			className={classNames(gnmspc("clickable"), className)}
+		>
+			{children || <span>&#8203;</span>}
+		</span>
+	);
+});
 
+export const Button = React.memo(function Button({children, active, className, ...props}: any) {
+	return <button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>;
+});
 
-//const Button = React.memo(({children, active, className, ...props}: {children: React.ReactNode, active: boolean, props?: React.HTMLAttributes<HTMLButtonElement>}) =>
-export const Button = React.memo(({children, active, className, ...props}: any) =>
-	<button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>
-);
-
-export const Spinner = React.memo(({color = "white", size = 32}: {color: "white" | "black", size?: number}) => (
-	<_Spinner
-		style={size ? {width: size, height: size} : {}}
-		className={classNames(gnmspc("spinner-container"), gnmspc(color === "black" ? "spinner-black" : ""))}
-	/>
-))
+export const Spinner = React.memo(function Spinner({color = "white", size = 32}: {color: "white" | "black", size?: number}) {
+	return (
+		<_Spinner
+			style={size ? {width: size, height: size} : {}}
+			className={classNames(gnmspc("spinner-container"), gnmspc(color === "black" ? "spinner-black" : ""))}
+		/>
+	);
+})

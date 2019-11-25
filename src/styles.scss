@@ -7,14 +7,14 @@ $def_accent: #337ab7;
 	$root: &;
 	&-field {
 		& > span:hover:not(&-selected) {
-			background-color: #dcefff;
+			background-color: lighten($darker, 20%);
 		}
 		&-expanded, &-contracted {
 			width: 0px;
 		}
 		&-expanded:before, &-contracted:before {
-			color: black;
-			margin-left: -20px;
+			color: white;
+			margin-left: -13px;
 		}
 		&-expanded:before {
 			content: "▼";
@@ -26,13 +26,17 @@ $def_accent: #337ab7;
 			background-color: #337ab7;
 			color: white;
 		}
-		&-delete:before {
-			content: "✕";
-			font-weight: bold;
-			color: lighten(red, 20%);
-		}
-		&-delete:hover:before {
-			color: #ff0000;
+		&-delete {
+			margin-left: auto;
+
+			&:before {
+				content: "✕";
+				font-weight: bold;
+				color: lighten(red, 20%);
+			}
+			&:hover:before {
+				color: #ff0000;
+			}
 		}
 		&-item {
 			display: flex;
@@ -49,7 +53,6 @@ $def_accent: #337ab7;
 	}
 
 	&-editor {
-		zoom: 85%;
 		background-color: $def;
 		#{$root}-draggable-line {
 			background-color: $def_separating;
@@ -63,10 +66,13 @@ $def_accent: #337ab7;
 		padding: 10px;
 	}
 	&-field-chooser {
-		background: white;
-		border: 1px solid $def_separating;
-		margin-top: 5px;
-		border-radius: 2px;
+		color: white;
+		background: initial;
+		border: none;
+	}
+
+	&-field {
+		padding-left: 10px;
 	}
 
 	&-draggable-line {

@@ -1,7 +1,6 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent, FieldOptions } from "./LajiFormEditor";
 import { PropertyModel, PropertyRange } from "./LajiFormBuilder";
-import { Stylable, Classable, Button } from "./components";
 import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify } = LajiFormUtils;

@@ -3,14 +3,13 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import JSONEditor from "react-json-editor-ajrm";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
-import { Stylable } from "./components";
 import LajiFormInterface from "./LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply } from "./utils";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject } = LajiFormUtils;
+const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema } = LajiFormUtils;
 
-export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps & Stylable> {
+export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
 	static defaultProps = {
 		uiSchema: {}
 	};
@@ -77,7 +76,6 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			rootUiSchema: this.props.uiSchema
 		};
 		return (
-			<div style={this.props.style} className={this.props.className}>
 				<LajiForm
 					schema={schema}
 					uiSchema={uiSchema}
@@ -87,7 +85,6 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 					formContext={formContext}
 					fields={fields}
 				/>
-			</div>
 		);
 	}
 
@@ -321,7 +318,7 @@ const UiFieldEditor = (props: any) => {
 	const { SchemaField } = props.registry.fields;
 
 	const schema = customize(props.schema, props.formContext.rootSchema, "$");
-	const uiSchema = customize(LajiFormUtils.getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, "$");
+	const uiSchema = customize(getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, "$");
 
 	return <SchemaField {...props} schema={schema} uiSchema={uiSchema}/>;
 };

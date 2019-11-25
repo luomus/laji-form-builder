@@ -38,10 +38,9 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			width: "100%"
 		};
 		const fieldsStyle: React.CSSProperties = {
-			overflowY: "scroll",
+			overflowY: "auto",
 			display: "flex",
 			flexDirection: "column",
-			paddingLeft: "20px",
 			overflowX: "auto",
 			height: "100%"
 		};
@@ -56,12 +55,12 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			height: "100%"
 		};
 		return (
-			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")}>
+			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")} thickness={2}>
 				{this.props.loading
 				? <Spinner color="black" size={100} />
 				: (
 					<React.Fragment>
-						<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")}>
+						<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
 							<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
 							<Fields
 								style={fieldsStyle}
@@ -160,7 +159,7 @@ type OnSelectedCB = (field: string) => void;
 const Fields = React.memo(function _Fields({fields = [], onSelected, onDeleted, selected, pointer, style = {}, className, expanded}
 	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string, expanded?: boolean} & Stylable & Classable) {
 	return (
-		<div style={{...style, display: "flex", flexDirection: "column", paddingLeft: 20}} className={className}>
+		<div style={{...style, display: "flex", flexDirection: "column"}} className={className}>
 			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${f.name}`} expanded={expanded} />)}
 		</div>
 	);
@@ -292,10 +291,12 @@ const EditorChooser = React.memo(function _EditorChooser({active, onChange}: {ac
 interface EditorProps extends FieldEditorProps {
 	active: ActiveEditorMode;
 }
-const Editor = React.memo(function _Editor({active, ...props}: EditorProps) {
+const Editor = React.memo(function _Editor({active, style, className, ...props}: EditorProps & Classable & Stylable) {
 	return (
-		active === "uiSchema" && <UiSchemaEditor {...props} />
-		|| active === "basic" && <BasicEditor {...props} />
-		|| null
+		<div style={style} className={className}>{
+			active === "uiSchema" && <UiSchemaEditor {...props} />
+			|| active === "basic" && <BasicEditor {...props} />
+			|| null
+		}</div>
 	);
 });
