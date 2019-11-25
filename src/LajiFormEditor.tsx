@@ -66,11 +66,12 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							<Fields
 								style={fieldsStyle}
 								className={gnmspc("field-chooser")}
-								fields={this.props.master.fields}
+								fields={this.getFields(this.props.master.fields)}
 								onSelected={this.onFieldSelected}
 								onDeleted={this.onFieldDeleted}
 								selected={this.state.selected}
 								pointer=""
+								expanded={true}
 							/>
 						</DraggableWidth>
 
@@ -86,18 +87,25 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		);
 	}
 
+	getFields = memoize((fields: any): any => ([{
+		name: "document",
+		label: "Document",
+		type: "fieldset",
+		fields
+	}]));
+
 	onFieldSelected = (field: string) => {
 		this.setState({selected: field});
 	}
 
 	onFieldDeleted = (field: string) => {
-		this.props.onChange([{type: "field", op: "delete", selected: field}]);
+		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
 	}
 
 	getEditorProps(): FieldEditorProps {
 		const { schemas, master } = this.props;
 		const { lang, apiClient } = this.context;
-		const { selected = "" } = this.state;
+		const selected = this.getSelected();
 		const findField = (_field: FieldOptions, path: string): FieldOptions => {
 			const [next, ...rest] = path.split("/").filter(s => s);
 			if (next === undefined) {
@@ -111,11 +119,10 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			type: "fieldset",
 			fields: this.props.master.fields
 		};
-		const field = findField(documentField, this.state.selected || "")
 		return {
-			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected || "")),
-			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected || ""), !!"safely"),
-			field: findField(documentField, (this.state.selected || "")),
+			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected)),
+			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected), !!"safely"),
+			field: findField(this.getFields(this.props.master.fields)[0], selected),
 			translations: master.translations[lang],
 			path: selected,
 			onChange: this.onEditorChange
@@ -124,8 +131,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
 		events = (events instanceof Array ? events : [events]).map(event => {
-			const {selected = ""} = this.state;
-			return { ...event, selected };
+			return { ...event, selected: this.getSelected() };
 		});
 
 		this.props.onChange(events);
@@ -135,6 +141,9 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.setState({activeEditorMode: newActive});
 	}
 
+	getSelected = () => this.getFieldPath(this.state.selected || "");
+
+	getFieldPath = ((path: string) => path.replace("/document", ""));
 }
 
 export interface FieldEditorProps extends Classable {
@@ -148,12 +157,14 @@ export interface FieldEditorProps extends Classable {
 
 type OnSelectedCB = (field: string) => void;
 
-const Fields = React.memo(({fields = [], onSelected, onDeleted, selected, pointer, style = {}, className}
-	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string} & Stylable & Classable) => (
+const Fields = React.memo(function _Fields({fields = [], onSelected, onDeleted, selected, pointer, style = {}, className, expanded}
+	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string, expanded?: boolean} & Stylable & Classable) {
+	return (
 		<div style={{...style, display: "flex", flexDirection: "column", paddingLeft: 20}} className={className}>
-			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${f.name}`} />)}
+			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${f.name}`} expanded={expanded} />)}
 		</div>
-));
+	);
+});
 
 export interface FieldOptions {
 	label?: string;
@@ -177,13 +188,14 @@ interface FieldProps extends FieldOptions {
 	onSelected: OnSelectedCB;
 	onDeleted: OnSelectedCB;
 	fields: FieldProps[];
+	expanded?: boolean;
 }
 interface FieldState {
 	expanded: boolean;
 }
 class Field extends React.PureComponent<FieldProps, FieldState> {
 	state = {
-		expanded: this.isSelected() || false
+		expanded: this.props.expanded || this.isSelected() || false
 	};
 
 	static contextType = Context;
@@ -243,7 +255,8 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	}
 }
 
-const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) => (
+const LangChooser = React.memo(function _LangChooser({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) {
+	return (
 	<div className="btn-group">{
 		["fi", "sv", "en"].map((_lang: Lang) => (
 			<Button
@@ -255,29 +268,34 @@ const LangChooser = React.memo(({lang, onChange}: {lang: Lang, onChange: (lang: 
 			</Button>
 		))
 	}</div>
-));
+	);
+});
 
 const editorNmspc = nmspc("editor-chooser");
 
 type ActiveEditorMode = "uiSchema" | "basic";
-const EditorChooser = React.memo(({active, onChange}: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) => (
-	<div className={editorNmspc()} style={{display: "flex"}}>{
-		["basic", "uiSchema"].map((_active: ActiveEditorMode) => (
-			<Clickable
-				className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
-				onClick={React.useCallback(() => onChange(_active), [_active])}
-				key={_active}
-			>{capitalizeFirstLetter(_active)}
-			</Clickable>
-		))
-	}</div>
-));
+const EditorChooser = React.memo(function _EditorChooser({active, onChange}: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) {
+	return (
+		<div className={editorNmspc()} style={{display: "flex"}}>{
+			["basic", "uiSchema"].map((_active: ActiveEditorMode) => (
+				<Clickable
+					className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
+					onClick={React.useCallback(() => onChange(_active), [_active])}
+					key={_active}
+				>{capitalizeFirstLetter(_active)}
+				</Clickable>
+			))
+		}</div>
+	);
+});
 
 interface EditorProps extends FieldEditorProps {
 	active: ActiveEditorMode;
 }
-const Editor = React.memo(({active, ...props}: EditorProps) => (
-	active === "uiSchema" && <UiSchemaEditor {...props} />
-	|| active === "basic" && <BasicEditor {...props} />
-	|| null
-));
+const Editor = React.memo(function _Editor({active, ...props}: EditorProps) {
+	return (
+		active === "uiSchema" && <UiSchemaEditor {...props} />
+		|| active === "basic" && <BasicEditor {...props} />
+		|| null
+	);
+});

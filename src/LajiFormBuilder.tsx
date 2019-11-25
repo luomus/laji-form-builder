@@ -9,6 +9,7 @@ import LajiFormInterface from "./LajiFormInterface";
 import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
 import { Context } from "./Context";
 import translations from "./translations";
+import memoize from "memoizee";
 
 export interface LajiFormBuilderProps {
 	id: string;
