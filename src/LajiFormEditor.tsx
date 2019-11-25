@@ -57,7 +57,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		return (
 			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")} thickness={2}>
 				{this.props.loading
-				? <Spinner color="black" size={100} />
+				? <Spinner size={100} />
 				: (
 					<React.Fragment>
 						<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>

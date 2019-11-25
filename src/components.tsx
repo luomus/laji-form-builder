@@ -204,7 +204,7 @@ export const Button = React.memo(function Button({children, active, className, .
 	return <button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>;
 });
 
-export const Spinner = React.memo(function Spinner({color = "white", size = 32}: {color: "white" | "black", size?: number}) {
+export const Spinner = React.memo(function Spinner({color = "black", size = 32}: {color?: "white" | "black", size?: number}) {
 	return (
 		<_Spinner
 			style={size ? {width: size, height: size} : {}}

@@ -98,7 +98,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	renderLajiForm() {
 		if (this.state.schemas === "loading" || this.state.master === "loading") {
-			return <Spinner color="black" />;
+			return <Spinner />;
 		}
 		const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
 		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} />;
