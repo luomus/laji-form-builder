@@ -22,6 +22,8 @@ export interface LajiFormEditorProps {
 	onChange: (changed: ChangeEvent[]) => void;
 	onLangChange: (lang: Lang) => void;
 	loading?: boolean;
+	height?: number;
+	onHeightChange?: (height: number) => void;
 }
 
 export interface LajiFormEditorState {
@@ -55,35 +57,40 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			height: "100%"
 		};
 		return (
-			<DraggableHeight style={containerStyle} fixed="bottom" height={400} className={gnmspc("editor")} thickness={2}>
-				{this.props.loading
-				? <Spinner size={100} />
-				: (
-					<React.Fragment>
-						<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
-							<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
-							<Fields
-								style={fieldsStyle}
-								className={gnmspc("field-chooser")}
-								fields={this.getFields(this.props.master.fields)}
-								onSelected={this.onFieldSelected}
-								onDeleted={this.onFieldDeleted}
-								selected={this.state.selected}
-								pointer=""
-								expanded={true}
-							/>
-						</DraggableWidth>
-
-						<div style={fieldEditorStyle}>
-							<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
-							{this.state.selected &&	(
-								<Editor key={this.state.selected} active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
-							)}
-						</div>
-					</React.Fragment>
-				)}
-			</DraggableHeight>
+			<React.Fragment>
+				<DraggableHeight style={containerStyle} fixed="bottom" height={this.props.height} className={gnmspc("editor")} thickness={2} onChange={this.onHeightChange}>
+					{this.props.loading
+					? <Spinner size={100} />
+					: (
+						<React.Fragment>
+							<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
+								<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
+								<Fields
+									style={fieldsStyle}
+									className={gnmspc("field-chooser")}
+									fields={this.getFields(this.props.master.fields)}
+									onSelected={this.onFieldSelected}
+									onDeleted={this.onFieldDeleted}
+									selected={this.state.selected}
+									pointer=""
+									expanded={true}
+								/>
+							</DraggableWidth>
+							<div style={fieldEditorStyle}>
+								<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
+								{this.state.selected &&	(
+									<Editor key={this.state.selected} active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
+								)}
+							</div>
+						</React.Fragment>
+					)}
+				</DraggableHeight>
+			</React.Fragment>
 		);
+	}
+
+	onHeightChange = ({height}: {height: number}) => {
+		this.props.onHeightChange?.(height);
 	}
 
 	getFields = memoize((fields: any): any => ([{

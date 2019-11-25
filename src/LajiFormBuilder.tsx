@@ -22,6 +22,7 @@ export interface LajiFormBuilderState {
 	schemas?: "loading" | any;
 	uiSchema?: any;
 	lang: Lang;
+	editorHeight?: number;
 }
 
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
@@ -31,7 +32,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		master: "loading",
 		schemas: "loading",
 		lang: this.props.lang
-	};
+	} as LajiFormBuilderState;
 	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
 		...fns, [lang]: () => this.setState({lang})
 	}), {} as any);
@@ -88,10 +89,11 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	render() {
 		return (
 			<Context.Provider value={{apiClient: this.apiClient, lang: this.state.lang, translations: this.translations[this.state.lang]}}>
-					{this.renderLajiForm()}
+				{this.renderLajiForm()}
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
 					{this.renderEditor()}
 				</div>
+				<div style={{height: this.state.editorHeight}} />
 			</Context.Provider>
 		);
 	}
@@ -101,7 +103,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			return <Spinner />;
 		}
 		const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
-		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} />;
+		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} renderSubmit={false} />;
 	}
 
 	renderEditor() {
@@ -113,8 +115,14 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						schemas={schemas}
 						onChange={this.onEditorChange}
 						onLangChange={this.onLangChange}
+						onHeightChange={this.onHeightChange}
+						height={400}
 				/>
 			);
+	}
+
+	onHeightChange = (editorHeight: number) => {
+		this.setState({editorHeight});
 	}
 
 	renderLangChooser = () => {

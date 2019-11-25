@@ -17,6 +17,7 @@ interface DraggablePublicProps extends Stylable, Classable, HasChildren {
 	color?: string;
 	thickness?: number;
 	dragClassName?: string;
+	onChange?: (change: any) => void;
 }
 interface DraggableHeightProps extends DraggablePublicProps {
 	height?: number;
@@ -157,6 +158,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 				this.dragging = false;
 				document.removeEventListener("mouseup", this.onMouseUp(dir));
 				document.removeEventListener("mousemove", this.onMouseMove(dir));
+				this.props.onChange?.({[dir]: this.state[dir]});
 			}
 		}
 		return this._onMouseUp[dir] as EventListener;
