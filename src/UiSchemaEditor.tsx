@@ -85,6 +85,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 					onChange={this.onEditorLajiFormChange}
 					lang={this.context.lang}
 					formContext={formContext}
+					fields={fields}
 				/>
 			</div>
 		);
@@ -215,9 +216,6 @@ const customPropTypeSchemaMappings: {
 					"ui:options": {type: "object", properties: {}}
 				}
 			}};
-			//const {"ui:functions": uiFunctions} = rootUiSchema;
-			//const _enum = ["", ...Object.keys(LajiFormInterface.getFieldTypes()[_type])];
-			//return {type: "string", enum: _enum, enumNames: _enum};
 		},
 		uiSchema:  (): any => {
 			return {items: {"ui:field": "UiFieldEditor"}};
@@ -225,12 +223,12 @@ const customPropTypeSchemaMappings: {
 	}
 };
 
-
 const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): any => {
+	const rmPrefix = unprefixer(prefix);
 	if (schemaForUiSchema.properties) {
 		return {...schemaForUiSchema, properties: Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
 			let propSchema = schemaForUiSchema.properties[prop];
-			const {schema: replace} = customPropTypeSchemaMappings[prop] || {};
+			const {schema: replace} = customPropTypeSchemaMappings[rmPrefix(prop)] || {};
 			if (replace) {
 				propSchema = prefixSchemaDeeply(replace(schemaForUiSchema.properties[prop], rootSchema), prefix);
 			}
@@ -251,11 +249,14 @@ const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): an
 	return schemaForUiSchema;
 };
 
-const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any): any => {
+const unprefixer = (prefix: string = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s
+
+const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any, prefix = "$"): any => {
+	const rmPrefix = unprefixer(prefix);
 	if (schemaForUiSchema.properties) {
 		const propertiesUiSchema = Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
 			const propSchema = schemaForUiSchema.properties[prop];
-			const {uiSchema: replace} = customPropTypeSchemaMappings[prop] || {};
+			const {uiSchema: replace} = customPropTypeSchemaMappings[rmPrefix(prop)] || {};
 			let propUiSchema = properties[prop];
 			if (replace) {
 				propUiSchema = replace(schemaForUiSchema.properties[prop]);
