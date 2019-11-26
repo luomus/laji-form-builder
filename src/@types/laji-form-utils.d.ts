@@ -15,6 +15,9 @@ declare module "laji-form/lib/utils" {
 		function dictionarify<T, V>(arr: T[], getKey?: (item: T) => string, getValue?: (item: T) => V): {[key: string]: T | V};
 		function dictionarify<T, V>(arr: T[], getKey?: (item: T) => string, getValue?: (item: T) => V): {[key: string]: V};
 		function dictionarify<T>(arr: T[], getKey?: (item: T) => string): {[key: string]: T};
+		function findNearestParentSchemaElem(elem?: Element | null): HTMLElement | undefined;
+		function idSchemaIdToJSONPointer(id: string): string;
+		function scrollIntoViewIfNeeded(elem: HTMLElement, topOffset?: number, bottomOffset?: number): void;
 	}
 	export = utils;
 }

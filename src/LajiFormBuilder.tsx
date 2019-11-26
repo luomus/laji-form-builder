@@ -25,13 +25,16 @@ export interface LajiFormBuilderState {
 	editorHeight?: number;
 }
 
+const EDITOR_HEIGHT = 400;
+
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: any;
 	formApiClient: any;
 	state: LajiFormBuilderState = {
 		master: "loading",
 		schemas: "loading",
-		lang: this.props.lang
+		lang: this.props.lang,
+		editorHeight: EDITOR_HEIGHT
 	} as LajiFormBuilderState;
 	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
 		...fns, [lang]: () => this.setState({lang})
@@ -116,7 +119,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						onChange={this.onEditorChange}
 						onLangChange={this.onLangChange}
 						onHeightChange={this.onHeightChange}
-						height={400}
+						height={EDITOR_HEIGHT}
 				/>
 			);
 	}

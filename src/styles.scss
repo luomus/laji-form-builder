@@ -2,6 +2,7 @@ $def: #f2f6ff;
 $def_separating: darken($def, 30%);
 $darker: #47494e;
 $def_accent: #337ab7;
+$red: darken(red, 10%);
 
 .ljb {
 	$root: &;
@@ -62,6 +63,17 @@ $def_accent: #337ab7;
 		padding: 10px;
 		background-color: $darker;
 	}
+	&-editor-nav-bar .glyphicon {
+		color: white;
+		padding: 2px;
+
+		&:hover {
+			color: $def_accent;
+		}
+		&.active {
+			color: $red;
+		}
+	}
 	&-field-editor {
 		padding: 10px;
 	}
@@ -91,5 +103,8 @@ $def_accent: #337ab7;
 	}
 	&-spinner-black .react-spinner_bar {
 		background-color: black;
+	}
+	&-form-highlight {
+		outline: 3px solid lighten($red, 10%);
 	}
 }

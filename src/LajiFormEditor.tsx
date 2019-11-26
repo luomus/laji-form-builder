@@ -5,7 +5,7 @@ import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToU
 import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, Lang, Schemas } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, capitalizeFirstLetter } = LajiFormUtils;
+const { parseJSONPointer, capitalizeFirstLetter, findNearestParentSchemaElem, idSchemaIdToJSONPointer, scrollIntoViewIfNeeded } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import ApiClient from "./ApiClientImplementation";
@@ -29,10 +29,12 @@ export interface LajiFormEditorProps {
 export interface LajiFormEditorState {
 	selected?: string;
 	activeEditorMode: ActiveEditorMode;
+	pointerChoosingActive?: boolean;
 }
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	static contextType = Context;
-	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode};
+	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false};
+	highlightedLajiFormElem?: HTMLElement;
 	render() {
 		const containerStyle: React.CSSProperties = {
 			display: "flex",
@@ -56,15 +58,29 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			flexDirection: "column",
 			height: "100%"
 		};
+		const sidebarToolbarContainer: React.CSSProperties = {
+			display: "flex",
+			flexDirection: "row",
+		};
 		return (
 			<React.Fragment>
-				<DraggableHeight style={containerStyle} fixed="bottom" height={this.props.height} className={gnmspc("editor")} thickness={2} onChange={this.onHeightChange}>
+				<DraggableHeight
+					style={containerStyle}
+					fixed="bottom"
+					height={this.props.height}
+					className={gnmspc("editor")}
+					thickness={2}
+					onChange={this.onHeightChange}
+				>
 					{this.props.loading
 					? <Spinner size={100} />
 					: (
 						<React.Fragment>
 							<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
-								<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
+								<div style={sidebarToolbarContainer}>
+									<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
+									<Clickable className={classNames("glyphicon glyphicon-magnet", this.state.pointerChoosingActive && "active")} onClick={this.pointerChoosing.start} />
+								</div>
 								<Fields
 									style={fieldsStyle}
 									className={gnmspc("field-chooser")}
@@ -150,6 +166,40 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	getSelected = () => this.getFieldPath(this.state.selected || "");
 
 	getFieldPath = ((path: string) => path.replace("/document", ""));
+
+	pointerChoosing = {
+		start: () => {
+			this.setState({pointerChoosingActive: true}, () => {
+				document.addEventListener("mousemove", this.pointerChoosing.onMouseMove);
+			});
+		},
+		rmHighlight: (elem?: HTMLElement) => {
+			if (elem) {
+				elem.className = elem.className.replace(` ${gnmspc("form-highlight")}`, "");
+			}
+		},
+		onMouseMove: ({clientX, clientY}: MouseEvent) => {
+			document.addEventListener("click", this.pointerChoosing.onClick);
+			const lajiFormElem = findNearestParentSchemaElem(document.elementFromPoint(clientX, clientY));
+			if (lajiFormElem) {
+				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
+				this.highlightedLajiFormElem = lajiFormElem;
+				this.highlightedLajiFormElem.className = `${this.highlightedLajiFormElem.className} ${gnmspc("form-highlight")}`;
+			}
+		},
+		onClick: () => {
+			this.setState({pointerChoosingActive: false}, () => {
+				const id = this.highlightedLajiFormElem?.id
+					.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
+					.replace(/_/g, "/");
+				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
+				document.removeEventListener("mousemove", this.pointerChoosing.onMouseMove);
+				document.removeEventListener("click", this.pointerChoosing.onClick);
+				this.highlightedLajiFormElem = undefined;
+				this.setState({selected: `/document${id}`});
+			});
+		}
+	}
 }
 
 export interface FieldEditorProps extends Classable {
@@ -198,18 +248,43 @@ interface FieldProps extends FieldOptions {
 }
 interface FieldState {
 	expanded: boolean;
+	prevSelected?: string;
+	prevExpanded?: boolean;
 }
 class Field extends React.PureComponent<FieldProps, FieldState> {
 	state = {
-		expanded: this.props.expanded || this.isSelected() || false
+		expanded: this.props.expanded || Field.isSelected(this.props.selected, this.props.pointer) ||  false,
 	};
+	private fieldRef = React.createRef<HTMLDivElement>();
+	private nmspc = nmspc("field");
 
 	static contextType = Context;
 
-	nmspc = nmspc("field");
+	static getDerivedStateFromProps(nextProps: FieldProps, prevState: FieldState) {
+		if (nextProps.selected !== prevState.prevSelected
+			&& !Field.isChildSelected(prevState.prevSelected, nextProps.pointer)
+			&& Field.isChildSelected(nextProps.selected, nextProps.pointer)
+		) {
+			return {expanded: true};
+		}
+		return {};
+	}
 
-	isSelected(): boolean {
-		return (this.props.selected || "") === this.props.pointer;
+	componentDidUpdate(prevProps: FieldProps, prevState: FieldState) {
+		if ((!Field.isSelected(prevProps.selected, prevProps.pointer) && Field.isSelected(this.props.selected, this.props.pointer))) {
+			if (this.fieldRef.current) {
+				// TODO doesn't work since container fixed?
+				//scrollIntoViewIfNeeded(this.fieldRef.current);
+			}
+		}
+	}
+
+	static isSelected(selected: string | undefined, pointer: string): boolean {
+		return selected === pointer;
+	}
+
+	static isChildSelected(selected = "", pointer: string): boolean {
+		return selected.startsWith(pointer);
 	}
 
 	toggleExpand = () => {
@@ -240,8 +315,8 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 				: "contracted"
 			: "nonexpandable";
 		return (
-			<div className={this.nmspc()}>
-				<Clickable className={classNames(this.nmspc("item"), this.nmspc(this.isSelected() && "selected"))}>
+			<div className={this.nmspc()} ref={this.fieldRef}>
+				<Clickable className={classNames(this.nmspc("item"), this.nmspc(Field.isSelected(this.props.selected, this.props.pointer) && "selected"))}>
 					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={this.nmspc(className)} />
 					<Clickable className={this.nmspc("label")} onClick={this.onThisSelected}>{name}</Clickable>
 					<Clickable onClick={this.onThisDeleted} className={this.nmspc("delete")} />
