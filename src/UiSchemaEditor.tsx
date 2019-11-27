@@ -5,9 +5,19 @@ import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import LajiFormInterface from "./LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply } from "./utils";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
+const {Label: LajiFormLabel } = require("laji-form/lib/components/components");
+const LajiFormTitle = require("laji-form/lib/components/fields/TitleField").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema } = LajiFormUtils;
 import { JSONEditor } from "./components"
+
+const PREFIX = "$";
+
+const unprefixer = (prefix: string = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s;
+const unprefix = unprefixer(PREFIX);
+
+const LabelWithoutPrefix = React.memo((props: any) => <LajiFormLabel {...props} label={unprefix(props.label)} />);
+const TitleWithoutPrefix = React.memo((props: any) => <LajiFormTitle {...props} title={unprefix(props.title)} />);
 
 export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
 	static defaultProps = {
@@ -46,7 +56,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			}
 		};
 		const _uiSchema = (componentPropTypes || {}).uiSchema ? propTypesForUiSchema((componentPropTypes || {}).uiSchema) : {};
-		return customizeUiSchema(schemaForUiSchema, prefixUiSchemaDeeply(_uiSchema, unprefixSchemaDeeply(schemaForUiSchema, "$"), "$"));
+		return customizeUiSchema(schemaForUiSchema, prefixUiSchemaDeeply(_uiSchema, unprefixSchemaDeeply(schemaForUiSchema, PREFIX), PREFIX));
 	});
 
 	getFieldName(): string {
@@ -63,13 +73,13 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			return null;
 		}
 
-		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema, "$");
+		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema, PREFIX);
 		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
 		const formData = {
-			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations, "$"),
+			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX),
 			"$ui:title": this.getFieldName()
 		};
-		const fields = { TextareaEditorField, UiFieldEditor };
+		const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
 		const formContext = {
 			path: this.props.path,
 			rootSchema: this.props.schema,
@@ -89,7 +99,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	}
 
 	onEditorLajiFormChange = (eventUiSchema: any) => {
-		eventUiSchema = unprefixDeeply(eventUiSchema, "$");
+		eventUiSchema = unprefixDeeply(eventUiSchema, PREFIX);
 		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
 		const { schema, uiSchema } = this.props;
 		const detectChangePaths = (_uiSchema: any, path: string): string[] => {
@@ -113,7 +123,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		const events: FieldEditorChangeEvent[] = [];
 		let newUiSchema = uiSchema;
 		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), "$"), changedPath);
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX), changedPath);
 			const currentValue = parseJSONPointer(newUiSchema, changedPath);
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
 			if (schemaForUiSchema.type === "string" && !schemaForUiSchema.enum) {
@@ -129,7 +139,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			}
 		});
 		if (newUiSchema !== uiSchema) {
-			events.push({type: "uiSchema", value: unprefixDeeply(newUiSchema, "$")});
+			events.push({type: "uiSchema", value: unprefixDeeply(newUiSchema, PREFIX)});
 		}
 		(events.length) && this.props.onChange(events);
 	}
@@ -171,7 +181,7 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 		}
 	}, schema);
 	if ((componentPropTypes || {}).uiSchema) {
-		const _schema = propTypesToSchema((componentPropTypes || {}).uiSchema, "$");
+		const _schema = propTypesToSchema((componentPropTypes || {}).uiSchema, PREFIX);
 		return customize({
 			..._schema,
 			properties: {
@@ -246,9 +256,7 @@ const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): an
 	return schemaForUiSchema;
 };
 
-const unprefixer = (prefix: string = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s
-
-const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any, prefix = "$"): any => {
+const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any, prefix = PREFIX): any => {
 	const rmPrefix = unprefixer(prefix);
 	if (schemaForUiSchema.properties) {
 		const propertiesUiSchema = Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
@@ -315,8 +323,8 @@ const TextareaEditorField = (props: any) => {
 const UiFieldEditor = (props: any) => {
 	const { SchemaField } = props.registry.fields;
 
-	const schema = customize(props.schema, props.formContext.rootSchema, "$");
-	const uiSchema = customize(getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, "$");
+	const schema = customize(props.schema, props.formContext.rootSchema, PREFIX);
+	const uiSchema = customize(getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, PREFIX);
 
 	return <SchemaField {...props} schema={schema} uiSchema={uiSchema}/>;
 };
