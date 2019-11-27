@@ -1,6 +1,9 @@
 import * as React from "react";
 import _Spinner from "react-spinner";
 import { classNames, nmspc, gnmspc } from "./utils";
+const _JSONEditor = require("jsoneditor-react").JsonEditor;
+import ace from "brace";
+require("brace/mode/json");
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -214,3 +217,53 @@ export const Spinner = React.memo(function Spinner({color = "black", size = 32}:
 		/>
 	);
 })
+
+const getMinMaxed = (val: number, min?: number, max?: number) => {
+	if (min) {
+		val = Math.max(val, min);
+	}
+	if (max) {
+		val = Math.min(val, max);
+	}
+	return val;
+}
+const JSON_EDITOR_ROW_HEIGHT = 13;
+const JSON_EDITOR_PADDING = 5;
+export const JSONEditor = ({value, onChange, rows, minRows, maxRows}
+	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number}) => {
+
+	let tmp: any;
+	const _onChange = React.useCallback((val) => {
+		tmp = val;
+	}, [onChange]);
+	const onBlur = React.useCallback(() => onChange(tmp), [onChange]);
+
+	const _props = {
+		mode: "code",
+		ace,
+		theme: "ace/theme/textmate",
+		statusBar: false,
+		navigationBar: false,
+		mainMenuBar: false,
+		value,
+		onChange: _onChange,
+	};
+
+	const height = getMinMaxed(rows === undefined
+		? JSON.stringify(value, undefined, 2).split("\n").length
+		: rows,
+		minRows,
+		maxRows
+	) * JSON_EDITOR_ROW_HEIGHT + JSON_EDITOR_PADDING;
+
+	return (
+		<div onBlur={onBlur} style={{height}} className={gnmspc("json-editor-container")}>
+			<_JSONEditor
+				{..._props}
+				onChange={onChange}
+				height={100}
+
+			/>
+		</div>
+	);
+};

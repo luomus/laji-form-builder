@@ -2,8 +2,7 @@ import LajiFormBuilder from "../src/app";
 import properties from "../properties.json";
 import ApiClient from "./ApiClientImplementation";
 
-import "laji-form/dist/styles.css";
-import "../src/styles.scss";
+import "../src/styles";
 
 function getJsonFromUrl() {
 	const type = (value) => {

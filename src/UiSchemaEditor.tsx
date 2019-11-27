@@ -1,13 +1,13 @@
 import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
-import JSONEditor from "react-json-editor-ajrm";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import LajiFormInterface from "./LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply } from "./utils";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema } = LajiFormUtils;
+import { JSONEditor } from "./components"
 
 export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
 	static defaultProps = {
@@ -296,16 +296,14 @@ const TextareaEditorField = (props: any) => {
 		}
 		return _value;
 	};
-	const onChange = React.useCallback((({jsObject}: any) => props.onChange(_lajiFormId ? {...jsObject, _lajiFormId} : jsObject)), [props.onChange])
+	const onChange = React.useCallback(((value: any) => props.onChange(_lajiFormId ? {...value, _lajiFormId} : value)), [props.onChange])
 	return  (
 		<React.Fragment>
 			{label}
 			{isObject(value) || Array.isArray(value) ? (
 				<JSONEditor
-					placeholder={filterLajiFormId(props.formData || props.value)}
+					value={filterLajiFormId(props.formData || props.value)}
 					onChange={onChange}
-					locale="en"
-					height={100}
 				/>
 			) : (
 				<input value={value} />

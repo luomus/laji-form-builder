@@ -20,14 +20,16 @@
  },
  "dependencies": {
   "@types/isomorphic-fetch": "0.0.35",
+  "brace": "^0.11.1",
   "deepmerge": "^4.2.2",
   "isomorphic-fetch": "^2.2.1",
+  "jsoneditor": "^7.2.1",
+  "jsoneditor-react": "^2.0.0",
   "laji-form": "^2.1.8",
   "memoizee": "^0.4.14",
   "parse-prop-types": "git+https://git@github.com/olzraiti/parse-prop-types.git#c8a4540d8d0af0e47187c1d0de155c11be84b9ce",
   "react": "~16.8.6",
   "react-dom": "~16.8.6",
-  "react-json-editor-ajrm": "^2.5.9",
   "react-jsonschema-form": "git+https://git@github.com/olzraiti/react-jsonschema-form.git#0443d2f7ff0d9e9eb5ead2de7c8e5bfcdc01d634",
   "react-spinner": "^0.2.7"
  },
