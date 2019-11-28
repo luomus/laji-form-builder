@@ -23,46 +23,48 @@ export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	const name = propTypes.name || (propTypes.type || {}).name;
 	const value = propTypes.value || (propTypes.type || {}).value;
 	switch (name) {
-		case "shape":
-			return {type: "object", properties: Object.keys(value).reduce((properties, prop) => ({
-				...properties,
-				[typeof propPrefix === "string" ? `${propPrefix}${prop}` : prop]: propTypesToSchema(value[prop], propPrefix)
-			}), {})};
-		case "arrayOf":
-			return {type: "array", items: propTypesToSchema(value, propPrefix)};
-		case "oneOf":
-			return {type: "string", enum: value, enumNames: value};
-		case "string":
-			return {type: "string"};
-		case "number":
-			return {type: "number"};
-		case "bool":
-			return {type: "boolean"};
-		case "object":
-		case "custom":
-			return {type: "object", properties: {}};
-		default:
-			//console.warn(`Unhandled PropType type ${name}`);
-			return {type: "object", properties: {}};
+	case "shape":
+		return {type: "object", properties: Object.keys(value).reduce((properties, prop) => ({
+			...properties,
+			[typeof propPrefix === "string" ? `${propPrefix}${prop}` : prop]: propTypesToSchema(value[prop], propPrefix)
+		}), {})};
+	case "arrayOf":
+		return {type: "array", items: propTypesToSchema(value, propPrefix)};
+	case "oneOf":
+		return {type: "string", enum: value, enumNames: value};
+	case "string":
+		return {type: "string"};
+	case "number":
+		return {type: "number"};
+	case "bool":
+		return {type: "boolean"};
+	case "object":
+	case "custom":
+		return {type: "object", properties: {}};
+	default:
+		//console.warn(`Unhandled PropType type ${name}`);
+		return {type: "object", properties: {}};
 	}
 };
 
-export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, prefix?: string): any => {
-	function translate(obj: any): any {
+export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, prefix?: string, schemaForUiSchema?: any): any => {
+	function translate(obj: any, schemaForUiSchema?: any): any {
 		if (isObject(obj)) {
-			return Object.keys(obj).reduce((translated, key) => ({
-				...translated,
-				[prefix ? `${prefix}${key}` : key]: translate(obj[key])
-			}), {});
+			return Object.keys(obj).reduce<any>((translated, key) => {
+				const propSchemaForUiSchema = schemaForUiSchema?.properties?.[key];
+				const _key = propSchemaForUiSchema && prefix ? `${prefix}${key}` : key;
+				translated[_key] = translate(obj[key], propSchemaForUiSchema);
+				return translated;
+			}, {});
 		} else if (Array.isArray(obj)) {
-			return obj.map(translate);
+			return obj.map(item => translate(item, schemaForUiSchema?.items));
 		}
 		if (typeof obj === "string" && obj[0] === "@") {
 			return translations[obj];
 		}
 		return obj;
 	}
-	return translate(uiSchema);
+	return translate(uiSchema, schemaForUiSchema);
 });
 
 export const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {
