@@ -107,14 +107,8 @@ $red: darken(red, 10%);
 	&-form-highlight {
 		outline: 3px solid lighten($red, 10%);
 	}
-	&-json-editor-container > div {
-		height: 100%;
-
-		.ace_editor {
-			min-height: initial;
-		}
-		.jsoneditor-outer {
-			padding-bottom: 0px !important;
-		}
+	
+	&-json-editor-invalid {
+		background-color: lighten(#ff0000, 30%);
 	}
 }

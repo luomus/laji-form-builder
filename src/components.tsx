@@ -1,9 +1,6 @@
 import * as React from "react";
 import _Spinner from "react-spinner";
 import { classNames, nmspc, gnmspc } from "./utils";
-const _JSONEditor = require("jsoneditor-react").JsonEditor;
-import ace from "brace";
-require("brace/mode/json");
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -232,38 +229,44 @@ const JSON_EDITOR_PADDING = 5;
 export const JSONEditor = ({value, onChange, rows, minRows, maxRows}
 	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number}) => {
 
-	let tmp: any;
-	const _onChange = React.useCallback((val) => {
-		tmp = val;
+	const [tmpValue, setTmpValue] = React.useState(JSON.stringify(value, undefined, 2));
+	const [valid, setValid] = React.useState(true);
+	const [touched, setToutched] = React.useState(false);
+
+	const _onChange = React.useCallback((e: any) => {
+		setToutched(true);
+		setTmpValue(e.target.value);
 	}, [onChange]);
-	const onBlur = React.useCallback(() => onChange(tmp), [onChange]);
 
-	const _props = {
-		mode: "code",
-		ace,
-		theme: "ace/theme/textmate",
-		statusBar: false,
-		navigationBar: false,
-		mainMenuBar: false,
-		value,
-		onChange: _onChange,
-	};
+	const onBlur = React.useCallback(() => {
+		if (!touched) {
+			return;
+		}
+		try {
+			onChange(JSON.parse(tmpValue));
+			if (!valid) {
+				setValid(true);
+			}
+		} catch (e) {
+			setValid(false);
+		}
+	}, [onChange, tmpValue, touched]);
 
-	const height = getMinMaxed(rows === undefined
+	const _rows = getMinMaxed(rows === undefined
 		? JSON.stringify(value, undefined, 2).split("\n").length
 		: rows,
 		minRows,
 		maxRows
-	) * JSON_EDITOR_ROW_HEIGHT + JSON_EDITOR_PADDING;
+	)
 
 	return (
-		<div onBlur={onBlur} style={{height}} className={gnmspc("json-editor-container")}>
-			<_JSONEditor
-				{..._props}
-				onChange={onChange}
-				height={100}
-
-			/>
-		</div>
+		<textarea
+			className={!valid ? gnmspc("json-editor-invalid") : undefined}
+			onBlur={onBlur}
+			rows={_rows}
+			style={{width: "100%"}}
+			onChange={_onChange}
+			value={tmpValue}
+		/>
 	);
 };
