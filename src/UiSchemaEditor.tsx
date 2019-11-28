@@ -60,12 +60,12 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	});
 
 	getFieldName(): string {
-		const {uiSchema = {}, field} = this.props;
+		const {uiSchema = {}, field, translations} = this.props;
 		if (!field) {
 			return "";
 		}
 		const { "ui:title": uiTitle } = getTranslatedUiSchema(uiSchema, this.props.translations);
-		return uiTitle ?? field.label ?? field.name;
+		return uiTitle ?? translations[field.label || ""] ?? field.label;
 	}
 
 	render() {
