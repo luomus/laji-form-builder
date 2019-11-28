@@ -311,7 +311,7 @@ const TextareaEditorField = (props: any) => {
 	)), [props.onChange]);
 	return  (
 		<React.Fragment>
-			{label}
+			<LajiFormLabel label={label} />
 			{isObject(value) || Array.isArray(value) ? (
 				<JSONEditor
 					value={filterLajiFormId(props.formData || props.value)}
