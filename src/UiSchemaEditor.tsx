@@ -3,7 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import LajiFormInterface from "./LajiFormInterface";
-import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply } from "./utils";
+import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, getTranslation } from "./utils";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 const {Label: LajiFormLabel } = require("laji-form/lib/components/components");
 const LajiFormTitle = require("laji-form/lib/components/fields/TitleField").default;
@@ -13,7 +13,6 @@ import { JSONEditor } from "./components"
 
 const PREFIX = "$";
 
-const unprefixer = (prefix: string = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s;
 const unprefix = unprefixer(PREFIX);
 
 const LabelWithoutPrefix = React.memo((props: any) => <LajiFormLabel {...props} label={unprefix(props.label)} />);
@@ -65,7 +64,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			return "";
 		}
 		const { "ui:title": uiTitle } = getTranslatedUiSchema(uiSchema, this.props.translations);
-		return uiTitle ?? translations[field.label || ""] ?? field.label;
+		return (uiTitle ?? getTranslation(field.label || "", translations)) || "";
 	}
 
 	render() {

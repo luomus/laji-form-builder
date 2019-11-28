@@ -217,3 +217,12 @@ export const makeCancellable = <T>(promise: Promise<T>): CancellablePromise<T> =
 };
 
 export const unprefixProp = (s: string) => s.replace(/^.+\./, "");
+
+export const unprefixer = (prefix: string = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s;
+
+export const getTranslation = (key: string, translations: {[key: string]: string}): string | undefined => {
+	if (typeof key === "string") {
+		return translations[key] || (key[0] === "@" && translations[unprefixer("@")(key)] || undefined);
+	}
+	return;
+};
