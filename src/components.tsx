@@ -226,8 +226,8 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 }
 const JSON_EDITOR_ROW_HEIGHT = 13;
 const JSON_EDITOR_PADDING = 5;
-export const JSONEditor = ({value, onChange, rows, minRows, maxRows}
-	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number}) => {
+export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable = true}
+	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number, resizable?: boolean}) => {
 
 	const [tmpValue, setTmpValue] = React.useState(JSON.stringify(value, undefined, 2));
 	const [valid, setValid] = React.useState(true);
@@ -264,7 +264,7 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows}
 			className={!valid ? gnmspc("json-editor-invalid") : undefined}
 			onBlur={onBlur}
 			rows={_rows}
-			style={{width: "100%"}}
+			style={{width: "100%", resize: resizable ? "vertical" : "none"}}
 			onChange={_onChange}
 			value={tmpValue}
 		/>

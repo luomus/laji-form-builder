@@ -325,17 +325,14 @@ const TextareaEditorField = (props: any) => {
 			? {...value, _lajiFormId}
 			: value)
 	)), [props.onChange]);
-	return  (
+	return (
 		<React.Fragment>
 			<LajiFormLabel label={label} />
-			{isObject(value) || Array.isArray(value) ? (
-				<JSONEditor
-					value={filterLajiFormId(props.formData || props.value)}
-					onChange={onChange}
-				/>
-			) : (
-				<input value={value} />
-			)}
+			<JSONEditor
+				value={filterLajiFormId(value)}
+				onChange={onChange}
+				resizable={isObject(value) || Array.isArray(value)}
+			/>
 		</React.Fragment>
 	);
 };
