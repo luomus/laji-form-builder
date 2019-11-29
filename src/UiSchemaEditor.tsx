@@ -8,8 +8,9 @@ const LajiForm = require("laji-form/lib/components/LajiForm").default;
 const {Label: LajiFormLabel } = require("laji-form/lib/components/components");
 const LajiFormTitle = require("laji-form/lib/components/fields/TitleField").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema } = LajiFormUtils;
+const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions } = LajiFormUtils;
 import { JSONEditor } from "./components"
+import { Context } from "./Context";
 
 const PREFIX = "$";
 
@@ -78,22 +79,18 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema)),
 			[`${PREFIX}ui:title`]: this.getFieldName()
 		};
-		const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
 		const formContext = {
 			path: this.props.path,
 			rootSchema: this.props.schema,
 			rootUiSchema: this.props.uiSchema
 		};
 		return (
-			<LajiForm
+			<EditorLajiForm
 				schema={schema}
 				uiSchema={uiSchema}
 				formData={formData}
 				onChange={this.onEditorLajiFormChange}
-				lang={this.context.lang}
 				formContext={formContext}
-				fields={fields}
-				renderSubmit={false}
 			/>
 		);
 	}
@@ -329,6 +326,7 @@ const TextareaEditorField = (props: any) => {
 			? {...value, _lajiFormId}
 			: value)
 	)), [props.onChange]);
+	const { minRows, maxRows, rows } = getUiOptions(props.uiSchema);
 	return (
 		<React.Fragment>
 			<LajiFormLabel label={label} />
@@ -336,6 +334,9 @@ const TextareaEditorField = (props: any) => {
 				value={filterLajiFormId(value)}
 				onChange={onChange}
 				resizable={isObject(value) || Array.isArray(value)}
+				rows={rows}
+				minRows={minRows}
+				maxRows={maxRows}
 			/>
 		</React.Fragment>
 	);
@@ -348,4 +349,18 @@ const UiFieldEditor = (props: any) => {
 	const uiSchema = customize(getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, PREFIX);
 
 	return <SchemaField {...props} schema={schema} uiSchema={uiSchema}/>;
+}
+
+export const EditorLajiForm = (props: any) => {
+	const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
+	return (
+		<Context.Consumer>{({lang}) => (
+			<LajiForm
+				lang={lang}
+				fields={fields}
+				renderSubmit={false}
+				{...props}
+			/>
+		)}</Context.Consumer>
+	);
 };

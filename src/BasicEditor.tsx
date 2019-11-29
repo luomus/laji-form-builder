@@ -9,6 +9,7 @@ import memoize from "memoizee";
 const SelectWidget = require("laji-form/lib/components/widgets/SelectWidget").default;
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 import { Spinner } from "./components";
+import { EditorLajiForm } from "./UiSchemaEditor";
 
 interface PropertyContext {
 	"@id": string;
@@ -52,43 +53,45 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	}
 
 	render() {
-		const getAdder = () => {
-			if (this.state.childProps) {
-				const existing = dictionarify(this.props.field.fields as FieldOptions[], (field: FieldOptions) => field.name);
-				const [enums, enumNames] = this.state.childProps
-					.filter(s => !existing[unprefixProp(s.property)])
-					.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
-						_enums.push(prop.property);
-						_enumNames.push(`${prop.property} (${prop.label})`);
-						return [_enums, _enumNames];
-					}, [[], []]);
-				const schema = {
-					title: this.context.translations.AddProperty,
-					type: "string",
-					enum: enums,
-					enumNames
-				};
-				return (
-					<LajiForm
-						key={this.state.lajiFormToucher}
-						schema={schema}
-						onChange={this.onAddProperty}
-						lang={this.context.lang}
-						renderSubmit={false}
-					/>
-							);
-			} else if (this.state.childProps === false) {
-				return null;
-			} else {
-				return <Spinner />;
-			}
-		}
 		return (
 			<React.Fragment>
-				{getAdder()}
+				{this.renderAdder()}
+				{this.renderOptionsAndValidations()}
 				{"TODO (kenttien piilottaminen, järjestys?)"}
 			</React.Fragment>
 		);
+	}
+
+	renderAdder = () => {
+		if (this.state.childProps) {
+			const existing = dictionarify(this.props.field.fields as FieldOptions[], (field: FieldOptions) => field.name);
+			const [enums, enumNames] = this.state.childProps
+				.filter(s => !existing[unprefixProp(s.property)])
+				.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
+					_enums.push(prop.property);
+					_enumNames.push(`${prop.property} (${prop.label})`);
+					return [_enums, _enumNames];
+				}, [[], []]);
+			const schema = {
+				title: this.context.translations.AddProperty,
+				type: "string",
+				enum: enums,
+				enumNames
+			};
+			return (
+				<LajiForm
+					key={this.state.lajiFormToucher}
+					schema={schema}
+					onChange={this.onAddProperty}
+					lang={this.context.lang}
+					renderSubmit={false}
+				/>
+						);
+		} else if (this.state.childProps === false) {
+			return null;
+		} else {
+			return <Spinner />;
+		}
 	}
 
 	onAddProperty = (property: string, b: any): void => {
@@ -169,4 +172,39 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			)
 		});
 	})
+
+	renderOptionsAndValidations = () => {
+		const {options, validators, warnings} = this.props.field;
+		const schema = {
+			type: "object",
+			properties: {
+				options: {
+					type: "object",
+					properties: {}
+				},
+				validators: {
+					type: "object",
+					properties: {}
+				},
+				warnings: {
+					type: "object",
+					properties: {}
+				}
+			}
+		};
+		const itemUiSchema = { "ui:field": "TextareaEditorField", "ui:options": { minRows: 5 } };
+		const uiSchema = {
+			options: itemUiSchema,
+			validators: itemUiSchema,
+			warnings: itemUiSchema
+		}
+		const formData = { options, validators, warnings };
+		return (
+			<EditorLajiForm
+				schema={schema}
+				uiSchema={uiSchema}
+				formData={formData}
+			/>
+		);
+	}
 }

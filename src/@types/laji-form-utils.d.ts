@@ -18,6 +18,7 @@ declare module "laji-form/lib/utils" {
 		function findNearestParentSchemaElem(elem?: Element | null): HTMLElement | undefined;
 		function idSchemaIdToJSONPointer(id: string): string;
 		function scrollIntoViewIfNeeded(elem: HTMLElement, topOffset?: number, bottomOffset?: number): void;
+		function getUiOptions(uiSchema: any): any;
 	}
 	export = utils;
 }

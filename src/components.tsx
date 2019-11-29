@@ -253,7 +253,7 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable =
 	}, [onChange, tmpValue, touched]);
 
 	const _rows = getMinMaxed(rows === undefined
-		? JSON.stringify(value, undefined, 2).split("\n").length
+		? (tmpValue ?? "").split("\n").length
 		: rows,
 		minRows,
 		maxRows

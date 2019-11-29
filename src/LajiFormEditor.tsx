@@ -243,6 +243,7 @@ export interface FieldOptions {
 	options?: any;
 	type?: string;
 	validators?: any;
+	warnings?: any;
 	fields?: FieldOptions[];
 }
 export interface FieldMap {
@@ -251,6 +252,7 @@ export interface FieldMap {
 	options: any;
 	type: string;
 	validators: any;
+	warnings?: any;
 	fields: {[field: string]: FieldMap};
 }
 interface FieldProps extends FieldOptions {
