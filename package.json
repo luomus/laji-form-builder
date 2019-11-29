@@ -5,6 +5,7 @@
  "main": "lib/index.js",
  "scripts": {
   "start": "webpack-dev-server --content-base playground playground/app.js --inline --port 8082 --host 0.0.0.0",
+  "staging": "webpack-dev-server --content-base playground playground/app.js --inline --port 4010 --host 0.0.0.0",
   "test": "echo \"Error: no test specified\" && exit 1",
   "lint": "tslint src/*.ts*"
  },
