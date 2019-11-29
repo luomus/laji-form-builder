@@ -1,0 +1,1617 @@
+{
+"@context": {
+"id": "@id",
+"@vocab": "http://tun.fi/",
+"@base": "http://tun.fi/",
+"luomus": "http://id.luomus.fi/",
+"zmuo": "http://id.zmuo.oulu.fi/",
+"herbo": "http://id.herb.oulu.fi/",
+"utu": "http://mus.utu.fi/",
+"xsd": "https://www.w3.org/TR/xmlschema-2/#",
+"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+"rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+"xml": "http://www.w3.org/XML/1998/namespace#",
+"owl": "http://www.w3.org/2002/07/owl#",
+"dwc": "http://rs.tdwg.org/dwc/terms/",
+"dc": "http://purl.org/dc/terms/",
+"dwctype": "http://rs.tdwg.org/dwc/dwctype/",
+"abcd": "http://www.tdwg.org/schemas/abcd/2.06#",
+"naturforskaren": "http://naturforskaren.se/",
+"eol": "http://eol.org/",
+"skos": "http://www.w3.org/2004/02/skos/core#",
+"dyntaxa": "http://dyntaxa.se/Taxon/Info/",
+"taxonid": "http://taxonid.org/",
+"censusHinderedByEnviromentalFactors": {
+"@id": "http://tun.fi/MY.censusHinderedByEnviromentalFactors",
+"@type": "xsd:boolean"
+},
+"censusPrematurelyAborted": {
+"@id": "http://tun.fi/MY.censusPrematurelyAborted",
+"@type": "xsd:boolean"
+},
+"breaksDuringCensusInMinutes": {
+"@id": "http://tun.fi/MY.breaksDuringCensusInMinutes",
+"@type": "xsd:nonNegativeInteger"
+},
+"gpsUsed": {
+"@id": "http://tun.fi/MY.gpsUsed",
+"@type": "xsd:boolean"
+},
+"legUserID": {
+"@id": "http://tun.fi/MY.legUserID",
+"@type": "xsd:string"
+},
+"timeStart": {
+"@id": "http://tun.fi/MY.timeStart",
+"@type": "xsd:string"
+},
+"timeEnd": {
+"@id": "http://tun.fi/MY.timeEnd",
+"@type": "xsd:string"
+},
+"dateBegin": {
+"@id": "http://tun.fi/MY.dateBegin",
+"@type": "xsd:string"
+},
+"leg": {
+"@id": "http://tun.fi/MY.leg",
+"@type": "xsd:string"
+},
+"dateEnd": {
+"@id": "http://tun.fi/MY.dateEnd",
+"@type": "xsd:string"
+},
+"legPublic": {
+"@id": "http://tun.fi/MY.legPublic",
+"@type": "xsd:boolean"
+},
+"namedPlaceNotes": {
+"@id": "http://tun.fi/MY.namedPlaceNotes",
+"@type": "xsd:string"
+},
+"startPointDeviation": {
+"@id": "http://tun.fi/MY.startPointDeviation",
+"@type": "xsd:integer"
+},
+"routeDirectionAdhered": {
+"@id": "http://tun.fi/MY.routeDirectionAdhered",
+"@type": "xsd:boolean"
+},
+"startDistanceFromNECorner": {
+"@id": "http://tun.fi/MY.startDistanceFromNECorner",
+"@type": "xsd:string"
+},
+"routeLengthChangeBiotopeB": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeB",
+"@type": "xsd:integer"
+},
+"feedingStationCount": {
+"@id": "http://tun.fi/WBC.feedingStationCount",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthChangeBiotopeH": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeH",
+"@type": "xsd:integer"
+},
+"routeLengthChangeBiotopeG": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeG",
+"@type": "xsd:integer"
+},
+"routeLengthChangeBiotopeF": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeF",
+"@type": "xsd:integer"
+},
+"routeLengthChangeBiotopeE": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeE",
+"@type": "xsd:integer"
+},
+"routeLengthChangeBiotopeD": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeD",
+"@type": "xsd:integer"
+},
+"routeLengthChangeBiotopeC": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeC",
+"@type": "xsd:integer"
+},
+"routeLengthChangeBiotopeA": {
+"@id": "http://tun.fi/WBC.routeLengthChangeBiotopeA",
+"@type": "xsd:integer"
+},
+"birdFeederCount": {
+"@id": "http://tun.fi/WBC.birdFeederCount",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthChange": {
+"@id": "http://tun.fi/WBC.routeLengthChange",
+"@type": "xsd:integer"
+},
+"routeLengthBiotopeH": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeH",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeG": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeG",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeF": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeF",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeE": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeE",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeD": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeD",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeC": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeC",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeB": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeB",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeA": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeA",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLength": {
+"@id": "http://tun.fi/WBC.routeLength",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeD": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeD",
+"@type": "xsd:nonNegativeInteger"
+},
+"wayOfTravelNotes": {
+"@id": "http://tun.fi/WBC.wayOfTravelNotes",
+"@type": "xsd:string"
+},
+"birdFeederCountBiotopeH": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeH",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeG": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeG",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeF": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeF",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeE": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeE",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeC": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeC",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeB": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeB",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeB": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeB",
+"@type": "xsd:nonNegativeInteger"
+},
+"birdFeederCountBiotopeA": {
+"@id": "http://tun.fi/WBC.birdFeederCountBiotopeA",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeH": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeH",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeG": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeG",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeF": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeF",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeE": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeE",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeD": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeD",
+"@type": "xsd:nonNegativeInteger"
+},
+"feedingStationCountBiotopeC": {
+"@id": "http://tun.fi/WBC.feedingStationCountBiotopeC",
+"@type": "xsd:nonNegativeInteger"
+},
+"routeLengthBiotopeA": {
+"@id": "http://tun.fi/WBC.routeLengthBiotopeA",
+"@type": "xsd:nonNegativeInteger"
+},
+"descriptionBiotopeF": {
+"@id": "http://tun.fi/WBC.descriptionBiotopeF",
+"@type": "xsd:string"
+},
+"routeID": {
+"@id": "http://tun.fi/WBC.routeID",
+"@type": "xsd:nonNegativeInteger"
+},
+"observerCount": {
+"@id": "http://tun.fi/WBC.observerCount",
+"@type": "xsd:positiveInteger"
+},
+"observerID": {
+"@id": "http://tun.fi/WBC.observerID",
+"@type": "xsd:nonNegativeInteger"
+},
+"wayOfTravel": {
+"@id": "http://tun.fi/WBC.wayOfTravel",
+"@type": "@id"
+},
+"sorbusBerriesAtCensus": {
+"@id": "http://tun.fi/WBC.sorbusBerriesAtCensus",
+"@type": "@id"
+},
+"sorbusBerriesEarlyFall": {
+"@id": "http://tun.fi/WBC.sorbusBerriesEarlyFall",
+"@type": "@id"
+},
+"abundancePINENU": {
+"@id": "http://tun.fi/WBC.abundancePINENU",
+"@type": "@id"
+},
+"abundanceTURPIL": {
+"@id": "http://tun.fi/WBC.abundanceTURPIL",
+"@type": "@id"
+},
+"abundanceBOMGAR": {
+"@id": "http://tun.fi/WBC.abundanceBOMGAR",
+"@type": "@id"
+},
+"typeOfSnowCover": {
+"@id": "http://tun.fi/WBC.typeOfSnowCover",
+"@type": "@id"
+},
+"snowAndIceOnTrees": {
+"@id": "http://tun.fi/WBC.snowAndIceOnTrees",
+"@type": "@id"
+},
+"pineConesAtCensus": {
+"@id": "http://tun.fi/WBC.pineConesAtCensus",
+"@type": "@id"
+},
+"spruceConesAtCensus": {
+"@id": "http://tun.fi/WBC.spruceConesAtCensus",
+"@type": "@id"
+},
+"meanTemperature": {
+"@id": "http://tun.fi/WBC.meanTemperature",
+"@type": "xsd:integer"
+},
+"iceCover": {
+"@id": "http://tun.fi/WBC.iceCover",
+"@type": "@id"
+},
+"waterbodies": {
+"@id": "http://tun.fi/WBC.waterbodies",
+"@type": "@id"
+},
+"snowCover": {
+"@id": "http://tun.fi/WBC.snowCover",
+"@type": "@id"
+},
+"cloudAndRain": {
+"@id": "http://tun.fi/WBC.cloudAndRain",
+"@type": "@id"
+},
+"visibility": {
+"@id": "http://tun.fi/WBC.visibility",
+"@type": "@id"
+},
+"wind": {
+"@id": "http://tun.fi/WBC.wind",
+"@type": "@id"
+},
+"batCollector": {
+"@id": "http://tun.fi/MY.batCollector",
+"@type": "@id"
+},
+"CARSPIonAlder": {
+"@id": "http://tun.fi/WBC.CARSPIonAlder",
+"@type": "xsd:nonNegativeInteger"
+},
+"CARSPIonBirch": {
+"@id": "http://tun.fi/WBC.CARSPIonBirch",
+"@type": "xsd:nonNegativeInteger"
+},
+"ACAFLAonGround": {
+"@id": "http://tun.fi/WBC.ACAFLAonGround",
+"@type": "xsd:nonNegativeInteger"
+},
+"ACAFLAonPine": {
+"@id": "http://tun.fi/WBC.ACAFLAonPine",
+"@type": "xsd:nonNegativeInteger"
+},
+"ACAFLAonSpruce": {
+"@id": "http://tun.fi/WBC.ACAFLAonSpruce",
+"@type": "xsd:nonNegativeInteger"
+},
+"ACAFLAonAlder": {
+"@id": "http://tun.fi/WBC.ACAFLAonAlder",
+"@type": "xsd:nonNegativeInteger"
+},
+"ACAFLAonBirch": {
+"@id": "http://tun.fi/WBC.ACAFLAonBirch",
+"@type": "xsd:nonNegativeInteger"
+},
+"CARSPIonPine": {
+"@id": "http://tun.fi/WBC.CARSPIonPine",
+"@type": "xsd:nonNegativeInteger"
+},
+"CARSPIonSpruce": {
+"@id": "http://tun.fi/WBC.CARSPIonSpruce",
+"@type": "xsd:nonNegativeInteger"
+},
+"CARSPIonGround": {
+"@id": "http://tun.fi/WBC.CARSPIonGround",
+"@type": "xsd:nonNegativeInteger"
+},
+"invasiveControlWorkHours": {
+"@id": "http://tun.fi/MY.invasiveControlWorkHours",
+"@type": "xsd:nonNegativeInteger"
+},
+"lineTransectSegmentMetersEnd": {
+"@id": "http://tun.fi/MY.lineTransectSegmentMetersEnd",
+"@type": "xsd:nonNegativeInteger"
+},
+"lineTransectSegmentMetersStart": {
+"@id": "http://tun.fi/MY.lineTransectSegmentMetersStart",
+"@type": "xsd:nonNegativeInteger"
+},
+"lineTransectSegmentCounted": {
+"@id": "http://tun.fi/MY.lineTransectSegmentCounted",
+"@type": "xsd:boolean"
+},
+"LOXIAonGround": {
+"@id": "http://tun.fi/WBC.LOXIAonGround",
+"@type": "xsd:nonNegativeInteger"
+},
+"LOXIAonPine": {
+"@id": "http://tun.fi/WBC.LOXIAonPine",
+"@type": "xsd:nonNegativeInteger"
+},
+"LOXIAonSpruce": {
+"@id": "http://tun.fi/WBC.LOXIAonSpruce",
+"@type": "xsd:nonNegativeInteger"
+},
+"LOXIAonAlder": {
+"@id": "http://tun.fi/WBC.LOXIAonAlder",
+"@type": "xsd:nonNegativeInteger"
+},
+"LOXIAonBirch": {
+"@id": "http://tun.fi/WBC.LOXIAonBirch",
+"@type": "xsd:nonNegativeInteger"
+},
+"invasiveControlOtherExpensesInEuros": {
+"@id": "http://tun.fi/MY.invasiveControlOtherExpensesInEuros",
+"@type": "xsd:nonNegativeInteger"
+},
+"taxonCensusType": {
+"@id": "http://tun.fi/MY.taxonCensusType",
+"@type": "@id"
+},
+"censusTaxonID": {
+"@id": "http://tun.fi/MY.censusTaxonID",
+"@type": "@id"
+},
+"tarsusLengthMillimeters": {
+"@id": "http://tun.fi/MY.tarsusLengthMillimeters",
+"@type": "xsd:decimal"
+},
+"beakMillimeters": {
+"@id": "http://tun.fi/MY.beakMillimeters",
+"@type": "xsd:decimal"
+},
+"gonadMillimeters": {
+"@id": "http://tun.fi/MY.gonadMillimeters",
+"@type": "xsd:decimal"
+},
+"totalLengthMillimeters": {
+"@id": "http://tun.fi/MY.totalLengthMillimeters",
+"@type": "xsd:decimal"
+},
+"totalLengthCentimeters": {
+"@id": "http://tun.fi/MY.totalLengthCentimeters",
+"@type": "xsd:decimal"
+},
+"bodyMillimeters": {
+"@id": "http://tun.fi/MY.bodyMillimeters",
+"@type": "xsd:decimal"
+},
+"bodyCentimeters": {
+"@id": "http://tun.fi/MY.bodyCentimeters",
+"@type": "xsd:decimal"
+},
+"tailMillimeters": {
+"@id": "http://tun.fi/MY.tailMillimeters",
+"@type": "xsd:decimal"
+},
+"tailCentimeters": {
+"@id": "http://tun.fi/MY.tailCentimeters",
+"@type": "xsd:decimal"
+},
+"weightGrams": {
+"@id": "http://tun.fi/MY.weightGrams",
+"@type": "xsd:decimal"
+},
+"weightKilograms": {
+"@id": "http://tun.fi/MY.weightKilograms",
+"@type": "xsd:decimal"
+},
+"wingMillimeters": {
+"@id": "http://tun.fi/MY.wingMillimeters",
+"@type": "xsd:decimal"
+},
+"earLengthMillimeters": {
+"@id": "http://tun.fi/MY.earLengthMillimeters",
+"@type": "xsd:decimal"
+},
+"footLengthMillimeters": {
+"@id": "http://tun.fi/MY.footLengthMillimeters",
+"@type": "xsd:decimal"
+},
+"embryoCount": {
+"@id": "http://tun.fi/MY.embryoCount",
+"@type": "xsd:decimal"
+},
+"uterineScarCount": {
+"@id": "http://tun.fi/MY.uterineScarCount",
+"@type": "xsd:decimal"
+},
+"follicleDiameterMillimeters": {
+"@id": "http://tun.fi/MY.follicleDiameterMillimeters",
+"@type": "xsd:decimal"
+},
+"wingMaxMillimeters": {
+"@id": "http://tun.fi/MY.wingMaxMillimeters",
+"@type": "xsd:decimal"
+},
+"wingMinMillimeters": {
+"@id": "http://tun.fi/MY.wingMinMillimeters",
+"@type": "xsd:decimal"
+},
+"DNAVolumeMicroliters": {
+"@id": "http://tun.fi/MY.DNAVolumeMicroliters",
+"@type": "xsd:decimal"
+},
+"DNARatioOfAbsorbance260And280": {
+"@id": "http://tun.fi/MY.DNARatioOfAbsorbance260And280",
+"@type": "xsd:decimal"
+},
+"DNAConcentrationNgPerMicroliter": {
+"@id": "http://tun.fi/MY.DNAConcentrationNgPerMicroliter",
+"@type": "xsd:decimal"
+},
+"forearmMillimeters": {
+"@id": "http://tun.fi/MY.forearmMillimeters",
+"@type": "xsd:decimal"
+},
+"runningWaterInVicinity": {
+"@id": "http://tun.fi/MY.runningWaterInVicinity",
+"@type": "xsd:boolean"
+},
+"autocompleteSelectedTaxonID": {
+"@id": "http://tun.fi/MY.autocompleteSelectedTaxonID",
+"@type": "xsd:string"
+},
+"individualCountBiotopeH": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeH",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeG": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeG",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeF": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeF",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeE": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeE",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeD": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeD",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeC": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeC",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeB": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeB",
+"@type": "xsd:nonNegativeInteger"
+},
+"individualCountBiotopeA": {
+"@id": "http://tun.fi/WBC.individualCountBiotopeA",
+"@type": "xsd:nonNegativeInteger"
+},
+"lineTransectRouteFieldType": {
+"@id": "http://tun.fi/MY.lineTransectRouteFieldType",
+"@type": "@id"
+},
+"lineTransectObsType": {
+"@id": "http://tun.fi/MY.lineTransectObsType",
+"@type": "@id"
+},
+"geometry": {
+"@id": "http://tun.fi/MY.geometry",
+"@type": "@id"
+},
+"substrate": {
+"@id": "http://tun.fi/MY.substrate",
+"@type": "xsd:string"
+},
+"habitatIUCN": {
+"@id": "http://tun.fi/MY.habitatIUCN",
+"@type": "xsd:string"
+},
+"habitatDescription": {
+"@id": "http://tun.fi/MY.habitatDescription",
+"@type": "xsd:string"
+},
+"typeStatus": {
+"@id": "http://tun.fi/MY.typeStatus",
+"@type": "@id"
+},
+"typeSpecies": {
+"@id": "http://tun.fi/MY.typeSpecies",
+"@type": "xsd:string"
+},
+"typeAuthor": {
+"@id": "http://tun.fi/MY.typeAuthor",
+"@type": "xsd:string"
+},
+"typeSubspecies": {
+"@id": "http://tun.fi/MY.typeSubspecies",
+"@type": "xsd:string"
+},
+"typeSubspeciesAuthor": {
+"@id": "http://tun.fi/MY.typeSubspeciesAuthor",
+"@type": "xsd:string"
+},
+"typif": {
+"@id": "http://tun.fi/MY.typif",
+"@type": "xsd:string"
+},
+"typifDate": {
+"@id": "http://tun.fi/MY.typifDate",
+"@type": "xsd:string"
+},
+"typeVerification": {
+"@id": "http://tun.fi/MY.typeVerification",
+"@type": "@id"
+},
+"typeBasionymePubl": {
+"@id": "http://tun.fi/MY.typeBasionymePubl",
+"@type": "xsd:string"
+},
+"typePubl": {
+"@id": "http://tun.fi/MY.typePubl",
+"@type": "xsd:string"
+},
+"typeNotes": {
+"@id": "http://tun.fi/MY.typeNotes",
+"@type": "xsd:string"
+},
+"typeSeriesID": {
+"@id": "http://tun.fi/MY.typeSeriesID",
+"@type": "xsd:string"
+},
+"publicityRestrictions": {
+"@id": "http://tun.fi/MZ.publicityRestrictions",
+"@type": "@id"
+},
+"sortOrder": {
+"@id": "http://id.herb.oulu.fi/sortOrder",
+"@type": "xsd:integer"
+},
+"taxonURI": {
+"@id": "http://tun.fi/MY.taxonURI",
+"@type": "@id"
+},
+"taxonSpecifier": {
+"@id": "http://tun.fi/MY.taxonSpecifier",
+"@type": "xsd:string"
+},
+"isTaxonGroup": {
+"@id": "http://tun.fi/MY.isTaxonGroup",
+"@type": "xsd:boolean"
+},
+"detMethod": {
+"@id": "http://tun.fi/MY.detMethod",
+"@type": "@id"
+},
+"identificationBasis": {
+"@id": "http://tun.fi/MY.identificationBasis",
+"@type": "@id"
+},
+"identificationDate": {
+"@id": "http://tun.fi/MY.identificationDate",
+"@type": "xsd:string"
+},
+"taxonRank": {
+"@id": "http://tun.fi/MY.taxonRank",
+"@type": "@id"
+},
+"taxon": {
+"@id": "http://tun.fi/MY.taxon",
+"@type": "xsd:string"
+},
+"author": {
+"@id": "http://tun.fi/MY.author",
+"@type": "xsd:string"
+},
+"infraRank": {
+"@id": "http://tun.fi/MY.infraRank",
+"@type": "@id"
+},
+"infraEpithet": {
+"@id": "http://tun.fi/MY.infraEpithet",
+"@type": "xsd:string"
+},
+"infraAuthor": {
+"@id": "http://tun.fi/MY.infraAuthor",
+"@type": "xsd:string"
+},
+"taxonVerbatim": {
+"@id": "http://tun.fi/MY.taxonVerbatim",
+"@type": "xsd:string"
+},
+"genusQualifier": {
+"@id": "http://tun.fi/MY.genusQualifier",
+"@type": "xsd:string"
+},
+"speciesQualifier": {
+"@id": "http://tun.fi/MY.speciesQualifier",
+"@type": "xsd:string"
+},
+"det": {
+"@id": "http://tun.fi/MY.det",
+"@type": "xsd:string"
+},
+"detDate": {
+"@id": "http://tun.fi/MY.detDate",
+"@type": "xsd:string"
+},
+"taxonID": {
+"@id": "http://tun.fi/MY.taxonID",
+"@type": "xsd:string"
+},
+"detVerbatim": {
+"@id": "http://tun.fi/MY.detVerbatim",
+"@type": "xsd:string"
+},
+"sec": {
+"@id": "http://tun.fi/MY.sec",
+"@type": "xsd:string"
+},
+"identificationNotes": {
+"@id": "http://tun.fi/MY.identificationNotes",
+"@type": "xsd:string"
+},
+"preferredIdentification": {
+"@id": "http://tun.fi/MY.preferredIdentification",
+"@type": "xsd:string"
+},
+"associatedObservationTaxa": {
+"@id": "http://tun.fi/MY.associatedObservationTaxa",
+"@type": "xsd:string"
+},
+"infrasubspecificSubdivision": {
+"@id": "http://tun.fi/MY.infrasubspecificSubdivision",
+"@type": "xsd:string"
+},
+"individualCount": {
+"@id": "http://tun.fi/MY.individualCount",
+"@type": "xsd:nonNegativeInteger"
+},
+"informalNameString": {
+"@id": "http://tun.fi/MY.informalNameString",
+"@type": "xsd:string"
+},
+"abundanceString": {
+"@id": "http://tun.fi/MY.abundanceString",
+"@type": "xsd:string"
+},
+"hasSubUnit": {
+"@id": "http://tun.fi/MY.hasSubUnit",
+"@type": "@id"
+},
+"hasIdentification": {
+"@id": "http://tun.fi/MY.hasIdentification",
+"@type": "@id"
+},
+"samplingMethodNotes": {
+"@id": "http://tun.fi/MY.samplingMethodNotes",
+"@type": "xsd:string"
+},
+"images": {
+"@id": "http://tun.fi/MZ.images",
+"@type": "@id"
+},
+"keywords": {
+"@id": "http://tun.fi/MY.keywords",
+"@type": "xsd:string"
+},
+"likelyMigrant": {
+"@id": "http://tun.fi/MY.likelyMigrant",
+"@type": "xsd:boolean"
+},
+"informalTaxonGroup": {
+"@id": "http://tun.fi/MY.informalTaxonGroup",
+"@type": "@id"
+},
+"checklistID": {
+"@id": "http://tun.fi/MY.checklistID",
+"@type": "@id"
+},
+"adultIndividualCount": {
+"@id": "http://tun.fi/MY.adultIndividualCount",
+"@type": "xsd:integer"
+},
+"juvenileIndividualCount": {
+"@id": "http://tun.fi/MY.juvenileIndividualCount",
+"@type": "xsd:integer"
+},
+"informalTaxonGroups": {
+"@id": "http://tun.fi/MY.informalTaxonGroups",
+"@type": "@id"
+},
+"substrateSpeciesInformalNameString": {
+"@id": "http://tun.fi/MY.substrateSpeciesInformalNameString",
+"@type": "xsd:string"
+},
+"batBehavior": {
+"@id": "http://tun.fi/MY.batBehavior",
+"@type": "@id"
+},
+"birdAge": {
+"@id": "http://tun.fi/MY.birdAge",
+"@type": "@id"
+},
+"birdPlumage": {
+"@id": "http://tun.fi/MY.birdPlumage",
+"@type": "@id"
+},
+"birdBehavior": {
+"@id": "http://tun.fi/MY.birdBehavior",
+"@type": "xsd:string"
+},
+"movingDirection": {
+"@id": "http://tun.fi/MY.movingDirection",
+"@type": "@id"
+},
+"distance": {
+"@id": "http://tun.fi/MY.distance",
+"@type": "@id"
+},
+"areaInSquareMeters": {
+"@id": "http://tun.fi/MY.areaInSquareMeters",
+"@type": "xsd:nonNegativeInteger"
+},
+"wild": {
+"@id": "http://tun.fi/MY.wild",
+"@type": "@id"
+},
+"femaleIndividualCount": {
+"@id": "http://tun.fi/MY.femaleIndividualCount",
+"@type": "xsd:nonNegativeInteger"
+},
+"hostInformalNameString": {
+"@id": "http://tun.fi/MY.hostInformalNameString",
+"@type": "xsd:string"
+},
+"maleIndividualCount": {
+"@id": "http://tun.fi/MY.maleIndividualCount",
+"@type": "xsd:nonNegativeInteger"
+},
+"tailInMillimeters": {
+"@id": "http://tun.fi/MY.tailInMillimeters",
+"@type": "xsd:string"
+},
+"substrateSpeciesID": {
+"@id": "http://tun.fi/MY.substrateSpeciesID",
+"@type": "@id"
+},
+"unitGathering": {
+"@id": "http://tun.fi/MY.unitGathering",
+"@container": "@set"
+},
+"atlasCode": {
+"@id": "http://tun.fi/MY.atlasCode",
+"@type": "@id"
+},
+"ankleInMillimeters": {
+"@id": "http://tun.fi/MY.ankleInMillimeters",
+"@type": "xsd:string"
+},
+"movingStatus": {
+"@id": "http://tun.fi/MY.movingStatus",
+"@type": "xsd:string"
+},
+"lengthInMillimeters": {
+"@id": "http://tun.fi/MY.lengthInMillimeters",
+"@type": "xsd:string"
+},
+"gonadInMillimeters": {
+"@id": "http://tun.fi/MY.gonadInMillimeters",
+"@type": "xsd:string"
+},
+"beakInMillimeters": {
+"@id": "http://tun.fi/MY.beakInMillimeters",
+"@type": "xsd:string"
+},
+"twitched": {
+"@id": "http://tun.fi/MY.twitched",
+"@type": "xsd:boolean"
+},
+"wingInMillimeters": {
+"@id": "http://tun.fi/MY.wingInMillimeters",
+"@type": "xsd:string"
+},
+"nativeStatus": {
+"@id": "http://tun.fi/MY.nativeStatus",
+"@type": "@id"
+},
+"substrateSpecies": {
+"@id": "http://tun.fi/MY.substrateSpecies",
+"@type": "xsd:string"
+},
+"unitType": {
+"@id": "http://tun.fi/MY.unitType",
+"@type": "xsd:string"
+},
+"alive": {
+"@id": "http://tun.fi/MY.alive",
+"@type": "xsd:boolean"
+},
+"substrateNotes": {
+"@id": "http://tun.fi/MY.substrateNotes",
+"@type": "xsd:string"
+},
+"hostID": {
+"@id": "http://tun.fi/MY.hostID",
+"@type": "@id"
+},
+"taste": {
+"@id": "http://tun.fi/MY.taste",
+"@type": "@id"
+},
+"tasteNotes": {
+"@id": "http://tun.fi/MY.tasteNotes",
+"@type": "xsd:string"
+},
+"smell": {
+"@id": "http://tun.fi/MY.smell",
+"@type": "@id"
+},
+"smellNotes": {
+"@id": "http://tun.fi/MY.smellNotes",
+"@type": "xsd:string"
+},
+"taxonConfidence": {
+"@id": "http://tun.fi/MY.taxonConfidence",
+"@type": "@id"
+},
+"substrateClassification": {
+"@id": "http://tun.fi/MY.substrateClassification",
+"@type": "@id"
+},
+"weightInGrams": {
+"@id": "http://tun.fi/MY.weightInGrams",
+"@type": "xsd:string"
+},
+"shortHandText": {
+"@id": "http://tun.fi/MY.shortHandText",
+"@type": "xsd:string"
+},
+"plantLifeStage": {
+"@id": "http://tun.fi/MY.plantLifeStage",
+"@type": "@id"
+},
+"substrateDecayStage": {
+"@id": "http://tun.fi/MY.substrateDecayStage",
+"@type": "@id"
+},
+"unitFact": {
+"@id": "http://tun.fi/MY.unitFact",
+"@container": "@set"
+},
+"broodSize": {
+"@id": "http://tun.fi/MY.broodSize",
+"@type": "xsd:positiveInteger"
+},
+"pairCount": {
+"@id": "http://tun.fi/MY.pairCount",
+"@type": "xsd:positiveInteger"
+},
+"breeding": {
+"@id": "http://tun.fi/MY.breeding",
+"@type": "xsd:boolean"
+},
+"plantStatusCode": {
+"@id": "http://tun.fi/MY.plantStatusCode",
+"@type": "@id"
+},
+"substrateTreeClassification": {
+"@id": "http://tun.fi/MY.substrateTreeClassification",
+"@type": "@id"
+},
+"recordBasis": {
+"@id": "http://tun.fi/MY.recordBasis",
+"@type": "@id"
+},
+"recordParts": {
+"@id": "http://tun.fi/MY.recordParts",
+"@type": "@id"
+},
+"lifeStage": {
+"@id": "http://tun.fi/MY.lifeStage",
+"@type": "@id"
+},
+"lifeStageDescription": {
+"@id": "http://tun.fi/MY.lifeStageDescription",
+"@type": "xsd:string"
+},
+"causeOfDeath": {
+"@id": "http://tun.fi/MY.causeOfDeath",
+"@type": "xsd:string"
+},
+"sex": {
+"@id": "http://tun.fi/MY.sex",
+"@type": "@id"
+},
+"age": {
+"@id": "http://tun.fi/MY.age",
+"@type": "xsd:string"
+},
+"sexNotes": {
+"@id": "http://tun.fi/MY.sexNotes",
+"@type": "xsd:string"
+},
+"count": {
+"@id": "http://tun.fi/MY.count",
+"@type": "xsd:string"
+},
+"populationAbundance": {
+"@id": "http://tun.fi/MY.populationAbundance",
+"@type": "xsd:string"
+},
+"DBH": {
+"@id": "http://tun.fi/MY.DBH",
+"@type": "xsd:string"
+},
+"decayStage": {
+"@id": "http://tun.fi/MY.decayStage",
+"@type": "xsd:string"
+},
+"chemistry": {
+"@id": "http://tun.fi/MY.chemistry",
+"@type": "xsd:string"
+},
+"macroscopy": {
+"@id": "http://tun.fi/MY.macroscopy",
+"@type": "xsd:string"
+},
+"microscopy": {
+"@id": "http://tun.fi/MY.microscopy",
+"@type": "xsd:string"
+},
+"notes": {
+"@id": "http://tun.fi/MY.notes",
+"@type": "xsd:string"
+},
+"preparations": {
+"@id": "http://tun.fi/MY.preparations",
+"@type": "xsd:string"
+},
+"ring": {
+"@id": "http://tun.fi/MY.ring",
+"@type": "xsd:string"
+},
+"ageNotes": {
+"@id": "http://tun.fi/MY.ageNotes",
+"@type": "xsd:string"
+},
+"earliestEpochOrLowestSeries": {
+"@id": "http://tun.fi/MY.earliestEpochOrLowestSeries",
+"@type": "@id"
+},
+"latestEpochOrHighestSeries": {
+"@id": "http://tun.fi/MY.latestEpochOrHighestSeries",
+"@type": "@id"
+},
+"mutant": {
+"@id": "http://tun.fi/MY.mutant",
+"@type": "xsd:string"
+},
+"genotype": {
+"@id": "http://tun.fi/MY.genotype",
+"@type": "xsd:string"
+},
+"growthTemperature": {
+"@id": "http://tun.fi/MY.growthTemperature",
+"@type": "xsd:string"
+},
+"growthMediumName": {
+"@id": "http://tun.fi/MY.growthMediumName",
+"@type": "xsd:string"
+},
+"DNASampleLocation": {
+"@id": "http://tun.fi/MY.DNASampleLocation",
+"@type": "xsd:string"
+},
+"growthOtherConditions": {
+"@id": "http://tun.fi/MY.growthOtherConditions",
+"@type": "xsd:string"
+},
+"additionalIDs": {
+"@id": "http://tun.fi/MY.additionalIDs",
+"@type": "xsd:string"
+},
+"provenance": {
+"@id": "http://tun.fi/MY.provenance",
+"@type": "@id"
+},
+"preservation": {
+"@id": "http://tun.fi/MY.preservation",
+"@type": "@id"
+},
+"samplingMethod": {
+"@id": "http://tun.fi/MY.samplingMethod",
+"@type": "@id"
+},
+"microbiologicalRiskGroup": {
+"@id": "http://tun.fi/MY.microbiologicalRiskGroup",
+"@type": "@id"
+},
+"measurement": {
+"@id": "http://tun.fi/MY.measurement",
+"@container": "@set"
+},
+"identification": {
+"@id": "http://tun.fi/MY.identification",
+"@type": "@id"
+},
+"typeSpecimen": {
+"@id": "http://tun.fi/MY.typeSpecimen",
+"@type": "@id"
+},
+"identifications": {
+"@id": "http://tun.fi/MY.identifications",
+"@container": "@set"
+},
+"typeSpecimens": {
+"@id": "http://tun.fi/MY.typeSpecimens",
+"@container": "@set"
+},
+"areaDetail": {
+"@id": "http://tun.fi/MY.areaDetail",
+"@type": "xsd:string"
+},
+"province": {
+"@id": "http://tun.fi/MY.province",
+"@type": "xsd:string"
+},
+"eventDate": {
+"@id": "http://tun.fi/MY.eventDate",
+"@type": "xsd:string"
+},
+"hasUnit": {
+"@id": "http://tun.fi/MY.hasUnit",
+"@type": "@id"
+},
+"projectTitle": {
+"@id": "http://tun.fi/MY.projectTitle",
+"@type": "xsd:string"
+},
+"gatheringType": {
+"@id": "http://tun.fi/MY.gatheringType",
+"@type": "@id"
+},
+"invasiveControlMethodsDescription": {
+"@id": "http://tun.fi/MY.invasiveControlMethodsDescription",
+"@type": "xsd:string"
+},
+"invasiveControlOpen": {
+"@id": "http://tun.fi/MY.invasiveControlOpen",
+"@type": "xsd:boolean"
+},
+"invasiveControlDangerousDescription": {
+"@id": "http://tun.fi/MY.invasiveControlDangerousDescription",
+"@type": "xsd:string"
+},
+"invasiveControlEffectivenessNotes": {
+"@id": "http://tun.fi/MY.invasiveControlEffectivenessNotes",
+"@type": "xsd:string"
+},
+"invasiveControlAreaKnown": {
+"@id": "http://tun.fi/MY.invasiveControlAreaKnown",
+"@type": "xsd:boolean"
+},
+"invasiveControlOpenDescription": {
+"@id": "http://tun.fi/MY.invasiveControlOpenDescription",
+"@type": "xsd:string"
+},
+"relativeHumidity": {
+"@id": "http://tun.fi/MY.relativeHumidity",
+"@type": "xsd:nonNegativeInteger"
+},
+"batHabitat": {
+"@id": "http://tun.fi/MY.batHabitat",
+"@type": "@id"
+},
+"invasiveControlMethods": {
+"@id": "http://tun.fi/MY.invasiveControlMethods",
+"@type": "@id"
+},
+"trapCount": {
+"@id": "http://tun.fi/MY.trapCount",
+"@type": "xsd:integer"
+},
+"temperature": {
+"@id": "http://tun.fi/MY.temperature",
+"@type": "xsd:integer"
+},
+"habitat": {
+"@id": "http://tun.fi/MY.habitat",
+"@type": "@id"
+},
+"predominantTree": {
+"@id": "http://tun.fi/MY.predominantTree",
+"@type": "@id"
+},
+"controlActivitiesNotes": {
+"@id": "http://tun.fi/MY.controlActivitiesNotes",
+"@type": "xsd:string"
+},
+"weather": {
+"@id": "http://tun.fi/MY.weather",
+"@type": "xsd:string"
+},
+"invasiveControlEffectiveness": {
+"@id": "http://tun.fi/MY.invasiveControlEffectiveness",
+"@type": "@id"
+},
+"invasiveControlTaxon": {
+"@id": "http://tun.fi/MY.invasiveControlTaxon",
+"@type": "@id"
+},
+"habitatAttributes": {
+"@id": "http://tun.fi/MY.habitatAttributes",
+"@type": "@id"
+},
+"dynamicProperties": {
+"@id": "http://tun.fi/MY.dynamicProperties",
+"@type": "xsd:string"
+},
+"observationDays": {
+"@id": "http://tun.fi/MY.observationDays",
+"@type": "xsd:integer"
+},
+"skipped": {
+"@id": "http://tun.fi/MY.skipped",
+"@type": "xsd:boolean"
+},
+"taxonCensus": {
+"@id": "http://tun.fi/MY.taxonCensus",
+"@container": "@set"
+},
+"gatheringFact": {
+"@id": "http://tun.fi/MY.gatheringFact",
+"@container": "@set"
+},
+"observationMinutes": {
+"@id": "http://tun.fi/MY.observationMinutes",
+"@type": "xsd:positiveInteger"
+},
+"namedPlaceID": {
+"@id": "http://tun.fi/MY.namedPlaceID",
+"@type": "@id"
+},
+"invasiveControlDangerous": {
+"@id": "http://tun.fi/MY.invasiveControlDangerous",
+"@type": "xsd:boolean"
+},
+"legVerbatim": {
+"@id": "http://tun.fi/MY.legVerbatim",
+"@type": "xsd:string"
+},
+"dateVerbatim": {
+"@id": "http://tun.fi/MY.dateVerbatim",
+"@type": "xsd:string"
+},
+"coordinatesGridYKJ": {
+"@id": "http://tun.fi/MY.coordinatesGridYKJ",
+"@type": "xsd:string"
+},
+"coordinatesVerbatim": {
+"@id": "http://tun.fi/MY.coordinatesVerbatim",
+"@type": "xsd:string"
+},
+"latitude": {
+"@id": "http://tun.fi/MY.latitude",
+"@type": "xsd:string"
+},
+"longitude": {
+"@id": "http://tun.fi/MY.longitude",
+"@type": "xsd:string"
+},
+"coordinateSystem": {
+"@id": "http://tun.fi/MY.coordinateSystem",
+"@type": "@id"
+},
+"coordinateSource": {
+"@id": "http://tun.fi/MY.coordinateSource",
+"@type": "@id"
+},
+"georeferenceSource": {
+"@id": "http://tun.fi/MY.georeferenceSource",
+"@type": "@id"
+},
+"coordinateRadius": {
+"@id": "http://tun.fi/MY.coordinateRadius",
+"@type": "xsd:string"
+},
+"alt": {
+"@id": "http://tun.fi/MY.alt",
+"@type": "xsd:string"
+},
+"depth": {
+"@id": "http://tun.fi/MY.depth",
+"@type": "xsd:string"
+},
+"AFEQuadrat": {
+"@id": "http://tun.fi/MY.AFEQuadrat",
+"@type": "xsd:string"
+},
+"UTMQuadrat": {
+"@id": "http://tun.fi/MY.UTMQuadrat",
+"@type": "xsd:string"
+},
+"coordinateNotes": {
+"@id": "http://tun.fi/MY.coordinateNotes",
+"@type": "xsd:string"
+},
+"localityVerbatim": {
+"@id": "http://tun.fi/MY.localityVerbatim",
+"@type": "xsd:string"
+},
+"country": {
+"@id": "http://tun.fi/MY.country",
+"@type": "xsd:string"
+},
+"higherGeography": {
+"@id": "http://tun.fi/MY.higherGeography",
+"@type": "xsd:string"
+},
+"biologicalProvince": {
+"@id": "http://tun.fi/MY.biologicalProvince",
+"@type": "xsd:string"
+},
+"forestVegetationZone": {
+"@id": "http://tun.fi/MY.forestVegetationZone",
+"@type": "@id"
+},
+"administrativeProvince": {
+"@id": "http://tun.fi/MY.administrativeProvince",
+"@type": "xsd:string"
+},
+"county": {
+"@id": "http://tun.fi/MY.county",
+"@type": "xsd:string"
+},
+"municipality": {
+"@id": "http://tun.fi/MY.municipality",
+"@type": "xsd:string"
+},
+"locality": {
+"@id": "http://tun.fi/MY.locality",
+"@type": "xsd:string"
+},
+"localityID": {
+"@id": "http://tun.fi/MY.localityID",
+"@type": "xsd:string"
+},
+"localityDescription": {
+"@id": "http://tun.fi/MY.localityDescription",
+"@type": "xsd:string"
+},
+"habitatClassification": {
+"@id": "http://tun.fi/MY.habitatClassification",
+"@type": "xsd:string"
+},
+"associatedSpecimenTaxa": {
+"@id": "http://tun.fi/MY.associatedSpecimenTaxa",
+"@type": "xsd:string"
+},
+"collectingEventName": {
+"@id": "http://tun.fi/MY.collectingEventName",
+"@type": "xsd:string"
+},
+"wgs84Latitude": {
+"@id": "http://tun.fi/MY.wgs84Latitude",
+"@type": "xsd:string"
+},
+"wgs84Longitude": {
+"@id": "http://tun.fi/MY.wgs84Longitude",
+"@type": "xsd:string"
+},
+"unit": {
+"@id": "http://tun.fi/MY.unit",
+"@type": "@id"
+},
+"units": {
+"@id": "http://tun.fi/MY.units",
+"@container": "@set"
+},
+"dateCreated": {
+"@id": "http://tun.fi/MZ.dateCreated",
+"@type": "xsd:dateTime"
+},
+"locked": {
+"@id": "http://tun.fi/MY.locked",
+"@type": "xsd:boolean"
+},
+"caption": {
+"@id": "http://tun.fi/MY.caption",
+"@type": "xsd:string"
+},
+"dataOrigin": {
+"@id": "http://tun.fi/MY.dataOrigin",
+"@type": "@id"
+},
+"acknowledgedWarnings": {
+"@id": "http://tun.fi/MY.acknowledgedWarnings",
+"@type": "@id"
+},
+"serialNumber": {
+"@id": "http://tun.fi/MY.serialNumber",
+"@type": "xsd:string"
+},
+"hasGathering": {
+"@id": "http://tun.fi/MY.hasGathering",
+"@type": "@id"
+},
+"dateEdited": {
+"@id": "http://tun.fi/MZ.dateEdited",
+"@type": "xsd:dateTime"
+},
+"editor": {
+"@id": "http://tun.fi/MY.editor",
+"@type": "xsd:string"
+},
+"creator": {
+"@id": "http://tun.fi/MZ.creator",
+"@type": "@id"
+},
+"templateDescription": {
+"@id": "http://tun.fi/MY.templateDescription",
+"@type": "xsd:string"
+},
+"scheduledForDeletion": {
+"@id": "http://tun.fi/MZ.scheduledForDeletion",
+"@type": "xsd:boolean"
+},
+"deviceID": {
+"@id": "http://tun.fi/MY.deviceID",
+"@type": "xsd:string"
+},
+"temp": {
+"@id": "http://tun.fi/MY.temp",
+"@type": "xsd:boolean"
+},
+"editors": {
+"@id": "http://tun.fi/MZ.editors",
+"@type": "@id"
+},
+"gatheringEvent": {
+"@id": "http://tun.fi/MY.gatheringEvent",
+"@container": "@set"
+},
+"formID": {
+"@id": "http://tun.fi/MY.formID",
+"@type": "xsd:string"
+},
+"sourceID": {
+"@id": "http://tun.fi/MY.sourceID",
+"@type": "@id"
+},
+"isTemplate": {
+"@id": "http://tun.fi/MY.isTemplate",
+"@type": "xsd:boolean"
+},
+"templateName": {
+"@id": "http://tun.fi/MY.templateName",
+"@type": "xsd:string"
+},
+"owner": {
+"@id": "http://tun.fi/MZ.owner",
+"@type": "@id"
+},
+"collectionID": {
+"@id": "http://tun.fi/MY.collectionID",
+"@type": "@id"
+},
+"datasetID": {
+"@id": "http://tun.fi/MY.datasetID",
+"@type": "@id"
+},
+"primaryDataLocation": {
+"@id": "http://tun.fi/MY.primaryDataLocation",
+"@type": "xsd:string"
+},
+"status": {
+"@id": "http://tun.fi/MY.status",
+"@type": "@id"
+},
+"condition": {
+"@id": "http://tun.fi/MY.condition",
+"@type": "xsd:string"
+},
+"originalSpecimenID": {
+"@id": "http://tun.fi/MY.originalSpecimenID",
+"@type": "xsd:string"
+},
+"labelsVerbatim": {
+"@id": "http://tun.fi/MY.labelsVerbatim",
+"@type": "xsd:string"
+},
+"cladBookID": {
+"@id": "http://tun.fi/MY.cladBookID",
+"@type": "xsd:string"
+},
+"cladSpecimenID": {
+"@id": "http://tun.fi/MY.cladSpecimenID",
+"@type": "xsd:string"
+},
+"cladVerbatim": {
+"@id": "http://tun.fi/MY.cladVerbatim",
+"@type": "xsd:string"
+},
+"verificationStatus": {
+"@id": "http://tun.fi/MY.verificationStatus",
+"@type": "@id"
+},
+"documentLocation": {
+"@id": "http://tun.fi/MY.documentLocation",
+"@type": "xsd:string"
+},
+"legID": {
+"@id": "http://tun.fi/MY.legID",
+"@type": "xsd:string"
+},
+"genbank": {
+"@id": "http://tun.fi/MY.genbank",
+"@type": "xsd:string"
+},
+"bold": {
+"@id": "http://tun.fi/MY.bold",
+"@type": "xsd:string"
+},
+"dataSource": {
+"@id": "http://tun.fi/MY.dataSource",
+"@type": "xsd:string"
+},
+"publication": {
+"@id": "http://tun.fi/MY.publication",
+"@type": "xsd:string"
+},
+"separatedFrom": {
+"@id": "http://tun.fi/MY.separatedFrom",
+"@type": "xsd:string"
+},
+"separatedTo": {
+"@id": "http://tun.fi/MY.separatedTo",
+"@type": "xsd:string"
+},
+"duplicatesIn": {
+"@id": "http://tun.fi/MY.duplicatesIn",
+"@type": "xsd:string"
+},
+"acquiredFrom": {
+"@id": "http://tun.fi/MY.acquiredFrom",
+"@type": "xsd:string"
+},
+"acquisitionDate": {
+"@id": "http://tun.fi/MY.acquisitionDate",
+"@type": "xsd:string"
+},
+"event": {
+"@id": "http://tun.fi/MY.event",
+"@type": "xsd:string"
+},
+"exsiccatum": {
+"@id": "http://tun.fi/MY.exsiccatum",
+"@type": "xsd:string"
+},
+"URL": {
+"@id": "http://tun.fi/MY.URL",
+"@type": "xsd:string"
+},
+"language": {
+"@id": "http://tun.fi/MY.language",
+"@type": "xsd:string"
+},
+"editNotes": {
+"@id": "http://tun.fi/MY.editNotes",
+"@type": "xsd:string"
+},
+"relationship": {
+"@id": "http://tun.fi/MY.relationship",
+"@type": "xsd:string"
+},
+"sampleHistory": {
+"@id": "http://tun.fi/MY.sampleHistory",
+"@type": "xsd:string"
+},
+"IPEN": {
+"@id": "http://tun.fi/MY.IPEN",
+"@type": "xsd:string"
+},
+"voucherSpecimenID": {
+"@id": "http://tun.fi/MY.voucherSpecimenID",
+"@type": "xsd:string"
+},
+"acquiredFromOrganization": {
+"@id": "http://tun.fi/MY.acquiredFromOrganization",
+"@type": "@id"
+},
+"transferAgreement": {
+"@id": "http://tun.fi/MY.transferAgreement",
+"@type": "xsd:string"
+},
+"datatype": {
+"@id": "http://tun.fi/MY.datatype",
+"@type": "xsd:string"
+},
+"entered": {
+"@id": "http://tun.fi/MY.entered",
+"@type": "xsd:string"
+},
+"secureLevel": {
+"@id": "http://tun.fi/MX.secureLevel",
+"@type": "@id"
+},
+"unreliableFields": {
+"@id": "http://tun.fi/MY.unreliableFields",
+"@type": "xsd:string"
+},
+"plannedLocation": {
+"@id": "http://tun.fi/MY.plannedLocation",
+"@type": "xsd:string"
+},
+"cultivationInformation": {
+"@id": "http://tun.fi/MY.cultivationInformation",
+"@type": "xsd:string"
+},
+"transcriberNotes": {
+"@id": "http://tun.fi/MY.transcriberNotes",
+"@type": "xsd:string"
+},
+"privateNotes": {
+"@id": "http://tun.fi/MY.privateNotes",
+"@type": "xsd:string"
+},
+"gathering": {
+"@id": "http://tun.fi/MY.gathering",
+"@type": "@id"
+},
+"gatherings": {
+"@id": "http://tun.fi/MY.gatherings",
+"@container": "@set"
+}
+}
+}

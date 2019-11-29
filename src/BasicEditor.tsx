@@ -109,7 +109,8 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		return property;
 	}
 
-	getPropertiesContext = memoize(() => fetchJSON("http://schema.laji.fi/context/document.jsonld").then(result => result["@context"]))
+	getPropertiesContext = () => Promise.resolve(require("./documentContext")["@context"]);
+	//getPropertiesContext = memoize(() => fetchJSON("http://schema.laji.fi/context/document.jsonld").then(result => result["@context"]))
 
 	getMedataPropertyName(context: {[property: string]: PropertyContext}, property: string): PropertyContext {
 		if (property === "gatherings") {
@@ -120,7 +121,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	getPropertyContextForPath(path: string): Promise<PropertyContext> {
 		return new Promise((resolve, reject) =>
-			this.getPropertiesContext().then(propertiesContext => {
+			this.getPropertiesContext().then((propertiesContext: any) => {
 				const splits = path.split("/");
 				if (splits.length === 1) {
 					return resolve({
