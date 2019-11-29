@@ -4,7 +4,7 @@ import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button, Spinner } from "./components";
-import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp } from "./utils";
+import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise } from "./utils";
 import LajiFormInterface from "./LajiFormInterface";
 import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
 import { Context } from "./Context";
@@ -40,6 +40,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		...fns, [lang]: () => this.setState({lang})
 	}), {} as any);
 	translations: {[key: string]: {[lang in Lang]: string}};
+	schemasPromise: CancellablePromise<any>;
 
 	static defaultProps = {
 		lang: "fi",
@@ -65,6 +66,10 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.updateFromId(this.props.id);
 	}
 
+	componentWillUnmount() {
+		this.schemasPromise?.cancel();
+	}
+
 	componentWillReceiveProps({id, lang}: LajiFormBuilderProps) {
 		lang !== this.props.lang && this.apiClient?.setLang(lang);
 		this.updateFromId(id);
@@ -76,17 +81,22 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				// TODO fix formtest
 				this.setState({master: require(`../forms/${id}.json`)});
 				//this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
-				[["schemas", "schema"], ["schemas", "schema"]].forEach(
-					([stateProp, format]) => this.apiClient.fetchJSON(`/forms/${id}`, {lang: this.props.lang, format: format || stateProp})
-						.then((data: any) => this.setState({id, [stateProp]: data} as Pick<LajiFormBuilderState, "id" | "schemas">))
-				);
+				this.updateSchemas();
 			}
 			);
 		}
 	}
 
+	updateSchemas() {
+		this.schemasPromise?.cancel();
+		const {id} = this.props;
+		const {lang} = this.state;
+		this.schemasPromise = makeCancellable(this.apiClient.fetchJSON(`/forms/${id}`, {lang, format: "schema"})
+			.then((data: any) => this.setState({schemas: data})));
+	}
+
 	onLangChange = (lang: Lang) => {
-		this.setState({lang});
+		this.setState({lang}, this.updateSchemas);
 	}
 
 	render() {
