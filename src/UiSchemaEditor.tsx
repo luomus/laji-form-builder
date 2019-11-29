@@ -76,7 +76,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
 		const formData = {
 			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema)),
-			"$ui:title": this.getFieldName()
+			[`${PREFIX}ui:title`]: this.getFieldName()
 		};
 		const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
 		const formContext = {
@@ -147,11 +147,11 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 const prefixer = (prefix?: string) => (key: string) => prefix ? `${prefix}${key}` : key;
 
 const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
+	const prependPrefix = prefixer(prefix);
 	const registry = LajiFormInterface.getRegistry();
 	const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
 	const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 	const componentPropTypes = getComponentPropTypes(component);
-	const prependPrefix = prefixer(prefix);
 	const forBoth = {
 		[prependPrefix("ui:field")]: {type: "string"},
 		[prependPrefix("ui:functions")]: {
@@ -168,7 +168,7 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 	const addWidgetOrField = ((schemaForUiSchema: any, _schema: any) =>
 		(_schema.type === "object" || _schema.type === "array")
 			? {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth}}
-			: {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth, "$ui:widget": {type: "string"}}}
+			: {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth, [prependPrefix("ui:widget")]: {type: "string"}}}
 	);
 	const defaultProps = addWidgetOrField({
 		type: "object",
@@ -179,18 +179,32 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 			[prependPrefix("className")]: { type: "string", }
 		}
 	}, schema);
-	if ((componentPropTypes || {}).uiSchema) {
-		const _schema = propTypesToSchema((componentPropTypes || {}).uiSchema, prefix);
-		return customize({
+	let editorSchema;
+	if (componentPropTypes?.uiSchema) {
+		const _schema = propTypesToSchema(componentPropTypes?.uiSchema, prefix);
+		editorSchema = customize({
 			..._schema,
 			properties: {
 				...defaultProps.properties,
 				..._schema.properties
 			}
-		}, schema, prefix)
+		}, schema, prefix);
 	} else {
-		return customize(defaultProps, schema, prefix);
+		editorSchema = customize(defaultProps, schema, prefix);
 	}
+	if (schema.type === "array") {
+		const itemsEditorSchema = getEditorSchema(uiSchema?.items, schema.items, prefix);
+		if (itemsEditorSchema) {
+			editorSchema = {
+				...editorSchema,
+				properties: {
+					...editorSchema.properties,
+					[prependPrefix("items")]: itemsEditorSchema
+				}
+			};
+		}
+	}
+	return editorSchema;
 };
 
 const customPropTypeSchemaMappings: {
@@ -207,9 +221,9 @@ const customPropTypeSchemaMappings: {
 		}
 	},
 	"ui:field": {
-		schema: (_schema, rootSchema): any => {
-			const {type: _type} = rootSchema;
-			const _enum = ["", ...Object.keys(LajiFormInterface.getFieldTypes()[_type])];
+		schema: (): any => {
+			const {object, array} = LajiFormInterface.getFieldTypes();
+			const _enum = ["", ...Object.keys({...object, ...array})];
 			return {type: "string", enum: _enum, enumNames: _enum};
 		}
 	},
@@ -226,7 +240,7 @@ const customPropTypeSchemaMappings: {
 		uiSchema: (): any => {
 			return {items: {"ui:field": "UiFieldEditor"}};
 		}
-	}
+	},
 };
 
 const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): any => {
