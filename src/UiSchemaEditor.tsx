@@ -101,15 +101,18 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		eventUiSchema = unprefixDeeply(eventUiSchema, PREFIX);
 		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
 		const { schema, uiSchema } = this.props;
-		const detectChangePaths = (_uiSchema: any, path: string): string[] => {
+		const detectChangePaths = (_uiSchema: any, _viewUiSchema: any, path: string): string[] => {
 			if (isObject(_uiSchema)) {
 				return Object.keys(_uiSchema).reduce((paths, key) => {
-					const changes = detectChangePaths(_uiSchema[key], `${path}/${key}`);
+					const changes = detectChangePaths(_uiSchema[key], _viewUiSchema[key], `${path}/${key}`);
 					return changes.length ? [...paths, ...changes] : paths;
 				}, []);
-			} else if (Array.isArray(_uiSchema)) {
-				return _uiSchema.reduce((paths, item, idx) => {
-					const changes = detectChangePaths(item, `${path}/${idx}`);
+			} else if (Array.isArray(_uiSchema) || Array.isArray(_viewUiSchema)) {
+				if (!_viewUiSchema || !_uiSchema || _uiSchema.length !== _viewUiSchema.length) {
+					return [path];
+				}
+				return _uiSchema.reduce((paths: string[], item: any, idx: number) => {
+					const changes = detectChangePaths(item, _viewUiSchema[idx], `${path}/${idx}`);
 					return changes.length ? [...paths, ...changes] : paths;
 				}, []);
 			}
@@ -118,7 +121,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			}
 			return [];
 		};
-		const changedPaths = detectChangePaths(eventUiSchema, "");
+		const changedPaths = detectChangePaths(eventUiSchema, viewUiSchema, "");
 		const events: FieldEditorChangeEvent[] = [];
 		let newUiSchema = uiSchema;
 		changedPaths.forEach(changedPath => {
