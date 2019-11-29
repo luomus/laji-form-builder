@@ -76,6 +76,10 @@ $red: darken(red, 10%);
 	}
 	&-field-editor {
 		padding: 10px;
+
+		.field-array-of-object > div, fieldset .field-object fieldset > fieldset {
+			padding-left: 20px;
+		}
 	}
 	&-field-chooser {
 		color: white;
