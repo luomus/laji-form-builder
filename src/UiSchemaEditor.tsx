@@ -103,6 +103,9 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		const { schema, uiSchema } = this.props;
 		const detectChangePaths = (_uiSchema: any, _viewUiSchema: any, path: string): string[] => {
 			if (isObject(_uiSchema)) {
+				if (!isObject(_viewUiSchema)) {
+					return [path];
+				}
 				return Object.keys(_uiSchema).reduce((paths, key) => {
 					const changes = detectChangePaths(_uiSchema[key], _viewUiSchema[key], `${path}/${key}`);
 					return changes.length ? [...paths, ...changes] : paths;
@@ -196,7 +199,7 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 		editorSchema = customize(defaultProps, schema, prefix);
 	}
 	if (schema.type === "array") {
-		const itemsEditorSchema = getEditorSchema(uiSchema?.items, schema.items, prefix);
+		const itemsEditorSchema = getEditorSchema(uiSchema.items || {}, schema.items, prefix);
 		if (itemsEditorSchema) {
 			editorSchema = {
 				...editorSchema,
