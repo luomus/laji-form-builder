@@ -79,7 +79,10 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
 								<div style={sidebarToolbarContainer}>
 									<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
-									<Clickable className={classNames("glyphicon glyphicon-magnet", this.state.pointerChoosingActive && "active")} onClick={this.pointerChoosing.start} />
+										<Clickable
+											className={classNames("glyphicon glyphicon-magnet", this.state.pointerChoosingActive && "active")}
+											onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}
+										/>
 								</div>
 								<Fields
 									style={fieldsStyle}
@@ -171,6 +174,17 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		start: () => {
 			this.setState({pointerChoosingActive: true}, () => {
 				document.addEventListener("mousemove", this.pointerChoosing.onMouseMove);
+				document.addEventListener("click", this.pointerChoosing.onClick);
+				document.addEventListener("keydown", this.pointerChoosing.onKeyDown);
+			});
+		},
+		stop: () => {
+			this.setState({pointerChoosingActive: false}, () => {
+				document.removeEventListener("mousemove", this.pointerChoosing.onMouseMove);
+				document.removeEventListener("click", this.pointerChoosing.onClick);
+				document.removeEventListener("keydown", this.pointerChoosing.onKeyDown);
+				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
+				this.highlightedLajiFormElem = undefined;
 			});
 		},
 		rmHighlight: (elem?: HTMLElement) => {
@@ -179,7 +193,6 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			}
 		},
 		onMouseMove: ({clientX, clientY}: MouseEvent) => {
-			document.addEventListener("click", this.pointerChoosing.onClick);
 			const lajiFormElem = findNearestParentSchemaElem(document.elementFromPoint(clientX, clientY));
 			if (lajiFormElem) {
 				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
@@ -192,12 +205,12 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 				const id = this.highlightedLajiFormElem?.id
 					.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
 					.replace(/_/g, "/");
-				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
-				document.removeEventListener("mousemove", this.pointerChoosing.onMouseMove);
-				document.removeEventListener("click", this.pointerChoosing.onClick);
-				this.highlightedLajiFormElem = undefined;
+				this.pointerChoosing.stop();
 				this.setState({selected: `/document${id}`});
 			});
+		},
+		onKeyDown: (e: KeyboardEvent) => {
+			e.key === "Escape" && this.pointerChoosing.stop();
 		}
 	}
 }
