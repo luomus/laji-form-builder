@@ -106,7 +106,16 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			return <Spinner />;
 		}
 		const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
-		return <LajiForm {...this.props} {...this.state.schemas} uiSchema={uiSchema} apiClient={this.apiClient} renderSubmit={false} />;
+		return (
+			<LajiForm
+				{...this.props}
+				{...this.state.schemas}
+				uiSchema={uiSchema}
+				apiClient={this.apiClient}
+				renderSubmit={false}
+				bottomOffset={this.state.editorHeight}
+			/>
+		);
 	}
 
 	renderEditor() {
