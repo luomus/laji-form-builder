@@ -49,9 +49,11 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			height: "100%"
 		};
 		const fieldEditorStyle: React.CSSProperties = {
-			overflowY: "scroll",
-			overflowX: "auto",
 			width: "100%"
+		};
+		const fieldEditorContentStyle: React.CSSProperties = {
+			overflow: "auto",
+			height: "100%"
 		};
 		const fieldsBlockStyle: React.CSSProperties = {
 			display: "flex",
@@ -98,7 +100,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							<div style={fieldEditorStyle}>
 								<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
 								{this.state.selected &&	(
-									<Editor key={this.state.selected} active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")} />
+									<Editor key={this.state.selected} active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")}  style={fieldEditorContentStyle}/>
 								)}
 							</div>
 						</React.Fragment>

@@ -93,6 +93,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 				lang={this.context.lang}
 				formContext={formContext}
 				fields={fields}
+				renderSubmit={false}
 			/>
 		);
 	}
