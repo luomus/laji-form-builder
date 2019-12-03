@@ -2,7 +2,7 @@ import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fetchJSON } from "./utils";
-import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, Lang, Schemas } from "./LajiFormBuilder";
+import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, Lang, Schemas } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, capitalizeFirstLetter, findNearestParentSchemaElem, idSchemaIdToJSONPointer, scrollIntoViewIfNeeded } = LajiFormUtils;
@@ -14,7 +14,8 @@ export type FieldEditorChangeEvent =
 	TranslationsChangeEvent
 	| Omit<UiSchemaChangeEvent, "selected">
 	| Omit<FieldDeleteEvent, "selected">
-	| Omit<FieldAddEvent, "selected">;
+	| Omit<FieldAddEvent, "selected">
+	| Omit<FieldUpdateEvent, "selected">;
 
 export interface LajiFormEditorProps {
 	master: any;

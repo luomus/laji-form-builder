@@ -1,9 +1,9 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent, FieldOptions } from "./LajiFormEditor";
 import { PropertyModel, PropertyRange } from "./LajiFormBuilder";
-import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp } from "./utils";
+import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { dictionarify } = LajiFormUtils;
+const { dictionarify, parseJSONPointer, updateSafelyWithJSONPath } = LajiFormUtils;
 import { Context } from "./Context";
 import memoize from "memoizee";
 const SelectWidget = require("laji-form/lib/components/widgets/SelectWidget").default;
@@ -203,8 +203,36 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			<EditorLajiForm
 				schema={schema}
 				uiSchema={uiSchema}
-				formData={formData}
+				formData={translate(formData, this.props.translations)}
+				onChange={this.onLajiFormChange}
 			/>
 		);
+	}
+
+	onLajiFormChange = (viewFormData: any) => {
+		const events: FieldEditorChangeEvent[] = [];
+		const {options, validators, warnings} = this.props.field;
+		const formData = { options, validators, warnings };
+		let newFormData = formData;
+		const changedPaths = detectChangePaths(viewFormData, newFormData);
+		changedPaths.forEach(changedPath => {
+			const currentValue = parseJSONPointer(newFormData, changedPath);
+			const newValue = parseJSONPointer(viewFormData, changedPath);
+			if (typeof currentValue === "string") {
+				if (currentValue[0] === "@") {
+					events.push({type: "translations", key: currentValue, value: newValue});
+				} else {
+					const translationKey =  `@${this.props.path}${changedPath}`;
+					newFormData = updateSafelyWithJSONPath(newFormData, translationKey, changedPath);
+					events.push({type: "translations", key: translationKey, value: newValue});
+				}
+			} else {
+				newFormData = updateSafelyWithJSONPath(newFormData, newValue, changedPath);
+			}
+		});
+		if (newFormData !== formData) {
+			events.push({type: "field", op: "update", value: {...this.props.field, ...newFormData}});
+		}
+		(events.length) && this.props.onChange(events);
 	}
 }

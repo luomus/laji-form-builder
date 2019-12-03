@@ -260,10 +260,10 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							default:
 								throw new Error("Unknown property range");
 							}
-						}
+						};
 						const addSchemaField = (schema: any, path: string[], property: PropertyModel): any => {
 							const [next, ...remaining] = path;
-							const propName = next || unprefixProp(property.property)
+							const propName = next || unprefixProp(property.property);
 							const schemaForNext = !next
 								? getSchemaForProperty(property)
 								: addSchemaField(schema.items?.properties[next] || schema.properties[next], remaining, property);
@@ -278,6 +278,72 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						changed.schemas = {
 							...changed.schemas,
 							schema: addSchemaField(changed.schemas.schema, splitted, event.value)
+						};
+					}
+				} else if (isFieldUpdateEvent(event)) {
+					const updateField = (fields: FieldOptions[], path: string[], value: FieldOptions): FieldOptions[] => {
+						if (path.length === 1) {
+							return fields.map(field => field.name === value.name ? value : field);
+						}
+						const [next, ...remaining] = path;
+						return fields.map(field => field.name === next
+							? {...field, fields: updateField(field.fields as FieldOptions[], remaining, value)}
+							: field
+						);
+					};
+					const updateFromField  = (schema: any, field: any) => {
+						if (field.options?.hasOwnProperty("default") && schema.default !== field.options.default) {
+							return {...schema, default: field.options.default};
+						}
+						return schema;
+					}
+					const updateSchema = (schema: any, path: string[], field: FieldOptions) => {
+						const [next, ...remaining] = path;
+						const currentSchema = schema.items?.properties[next] || schema.properties[next];
+						const schemaForNext: any = !remaining.length
+							? updateFromField(currentSchema, field)
+							: updateSchema(currentSchema, remaining, field);
+						return schema.type === "object"
+						? {...schema, properties: {...schema.properties, [next]: schemaForNext}}
+						: {...schema, items: {...schema.items, properties: {...schema.items.properties, [next]: schemaForNext}}};
+					};
+					const updateValidators = (currentValidators: any, schema: any, path: string[], newValidators: any): any | undefined => {
+						const [next, ...remaining] = path;
+						if (next) {
+							let nextCurrentValidators, nextSchema, nextPath, nextValidators;
+							if (schema.items && schema.items.properties) {
+								nextCurrentValidators = currentValidators?.items?.properties?.[next];
+								nextSchema = schema.items.properties[next];
+								nextPath =  `/items/properties/${next}`;
+								nextValidators = updateValidators(nextCurrentValidators, nextSchema, remaining, newValidators);
+							} else {
+								nextCurrentValidators = currentValidators?.properties?.[next];
+								nextSchema = schema.properties[next];
+								nextPath = `/properties/${next}`;
+								nextValidators = updateValidators(nextCurrentValidators, nextSchema, remaining, newValidators);
+								if (nextCurrentValidators?.items) {
+									nextValidators = {items: nextCurrentValidators.items, ...nextValidators};
+								}
+							}
+							return updateSafelyWithJSONPath(currentValidators, nextValidators, nextPath);
+						}
+						return newValidators;
+					};
+
+					changed.master = {
+						...changed.master,
+						fields: updateField(changed.master.fields, splitted, event.value),
+					};
+					if (event.value.validators) {
+						changed.schema = {
+							...changed.schema,
+							validators: updateValidators({properties: changed.schemas.validators}, changed.schemas.schema, splitted, event.value.validators).properties,
+						};
+					}
+					if (event.value.warnings) {
+						changed.schema = {
+							...changed.schema,
+							warnings: updateValidators({properties: changed.schemas.warnings}, changed.schemas.schema, splitted, event.value.warnings).properties,
 						};
 					}
 				}
@@ -317,14 +383,21 @@ export interface FieldAddEvent extends FieldEvent {
 	op: "add";
 	value: PropertyModel
 }
+export interface FieldUpdateEvent extends FieldEvent {
+	op: "update";
+	value: FieldOptions
+}
 function isFieldDeleteEvent(event: ChangeEvent): event is FieldDeleteEvent {
 	return event.type === "field" &&  event.op === "delete";
 }
 function isFieldAddEvent(event: ChangeEvent): event is FieldAddEvent {
 	return event.type === "field" &&  event.op === "add";
 }
+function isFieldUpdateEvent(event: ChangeEvent): event is FieldUpdateEvent {
+	return event.type === "field" &&  event.op === "update";
+}
 
-export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldDeleteEvent | FieldAddEvent;
+export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldDeleteEvent | FieldAddEvent | FieldUpdateEvent;
 
 export interface Schemas {
 	schema: any;

@@ -3,7 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { isObject } = LajiFormUtils;
+const { isObject, parseJSONPointer } = LajiFormUtils;
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -66,6 +66,24 @@ export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, 
 	}
 	return translate(uiSchema, schemaForUiSchema);
 });
+
+export const translate = (obj: any, translations: any) => {
+	function translate(obj: any): any {
+		if (isObject(obj)) {
+			return Object.keys(obj).reduce<any>((translated, key) => {
+				translated[key] = translate(obj[key]);
+				return translated;
+			}, {});
+		} else if (Array.isArray(obj)) {
+			return obj.map(translate);
+		}
+		if (typeof obj === "string" && obj[0] === "@") {
+			return translations[obj];
+		}
+		return obj;
+	}
+	return translate(obj);
+}
 
 export const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {
 	let schemaPointer = schema;
@@ -195,9 +213,10 @@ export const prefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix?: string
 export const fetchJSON = (path: string, options?: any) => fetch(path, options).then(r => r.json());
 
 export interface CancellablePromise<T> {
-	promise: Promise<T>,
-	cancel: () => void
-};
+	promise: Promise<T>;
+	cancel: () => void;
+}
+
 export const makeCancellable = <T>(promise: Promise<T>): CancellablePromise<T> => {
 	let hasCancelled = false;
 
@@ -225,4 +244,34 @@ export const getTranslation = (key: string, translations: {[key: string]: string
 		return translations[key] || (key[0] === "@" && translations[unprefixer("@")(key)] || undefined);
 	}
 	return;
+};
+
+export const detectChangePaths = (eventObject: any, translatedObj: any): string[] => {
+	const detectChangePaths = (_eventObject: any, _translatedObj: any, path: string): string[] => {
+		if (isObject(_eventObject)) {
+			if (!isObject(_translatedObj)) {
+				return [path];
+			}
+			return Object.keys({..._eventObject, ..._translatedObj}).reduce((paths, key) => {
+				if (!(key in _eventObject) || !(key in _translatedObj)) {
+					return [...paths, path];
+				}
+				const changes = detectChangePaths(_eventObject[key], _translatedObj[key], `${path}/${key}`);
+				return changes.length ? [...paths, ...changes] : paths;
+			}, []);
+		} else if (Array.isArray(_eventObject) || Array.isArray(_translatedObj)) {
+			if (!_translatedObj || !_eventObject || _eventObject.length !== _translatedObj.length) {
+				return [path];
+			}
+			return _eventObject.reduce((paths: string[], item: any, idx: number) => {
+				const changes = detectChangePaths(item, _translatedObj[idx], `${path}/${idx}`);
+				return changes.length ? [...paths, ...changes] : paths;
+			}, []);
+		}
+		if (parseJSONPointer(eventObject, path) !== parseJSONPointer(translatedObj, path)) {
+			return [path];
+		}
+		return [];
+	};
+	return detectChangePaths(eventObject, translatedObj, "");
 };
