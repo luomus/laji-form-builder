@@ -4,6 +4,13 @@ $darker: #47494e;
 $def_accent: #337ab7;
 $red: darken(red, 10%);
 
+$padding: 10px;
+$bRadius: 2px;
+
+:export {
+	padding: $padding;
+}
+
 .ljb {
 	$root: &;
 	&-field {
@@ -60,7 +67,7 @@ $red: darken(red, 10%);
 		}
 	}
 	&-editor-nav-bar {
-		padding: 10px;
+		padding: $padding;
 		background-color: $darker;
 	}
 	&-editor-nav-bar .glyphicon {
@@ -75,7 +82,7 @@ $red: darken(red, 10%);
 		}
 	}
 	&-field-editor {
-		padding: 10px;
+		padding: $padding;
 
 		.field-array-of-object > div, fieldset .field-object fieldset > fieldset {
 			padding-left: 20px;
@@ -88,7 +95,7 @@ $red: darken(red, 10%);
 	}
 
 	&-field {
-		padding-left: 10px;
+		padding-left: $padding;
 	}
 
 	&-draggable-line {
@@ -114,5 +121,30 @@ $red: darken(red, 10%);
 	
 	&-json-editor-invalid {
 		background-color: lighten(#ff0000, 30%);
+	}
+
+	&-modal {
+		background-color: $def;
+		color: black;
+		border: 1px solid $def_accent;
+		border-radius: $bRadius;
+		padding: $padding;
+
+		&-backdrop {
+			background: black;
+			opacity: .3;
+		}
+	}
+
+	&-close-button {
+		background: none;
+		border: none;
+		margin-top: -$padding;
+		margin-right: -$padding - 3;
+
+		&:before {
+			content: "✖";
+			color: $def_accent;
+		 }
 	}
 }
