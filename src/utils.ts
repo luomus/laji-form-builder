@@ -248,12 +248,16 @@ export const getTranslation = (key: string, translations: {[key: string]: string
 
 export const detectChangePaths = (eventObject: any, translatedObj: any): string[] => {
 	const detectChangePaths = (_eventObject: any, _translatedObj: any, path: string): string[] => {
-		if (isObject(_eventObject)) {
-			if (!isObject(_translatedObj)) {
+		if (isObject(_eventObject) || isObject(_translatedObj)) {
+			if (!isObject(_translatedObj) || !isObject(_eventObject)) {
 				return [path];
 			}
 			return Object.keys({..._eventObject, ..._translatedObj}).reduce((paths, key) => {
 				if (!(key in _eventObject) || !(key in _translatedObj)) {
+					const value = ((key in _eventObject) ? _eventObject : _translatedObj)[key];
+					if (isObject(value) && !Object.keys(value).length) {
+						return paths
+					}
 					return [...paths, key];
 				}
 				const changes = detectChangePaths(_eventObject[key], _translatedObj[key], `${path}/${key}`);
@@ -275,3 +279,23 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 	};
 	return detectChangePaths(eventObject, translatedObj, "");
 };
+
+export class JSONSchema {
+	static type = (type: string) => (options = {}) => ({type, ...options})
+	static Str = JSONSchema.type("string")
+	static str = JSONSchema.Str()
+	static Number = JSONSchema.type("number")
+	static number = JSONSchema.Number()
+	static Int = JSONSchema.type("integer")
+	static int = JSONSchema.Int()
+	static Bool = JSONSchema.type("boolean")
+	static bool = JSONSchema.Bool()
+	static arr = (items: any, options = {}) => JSONSchema.type("array")({items, ...options})
+	static enu = (_enum: {enum: string[], enumNames: string[]}, options?: any) => ({
+		...JSONSchema.Str(options),
+		..._enum
+	})
+	static obj = (properties: any, options = {}) => JSONSchema.type("object")({properties, ...options})
+};
+
+console.log(JSONSchema.arr(JSONSchema.str, {uniqueItems: true}));

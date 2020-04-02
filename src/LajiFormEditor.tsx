@@ -1,13 +1,14 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fetchJSON } from "./utils";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fetchJSON, translate } from "./utils";
 import { ChangeEvent, TranslationsChangeEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, Lang, Schemas } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseJSONPointer, capitalizeFirstLetter, findNearestParentSchemaElem, idSchemaIdToJSONPointer, scrollIntoViewIfNeeded } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
+import OptionsEditor from "./OptionsEditor";
 import ApiClient from "./ApiClientImplementation";
 
 export type FieldEditorChangeEvent =
@@ -20,7 +21,7 @@ export type FieldEditorChangeEvent =
 export interface LajiFormEditorProps {
 	master: any;
 	schemas: Schemas;
-	onChange: (changed: ChangeEvent[]) => void;
+	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
 	onLangChange: (lang: Lang) => void;
 	loading?: boolean;
 	height?: number;
@@ -30,11 +31,12 @@ export interface LajiFormEditorProps {
 export interface LajiFormEditorState {
 	selected?: string;
 	activeEditorMode: ActiveEditorMode;
-	pointerChoosingActive?: boolean;
+	pointerChoosingActive: boolean;
+	formOptionsModalOpen: boolean;
 }
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	static contextType = Context;
-	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false};
+	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false, formOptionsModalOpen: false};
 	highlightedLajiFormElem?: HTMLElement;
 	render() {
 		const containerStyle: React.CSSProperties = {
@@ -86,6 +88,10 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 											className={classNames("glyphicon glyphicon-magnet", this.state.pointerChoosingActive && "active")}
 											onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}
 										/>
+										<Clickable
+											className="glyphicon glyphicon-cog"
+											onClick={this.openFormOptionsEditor}
+										/>
 								</div>
 								<Fields
 									style={fieldsStyle}
@@ -101,9 +107,23 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							<div style={fieldEditorStyle}>
 								<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
 								{this.state.selected &&	(
-									<Editor key={this.state.selected} active={this.state.activeEditorMode} {...this.getEditorProps()} className={gnmspc("field-editor")}  style={fieldEditorContentStyle}/>
+									<Editor
+										key={this.state.selected}
+										active={this.state.activeEditorMode}
+										{...this.getEditorProps()}
+										className={gnmspc("field-editor")}
+										style={fieldEditorContentStyle}
+									/>
 								)}
 							</div>
+						{this.state.formOptionsModalOpen &&
+							<OptionsEditor
+								onClose={this.closeFormOptionsEditor}
+								options={this.getFormOptions(this.props.master)}
+								translations={this.props.master.translations[this.context.lang]}
+								onChange={this.props.onChange}
+							/>
+						}
 						</React.Fragment>
 					)}
 				</DraggableHeight>
@@ -157,12 +177,12 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		};
 	}
 
-	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
+	onEditorChange = (events: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => {
 		events = (events instanceof Array ? events : [events]).map(event => {
 			return { ...event, selected: this.getSelected() };
 		});
 
-		this.props.onChange(events);
+		this.props.onChange(events as ChangeEvent[]);
 	}
 
 	onActiveEditorChange = (newActive: ActiveEditorMode) => {
@@ -215,6 +235,17 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		onKeyDown: (e: KeyboardEvent) => {
 			e.key === "Escape" && this.pointerChoosing.stop();
 		}
+	}
+
+	openFormOptionsEditor = () => {
+		this.setState({formOptionsModalOpen: true});
+	}
+	closeFormOptionsEditor = () => {
+		this.setState({formOptionsModalOpen: false});
+	}
+	getFormOptions = (master: any) => {
+		const {uiSchema, fields, translations, ...options} = master;
+		return options;
 	}
 }
 

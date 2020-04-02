@@ -1,7 +1,7 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent, FieldOptions } from "./LajiFormEditor";
 import { PropertyModel, PropertyRange } from "./LajiFormBuilder";
-import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths } from "./utils";
+import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, parseJSONPointer, updateSafelyWithJSONPath } = LajiFormUtils;
 import { Context } from "./Context";
@@ -72,12 +72,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					_enumNames.push(`${prop.property} (${prop.label})`);
 					return [_enums, _enumNames];
 				}, [[], []]);
-			const schema = {
-				title: this.context.translations.AddProperty,
-				type: "string",
-				enum: enums,
-				enumNames
-			};
+			const schema = JSONSchema.enu({enum: enums, enumNames}, {title: this.context.translations.AddProperty});
 			return (
 				<LajiForm
 					key={this.state.lajiFormToucher}
@@ -175,23 +170,11 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
-		const schema = {
-			type: "object",
-			properties: {
-				options: {
-					type: "object",
-					properties: {}
-				},
-				validators: {
-					type: "object",
-					properties: {}
-				},
-				warnings: {
-					type: "object",
-					properties: {}
-				}
-			}
-		};
+		const schema = JSONSchema.obj({
+			options: JSONSchema.obj({}),
+			validators: JSONSchema.obj({}),
+			warnings: JSONSchema.obj({}),
+		});
 		const itemUiSchema = { "ui:field": "TextareaEditorField", "ui:options": { minRows: 5 } };
 		const uiSchema = {
 			options: itemUiSchema,

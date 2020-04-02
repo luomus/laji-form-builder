@@ -4,12 +4,11 @@ import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button, Spinner } from "./components";
-import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise } from "./utils";
+import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
 import LajiFormInterface from "./LajiFormInterface";
 import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
 import { Context } from "./Context";
 import translations from "./translations";
-import memoize from "memoizee";
 
 export interface LajiFormBuilderProps {
 	id: string;
@@ -123,6 +122,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				uiSchema={uiSchema}
 				apiClient={this.apiClient}
 				renderSubmit={false}
+				uiSchemaContext={{isAdmin: true}}
 				bottomOffset={this.state.editorHeight}
 			/>
 		);
@@ -162,9 +162,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		);
 	}
 
-	onEditorChange = (events: ChangeEvent[]) => {
+	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
 		const changed: any = {master: this.state.master, schemas: this.state.schemas};
-		events.forEach(event => {
+		(events instanceof Array ? events : [events]).forEach(event => {
 			if (isUiSchemaChangeEvent(event)) {
 				changed.master = {
 					...(changed.master || {}),
@@ -248,15 +248,15 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						const getSchemaForProperty = (property: PropertyModel) => {
 							switch (property.range[0]) {
 							case PropertyRange.String:
-								return {type: "string"};
+								return JSONSchema.str;
 							case PropertyRange.Boolean:
-								return {type: "boolean"};
+								return JSONSchema.bool;
 							case PropertyRange.Int:
-								return {type: "integer"};
+								return JSONSchema.int;
 							case PropertyRange.PositiveInteger: // TODO validator
-								return {type: "number"};
+								return JSONSchema.number;
 							case PropertyRange.DateTime: // TODO datetime uiSchema
-								return {type: "string"};
+								return JSONSchema.str;
 							default:
 								throw new Error("Unknown property range");
 							}
@@ -347,6 +347,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						};
 					}
 				}
+			} else if (isOptionChangeEvent(event)) {
+				const {path, value} = event;
+				changed.master = updateSafelyWithJSONPath(changed.master, value, path);
 			}
 		});
 		this.setState(changed);
@@ -397,7 +400,16 @@ function isFieldUpdateEvent(event: ChangeEvent): event is FieldUpdateEvent {
 	return event.type === "field" &&  event.op === "update";
 }
 
-export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldDeleteEvent | FieldAddEvent | FieldUpdateEvent;
+export interface OptionChangeEvent {
+	type: "options";
+	value: any;
+	path: string;
+}
+function isOptionChangeEvent(event: ChangeEvent): event is OptionChangeEvent {
+	return event.type === "options";
+}
+
+export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldDeleteEvent | FieldAddEvent | FieldUpdateEvent | OptionChangeEvent;
 
 export interface Schemas {
 	schema: any;

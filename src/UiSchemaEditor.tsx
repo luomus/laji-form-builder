@@ -286,7 +286,7 @@ const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any, prefix = PREFI
 	}
 };
 
-const TextareaEditorField = (props: any) => {
+export const TextareaEditorField = (props: any) => {
 	const label = props.label || props.title || props.name;
 	const value = props.formData ?? props.value;
 	let _lajiFormId: any;
