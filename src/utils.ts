@@ -258,7 +258,7 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 					if (isObject(value) && !Object.keys(value).length) {
 						return paths
 					}
-					return [...paths, key];
+					return [...paths, `${path}/${key}`];
 				}
 				const changes = detectChangePaths(_eventObject[key], _translatedObj[key], `${path}/${key}`);
 				return changes.length ? [...paths, ...changes] : paths;
