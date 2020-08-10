@@ -358,16 +358,23 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 
 	render() {
 		const {name, fields = [], selected, pointer} = this.props;
-		const className = fields.length
+		const expandClassName = this.nmspc(fields.length
 			? this.state.expanded
 				? "expanded"
 				: "contracted"
-			: "nonexpandable";
+			: "nonexpandable");
+		const containerClassName = classNames(
+			this.nmspc("item"),
+			this.nmspc(Field.isSelected(this.props.selected, this.props.pointer) && "selected")
+		)
 		return (
 			<div className={this.nmspc()} ref={this.fieldRef}>
-				<Clickable className={classNames(this.nmspc("item"), this.nmspc(Field.isSelected(this.props.selected, this.props.pointer) && "selected"))}>
-					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={this.nmspc(className)} />
-					<Clickable className={this.nmspc("label")} onClick={this.onThisSelected}>{name}</Clickable>
+				<Clickable
+					className={containerClassName}
+					onClick={this.onThisSelected}
+				>
+					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={expandClassName} />
+					<Clickable className={this.nmspc("label")}>{name}</Clickable>
 					<Clickable onClick={this.onThisDeleted} className={this.nmspc("delete")} />
 				</Clickable>
 				{this.state.expanded && (

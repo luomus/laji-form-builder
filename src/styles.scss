@@ -65,6 +65,9 @@ $bRadius: 2px;
 		#{$root}-draggable-line {
 			background-color: $def_separating;
 		}
+		*:focus {
+			outline: none;
+		}
 	}
 	&-editor-nav-bar {
 		padding: $padding;
