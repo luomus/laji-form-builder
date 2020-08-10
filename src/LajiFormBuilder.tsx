@@ -8,7 +8,7 @@ import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, mak
 import LajiFormInterface from "./LajiFormInterface";
 import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
 import { Context } from "./Context";
-import translations from "./translations";
+import appTranslations from "./translations";
 
 export interface LajiFormBuilderProps {
 	id: string;
@@ -38,7 +38,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
 		...fns, [lang]: () => this.setState({lang})
 	}), {} as any);
-	translations: {[key: string]: {[lang in Lang]: string}};
+	appTranslations: {[key: string]: {[lang in Lang]: string}};
 	schemasPromise: CancellablePromise<any>;
 
 	static defaultProps = {
@@ -58,7 +58,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			"https://cors-anywhere.herokuapp.com/http://formtest.laji.fi/lajiform",
 			accessToken,
 		);
-		this.translations = constructTranslations(translations)
+		this.appTranslations = constructTranslations(appTranslations);
 	}
 
 	componentDidMount() {
@@ -100,7 +100,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	render() {
 		return (
-			<Context.Provider value={{apiClient: this.apiClient, lang: this.state.lang, translations: this.translations[this.state.lang]}}>
+			<Context.Provider value={{apiClient: this.apiClient, lang: this.state.lang, translations: this.appTranslations[this.state.lang]}}>
 				{this.renderLajiForm()}
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
 					{this.renderEditor()}
@@ -248,15 +248,15 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						const getSchemaForProperty = (property: PropertyModel) => {
 							switch (property.range[0]) {
 							case PropertyRange.String:
-								return JSONSchema.str;
+								return JSONSchema.string;
 							case PropertyRange.Boolean:
-								return JSONSchema.bool;
+								return JSONSchema.boolean;
 							case PropertyRange.Int:
-								return JSONSchema.int;
+								return JSONSchema.integer;
 							case PropertyRange.PositiveInteger: // TODO validator
 								return JSONSchema.number;
 							case PropertyRange.DateTime: // TODO datetime uiSchema
-								return JSONSchema.str;
+								return JSONSchema.string;
 							default:
 								throw new Error("Unknown property range");
 							}

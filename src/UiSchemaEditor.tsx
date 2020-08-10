@@ -3,12 +3,12 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import LajiFormInterface from "./LajiFormInterface";
-import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, getTranslation, detectChangePaths } from "./utils";
+import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, getTranslation, detectChangePaths, parseJSONPointer,  } from "./utils";
 const LajiForm = require("laji-form/lib/components/LajiForm").default;
 const {Label: LajiFormLabel } = require("laji-form/lib/components/components");
 const LajiFormTitle = require("laji-form/lib/components/fields/TitleField").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseJSONPointer, parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions } = LajiFormUtils;
+const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions } = LajiFormUtils;
 import { JSONEditor } from "./components"
 import { Context } from "./Context";
 

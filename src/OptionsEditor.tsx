@@ -5,9 +5,9 @@ import ApiClient from "./ApiClientImplementation";
 import { Context } from "./Context";
 import { Spinner, Modal } from "./components";
 import {  Lang, OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
-import { translate, JSONSchema, gnmspc, detectChangePaths } from "./utils";
+import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPath, parseJSONPointer } = LajiFormUtils;
+const { updateSafelyWithJSONPath } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
 
 const getEnumRange = memoize((apiClient: ApiClient, lang: Lang, enumName: string) =>
@@ -41,76 +41,76 @@ export default React.memo(function OptionsEditor({onClose, options, translations
 		getEnumRange(apiClient, lang, "MHL.viewerTypeEnum").then(setViewerTypes);
 		getEnumRange(apiClient, lang, "MHL.categoryEnum").then(setCategories);
 	}, [apiClient, lang]);
-	const {str, arr, obj, bool, enu} = JSONSchema;
-	const schema = features && printTypes && viewerTypes && categories && obj({
-		name: str,
-		title: str,
-		description: str,
-		shortDescription: str,
-		logo: str,
+	const {string, array, object, boolean, enu} = JSONSchema;
+	const schema = features && printTypes && viewerTypes && categories && object({
+		name: string,
+		title: string,
+		description: string,
+		shortDescription: string,
+		logo: string,
 		category: enu(categories),
-		collectionID: str,
-		instructions: obj({
-			fi: str,
-			en: str,
-			sv: str,
+		collectionID: string,
+		instructions: object({
+			fi: string,
+			en: string,
+			sv: string,
 		}),
-		actions: obj({
-			save: str,
-			temp: str,
-			cancel: str,
+		actions: object({
+			save: string,
+			temp: string,
+			cancel: string,
 		}),
 		language: enu({enum: langs, enumNames: langs}),
-		supportedLanguage: arr(enu({enum: langs, enumNames: langs}), {uniqueItems: true}),
+		supportedLanguage: array(enu({enum: langs, enumNames: langs}), {uniqueItems: true}),
 		printType: enu(printTypes),
 		viewerType: enu(viewerTypes),
-		features: arr(enu(features), {uniqueItems: true}),
-		options: obj({
-			namedPlaceList: arr(str),
-			messages: obj({
-				success: str
+		features: array(enu(features), {uniqueItems: true}),
+		options: object({
+			namedPlaceList: array(string),
+			messages: object({
+				success: string
 			}),
-			season: obj({
-				start: str,
-				end: str
+			season: object({
+				start: string,
+				end: string
 			}),
-			ownSubmissionColumns: arr(str),
-			ownSubmissionActions: arr(str),
-			periods: arr(str),
-			disableRequestDescription: bool,
-			hideTES: bool,
-			displayOwnSubmissions: bool,
-			formPermisionDescription: str
+			ownSubmissionColumns: array(string),
+			ownSubmissionActions: array(string),
+			periods: array(string),
+			disableRequestDescription: boolean,
+			hideTES: boolean,
+			displayOwnSubmissions: boolean,
+			formPermisionDescription: string
 		}),
-		namedPlaceOptions: obj({
-			formID: str,
-			description: str,
-			createDescription: str,
-			useLabel: str,
-			startWithMap: bool,
-			listLabel: str,
-			printLabel: str,
-			formNavLabel: str,
-			reservationUntil: str,
-			showLegentList: bool,
-			hideMapTab: bool,
-			zoomToData: bool,
-			mapTileLayerName: str,
-			mapOverlayNames: str,
-			createNewLabels: obj({
-				button: str
+		namedPlaceOptions: object({
+			formID: string,
+			description: string,
+			createDescription: string,
+			useLabel: string,
+			startWithMap: boolean,
+			listLabel: string,
+			printLabel: string,
+			formNavLabel: string,
+			reservationUntil: string,
+			showLegentList: boolean,
+			hideMapTab: boolean,
+			zoomToData: boolean,
+			mapTileLayerName: string,
+			mapOverlayNames: string,
+			createNewLabels: object({
+				button: string
 			}),
-			includeUnits: bool,
-			requireAdmin: bool,
-			infoFields: arr(str),
-			birdAssociationAreaHelp: str,
-			prepopulatedDocumentFields: arr(str),
-			documentListUseLocalDocumentViewer: bool,
-			documentViewerGatheringGeometryJSONPath: str,
-			adminShowCopyLink: bool
+			includeUnits: boolean,
+			requireAdmin: boolean,
+			infoFields: array(string),
+			birdAssociationAreaHelp: string,
+			prepopulatedDocumentFields: array(string),
+			documentListUseLocalDocumentViewer: boolean,
+			documentViewerGatheringGeometryJSONPath: string,
+			adminShowCopyLink: boolean
 		}),
-		prepopulatedWithInformalTaxonGroups: arr(str),
-		prepopulatedDocument: obj({})
+		prepopulatedWithInformalTaxonGroups: array(string),
+		prepopulatedDocument: object({})
 	});
 	const scopeField = (fields: string[] = []) => ({
 		"ui:field": "ScopeField",

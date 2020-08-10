@@ -1,9 +1,9 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent, FieldOptions } from "./LajiFormEditor";
 import { PropertyModel, PropertyRange } from "./LajiFormBuilder";
-import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema } from "./utils";
+import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { dictionarify, parseJSONPointer, updateSafelyWithJSONPath } = LajiFormUtils;
+const { dictionarify, updateSafelyWithJSONPath } = LajiFormUtils;
 import { Context } from "./Context";
 import memoize from "memoizee";
 const SelectWidget = require("laji-form/lib/components/widgets/SelectWidget").default;
@@ -170,14 +170,27 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
-		const schema = JSONSchema.obj({
-			options: JSONSchema.obj({}),
-			validators: JSONSchema.obj({}),
-			warnings: JSONSchema.obj({}),
+		const maybePrimitiveDefault = (JSONSchema as any)[this.props.schema.type];
+		const _default = typeof maybePrimitiveDefault !== "function"
+			? maybePrimitiveDefault
+			: JSONSchema.object({});
+		const optionsProps: any = {
+			excludeFromCopy: JSONSchema.boolean,
+			default: _default
+		};
+		const {enum: _enum, enumNames} = this.props.schema;
+		if (this.props.schema.enum) {
+			const list = JSONSchema.array(JSONSchema.enu({enum: _enum, enumNames}), {uniqueItems: true});
+			optionsProps.whitelist = list;
+			optionsProps.blacklist = list;
+		}
+		const schema = JSONSchema.object({
+			options: JSONSchema.object(optionsProps, {title: ""}),
+			validators: JSONSchema.object({}),
+			warnings: JSONSchema.object({}),
 		});
 		const itemUiSchema = { "ui:field": "TextareaEditorField", "ui:options": { minRows: 5 } };
 		const uiSchema = {
-			options: itemUiSchema,
 			validators: itemUiSchema,
 			warnings: itemUiSchema
 		}

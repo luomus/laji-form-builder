@@ -3,7 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { isObject, parseJSONPointer } = LajiFormUtils;
+const { isObject, parseJSONPointer: _parseJSONPointer } = LajiFormUtils;
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -68,19 +68,25 @@ export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, 
 });
 
 export const translate = (obj: any, translations: any) => {
-	function translate(obj: any): any {
-		if (isObject(obj)) {
-			return Object.keys(obj).reduce<any>((translated, key) => {
-				translated[key] = translate(obj[key]);
+	function translate(_any: any): any {
+		if (isObject(_any)) {
+			return Object.keys(_any).reduce<any>((translated, key) => {
+				translated[key] = translate(_any[key]);
 				return translated;
 			}, {});
-		} else if (Array.isArray(obj)) {
-			return obj.map(translate);
+		} else if (Array.isArray(_any)) {
+			return _any.map(translate);
 		}
-		if (typeof obj === "string" && obj[0] === "@") {
-			return translations[obj];
+		if (typeof _any === "string" && _any[0] === "@") {
+			if (translations[_any]) {
+				return translations[_any];
+			}
+			// Return the key if it doesn't have the @ prefix
+			if (translations[_any.substr(1)]) {
+				return _any;
+			}
 		}
-		return obj;
+		return _any;
 	}
 	return translate(obj);
 }
@@ -256,7 +262,7 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 				if (!(key in _eventObject) || !(key in _translatedObj)) {
 					const value = ((key in _eventObject) ? _eventObject : _translatedObj)[key];
 					if (isObject(value) && !Object.keys(value).length) {
-						return paths
+						return paths;
 					}
 					return [...paths, `${path}/${key}`];
 				}
@@ -282,20 +288,22 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 
 export class JSONSchema {
 	static type = (type: string) => (options = {}) => ({type, ...options})
-	static Str = JSONSchema.type("string")
-	static str = JSONSchema.Str()
-	static Number = JSONSchema.type("number")
-	static number = JSONSchema.Number()
-	static Int = JSONSchema.type("integer")
-	static int = JSONSchema.Int()
-	static Bool = JSONSchema.type("boolean")
-	static bool = JSONSchema.Bool()
-	static arr = (items: any, options = {}) => JSONSchema.type("array")({items, ...options})
+	static String = JSONSchema.type("string");
+	static string = JSONSchema.String();
+	static Number = JSONSchema.type("number");
+	static number = JSONSchema.Number();
+	static Integer = JSONSchema.type("integer");
+	static integer = JSONSchema.Integer();
+	static Boolean = JSONSchema.type("boolean");
+	static boolean = JSONSchema.Boolean();
+	static array = (items: any, options = {}) => JSONSchema.type("array")({items, ...options});
 	static enu = (_enum: {enum: string[], enumNames: string[]}, options?: any) => ({
-		...JSONSchema.Str(options),
+		...JSONSchema.String(options),
 		..._enum
 	})
-	static obj = (properties: any, options = {}) => JSONSchema.type("object")({properties, ...options})
-};
+	static object = (properties: any, options = {}) => JSONSchema.type("object")({properties, ...options});
+}
 
-console.log(JSONSchema.arr(JSONSchema.str, {uniqueItems: true}));
+export const parseJSONPointer = (obj: any, path: string, safeMode?: boolean | "createParents") => {
+	return _parseJSONPointer(obj, path, safeMode, true);
+}
