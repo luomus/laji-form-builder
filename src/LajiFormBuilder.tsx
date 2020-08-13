@@ -34,7 +34,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		schemas: "loading",
 		lang: this.props.lang,
 		editorHeight: EDITOR_HEIGHT
-	} as LajiFormBuilderState;
+	};
 	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
 		...fns, [lang]: () => this.setState({lang})
 	}), {} as any);

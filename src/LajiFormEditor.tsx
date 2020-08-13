@@ -336,7 +336,8 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		return selected.startsWith(pointer);
 	}
 
-	toggleExpand = () => {
+	toggleExpand = (e: React.MouseEvent<HTMLElement>) => {
+		e.stopPropagation();
 		this.setState({expanded: !this.state.expanded});
 	}
 
@@ -373,9 +374,9 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 					className={containerClassName}
 					onClick={this.onThisSelected}
 				>
-					<Clickable key="expand" onClick={fields.length ? this.toggleExpand : undefined} className={expandClassName} />
+					<Clickable className={expandClassName} onClick={fields.length ? this.toggleExpand : undefined} key="expand" />
 					<Clickable className={this.nmspc("label")}>{name}</Clickable>
-					<Clickable onClick={this.onThisDeleted} className={this.nmspc("delete")} />
+					<Clickable className={this.nmspc("delete")} onClick={this.onThisDeleted} />
 				</Clickable>
 				{this.state.expanded && (
 					<Fields
