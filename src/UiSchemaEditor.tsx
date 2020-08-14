@@ -20,6 +20,7 @@ const LabelWithoutPrefix = React.memo((props: any) => <LajiFormLabel {...props} 
 const TitleWithoutPrefix = React.memo((props: any) => <LajiFormTitle {...props} title={unprefix(props.title)} />);
 
 export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
+	static contextType = Context;
 	static defaultProps = {
 		uiSchema: {}
 	};
@@ -59,13 +60,20 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		return customizeUiSchema(schemaForUiSchema, prefixUiSchemaDeeply(_uiSchema, unprefixSchemaDeeply(schemaForUiSchema, PREFIX), PREFIX));
 	});
 
-	getFieldName(): string {
-		const {uiSchema = {}, field, translations} = this.props;
-		if (!field) {
-			return "";
-		}
-		const { "ui:title": uiTitle } = getTranslatedUiSchema(uiSchema, this.props.translations);
-		return (uiTitle ?? getTranslation(field.label || "", translations)) || "";
+	normalizeUiSchema(uiSchema: any, prefix = ""): any {
+		const key = `${prefix}ui:title`;
+		const getFieldName = () => {
+			const {field, translations} = this.props;
+			if (!field) {
+				return "";
+			}
+			const uiTitle = uiSchema[key];
+			return (uiTitle ?? getTranslation(field.label || "", translations)) || "";
+		};
+		return {
+			...uiSchema,
+			[key]: getFieldName()
+		};
 	}
 
 	render() {
@@ -75,10 +83,9 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 
 		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema, PREFIX);
 		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
-		const formData = {
-			...getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema)),
-			[`${PREFIX}ui:title`]: this.getFieldName()
-		};
+		const formData = this.normalizeUiSchema(
+			getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema)
+			), PREFIX)
 		const formContext = {
 			path: this.props.path,
 			rootSchema: this.props.schema,
@@ -97,7 +104,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 
 	onEditorLajiFormChange = (eventUiSchema: any) => {
 		eventUiSchema = unprefixDeeply(eventUiSchema, PREFIX);
-		const viewUiSchema = getTranslatedUiSchema(this.props.uiSchema, this.props.translations);
+		const viewUiSchema = this.normalizeUiSchema(getTranslatedUiSchema(this.props.uiSchema, this.props.translations));
 		const { schema, uiSchema } = this.props;
 		const changedPaths = detectChangePaths(eventUiSchema, viewUiSchema);
 		const events: FieldEditorChangeEvent[] = [];
