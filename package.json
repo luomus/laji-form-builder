@@ -20,7 +20,6 @@
   "start": "webpack-dev-server --content-base playground playground/app.js --inline --port 8084 --host 0.0.0.0"
  },
  "dependencies": {
-  "@types/isomorphic-fetch": "0.0.35",
   "deepmerge": "^4.2.2",
   "isomorphic-fetch": "^2.2.1",
   "laji-form": "^5.0.6",
@@ -35,6 +34,7 @@
   "@types/memoize-one": "^4.1.1",
   "@types/memoizee": "^0.4.3",
   "@types/node": "^12.7.5",
+  "@types/isomorphic-fetch": "0.0.35",
   "@types/react": "16.9.2",
   "@types/react-dom": "^16.8.6",
   "@types/react-spinner": "^0.2.0",
