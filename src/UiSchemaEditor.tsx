@@ -8,7 +8,7 @@ const LajiForm = require("laji-form/lib/components/LajiForm").default;
 const {Label: LajiFormLabel } = require("laji-form/lib/components/components");
 const LajiFormTitle = require("laji-form/lib/components/fields/TitleField").default;
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions } = LajiFormUtils;
+const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions, isEmptyString } = LajiFormUtils;
 import { JSONEditor } from "./components"
 import { Context } from "./Context";
 
@@ -113,13 +113,32 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			const schemaForUiSchema = parseSchemaFromFormDataPointer(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX), changedPath);
 			const currentValue = parseJSONPointer(newUiSchema, changedPath);
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
+
 			if (schemaForUiSchema?.type === "string" && !schemaForUiSchema?.enum) {
+				const doConfirm = () => !confirm(this.context.translations["editor.confirmDontTranslate"])
+
 				if (currentValue?.[0] === "@") {
 					events.push({type: "translations", key: currentValue, value: newValue});
 				} else {
 					const translationKey =  `@${this.props.path}${changedPath}`;
-					newUiSchema = updateSafelyWithJSONPath(newUiSchema, translationKey, changedPath);
-					events.push({type: "translations", key: translationKey, value: newValue});
+					if (isEmptyString(currentValue)) {
+						events.push({type: "translations", key: translationKey, value: newValue});
+						newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
+					} else if (doConfirm()) {
+						newUiSchema = updateSafelyWithJSONPath(newUiSchema, translationKey, changedPath);
+						events.push(
+							{
+								type: "translations",
+								op: "add",
+								key: translationKey,
+								value: ["fi", "sv", "en"].reduce((byLang, lang) => ({
+									...byLang,
+									[lang]: lang === this.context.lang ? newValue : currentValue
+								}), {})
+							});
+					} else {
+						newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
+					}
 				}
 			} else {
 				newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);

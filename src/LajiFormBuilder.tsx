@@ -174,6 +174,18 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						fieldPointerToUiSchemaPointer(this.state.schemas.schema, event.selected)
 					)
 				};
+			} else if (isTranslationsAddEvent(event)) {
+				const {key, value} = event;
+				changed.master = {
+					...(changed.master || {}),
+					translations: ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
+						...translations,
+						[lang]: {
+							...translations[lang],
+							[key]: value[lang]
+						}
+					}), this.state.master.translations)
+				};
 			} else if (isTranslationsChangeEvent(event)) {
 				const {key, value} = event;
 				changed.master = {
@@ -187,6 +199,15 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 								: (this.state.master.translations[lang][key] || value)
 						}
 					}), this.state.master.translations)
+				};
+			} else if (isTranslationsDeleteEvent(event)) {
+				const {key} = event;
+				changed.master = {
+					...(changed.master || {}),
+					translations: ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
+						...byLang,
+						[lang]: immutableDelete(this.state.master.translations[lang], key)
+					}), {})
 				};
 			} else if (event.type === "field") {
 				const splitted = event.selected.split("/").filter(s => s);
@@ -366,13 +387,29 @@ export interface UiSchemaChangeEvent {
 function isUiSchemaChangeEvent(event: ChangeEvent): event is UiSchemaChangeEvent {
 	return event.type === "uiSchema";
 }
-export interface TranslationsChangeEvent {
+export interface TranslationsEvent {
 	type: "translations";
 	key: any;
+	op?: string;
+}
+export interface TranslationsAddEvent extends TranslationsEvent {
+	value: {[lang in Lang]: string};
+	op: "add";
+}
+export interface TranslationsChangeEvent extends TranslationsEvent {
 	value: any;
 }
+export interface TranslationsDeleteEvent extends TranslationsEvent {
+	op: "delete";
+}
+function isTranslationsAddEvent(event: ChangeEvent): event is TranslationsAddEvent {
+	return event.type === "translations" && event.op === "add";
+}
 function isTranslationsChangeEvent(event: ChangeEvent): event is TranslationsChangeEvent {
-	return event.type === "translations";
+	return event.type === "translations" && !event.op;
+}
+function isTranslationsDeleteEvent(event: ChangeEvent): event is TranslationsDeleteEvent {
+	return event.type === "translations" && event.op === "delete";
 }
 export interface FieldEvent {
 	type: "field";
@@ -409,7 +446,7 @@ function isOptionChangeEvent(event: ChangeEvent): event is OptionChangeEvent {
 	return event.type === "options";
 }
 
-export type ChangeEvent = UiSchemaChangeEvent | TranslationsChangeEvent | FieldDeleteEvent | FieldAddEvent | FieldUpdateEvent | OptionChangeEvent;
+export type ChangeEvent = UiSchemaChangeEvent | TranslationsAddEvent | TranslationsChangeEvent | TranslationsDeleteEvent | FieldDeleteEvent | FieldAddEvent | FieldUpdateEvent | OptionChangeEvent;
 
 export interface Schemas {
 	schema: any;

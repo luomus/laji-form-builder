@@ -13,5 +13,10 @@ export default {
 		fi: "UI",
 		sv: "UI",
 		en: "UI"
+	},
+	"editor.confirmDontTranslate": {
+		fi: "Tehdäänkö muutos kaikilla kielillä?",
+		sv: "Vill du tillämpa ändringarna på alla språk?",
+		en: "Do you want to apply the changes for all languages?"
 	}
 }
