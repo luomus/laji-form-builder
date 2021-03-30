@@ -1,0 +1,7 @@
+src/
+playground
+webpack*
+.*
+properties*
+tsconfig*
+*.log

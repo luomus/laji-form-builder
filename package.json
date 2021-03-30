@@ -67,5 +67,16 @@
     "leaflet": "1.4.0"
   },
   "author": "Olli Raitio",
-  "license": "MIT"
+  "license": "MIT",
+  "directories": {
+    "lib": "lib"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luomus/laji-form-builder.git"
+  },
+  "bugs": {
+    "url": "https://github.com/luomus/laji-form-builder/issues"
+  },
+  "homepage": "https://github.com/luomus/laji-form-builder#readme"
 }
