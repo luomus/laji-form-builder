@@ -1,12 +1,12 @@
 import * as React from "react";
-const LajiForm = require("laji-form/lib/components/LajiForm").default;
+import LajiForm from "laji-form/lib/components/LajiForm";
+import lajiFormBs3 from "laji-form/lib/themes/bs3";
 import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button, Spinner } from "./components";
 import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
-import LajiFormInterface from "./LajiFormInterface";
-import { LajiFormEditor, FieldOptions } from "./LajiFormEditor";
+import { LajiFormEditor } from "./LajiFormEditor";
 import { Context } from "./Context";
 import appTranslations from "./translations";
 
@@ -27,7 +27,7 @@ export interface LajiFormBuilderState {
 const EDITOR_HEIGHT = 400;
 
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
-	apiClient: any;
+	apiClient: ApiClient;
 	formApiClient: any;
 	state: LajiFormBuilderState = {
 		master: "loading",
@@ -42,7 +42,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	schemasPromise: CancellablePromise<any>;
 
 	static defaultProps = {
-		lang: "fi",
+		lang: "fi" as Lang,
 		id: "JX.519"
 	};
 
@@ -79,7 +79,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			this.setState({master: "loading", schemas: "loading"}, () => {
 				// TODO fix formtest
 				this.setState({master: require(`../forms/${id}.json`)});
-				//this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
+				// this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
 				this.updateSchemas();
 			}
 			);
@@ -101,7 +101,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	render() {
 		return (
 			<Context.Provider value={{apiClient: this.apiClient, lang: this.state.lang, translations: this.appTranslations[this.state.lang]}}>
-				{this.renderLajiForm()}
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
 					{this.renderEditor()}
 				</div>
@@ -124,23 +123,24 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				renderSubmit={false}
 				uiSchemaContext={{isAdmin: true}}
 				bottomOffset={this.state.editorHeight}
+				theme={lajiFormBs3}
 			/>
 		);
 	}
 
 	renderEditor() {
-		const {schemas, uiSchema, master} = this.state;
+		const {schemas, master} = this.state;
 		return (
-				<LajiFormEditor
-						loading={master === "loading"}
-						master={master}
-						schemas={schemas}
-						onChange={this.onEditorChange}
-						onLangChange={this.onLangChange}
-						onHeightChange={this.onHeightChange}
-						height={EDITOR_HEIGHT}
-				/>
-			);
+			<LajiFormEditor
+				loading={master === "loading"}
+				master={master}
+				schemas={schemas}
+				onChange={this.onEditorChange}
+				onLangChange={this.onLangChange}
+				onHeightChange={this.onHeightChange}
+				height={EDITOR_HEIGHT}
+			/>
+		);
 	}
 
 	onHeightChange = (editorHeight: number) => {
@@ -157,7 +157,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						key={lang}
 					>{lang}
 					</Button>
-					))
+				))
 			}</div>
 		);
 	}
@@ -217,8 +217,8 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						return {
 							...field,
 							fields: remaining.length
-							? (field.fields as FieldOptions[]).map((f: FieldOptions) => f.name === p ? filterFields(f, remaining) : f)
-							: (field.fields as FieldOptions[]).filter((f: FieldOptions) => f.name !== p)
+								? (field.fields as FieldOptions[]).map((f: FieldOptions) => f.name === p ? filterFields(f, remaining) : f)
+								: (field.fields as FieldOptions[]).filter((f: FieldOptions) => f.name !== p)
 						};
 					};
 					const filterSchema = (schema: any, pointer: string[]): any => {
@@ -269,15 +269,15 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						const getSchemaForProperty = (property: PropertyModel) => {
 							switch (property.range[0]) {
 							case PropertyRange.String:
-								return JSONSchema.string;
+								return JSONSchema.str;
 							case PropertyRange.Boolean:
-								return JSONSchema.boolean;
+								return JSONSchema.bool;
 							case PropertyRange.Int:
 								return JSONSchema.integer;
 							case PropertyRange.PositiveInteger: // TODO validator
 								return JSONSchema.number;
 							case PropertyRange.DateTime: // TODO datetime uiSchema
-								return JSONSchema.string;
+								return JSONSchema.str;
 							default:
 								throw new Error("Unknown property range");
 							}
@@ -311,22 +311,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							? {...field, fields: updateField(field.fields as FieldOptions[], remaining, value)}
 							: field
 						);
-					};
-					const updateFromField  = (schema: any, field: any) => {
-						if (field.options?.hasOwnProperty("default") && schema.default !== field.options.default) {
-							return {...schema, default: field.options.default};
-						}
-						return schema;
-					}
-					const updateSchema = (schema: any, path: string[], field: FieldOptions) => {
-						const [next, ...remaining] = path;
-						const currentSchema = schema.items?.properties[next] || schema.properties[next];
-						const schemaForNext: any = !remaining.length
-							? updateFromField(currentSchema, field)
-							: updateSchema(currentSchema, remaining, field);
-						return schema.type === "object"
-						? {...schema, properties: {...schema.properties, [next]: schemaForNext}}
-						: {...schema, items: {...schema.items, properties: {...schema.items.properties, [next]: schemaForNext}}};
 					};
 					const updateValidators = (currentValidators: any, schema: any, path: string[], newValidators: any): any | undefined => {
 						const [next, ...remaining] = path;
@@ -421,11 +405,11 @@ export interface FieldDeleteEvent extends FieldEvent {
 }
 export interface FieldAddEvent extends FieldEvent {
 	op: "add";
-	value: PropertyModel
+	value: PropertyModel;
 }
 export interface FieldUpdateEvent extends FieldEvent {
 	op: "update";
-	value: FieldOptions
+	value: FieldOptions;
 }
 function isFieldDeleteEvent(event: ChangeEvent): event is FieldDeleteEvent {
 	return event.type === "field" &&  event.op === "delete";
@@ -446,7 +430,14 @@ function isOptionChangeEvent(event: ChangeEvent): event is OptionChangeEvent {
 	return event.type === "options";
 }
 
-export type ChangeEvent = UiSchemaChangeEvent | TranslationsAddEvent | TranslationsChangeEvent | TranslationsDeleteEvent | FieldDeleteEvent | FieldAddEvent | FieldUpdateEvent | OptionChangeEvent;
+export type ChangeEvent = UiSchemaChangeEvent
+	| TranslationsAddEvent
+	| TranslationsChangeEvent
+	| TranslationsDeleteEvent
+	| FieldDeleteEvent
+	| FieldAddEvent
+	| FieldUpdateEvent
+	| OptionChangeEvent;
 
 export interface Schemas {
 	schema: any;
@@ -454,15 +445,25 @@ export interface Schemas {
 }
 
 export enum PropertyRange {
-	Int= "xsd:integer",
-	Boolean= "xsd:boolean",
-	String= "xsd:string",
-	Id= "@id",
+	Int = "xsd:integer",
+	Boolean = "xsd:boolean",
+	String = "xsd:string",
+	Id = "@id",
 	PositiveInteger = "xsd:positiveInteger",
 	DateTime = "xsd:dateTime"
 }
 export interface PropertyModel {
 	property: string;
 	label: string;
-	range: PropertyRange[]
+	range: PropertyRange[];
+}
+
+export interface FieldOptions {
+	label?: string;
+	name: string;
+	options?: any;
+	type?: string;
+	validators?: any;
+	warnings?: any;
+	fields?: FieldOptions[];
 }

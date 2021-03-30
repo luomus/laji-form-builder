@@ -31,7 +31,8 @@
 		"member-access": false,
 		"max-classes-per-file": false,
 		"jsx-no-multiline-js": false,
-		"no-shadowed-variable": false
+		"no-shadowed-variable": false,
+		"no-submodule-imports": false
 	},
     "rulesDirectory": []
 }

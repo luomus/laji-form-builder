@@ -1,15 +1,14 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fetchJSON, translate, parseJSONPointer } from "./utils";
-import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, Lang, Schemas } from "./LajiFormBuilder";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer } from "./utils";
+import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, Lang, Schemas, FieldOptions } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { capitalizeFirstLetter, findNearestParentSchemaElem, idSchemaIdToJSONPointer, scrollIntoViewIfNeeded } = LajiFormUtils;
+const { findNearestParentSchemaElem } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import ApiClient from "./ApiClientImplementation";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -80,12 +79,12 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 					onChange={this.onHeightChange}
 				>
 					{this.props.loading
-					? <Spinner size={100} />
-					: (
-						<React.Fragment>
-							<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
-								<div style={sidebarToolbarContainer}>
-									<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
+						? <Spinner size={100} />
+						: (
+							<React.Fragment>
+								<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
+									<div style={sidebarToolbarContainer}>
+										<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
 										<Clickable
 											className={classNames("glyphicon glyphicon-magnet", this.state.pointerChoosingActive && "active")}
 											onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}
@@ -94,40 +93,40 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 											className="glyphicon glyphicon-cog"
 											onClick={this.openFormOptionsEditor}
 										/>
-								</div>
-								<Fields
-									style={fieldsStyle}
-									className={gnmspc("field-chooser")}
-									fields={this.getFields(this.props.master.fields)}
-									onSelected={this.onFieldSelected}
-									onDeleted={this.onFieldDeleted}
-									selected={this.state.selected}
-									pointer=""
-									expanded={true}
-								/>
-							</DraggableWidth>
-							<div style={fieldEditorStyle}>
-								<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
-								{this.state.selected &&	(
-									<Editor
-										key={this.state.selected}
-										active={this.state.activeEditorMode}
-										{...this.getEditorProps()}
-										className={gnmspc("field-editor")}
-										style={fieldEditorContentStyle}
+									</div>
+									<Fields
+										style={fieldsStyle}
+										className={gnmspc("field-chooser")}
+										fields={this.getFields(this.props.master.fields)}
+										onSelected={this.onFieldSelected}
+										onDeleted={this.onFieldDeleted}
+										selected={this.state.selected}
+										pointer=""
+										expanded={true}
 									/>
-								)}
-							</div>
-						{this.state.formOptionsModalOpen &&
-							<OptionsEditor
-								onClose={this.closeFormOptionsEditor}
-								options={this.getFormOptions(this.props.master)}
-								translations={this.props.master.translations[this.context.lang]}
-								onChange={this.props.onChange}
-							/>
-						}
-						</React.Fragment>
-					)}
+								</DraggableWidth>
+								<div style={fieldEditorStyle}>
+									<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
+									{this.state.selected &&	(
+										<Editor
+											key={this.state.selected}
+											active={this.state.activeEditorMode}
+											{...this.getEditorProps()}
+											className={gnmspc("field-editor")}
+											style={fieldEditorContentStyle}
+										/>
+									)}
+								</div>
+								{this.state.formOptionsModalOpen &&
+									<OptionsEditor
+										onClose={this.closeFormOptionsEditor}
+										options={this.getFormOptions(this.props.master)}
+										translations={this.props.master.translations[this.context.lang]}
+										onChange={this.props.onChange}
+									/>
+								}
+							</React.Fragment>
+						)}
 				</DraggableHeight>
 			</React.Fragment>
 		);
@@ -154,7 +153,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 	getEditorProps(): FieldEditorProps {
 		const { schemas, master } = this.props;
-		const { lang, apiClient } = this.context;
+		const { lang } = this.context;
 		const selected = this.getSelected();
 		const findField = (_field: FieldOptions, path: string): FieldOptions => {
 			const [next, ...rest] = path.split("/").filter(s => s);
@@ -163,11 +162,6 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			}
 			const child  = (_field.fields as FieldOptions[]).find(_child => _child.name === next) as FieldOptions;
 			return findField(child, rest.join("/"));
-		};
-		const documentField: FieldOptions = {
-			name: "document",
-			type: "fieldset",
-			fields: this.props.master.fields
 		};
 		return {
 			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected)),
@@ -246,7 +240,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.setState({formOptionsModalOpen: false});
 	}
 	getFormOptions = (master: any) => {
-		const {uiSchema, fields, translations, ...options} = master;
+		const {uiSchema, fields, translations, ...options} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
 		return options;
 	}
 }
@@ -271,24 +265,6 @@ const Fields = React.memo(function _Fields({fields = [], onSelected, onDeleted, 
 	);
 });
 
-export interface FieldOptions {
-	label?: string;
-	name: string;
-	options?: any;
-	type?: string;
-	validators?: any;
-	warnings?: any;
-	fields?: FieldOptions[];
-}
-export interface FieldMap {
-	label: string;
-	name: string;
-	options: any;
-	type: string;
-	validators: any;
-	warnings?: any;
-	fields: {[field: string]: FieldMap};
-}
 interface FieldProps extends FieldOptions {
 	pointer: string;
 	selected?: string;
@@ -321,7 +297,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		return {};
 	}
 
-	componentDidUpdate(prevProps: FieldProps, prevState: FieldState) {
+	componentDidUpdate(prevProps: FieldProps) {
 		if ((!Field.isSelected(prevProps.selected, prevProps.pointer) && Field.isSelected(this.props.selected, this.props.pointer))) {
 			if (this.fieldRef.current) {
 				// TODO doesn't work since container fixed?
@@ -369,7 +345,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		const containerClassName = classNames(
 			this.nmspc("item"),
 			this.nmspc(Field.isSelected(this.props.selected, this.props.pointer) && "selected")
-		)
+		);
 		return (
 			<div className={this.nmspc()} ref={this.fieldRef}>
 				<Clickable
@@ -395,19 +371,31 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	}
 }
 
-const LangChooser = React.memo(function LangChooser({lang, onChange}: {lang: Lang, onChange: (lang: Lang) => void}) {
+interface LangChooserProps {
+	lang: Lang;
+	onChange: (lang: Lang) => void;
+}
+
+const LangChooser = React.memo(function LangChooser({lang, onChange}: LangChooserProps) {
 	return (
-	<div className="btn-group">{
-		["fi", "sv", "en"].map((_lang: Lang) => (
-			<Button
-				className="btn-xs"
-				active={_lang === lang}
-				onClick={React.useCallback(() => onChange(_lang), [_lang])}
-				key={_lang}
-			>{_lang}
-			</Button>
-		))
-	}</div>
+		<div className="btn-group">{
+			["fi", "sv", "en"].map((_lang: Lang) => <LangChooserByLang key={_lang} onChange={onChange}  lang={_lang} activeLang={lang} />)
+		}</div>
+	);
+});
+
+interface LangChooserByLangProps extends LangChooserProps {
+	activeLang: Lang;
+}
+
+const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange, activeLang}: LangChooserByLangProps) {
+	return (
+		<Button
+			className="btn-xs"
+			active={lang === activeLang}
+			onClick={React.useCallback(() => onChange(lang), [lang, onChange])}
+		>{lang}
+		</Button>
 	);
 });
 
@@ -420,18 +408,21 @@ const EditorChooser = React.memo(function EditorChooser(
 	: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) {
 	return (
 		<div className={editorNmspc()} style={{display: "flex"}}>{
-			Object.keys(tabs).map((_active: ActiveEditorMode) => {
-				const translation = (React.useContext(Context).translations as any)[tabs[_active]];
-				return (
-					<Clickable
-						className={classNames(editorNmspc("button"), active === _active && gnmspc("active"))}
-						onClick={React.useCallback(() => onChange(_active), [_active])}
-						key={_active}
-					>{translation}
-					</Clickable>
-				);
-			})
+			Object.keys(tabs).map((_active: ActiveEditorMode) => <EditorChooserTab  key={_active} active={active === _active} tab={_active} translationKey={tabs[_active]}  onActivate={onChange} />)
 		}</div>
+	);
+});
+
+const EditorChooserTab = React.memo(function EditorChooserTab(
+	{tab, translationKey, active, onActivate}
+	: {tab: ActiveEditorMode, translationKey: string, active: boolean, onActivate: (active: ActiveEditorMode) => void}) {
+	const translation = (React.useContext(Context).translations as any)[translationKey];
+	return (
+		<Clickable
+			className={classNames(editorNmspc("button"), active && gnmspc("active"))}
+			onClick={React.useCallback(() => onActivate(tab), [tab, onActivate])}
+		>{translation}
+		</Clickable>
 	);
 });
 

@@ -3,14 +3,16 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import LajiFormInterface from "./LajiFormInterface";
-import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, prefixDeeply, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, getTranslation, detectChangePaths, parseJSONPointer,  } from "./utils";
-const LajiForm = require("laji-form/lib/components/LajiForm").default;
-const {Label: LajiFormLabel } = require("laji-form/lib/components/components");
-const LajiFormTitle = require("laji-form/lib/components/fields/TitleField").default;
+import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, getTranslation, detectChangePaths, parseJSONPointer,  } from "./utils";
+import LajiForm from "laji-form/lib/components/LajiForm";
+import lajiFormBs3 from "laji-form/lib/themes/bs3";
+import { Label as LajiFormLabel } from "laji-form/lib/components/components";
+import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions, isEmptyString } = LajiFormUtils;
-import { JSONEditor } from "./components"
+import { JSONEditor } from "./components";
 import { Context } from "./Context";
+import { FieldProps } from "@rjsf/core";
 
 const PREFIX = "$";
 
@@ -33,6 +35,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		const propTypesForUiSchema = (propTypes: any): any => {
 			const name = propTypes.name || (propTypes.type || {}).name;
 			const value = propTypes.value || (propTypes.type || {}).value;
+			let itemUiSchema;
 			switch (name) {
 			case "shape":
 				return Object.keys(value).reduce((properties: any, prop) => {
@@ -43,7 +46,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 					return properties;
 				}, {});
 			case "arrayOf":
-				const itemUiSchema = propTypesForUiSchema(value);
+				 itemUiSchema = propTypesForUiSchema(value);
 				return Object.keys(itemUiSchema).length
 					? {items: itemUiSchema}
 					: {};
@@ -85,7 +88,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
 		const formData = this.normalizeUiSchema(
 			getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema)
-			), PREFIX)
+			), PREFIX);
 		const formContext = {
 			path: this.props.path,
 			rootSchema: this.props.schema,
@@ -115,7 +118,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
 
 			if (schemaForUiSchema?.type === "string" && !schemaForUiSchema?.enum) {
-				const doConfirm = () => !confirm(this.context.translations["editor.confirmDontTranslate"])
+				const doConfirm = () => !confirm(this.context.translations["editor.confirmDontTranslate"]);
 
 				if (currentValue?.[0] === "@") {
 					events.push({type: "translations", key: currentValue, value: newValue});
@@ -306,13 +309,13 @@ const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any, prefix = PREFI
 		if (Object.keys(itemsUiSchema).length) {
 			return {
 				...uiSchema, items: itemsUiSchema
-			}
+			};
 		}
 		return uiSchema;
 	}
 };
 
-export const TextareaEditorField = (props: any) => {
+export const TextareaEditorField = (props: FieldProps) => {
 	const label = props.label || props.title || props.name;
 	const value = props.formData ?? props.value;
 	let _lajiFormId: any;
@@ -324,15 +327,17 @@ export const TextareaEditorField = (props: any) => {
 		}
 		return _value;
 	};
+	const _onChange = props.onChange;
 	const onChange = React.useCallback(((value: any) => (
-		props.onChange(_lajiFormId
+		_onChange(_lajiFormId
 			? {...value, _lajiFormId}
 			: value)
-	)), [props.onChange]);
+	)), [_onChange, _lajiFormId]);
 	const { minRows, maxRows, rows } = getUiOptions(props.uiSchema);
+	const _LajiFormLabel = LajiFormLabel as any;
 	return (
 		<React.Fragment>
-			<LajiFormLabel label={label} />
+			<_LajiFormLabel label={label} />
 			<JSONEditor
 				value={filterLajiFormId(value)}
 				onChange={onChange}
@@ -352,7 +357,7 @@ const UiFieldEditor = (props: any) => {
 	const uiSchema = customize(getInnerUiSchema(props.uiSchema), props.formContext.rootUiSchema, PREFIX);
 
 	return <SchemaField {...props} schema={schema} uiSchema={uiSchema}/>;
-}
+};
 
 export const EditorLajiForm = (props: any) => {
 	const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
@@ -362,6 +367,7 @@ export const EditorLajiForm = (props: any) => {
 				lang={lang}
 				fields={fields}
 				renderSubmit={false}
+				theme={lajiFormBs3}
 				{...props}
 			/>
 		)}</Context.Consumer>

@@ -1,4 +1,4 @@
-{
+export default {
 "@context": {
 "id": "@id",
 "@vocab": "http://tun.fi/",

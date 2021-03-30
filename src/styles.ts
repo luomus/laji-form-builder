@@ -1,2 +1,2 @@
-require("laji-form/dist/styles.css");
-require("../src/styles.scss");
+import "laji-form/dist/styles.css";
+import "../src/styles.scss";

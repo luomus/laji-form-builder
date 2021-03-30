@@ -1,6 +1,7 @@
 import * as React from "react";
 import memoize from "memoizee";
-const LajiForm = require("laji-form/lib/components/LajiForm").default;
+import LajiForm from "laji-form/lib/components/LajiForm";
+import lajiFormBs3 from "laji-form/lib/themes/bs3";
 import ApiClient from "./ApiClientImplementation";
 import { Context } from "./Context";
 import { Spinner, Modal } from "./components";
@@ -10,11 +11,13 @@ import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
 
+interface JSONSchemaEnum {enum: string[]; enumNames: string[]; type: "string";}
+
 const getEnumRange = memoize((apiClient: ApiClient, lang: Lang, enumName: string) =>
 	apiClient.fetchJSON(`/metadata/ranges/${enumName}`, {lang}).then((enums: { value: string; id: string; }[]) =>
-		enums.reduce((es, e) => (
-			{enum: [...es.enum, e.id], enumNames: [...es.enumNames, e.value]}
-		), {enum: [""], enumNames: [""]})
+		enums.reduce<JSONSchemaEnum>((es, e) => (
+			{...es, enum: [...es.enum, e.id], enumNames: [...es.enumNames, e.value]}
+		), {enum: [""], enumNames: [""], type: "string"})
 	));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
@@ -27,10 +30,10 @@ interface FormOptionsEditorProps {
 
 export default React.memo(function OptionsEditor({onClose, options, translations, onChange}: FormOptionsEditorProps) {
 	const { lang, apiClient } = React.useContext(Context);
-	const [features, setFeatures] = React.useState();
-	const [printTypes, setPrintTypes] = React.useState();
-	const [viewerTypes, setViewerTypes] = React.useState();
-	const [categories, setCategories] = React.useState();
+	const [features, setFeatures] = React.useState<JSONSchemaEnum>();
+	const [printTypes, setPrintTypes] = React.useState<JSONSchemaEnum>();
+	const [viewerTypes, setViewerTypes] = React.useState<JSONSchemaEnum>();
+	const [categories, setCategories] = React.useState<JSONSchemaEnum>();
 	const langs = ["fi", "en", "sv"];
 	React.useEffect(() => {
 		if (!apiClient || !lang) {
@@ -41,24 +44,24 @@ export default React.memo(function OptionsEditor({onClose, options, translations
 		getEnumRange(apiClient, lang, "MHL.viewerTypeEnum").then(setViewerTypes);
 		getEnumRange(apiClient, lang, "MHL.categoryEnum").then(setCategories);
 	}, [apiClient, lang]);
-	const {string, array, object, boolean, enu} = JSONSchema;
+	const {str, array, object, bool, enu} = JSONSchema;
 	const schema = features && printTypes && viewerTypes && categories && object({
-		name: string,
-		title: string,
-		description: string,
-		shortDescription: string,
-		logo: string,
+		name: str,
+		title: str,
+		description: str,
+		shortDescription: str,
+		logo: str,
 		category: enu(categories),
-		collectionID: string,
+		collectionID: str,
 		instructions: object({
-			fi: string,
-			en: string,
-			sv: string,
+			fi: str,
+			en: str,
+			sv: str,
 		}),
 		actions: object({
-			save: string,
-			temp: string,
-			cancel: string,
+			save: str,
+			temp: str,
+			cancel: str,
 		}),
 		language: enu({enum: langs, enumNames: langs}),
 		supportedLanguage: array(enu({enum: langs, enumNames: langs}), {uniqueItems: true}),
@@ -66,50 +69,50 @@ export default React.memo(function OptionsEditor({onClose, options, translations
 		viewerType: enu(viewerTypes),
 		features: array(enu(features), {uniqueItems: true}),
 		options: object({
-			namedPlaceList: array(string),
+			namedPlaceList: array(str),
 			messages: object({
-				success: string
+				success: str
 			}),
 			season: object({
-				start: string,
-				end: string
+				start: str,
+				end: str
 			}),
-			ownSubmissionColumns: array(string),
-			ownSubmissionActions: array(string),
-			periods: array(string),
-			disableRequestDescription: boolean,
-			hideTES: boolean,
-			displayOwnSubmissions: boolean,
-			formPermisionDescription: string
+			ownSubmissionColumns: array(str),
+			ownSubmissionActions: array(str),
+			periods: array(str),
+			disableRequestDescription: bool,
+			hideTES: bool,
+			displayOwnSubmissions: bool,
+			formPermisionDescription: str
 		}),
 		namedPlaceOptions: object({
-			formID: string,
-			description: string,
-			createDescription: string,
-			useLabel: string,
-			startWithMap: boolean,
-			listLabel: string,
-			printLabel: string,
-			formNavLabel: string,
-			reservationUntil: string,
-			showLegentList: boolean,
-			hideMapTab: boolean,
-			zoomToData: boolean,
-			mapTileLayerName: string,
-			mapOverlayNames: string,
+			formID: str,
+			description: str,
+			createDescription: str,
+			useLabel: str,
+			startWithMap: bool,
+			listLabel: str,
+			printLabel: str,
+			formNavLabel: str,
+			reservationUntil: str,
+			showLegentList: bool,
+			hideMapTab: bool,
+			zoomToData: bool,
+			mapTileLayerName: str,
+			mapOverlayNames: str,
 			createNewLabels: object({
-				button: string
+				button: str
 			}),
-			includeUnits: boolean,
-			requireAdmin: boolean,
-			infoFields: array(string),
-			birdAssociationAreaHelp: string,
-			prepopulatedDocumentFields: array(string),
-			documentListUseLocalDocumentViewer: boolean,
-			documentViewerGatheringGeometryJSONPath: string,
-			adminShowCopyLink: boolean
+			includeUnits: bool,
+			requireAdmin: bool,
+			infoFields: array(str),
+			birdAssociationAreaHelp: str,
+			prepopulatedDocumentFields: array(str),
+			documentListUseLocalDocumentViewer: bool,
+			documentViewerGatheringGeometryJSONPath: str,
+			adminShowCopyLink: bool
 		}),
-		prepopulatedWithInformalTaxonGroups: array(string),
+		prepopulatedWithInformalTaxonGroups: array(str),
 		prepopulatedDocument: object({})
 	});
 	const scopeField = (fields: string[] = []) => ({
@@ -149,7 +152,7 @@ export default React.memo(function OptionsEditor({onClose, options, translations
 			}
 		});
 		onChange(events);
-	}, [options, translations]);
+	}, [formData, onChange, options]);
 	const fields = { TextareaEditorField };
 	return (
 		<Modal onClose={onClose}>
@@ -160,11 +163,11 @@ export default React.memo(function OptionsEditor({onClose, options, translations
 						schema={schema}
 						uiSchema={uiSchema}
 						formData={formData}
-						apiClient={apiClient}
 						renderSubmit={false}
 						onChange={onLajiFormChange}
 						fields={fields}
 						lang={lang}
+						theme={lajiFormBs3}
 					/>
 				}
 			</div>

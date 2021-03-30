@@ -5,3 +5,5 @@ properties.json
 .vim*
 *.swp
 .tern-project
+dist
+lib

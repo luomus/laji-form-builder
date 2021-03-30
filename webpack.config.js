@@ -5,14 +5,15 @@ module.exports = {
 	mode: "development",
 	devtool: "eval",
 	entry: [
-		path.join(__dirname, "playground", "app"),
+		path.join(__dirname, "playground", "app")
 	],
 	output: {
 		publicPath: "/build/",
 		filename: "main.js"
 	},
 	plugins: [
-		new webpack.HotModuleReplacementPlugin()
+		new webpack.HotModuleReplacementPlugin(),
+		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"development\""})
 	],
 	module: {
 		rules: [
@@ -46,6 +47,6 @@ module.exports = {
 		]
 	},
 	resolve: {
-		extensions: ['.tsx', '.ts', '.js', '.json']
+		extensions: [".tsx", ".ts", ".js", ".json"]
 	}
 };

@@ -17,7 +17,7 @@ export const nmspc = (_nmspc?: string) => (s?: any) => s === undefined
 
 export const gnmspc  = nmspc();
 
-export const getComponentPropTypes = (field: React.Component) => field && parsePropTypes(field);
+export const getComponentPropTypes = <T = React.Component>(field: T) => field && parsePropTypes(field);
 
 export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	const name = propTypes.name || (propTypes.type || {}).name;
@@ -42,7 +42,7 @@ export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	case "custom":
 		return {type: "object", properties: {}};
 	default:
-		//console.warn(`Unhandled PropType type ${name}`);
+		// console.warn(`Unhandled PropType type ${name}`);
 		return {type: "object", properties: {}};
 	}
 };
@@ -89,7 +89,7 @@ export const translate = (obj: any, translations: any) => {
 		return _any;
 	}
 	return translate(obj);
-}
+};
 
 export const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {
 	let schemaPointer = schema;
@@ -104,7 +104,8 @@ export const fieldPointerToSchemaPointer = (schema: any, pointer: string): strin
 		}
 		throw new Error(`failed to parse field schema pointer ${pointer}`);
 	}, "");
-}
+};
+
 export const fieldPointerToUiSchemaPointer = (schema: any, pointer: string): string => {
 	let schemaPointer = schema;
 	return pointer.split("/").filter(s => s).reduce((resultPointer: string, s): string => {
@@ -131,15 +132,17 @@ export const alterObjectKeys = (obj: any, replace: (key: string) => string): any
 	}
 	return obj;
 };
+
 export const unprefixDeeply = (obj: any, prefix: string): any => {
 	return alterObjectKeys(obj, (key => key.startsWith(prefix) ? key.substr(prefix.length, key.length) : key));
-}
+};
+
 export const prefixDeeply = (obj: any, prefix?: string): any => {
 	if (prefix === undefined) {
 		return obj;
 	}
 	return alterObjectKeys(obj, (key => `${prefix}${key}`));
-}
+};
 
 export const alterSchemaKeys = (schema: any, replace: (key: string) => string): any => {
 	if (schema.type === "object") {
@@ -243,7 +246,7 @@ export const makeCancellable = <T>(promise: Promise<T>): CancellablePromise<T> =
 
 export const unprefixProp = (s: string) => s.replace(/^.+\./, "");
 
-export const unprefixer = (prefix: string = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s;
+export const unprefixer = (prefix = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s;
 
 export const getTranslation = (key: string, translations: {[key: string]: string}): string | undefined => {
 	if (typeof key === "string") {
@@ -287,15 +290,15 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 };
 
 export class JSONSchema {
-	static type = (type: string) => (options = {}) => ({type, ...options})
+	static type = (type: string) => (options = {}) => ({type, ...options});
 	static String = JSONSchema.type("string");
-	static string = JSONSchema.String();
+	static str = JSONSchema.String();
 	static Number = JSONSchema.type("number");
 	static number = JSONSchema.Number();
 	static Integer = JSONSchema.type("integer");
 	static integer = JSONSchema.Integer();
 	static Boolean = JSONSchema.type("boolean");
-	static boolean = JSONSchema.Boolean();
+	static bool = JSONSchema.Boolean();
 	static array = (items: any, options = {}) => JSONSchema.type("array")({items, ...options});
 	static enu = (_enum: {enum: string[], enumNames: string[]}, options?: any) => ({
 		...JSONSchema.String(options),
@@ -306,4 +309,4 @@ export class JSONSchema {
 
 export const parseJSONPointer = (obj: any, path: string, safeMode?: boolean | "createParents") => {
 	return _parseJSONPointer(obj, path, safeMode, true);
-}
+};

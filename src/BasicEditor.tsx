@@ -1,13 +1,13 @@
 import * as React from "react";
-import { FieldEditorProps, FieldEditorChangeEvent, FieldOptions } from "./LajiFormEditor";
-import { PropertyModel, PropertyRange } from "./LajiFormBuilder";
-import { fetchJSON, makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "./utils";
+import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
+import { PropertyModel, PropertyRange, FieldOptions } from "./LajiFormBuilder";
+import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer, fetchJSON } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPath } = LajiFormUtils;
 import { Context } from "./Context";
 import memoize from "memoizee";
-const SelectWidget = require("laji-form/lib/components/widgets/SelectWidget").default;
-const LajiForm = require("laji-form/lib/components/LajiForm").default;
+import LajiForm from "laji-form/lib/components/LajiForm";
+import lajiFormBs3 from "laji-form/lib/themes/bs3";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
 
@@ -79,9 +79,10 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					schema={schema}
 					onChange={this.onAddProperty}
 					lang={this.context.lang}
+					theme={lajiFormBs3}
 					renderSubmit={false}
 				/>
-						);
+			);
 		} else if (this.state.childProps === false) {
 			return null;
 		} else {
@@ -89,7 +90,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		}
 	}
 
-	onAddProperty = (property: string, b: any): void => {
+	onAddProperty = (property: string): void => {
 		if (!property) {
 			return;
 		}
@@ -102,13 +103,12 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	propertyModelToFieldOptions(property?: PropertyModel) {
 		if (!property) {
-			throw new Error("Tried to add nonexisting property")
+			throw new Error("Tried to add nonexisting property");
 		}
 		return property;
 	}
 
-	getPropertiesContext = () => Promise.resolve(require("./documentContext")["@context"]);
-	//getPropertiesContext = memoize(() => fetchJSON("http://schema.laji.fi/context/document.jsonld").then(result => result["@context"]))
+	getPropertiesContext = memoize(() => fetchJSON("https://schema.laji.fi/context/document.jsonld").then(result => result["@context"]))
 
 	getMedataPropertyName(context: {[property: string]: PropertyContext}, property: string): PropertyContext {
 		if (property === "gatherings") {
@@ -134,7 +134,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	}
 
 	getPropertyNameFromContext(propertyContext: PropertyContext) {
-		let id = propertyContext["@id"]
+		let id = propertyContext["@id"];
 		id = id.replace("http://tun.fi/", "");
 		switch (id) {
 		case  "MY.gatherings":
@@ -164,18 +164,23 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					(r: any) => resolve(r.results),
 					reject
 				)
-			)
+			);
 		});
 	})
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
-		const maybePrimitiveDefault = (JSONSchema as any)[this.props.schema.type];
+		const schemaTypeToJSONSchemaUtilType = (type: string) => 
+			type === "boolean" && "bool"
+			|| type === "string" && "str"
+			|| type;
+
+		const maybePrimitiveDefault = (JSONSchema as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)];
 		const _default = typeof maybePrimitiveDefault !== "function"
 			? maybePrimitiveDefault
 			: JSONSchema.object({});
 		const optionsProps: any = {
-			excludeFromCopy: JSONSchema.boolean,
+			excludeFromCopy: JSONSchema.bool,
 			default: _default
 		};
 		const {enum: _enum, enumNames} = this.props.schema;
@@ -193,7 +198,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		const uiSchema = {
 			validators: itemUiSchema,
 			warnings: itemUiSchema
-		}
+		};
 		const formData = { options, validators, warnings };
 		return (
 			<EditorLajiForm

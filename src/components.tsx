@@ -66,23 +66,24 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 			</div>
 		);
 		const content = this.props.dragWidth ? (
-				<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
-			<div style={{width: "100%"}}>
+			<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
+				<div style={{width: "100%"}}>
 					{children}
 					{this.getWidthDragLine()}
-			</div>
 				</div>
+			</div>
 		) : children;
 
 		const heightContainerStyle = fixed === "bottom"
 			?  {
-			display: "flex",
-			flexDirection: "row",
-			position: "fixed",
-			bottom: 0,
-			left: 0,
-			zIndex: 10000,
-		} as React.CSSProperties : {};
+				display: "flex",
+				flexDirection: "row",
+				position: "fixed",
+				bottom: 0,
+				left: 0,
+				zIndex: 10000,
+			} as React.CSSProperties
+			: {};
 		return (
 			<div style={this.props.dragHeight && {...heightContainerStyle, height: this.state.height || 0, width: "100%"} || {}}>
 				{this.getHeightDragLine()}
@@ -146,13 +147,13 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 				this.widthAtStart = this.state.width;
 				document.addEventListener("mouseup", this.onMouseUp(dir));
 				document.addEventListener("mousemove", this.onMouseMove(dir));
-			}
+			};
 		}
 		return this._onMouseDown[dir];
 	}
 	onMouseUp = (dir: "height" | "width"): EventListener => {
 		if (!this._onMouseUp[dir]) {
-			this._onMouseUp[dir] = (e: MouseEvent) => {
+			this._onMouseUp[dir] = () => {
 				if (!this.dragging) {
 					return;
 				}
@@ -160,7 +161,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 				document.removeEventListener("mouseup", this.onMouseUp(dir));
 				document.removeEventListener("mousemove", this.onMouseMove(dir));
 				this.props.onChange?.({[dir]: this.state[dir]});
-			}
+			};
 		}
 		return this._onMouseUp[dir] as EventListener;
 	}
@@ -215,7 +216,7 @@ export const Spinner = React.memo(function Spinner({color = "black", size = 32}:
 			className={classNames(gnmspc("spinner-container"), gnmspc(color === "black" ? "spinner-black" : ""))}
 		/>
 	);
-})
+});
 
 const getMinMaxed = (val: number, min?: number, max?: number) => {
 	if (min) {
@@ -225,9 +226,7 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 		val = Math.min(val, max);
 	}
 	return val;
-}
-const JSON_EDITOR_ROW_HEIGHT = 13;
-const JSON_EDITOR_PADDING = 5;
+};
 export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable = true}
 	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number, resizable?: boolean}) => {
 
@@ -238,7 +237,7 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable =
 	const _onChange = React.useCallback((e: any) => {
 		setToutched(true);
 		setTmpValue(e.target.value);
-	}, [onChange]);
+	}, []);
 
 	const onBlur = React.useCallback(() => {
 		if (!touched) {
@@ -252,14 +251,15 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable =
 		} catch (e) {
 			setValid(false);
 		}
-	}, [onChange, tmpValue, touched]);
+	}, [onChange, tmpValue, touched, valid]);
 
-	const _rows = getMinMaxed(rows === undefined
-		? (tmpValue ?? "").split("\n").length
-		: rows,
+	const _rows = getMinMaxed(
+		rows === undefined
+			? (tmpValue ?? "").split("\n").length
+			: rows,
 		minRows,
 		maxRows
-	)
+	);
 
 	return (
 		<textarea
@@ -299,15 +299,15 @@ export const Modal = ({children, header, onClose}: {children: React.ReactNode, h
 					/>
 				</div>
 				<div style={{overflow: "auto"}}>
-				{children}
-			</div>
+					{children}
+				</div>
 			</div>
 		</React.Fragment>
 	);
 	return ReactDOM.createPortal(modal, document.body);
-}
+};
 
 const ModalBackdrop = ({onClick}: {onClick: () => void}) => {
-	const backdrop = <div onClick={onClick} style={{position: "fixed", width: "100%", height: "100%", top: 0, zIndex: 10001}} className={modalNmspc("backdrop")} />
+	const backdrop = <div onClick={onClick} style={{position: "fixed", width: "100%", height: "100%", top: 0, zIndex: 10001}} className={modalNmspc("backdrop")} />;
 	return ReactDOM.createPortal(backdrop, document.body);
-}
+};
