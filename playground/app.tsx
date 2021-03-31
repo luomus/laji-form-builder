@@ -27,21 +27,25 @@ function getJsonFromUrl() {
 }
 
 const query = getJsonFromUrl();
-let id = query.id || "JX.519";
-let lang = query.lang || "fi";
+const id = query.id || "JX.519";
+const lang = query.lang || "fi";
 
 const apiClient = new ApiClientImplementation(
 	"https://apitest.laji.fi/v0",
 	properties.accessToken,
 	lang
 );
+//const onChange = () => {};
 apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json()).then(form => {
-	const LajiFormApp = () => (
-		<React.Fragment>
-			<LajiForm {...form} lang={lang} apiClient={apiClient} theme={lajiFormBs3} />
-			<LajiFormBuilder id={id} lang={lang} {...query} {...properties} />
-		</React.Fragment>
-	);
+	const LajiFormApp = () => {
+		const [_form, onChange] = React.useState(form);
+		return (
+			<React.Fragment>
+				<LajiForm {..._form} lang={lang} apiClient={apiClient} theme={lajiFormBs3} />
+				<LajiFormBuilder id={id} lang={lang} {...query} {...properties} onChange={onChange} />
+			</React.Fragment>
+		);
+	};
 
 	render(
 		React.createElement(LajiFormApp),

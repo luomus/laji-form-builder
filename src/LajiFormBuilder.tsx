@@ -2,7 +2,7 @@ import * as React from "react";
 import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
-import { Button, Spinner } from "./components";
+import { Button } from "./components";
 import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context } from "./Context";
@@ -12,6 +12,7 @@ export interface LajiFormBuilderProps {
 	id: string;
 	lang: Lang;
 	accessToken: string;
+	onChange: (form: any) => void;
 }
 export interface LajiFormBuilderState {
 	id?: string;
@@ -40,8 +41,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	schemasPromise: CancellablePromise<any>;
 
 	static defaultProps = {
-		lang: "fi" as Lang,
-		id: "JX.519"
+		lang: "fi" as Lang
 	};
 
 	constructor(props: LajiFormBuilderProps) {
@@ -74,7 +74,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	updateFromId(id: string) {
 		if (id !== this.state.id) {
-			this.setState({master: "loading", schemas: "loading"}, () => {
+			this.setState({master: "loading", schemas: "loading", id}, () => {
 				// TODO fix formtest
 				this.setState({master: require(`../forms/${id}.json`)});
 				// this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
@@ -86,7 +86,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	updateSchemas() {
 		this.schemasPromise?.cancel();
-		const {id} = this.props;
+		const {id} = this.state;
 		const {lang} = this.state;
 		this.schemasPromise = makeCancellable(this.apiClient.fetchJSON(`/forms/${id}`, {lang, format: "schema"})
 			.then((data: any) => this.setState({schemas: data})));
@@ -336,7 +336,10 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				changed.master = updateSafelyWithJSONPath(changed.master, value, path);
 			}
 		});
-		this.setState(changed);
+		this.setState(changed, () => {
+			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
+			this.props.onChange({...this.state.schemas, uiSchema});
+		});
 	}
 }
 
