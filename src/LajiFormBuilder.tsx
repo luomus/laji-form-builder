@@ -1,6 +1,4 @@
 import * as React from "react";
-import LajiForm from "laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "laji-form/lib/themes/bs3";
 import ApiClient from "./ApiClientImplementation";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
@@ -106,25 +104,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				</div>
 				<div style={{height: this.state.editorHeight}} />
 			</Context.Provider>
-		);
-	}
-
-	renderLajiForm() {
-		if (this.state.schemas === "loading" || this.state.master === "loading") {
-			return <Spinner />;
-		}
-		const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
-		return (
-			<LajiForm
-				{...this.props}
-				{...this.state.schemas}
-				uiSchema={uiSchema}
-				apiClient={this.apiClient}
-				renderSubmit={false}
-				uiSchemaContext={{isAdmin: true}}
-				bottomOffset={this.state.editorHeight}
-				theme={lajiFormBs3}
-			/>
 		);
 	}
 

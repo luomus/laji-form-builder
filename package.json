@@ -28,7 +28,7 @@
     "isomorphic-fetch": "^2.2.1",
     "laji-form": "^11.0.3",
     "memoizee": "^0.4.14",
-    "parse-prop-types": "^0.3.0",
+    "parse-prop-types": "git+https://git@github.com/olzraiti/parse-prop-types.git#c8a4540d8d0af0e47187c1d0de155c11be84b9ce",
     "react": "~16.8.6",
     "react-bootstrap": "^0.33.1",
     "react-dom": "~16.8.6",

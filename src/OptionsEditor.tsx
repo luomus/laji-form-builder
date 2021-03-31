@@ -11,7 +11,11 @@ import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
 
-interface JSONSchemaEnum {enum: string[]; enumNames: string[]; type: "string";}
+interface JSONSchemaEnum {
+	enum: string[];
+	enumNames: string[];
+	type: "string";
+}
 
 const getEnumRange = memoize((apiClient: ApiClient, lang: Lang, enumName: string) =>
 	apiClient.fetchJSON(`/metadata/ranges/${enumName}`, {lang}).then((enums: { value: string; id: string; }[]) =>

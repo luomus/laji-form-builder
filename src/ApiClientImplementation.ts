@@ -1,9 +1,9 @@
 import fetch from "isomorphic-fetch";
 import queryString from "querystring";
 import merge from "deepmerge";
-import { ApiClientImplementation } from "laji-form/lib/ApiClient";
+//import { ApiClientImplementation } from "laji-form/lib/ApiClient";
 
-export default class ApiClient implements ApiClientImplementation {
+export default class ApiClient {
 	BASE_URL: string;
 	lang: string;
 	accessToken: string;
