@@ -1,21 +1,15 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
-import { PropertyModel, PropertyRange, FieldOptions } from "./LajiFormBuilder";
-import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer, fetchJSON } from "./utils";
+import { FieldOptions } from "./LajiFormBuilder";
+import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPath } = LajiFormUtils;
 import { Context } from "./Context";
-import memoize from "memoizee";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "laji-form/lib/themes/bs3";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-
-interface PropertyContext {
-	"@id": string;
-	"@type"?: PropertyRange;
-	"@container"?: "@set";
-}
+import { PropertyModel, PropertyRange, PropertyContext } from "./model";
 
 interface BasicEditorState {
 	childProps?: PropertyModel[] | false;
@@ -27,7 +21,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	documentTree: any;
 	// TODO why is void required?
 	propertyContextPromise: CancellablePromise<PropertyContext | void>;
-	propertyChildsPromise: CancellablePromise<PropertyModel[] | void>
+	propertyChildsPromise: CancellablePromise<PropertyModel[] | void>;
 
 	static contextType = Context;
 
@@ -108,27 +102,14 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		return property;
 	}
 
-	getPropertiesContext = memoize(() => fetchJSON("https://schema.laji.fi/context/document.jsonld").then(result => result["@context"]))
-
-	getMedataPropertyName(context: {[property: string]: PropertyContext}, property: string): PropertyContext {
-		if (property === "gatherings") {
-			return context.gathering;
-		}
-		return context[property];
-	}
-
 	getPropertyContextForPath(path: string): Promise<PropertyContext> {
+		const last = path.split("/").pop() as string;
+		const propertyName = path === ""
+			? "document"
+			: last;
 		return new Promise((resolve, reject) =>
-			this.getPropertiesContext().then((propertiesContext: any) => {
-				const splits = path.split("/");
-				if (splits.length === 1) {
-					return resolve({
-						"@id": "http://tun.fi/MY.document",
-						"@container": "@set",
-					});
-				}
-				const propertyContext = propertiesContext[splits[splits.length - 1]];
-				resolve(propertyContext);
+			this.context.metadataService.propertiesContext.then((propertiesContext: any) => { // TODO why is any needed?
+				resolve(propertiesContext[propertyName]);
 			}, reject)
 		);
 	}
@@ -157,20 +138,13 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		return id;
 	}
 
-	getProperties = memoize((path: string): Promise<PropertyModel[]> => {
-		return new Promise((resolve, reject) => {
-			this.getPropertyContextForPath(path).then(propertyContext =>
-				this.context.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(propertyContext)}/properties`).then(
-					(r: any) => resolve(r.results),
-					reject
-				)
-			);
-		});
-	})
+	getProperties = (path: string): Promise<PropertyModel[]> => {
+		return this.getPropertyContextForPath(path).then(this.context.metadataService.getProperties);
+	}
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
-		const schemaTypeToJSONSchemaUtilType = (type: string) => 
+		const schemaTypeToJSONSchemaUtilType = (type: string) =>
 			type === "boolean" && "bool"
 			|| type === "string" && "str"
 			|| type;

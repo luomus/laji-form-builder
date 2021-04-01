@@ -9,6 +9,9 @@ import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, mak
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context } from "./Context";
 import appTranslations from "./translations";
+import { PropertyModel, PropertyRange } from "./model";
+import MetadataService from "./metadata-service";
+import memoize from "memoizee";
 
 export interface LajiFormBuilderProps {
 	id: string;
@@ -40,6 +43,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}), {} as any);
 	appTranslations: {[key: string]: {[lang in Lang]: string}};
 	schemasPromise: CancellablePromise<any>;
+	metadataService: MetadataService;
 
 	static defaultProps = {
 		lang: "fi" as Lang
@@ -49,6 +53,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		super(props);
 		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
 		this.appTranslations = constructTranslations(appTranslations);
+		this.metadataService = new MetadataService(this.apiClient);
 	}
 
 	componentDidMount() {
@@ -87,9 +92,17 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.setState({lang}, this.updateSchemas);
 	}
 
+	getContext = memoize(() => ({
+		apiClient: this.apiClient,
+		lang: this.state.lang,
+		translations: this.appTranslations[this.state.lang],
+		metadataService: this.metadataService
+	}))
+
 	render() {
+		const context = this.getContext();
 		return (
-			<Context.Provider value={{apiClient: this.apiClient, lang: this.state.lang, translations: this.appTranslations[this.state.lang]}}>
+			<Context.Provider value={context}>
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
 					{this.renderEditor()}
 				</div>
@@ -415,20 +428,6 @@ export type ChangeEvent = UiSchemaChangeEvent
 export interface Schemas {
 	schema: any;
 	uiSchema: any;
-}
-
-export enum PropertyRange {
-	Int = "xsd:integer",
-	Boolean = "xsd:boolean",
-	String = "xsd:string",
-	Id = "@id",
-	PositiveInteger = "xsd:positiveInteger",
-	DateTime = "xsd:dateTime"
-}
-export interface PropertyModel {
-	property: string;
-	label: string;
-	range: PropertyRange[];
 }
 
 export interface FieldOptions {
