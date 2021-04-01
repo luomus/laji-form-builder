@@ -160,7 +160,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	getProperties = memoize((path: string): Promise<PropertyModel[]> => {
 		return new Promise((resolve, reject) => {
 			this.getPropertyContextForPath(path).then(propertyContext =>
-				this.context.apiClient.fetchJSON(`/metadata/classes/${this.getPropertyNameFromContext(propertyContext)}/properties`).then(
+				this.context.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(propertyContext)}/properties`).then(
 					(r: any) => resolve(r.results),
 					reject
 				)

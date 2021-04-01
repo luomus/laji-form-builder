@@ -4,7 +4,7 @@ import * as React from "react";
 import { render } from "react-dom";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "laji-form/lib/themes/bs3";
-import ApiClientImplementation from "../src/ApiClientImplementation";
+import ApiClientImplementation from "./ApiClientImplementation";
 
 import "../src/styles";
 
@@ -42,7 +42,7 @@ apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => respo
 		return (
 			<React.Fragment>
 				<LajiForm {..._form} lang={lang} apiClient={apiClient} theme={lajiFormBs3} />
-				<LajiFormBuilder id={id} lang={lang} {...query} {...properties} onChange={onChange} />
+				<LajiFormBuilder id={id} lang={lang} {...query} {...properties} onChange={onChange} apiClient={apiClient} />
 			</React.Fragment>
 		);
 	};

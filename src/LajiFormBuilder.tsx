@@ -1,5 +1,7 @@
 import * as React from "react";
-import ApiClient from "./ApiClientImplementation";
+import ApiClient, { ApiClientImplementation } from "laji-form/lib/ApiClient";
+import lajiFormTranslations from "laji-form/lib/translations";
+import { Translations } from "laji-form/lib/components/LajiForm";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button } from "./components";
@@ -11,8 +13,8 @@ import appTranslations from "./translations";
 export interface LajiFormBuilderProps {
 	id: string;
 	lang: Lang;
-	accessToken: string;
 	onChange: (form: any) => void;
+	apiClient: ApiClientImplementation;
 }
 export interface LajiFormBuilderState {
 	id?: string;
@@ -27,7 +29,6 @@ const EDITOR_HEIGHT = 400;
 
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: ApiClient;
-	formApiClient: any;
 	state: LajiFormBuilderState = {
 		master: "loading",
 		schemas: "loading",
@@ -46,16 +47,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	constructor(props: LajiFormBuilderProps) {
 		super(props);
-		const {lang, accessToken} = props;
-		this.apiClient = new ApiClient(
-			"https://apitest.laji.fi/v0",
-			accessToken,
-			lang
-		);
-		this.formApiClient = new ApiClient(
-			"https://cors-anywhere.herokuapp.com/http://formtest.laji.fi/lajiform",
-			accessToken,
-		);
+		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
 		this.appTranslations = constructTranslations(appTranslations);
 	}
 
@@ -77,7 +69,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			this.setState({master: "loading", schemas: "loading", id}, () => {
 				// TODO fix formtest
 				this.setState({master: require(`../forms/${id}.json`)});
-				// this.formApiClient.fetch(`/${id}`).then((response: any) => response.json()).then((data: any) => this.setState({master: data}));
 				this.updateSchemas();
 			}
 			);
@@ -88,7 +79,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.schemasPromise?.cancel();
 		const {id} = this.state;
 		const {lang} = this.state;
-		this.schemasPromise = makeCancellable(this.apiClient.fetchJSON(`/forms/${id}`, {lang, format: "schema"})
+		this.schemasPromise = makeCancellable(this.apiClient.fetch(`/forms/${id}`, {lang, format: "schema"})
 			.then((data: any) => this.setState({schemas: data})));
 	}
 

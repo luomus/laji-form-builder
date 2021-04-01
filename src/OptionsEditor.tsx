@@ -2,7 +2,7 @@ import * as React from "react";
 import memoize from "memoizee";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "laji-form/lib/themes/bs3";
-import ApiClient from "./ApiClientImplementation";
+import ApiClient from "laji-form/lib/ApiClient";
 import { Context } from "./Context";
 import { Spinner, Modal } from "./components";
 import {  Lang, OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
@@ -18,7 +18,7 @@ interface JSONSchemaEnum {
 }
 
 const getEnumRange = memoize((apiClient: ApiClient, lang: Lang, enumName: string) =>
-	apiClient.fetchJSON(`/metadata/ranges/${enumName}`, {lang}).then((enums: { value: string; id: string; }[]) =>
+	apiClient.fetch(`/metadata/ranges/${enumName}`, {lang}).then((enums: { value: string; id: string; }[]) =>
 		enums.reduce<JSONSchemaEnum>((es, e) => (
 			{...es, enum: [...es.enum, e.id], enumNames: [...es.enumNames, e.value]}
 		), {enum: [""], enumNames: [""], type: "string"})
