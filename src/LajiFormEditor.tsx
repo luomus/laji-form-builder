@@ -187,7 +187,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 	getSelected = () => this.getFieldPath(this.state.selected || "");
 
-	getFieldPath = ((path: string) => path.replace("/document", ""));
+	getFieldPath = ((path: string) => path === "/document" ? "" : path.replace("/document", ""));
 
 	pointerChoosing = {
 		start: () => {

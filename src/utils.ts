@@ -92,6 +92,10 @@ export const translate = (obj: any, translations: any) => {
 };
 
 export const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {
+	if (pointer === "") {
+		return pointer;
+	}
+
 	let schemaPointer = schema;
 	return pointer.split("/").filter(s => s).reduce((resultPointer: string, s): string => {
 		if (schemaPointer.items && schemaPointer.items.properties) {
