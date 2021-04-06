@@ -9,5 +9,5 @@ export interface ContextProps {
 	translations: {[lang: string]: string};
 	metadataService: MetadataService;
 }
-export const Context = React.createContext<Partial<ContextProps>> ({});
+export const Context = React.createContext<ContextProps> ({} as ContextProps);
 

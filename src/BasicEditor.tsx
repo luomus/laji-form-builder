@@ -114,30 +114,6 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		);
 	}
 
-	getPropertyNameFromContext(propertyContext: PropertyContext) {
-		let id = propertyContext["@id"];
-		id = id.replace("http://tun.fi/", "");
-		switch (id) {
-		case  "MY.gatherings":
-			return "MY.gathering";
-		case  "MY.gatheringEvent":
-			return "MZ.gatheringEvent";
-		case  "MY.gatheringFact":
-			return "MY.gatheringFactClass";
-		case  "MY.taxonCensus":
-			return "MY.taxonCensusClass";
-		case  "MY.units":
-			return "MY.unit";
-		case  "MY.unitFact":
-			return "MY.unitFactClass";
-		case  "MY.unitGathering":
-			return "MZ.unitGathering";
-		case  "MY.identifications":
-			return "MY.identification";
-		}
-		return id;
-	}
-
 	getProperties = (path: string): Promise<PropertyModel[]> => {
 		return this.getPropertyContextForPath(path).then(this.context.metadataService.getProperties);
 	}

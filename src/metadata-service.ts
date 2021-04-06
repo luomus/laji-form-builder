@@ -41,14 +41,16 @@ export default class MetadataService {
 			result?.["@context"] ? resolve(preparePropertiesContext(result?.["@context"])) : reject();
 		}, reject))
 
-	getProperties = memoize((propertyContext: PropertyContext): Promise<PropertyModel[]> => 
-		new Promise((resolve, reject) => this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(propertyContext)}/properties`).then(
+	getProperties = memoize((property: PropertyContext | string): Promise<PropertyModel[]> => 
+		new Promise((resolve, reject) => this.apiClient.fetch(`/metadata/classes/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}/properties`).then(
 			(r: any) => 
 				r?.results
 					? resolve(r.results as PropertyModel[])
 					: reject(),
 			reject))
 	)
+
+	getRange = memoize((property: PropertyContext | string): Promise<string[]> => this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`).then((result: {id: string}[]) => result.map(({id}) => id)))
 }
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({

@@ -11,6 +11,10 @@ export interface PropertyModel {
 	property: string;
 	label: string;
 	range: PropertyRange[];
+	shortName: string;
+	comment?: string;
+	maxOccurs: string;
+	multiLanguage: boolean;
 }
 
 export interface PropertyContext {

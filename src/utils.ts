@@ -308,7 +308,7 @@ export class JSONSchema {
 		...JSONSchema.String(options),
 		..._enum
 	})
-	static object = (properties: any, options = {}) => JSONSchema.type("object")({properties, ...options});
+	static object = (properties = {}, options = {}) => JSONSchema.type("object")({properties, ...options});
 }
 
 export const parseJSONPointer = (obj: any, path: string, safeMode?: boolean | "createParents") => {
