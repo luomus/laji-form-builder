@@ -334,10 +334,10 @@ export const TextareaEditorField = (props: FieldProps) => {
 			: value)
 	)), [_onChange, _lajiFormId]);
 	const { minRows, maxRows, rows } = getUiOptions(props.uiSchema);
-	const _LajiFormLabel = LajiFormLabel as any;
+	const {Label} = props.formContext;
 	return (
 		<React.Fragment>
-			<_LajiFormLabel label={label} />
+			<Label label={label} />
 			<JSONEditor
 				value={filterLajiFormId(value)}
 				onChange={onChange}

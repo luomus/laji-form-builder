@@ -263,7 +263,7 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable =
 
 	return (
 		<textarea
-			className={!valid ? gnmspc("json-editor-invalid") : undefined}
+			className={classNames("form-control", !valid && gnmspc("json-editor-invalid"))}
 			onBlur={onBlur}
 			rows={_rows}
 			style={{width: "100%", resize: resizable ? "vertical" : "none"}}
