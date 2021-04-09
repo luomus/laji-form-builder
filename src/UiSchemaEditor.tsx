@@ -4,8 +4,7 @@ import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import LajiFormInterface from "./LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, getTranslation, detectChangePaths, parseJSONPointer,  } from "./utils";
-import LajiForm from "laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "laji-form/lib/themes/bs3";
+import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
 import * as LajiFormUtils from "laji-form/lib/utils";
@@ -361,15 +360,5 @@ const UiFieldEditor = (props: any) => {
 
 export const EditorLajiForm = (props: any) => {
 	const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
-	return (
-		<Context.Consumer>{({lang}) => (
-			<LajiForm
-				lang={lang}
-				fields={fields}
-				renderSubmit={false}
-				theme={lajiFormBs3}
-				{...props}
-			/>
-		)}</Context.Consumer>
-	);
+	return <LajiForm fields={fields} {...props} />
 };

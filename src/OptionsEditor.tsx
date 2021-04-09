@@ -1,6 +1,5 @@
 import * as React from "react";
-import LajiForm from "laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "laji-form/lib/themes/bs3";
+import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Modal } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
@@ -74,7 +73,7 @@ interface FormOptionsEditorProps {
 }
 
 export default React.memo(function OptionsEditor({onClose, options, translations, onChange}: FormOptionsEditorProps) {
-	const { metadataService, lang } = React.useContext(Context);
+	const { metadataService } = React.useContext(Context);
 	const [schema, setModelSchema] = React.useState<any[]>();
 	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
 	React.useEffect(() => {
@@ -115,10 +114,7 @@ export default React.memo(function OptionsEditor({onClose, options, translations
 						schema={schema}
 						uiSchema={uiSchema}
 						formData={formData}
-						renderSubmit={false}
 						onChange={onLajiFormChange}
-						lang={lang}
-						theme={lajiFormBs3}
 						fields={{TextareaEditorField}}
 					/>
 				}

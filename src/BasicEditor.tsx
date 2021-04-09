@@ -5,8 +5,7 @@ import { makeCancellable, CancellablePromise, unprefixProp, translate, detectCha
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPath } = LajiFormUtils;
 import { Context } from "./Context";
-import LajiForm from "laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "laji-form/lib/themes/bs3";
+import LajiForm from "./LajiForm";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
 import { PropertyModel, PropertyRange, PropertyContext } from "./model";
@@ -72,9 +71,6 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					key={this.state.lajiFormToucher}
 					schema={schema}
 					onChange={this.onAddProperty}
-					lang={this.context.lang}
-					theme={lajiFormBs3}
-					renderSubmit={false}
 				/>
 			);
 		} else if (this.state.childProps === false) {

@@ -2,6 +2,7 @@ import * as React from "react";
 import ApiClient, { ApiClientImplementation } from "laji-form/lib/ApiClient";
 import lajiFormTranslations from "laji-form/lib/translations";
 import { Translations } from "laji-form/lib/components/LajiForm";
+import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button } from "./components";
@@ -18,6 +19,7 @@ export interface LajiFormBuilderProps {
 	lang: Lang;
 	onChange: (form: any) => void;
 	apiClient: ApiClientImplementation;
+	theme: Theme;
 }
 export interface LajiFormBuilderState {
 	id?: string;
@@ -96,7 +98,8 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		apiClient: this.apiClient,
 		lang: this.state.lang,
 		translations: this.appTranslations[this.state.lang],
-		metadataService: this.metadataService
+		metadataService: this.metadataService,
+		theme: this.props.theme
 	}))
 
 	render() {

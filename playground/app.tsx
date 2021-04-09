@@ -42,7 +42,7 @@ apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => respo
 		return (
 			<React.Fragment>
 				<LajiForm {..._form} lang={lang} apiClient={apiClient} theme={lajiFormBs3} />
-				<LajiFormBuilder id={id} lang={lang} {...query} {...properties} onChange={onChange} apiClient={apiClient} />
+				<LajiFormBuilder id={id} lang={lang} {...query} {...properties} onChange={onChange} apiClient={apiClient} theme={lajiFormBs3} />
 			</React.Fragment>
 		);
 	};
