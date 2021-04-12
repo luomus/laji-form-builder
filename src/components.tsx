@@ -81,7 +81,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 				position: "fixed",
 				bottom: 0,
 				left: 0,
-				zIndex: 10000,
+				zIndex: 1040,
 			} as React.CSSProperties
 			: {};
 		return (
