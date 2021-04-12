@@ -45,6 +45,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}), {} as any);
 	appTranslations: {[key: string]: {[lang in Lang]: string}};
 	schemasPromise: CancellablePromise<any>;
+	formPromise: CancellablePromise<any>;
 	metadataService: MetadataService;
 
 	static defaultProps = {
@@ -63,6 +64,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	componentWillUnmount() {
+		this.formPromise?.cancel();
 		this.schemasPromise?.cancel();
 	}
 
@@ -72,14 +74,16 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	updateFromId(id: string) {
-		if (id !== this.state.id) {
-			this.setState({master: "loading", schemas: "loading", id}, () => {
-				// TODO fix formtest
-				this.setState({master: require(`../forms/${id}.json`)});
-				this.updateSchemas();
-			}
-			);
+		if (id === this.state.id) {
+			return;
 		}
+		this.formPromise?.cancel();
+		this.setState({master: "loading", schemas: "loading", id}, () => {
+			this.formPromise = makeCancellable(this.apiClient.fetch(`/forms/${id}`, {lang: "multi", expand: false, format: "json"})
+				.then((master: any) => this.setState({master})));
+			this.updateSchemas();
+		}
+		);
 	}
 
 	updateSchemas() {
@@ -87,7 +91,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		const {id} = this.state;
 		const {lang} = this.state;
 		this.schemasPromise = makeCancellable(this.apiClient.fetch(`/forms/${id}`, {lang, format: "schema"})
-			.then((data: any) => this.setState({schemas: data})));
+			.then((schemas: any) => this.setState({schemas})));
 	}
 
 	onLangChange = (lang: Lang) => {
