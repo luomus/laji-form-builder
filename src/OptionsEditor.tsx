@@ -3,7 +3,7 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Modal } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
-import { PropertyModel } from "./model";
+import { PropertyModel, PropertyRange } from "./model";
 import MetadataService from "./metadata-service";
 import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
@@ -15,45 +15,49 @@ interface Schemas {
 	uiSchema: any;
 }
 
-const mapRangeToSchema = (range: string, metadataService: MetadataService): Promise<Schemas> => {
+const mapRangeToSchema = (property: Pick<PropertyModel, "range" | "isEmbeddable" | "multiLanguage">, metadataService: MetadataService): Promise<Schemas> => {
+	const range = property.range[0];
 	if (range.match(/Enum$/)) {
 		return metadataService.getRange(range).then(enums => ({schema: {type: "string", enum: enums}, uiSchema: {}}));
 	}
+	if (property.multiLanguage) {
+		return Promise.resolve({schema: JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {})), uiSchema: {}});
+	}
+
 	let schema, uiSchema = {};
 	switch (range) {
-	case "xsd:string":
+	case PropertyRange.String:
 		schema = JSONSchema.str;
 		break;
-	case "xsd:boolean":
+	case PropertyRange.Boolean:
 		schema = JSONSchema.bool;
 		break;
-	case "xsd:nonNegativeInteger":
+	case PropertyRange.NonNegativeInteger:
+	case PropertyRange.PositiveInteger:
 		schema = JSONSchema.integer;
 		break;
-	case "MZ.keyValue":
-	case "MZ.keyAny":
+	case PropertyRange.keyValue:
+	case PropertyRange.keyAny:
 	case "MY.document":
 		schema = JSONSchema.object();
 		uiSchema = {"ui:field": "TextareaEditorField"};
 		break;
 	default:
-		return metadataService.getProperties(range).then(_model => propertiesToSchema(_model, metadataService));
+		if (!property.isEmbeddable) {
+			schema = JSONSchema.str;
+		} else {
+			return metadataService.getProperties(range).then(_model => propertiesToSchema(_model, metadataService));
+		}
 	}
 	return Promise.resolve({schema, uiSchema});
 };
-
-const mapMultiLanguageToSchema = (multiLanguage: boolean): (Promise<Schemas> | undefined) => multiLanguage
-	? Promise.resolve({schema: JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {})), uiSchema: {}})
-	: undefined;
-
 const mapMaxOccurs = (maxOccurs: string, schema: any): Promise<Schemas> => maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
 
 const mapComment = (comment: string | undefined, uiSchema: any) => ({...uiSchema, "ui:help": comment});
 const mapLabel = (label: string | undefined, schema: any) => ({...schema, title: label});
 
-const mapPropertyToSchemas = ({label, comment, range, maxOccurs, multiLanguage}: PropertyModel, metadataService: MetadataService): Promise<Schemas> =>  
-	(mapMultiLanguageToSchema(multiLanguage)
-		|| mapRangeToSchema(range[0], metadataService)).then(schemas => ({
+const mapPropertyToSchemas = ({label, comment, range, maxOccurs, multiLanguage, isEmbeddable}: Pick<PropertyModel, "label" | "comment" | "range" | "maxOccurs" | "multiLanguage" | "isEmbeddable">, metadataService: MetadataService): Promise<Schemas> =>
+	(mapRangeToSchema({range, isEmbeddable, multiLanguage}, metadataService)).then(schemas => ({
 		schema: mapLabel(label, mapMaxOccurs(maxOccurs, schemas.schema)),
 		uiSchema: mapComment(comment, schemas.uiSchema)
 	}));
@@ -68,16 +72,17 @@ type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
 interface FormOptionsEditorProps {
 	onClose: () => void;
 	options: any;
-	translations: any;
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
 }
 
-export default React.memo(function OptionsEditor({onClose, options, translations, onChange}: FormOptionsEditorProps) {
-	const { metadataService } = React.useContext(Context);
+const formProperty = {range: ["MHL.formOptionsClass"], isEmbeddable: true, label: "", comment: "", maxOccurs: "1", multiLanguage: false};
+
+export default React.memo(function OptionsEditor({onClose, options, onChange}: FormOptionsEditorProps) {
+	const { metadataService, theme: { Modal }, translations } = React.useContext(Context);
 	const [schema, setModelSchema] = React.useState<any[]>();
 	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
 	React.useEffect(() => {
-		mapRangeToSchema("MHL.formOptionsClass", metadataService).then(({schema, uiSchema}) => {
+		mapPropertyToSchemas(formProperty, metadataService).then(({schema, uiSchema}) => {
 			setModelSchema(schema);
 			setModelUiSchema(uiSchema);
 		});
