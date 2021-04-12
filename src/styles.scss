@@ -11,6 +11,17 @@ $bRadius: 2px;
 	padding: $padding;
 }
 
+@mixin editor {
+	background-color: $def;
+	*:focus {
+		outline: none;
+	}
+}
+
+.ljb.ljb-editor .modal-content {
+	@include editor;
+}
+
 .ljb {
 	$root: &;
 	&-field {
@@ -61,12 +72,9 @@ $bRadius: 2px;
 	}
 
 	&-editor {
-		background-color: $def;
+		@include editor;
 		#{$root}-draggable-line {
 			background-color: $def_separating;
-		}
-		*:focus {
-			outline: none;
 		}
 	}
 	&-editor-nav-bar {
@@ -124,19 +132,6 @@ $bRadius: 2px;
 	
 	&-json-editor-invalid {
 		background-color: lighten(#ff0000, 30%);
-	}
-
-	&-modal {
-		background-color: $def;
-		color: black;
-		border: 1px solid $def_accent;
-		border-radius: $bRadius;
-		padding: $padding;
-
-		&-backdrop {
-			background: black;
-			opacity: .3;
-		}
 	}
 
 	&-close-button {

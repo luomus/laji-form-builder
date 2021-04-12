@@ -121,7 +121,6 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 									<OptionsEditor
 										onClose={this.closeFormOptionsEditor}
 										options={this.getFormOptions(this.props.master)}
-										translations={this.props.master.translations[this.context.lang]}
 										onChange={this.props.onChange}
 									/>
 								}

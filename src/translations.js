@@ -18,5 +18,10 @@ export default {
 		fi: "Tehdäänkö muutos kaikilla kielillä?",
 		sv: "Vill du tillämpa ändringarna på alla språk?",
 		en: "Do you want to apply the changes for all languages?"
+	},
+	"editor.options.header": {
+		fi: "Lomakkeen ominaisuudet",
+		sv: "Form featurerna",
+		en: "Form options"
 	}
 }

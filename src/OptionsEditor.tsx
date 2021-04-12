@@ -1,11 +1,11 @@
 import * as React from "react";
 import LajiForm from "./LajiForm";
 import { Context } from "./Context";
-import { Spinner, Modal } from "./components";
+import { Spinner } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
 import { PropertyModel, PropertyRange } from "./model";
 import MetadataService from "./metadata-service";
-import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer } from "./utils";
+import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer, classNames } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
@@ -111,19 +111,22 @@ export default React.memo(function OptionsEditor({onClose, options, onChange}: F
 		onChange(events);
 	}, [formData, onChange, options]);
 	return (
-		<Modal onClose={onClose}>
-			<div style={{width: 500}} className={gnmspc("field-editor")}>
-				{!schema
-					? <Spinner />
-					: <LajiForm
-						schema={schema}
-						uiSchema={uiSchema}
-						formData={formData}
-						onChange={onLajiFormChange}
-						fields={{TextareaEditorField}}
-					/>
-				}
-			</div>
+		<Modal onHide={onClose} show={true} dialogClassName={classNames(gnmspc(), gnmspc("editor"))}>
+			<Modal.Header closeButton={true}>{translations["Editor.options.header"]}</Modal.Header>
+			<Modal.Body>
+				<div style={{width: 500}} className={gnmspc("field-editor")}>
+					{!schema
+						? <Spinner />
+						: <LajiForm
+							schema={schema}
+							uiSchema={uiSchema}
+							formData={formData}
+							onChange={onLajiFormChange}
+							fields={{TextareaEditorField}}
+						/>
+					}
+				</div>
+			</Modal.Body>
 		</Modal>
 	);
 });
