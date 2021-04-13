@@ -376,10 +376,11 @@ interface LangChooserProps {
 }
 
 const LangChooser = React.memo(function LangChooser({lang, onChange}: LangChooserProps) {
+	const {ButtonGroup} = React.useContext(Context).theme;
 	return (
-		<div className="btn-group">{
-			["fi", "sv", "en"].map((_lang: Lang) => <LangChooserByLang key={_lang} onChange={onChange}  lang={_lang} activeLang={lang} />)
-		}</div>
+		<ButtonGroup small>{
+			["fi", "sv", "en"].map((_lang: Lang) => <LangChooserByLang key={_lang} onChange={onChange} lang={_lang} activeLang={lang} />)
+		}</ButtonGroup>
 	);
 });
 
@@ -389,10 +390,7 @@ interface LangChooserByLangProps extends LangChooserProps {
 
 const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange, activeLang}: LangChooserByLangProps) {
 	return (
-		<Button
-			className="btn-xs"
-			active={lang === activeLang}
-			onClick={React.useCallback(() => onChange(lang), [lang, onChange])}
+		<Button active={lang === activeLang} onClick={React.useCallback(() => onChange(lang), [lang, onChange])}
 		>{lang}
 		</Button>
 	);

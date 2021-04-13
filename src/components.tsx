@@ -1,6 +1,7 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 import _Spinner from "react-spinner";
+import { Context } from "./Context";
 import { classNames, nmspc, gnmspc } from "./utils";
 
 export interface Stylable {
@@ -206,7 +207,8 @@ export const Clickable = React.memo(function Clickable(
 });
 
 export const Button = React.memo(function Button({children, active, className, ...props}: any) {
-	return <button type="button" role="button" className={classNames("btn", className, active && "active")} {...props}>{children}</button>;
+	const {Button} = React.useContext(Context).theme;
+	return <Button className={classNames(className, active && "active")} {...props}>{children}</Button>;
 });
 
 export const Spinner = React.memo(function Spinner({color = "black", size = 32}: {color?: "white" | "black", size?: number}) {

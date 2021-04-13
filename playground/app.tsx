@@ -3,7 +3,7 @@ import properties from "../properties.json";
 import * as React from "react";
 import { render } from "react-dom";
 import LajiForm from "laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "laji-form/lib/themes/bs3";
+import lajiFormBs3 from "../src/themes/bs3";
 import ApiClientImplementation from "./ApiClientImplementation";
 
 import "../src/styles";
