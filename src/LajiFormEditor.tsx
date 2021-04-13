@@ -68,6 +68,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			display: "flex",
 			flexDirection: "row",
 		};
+		const {Glyphicon} = this.context.theme;
 		return (
 			<React.Fragment>
 				<DraggableHeight
@@ -85,14 +86,13 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 								<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
 									<div style={sidebarToolbarContainer}>
 										<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
-										<Clickable
-											className={classNames("glyphicon glyphicon-magnet", this.state.pointerChoosingActive && "active")}
-											onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}
-										/>
-										<Clickable
-											className="glyphicon glyphicon-cog"
-											onClick={this.openFormOptionsEditor}
-										/>
+										<Clickable className="glyph-container"
+										           onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}>
+											<Glyphicon glyph="magnet" className={classNames(this.state.pointerChoosingActive && "active")} />
+										</Clickable>
+										<Clickable className="glyph-container" onClick={this.openFormOptionsEditor}>
+											<Glyphicon glyph="cog" />
+										</Clickable>
 									</div>
 									<Fields
 										style={fieldsStyle}

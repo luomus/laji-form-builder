@@ -360,5 +360,5 @@ const UiFieldEditor = (props: any) => {
 
 export const EditorLajiForm = (props: any) => {
 	const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
-	return <LajiForm fields={fields} {...props} />
+	return <LajiForm fields={fields} {...props} />;
 };

@@ -81,7 +81,7 @@ $bRadius: 2px;
 		padding: $padding;
 		background-color: $darker;
 	}
-	&-editor-nav-bar .glyphicon {
+	&-editor-nav-bar .glyph-container > * {
 		color: white;
 		padding: 2px;
 
