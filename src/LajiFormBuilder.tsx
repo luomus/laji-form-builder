@@ -79,11 +79,10 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		}
 		this.formPromise?.cancel();
 		this.setState({master: "loading", schemas: "loading", id}, () => {
-			this.formPromise = makeCancellable(this.apiClient.fetch(`/forms/${id}`, {lang: "multi", expand: false, format: "json"})
+			this.formPromise = makeCancellable(this.apiClient.fetch(`/forms/${id}`, {lang: "multi", format: "json"})
 				.then((master: any) => this.setState({master})));
 			this.updateSchemas();
-		}
-		);
+		});
 	}
 
 	updateSchemas() {
