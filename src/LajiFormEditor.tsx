@@ -360,7 +360,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 					onClick={this.onThisSelected}
 				>
 					<Clickable className={expandClassName} onClick={fields.length ? this.toggleExpand : undefined} key="expand" />
-					<Clickable className={this.nmspc("label")}>{name}</Clickable>
+					<Clickable className={this.nmspc("label")}>{name.replace(/^[^.]+\./, "")}</Clickable>
 					<Clickable className={this.nmspc("delete")} onClick={this.onThisDeleted} />
 				</Clickable>
 				{this.state.expanded && (
