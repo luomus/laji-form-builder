@@ -1,14 +1,14 @@
 import * as React from "react";
 import ApiClient, { ApiClientImplementation } from "laji-form/lib/ApiClient";
 import lajiFormTranslations from "laji-form/lib/translations";
-import { Translations } from "laji-form/lib/components/LajiForm";
+import { Translations, Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button } from "./components";
 import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
-import { Context } from "./Context";
+import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations";
 import { PropertyModel, PropertyRange } from "./model";
 import MetadataService from "./metadata-service";
@@ -20,6 +20,7 @@ export interface LajiFormBuilderProps {
 	onChange: (form: any) => void;
 	apiClient: ApiClientImplementation;
 	theme: Theme;
+	notifier?: Notifier;
 }
 export interface LajiFormBuilderState {
 	id?: string;
@@ -47,6 +48,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	schemasPromise: CancellablePromise<any>;
 	formPromise: CancellablePromise<any>;
 	metadataService: MetadataService;
+	notifier: Notifier;
 
 	static defaultProps = {
 		lang: "fi" as Lang
@@ -57,6 +59,10 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
 		this.appTranslations = constructTranslations(appTranslations);
 		this.metadataService = new MetadataService(this.apiClient);
+		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
+			notifier[method] = msg => console.log(`LajiFormBuilder notification: ${msg}`);
+			return notifier;
+		}, {} as Notifier);
 	}
 
 	componentDidMount() {
@@ -97,7 +103,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.setState({lang}, this.updateSchemas);
 	}
 
-	getContext = memoize(() => ({
+	getContext = memoize((): ContextProps => ({
 		apiClient: this.apiClient,
 		lang: this.state.lang,
 		translations: this.appTranslations[this.state.lang],
