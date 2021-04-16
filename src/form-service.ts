@@ -11,11 +11,14 @@ export default class FormService {
 	}
 
 	getMaster(id: string) {
-		console.log("GET MASSTER");
 		return this.apiClient.fetch(`/forms/${id}`, {lang: "multi", format: "json", expand: false});
 	}
 
 	getSchemas(id: string) {
 		return this.apiClient.fetch(`/forms/${id}`, {lang: this.lang, format: "schema"});
+	}
+
+	update(form: any) {
+		return this.apiClient.fetch(`/forms/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form)});
 	}
 }

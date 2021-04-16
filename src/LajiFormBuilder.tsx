@@ -140,6 +140,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				master={master}
 				schemas={schemas}
 				onChange={this.onEditorChange}
+				onSave={this.onSave}
 				onLangChange={this.onLangChange}
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
@@ -365,6 +366,12 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
 			this.props.onChange({...this.state.schemas, uiSchema});
 		});
+	}
+
+	onSave = () => {
+		this.formService.update(this.state.master)
+			.then(() => this.notifier.success(this.getContext().translations["save.success"]))
+			.catch(() => this.notifier.error(this.getContext().translations["save.error"]));
 	}
 }
 

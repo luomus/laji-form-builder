@@ -33,6 +33,7 @@ const lang = query.lang || "fi";
 const apiClient = new ApiClientImplementation(
 	"https://apitest.laji.fi/v0",
 	properties.accessToken,
+	properties.userToken,
 	lang
 );
 //const onChange = () => {};

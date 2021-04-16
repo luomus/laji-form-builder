@@ -6,7 +6,7 @@ import { fetchJSON } from "./utils";
 type PropertyContextDict = Record<string, PropertyContext>;
 
 export default class MetadataService {
-	apiClient: ApiClient;
+	private apiClient: ApiClient;
 
 	constructor(apiClient: ApiClient) {
 		this.apiClient = apiClient;

@@ -4,9 +4,6 @@ import RJSF, { Field, Widget } from "@rjsf/core";
 import { getComponentPropTypes, propTypesToSchema } from "./utils";
 
 class _LajiFormInterface {
-	lajiForm: any;
-	rjsf: any;
-
 	getRegistry = memoize((): ({
 		fields: {[field: string]: Field},
 		widgets: {[field: string]: Widget}

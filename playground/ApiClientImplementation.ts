@@ -7,10 +7,12 @@ export default class ApiClient implements ApiClientImplementation {
 	BASE_URL: string;
 	lang: string;
 	accessToken: string;
-	constructor(baseUrl: string, accessToken: string, lang = "en") {
+	personToken: string;
+	constructor(baseUrl: string, accessToken: string, personToken: string, lang = "en") {
 		this.BASE_URL =  baseUrl;
 		this.lang = lang;
 		this.accessToken = accessToken;
+		this.personToken = personToken;
 	}
 
 	setLang(lang: string) {
@@ -18,7 +20,7 @@ export default class ApiClient implements ApiClientImplementation {
 	}
 
 	getBaseQuery() {
-		return {access_token: this.accessToken};
+		return {access_token: this.accessToken, personToken: this.personToken};
 	}
 
 	fetch(path: string, query?: any, options?: any) {

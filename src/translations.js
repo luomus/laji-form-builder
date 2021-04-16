@@ -23,5 +23,20 @@ export default {
 		fi: "Lomakkeen ominaisuudet",
 		sv: "Form featurerna",
 		en: "Form options"
+	},
+	save: {
+		fi: "Tallenna",
+		sv: "Spara",
+		en: "Save"
+	},
+	"save.success": {
+		fi: "Tallennus onnistui",
+		sv: "Spara lyckades",
+		en: "Saved successfully"
+	},
+	"save.error": {
+		fi: "Tallennus epäonnistui",
+		sv: "Inspelningen misslyckades",
+		en: "Save failed"
 	}
 }

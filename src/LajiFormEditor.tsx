@@ -27,6 +27,7 @@ export interface LajiFormEditorProps {
 	loading?: boolean;
 	height?: number;
 	onHeightChange?: (height: number) => void;
+	onSave: () => void;
 }
 
 export interface LajiFormEditorState {
@@ -39,6 +40,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	static contextType = Context;
 	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false, formOptionsModalOpen: false};
 	highlightedLajiFormElem?: HTMLElement;
+
 	render() {
 		const containerStyle: React.CSSProperties = {
 			display: "flex",
@@ -69,6 +71,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			flexDirection: "row",
 		};
 		const {Glyphicon} = this.context.theme;
+		const {translations} = this.context;
 		return (
 			<React.Fragment>
 				<DraggableHeight
@@ -104,6 +107,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 										pointer=""
 										expanded={true}
 									/>
+									<Button small variant="success" onClick={this.onSave}>{translations.Save}</Button>
 								</DraggableWidth>
 								<div style={fieldEditorStyle}>
 									<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
@@ -129,6 +133,10 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 				</DraggableHeight>
 			</React.Fragment>
 		);
+	}
+
+	onSave = () => {
+		this.props.onSave();
 	}
 
 	onHeightChange = ({height}: {height: number}) => {
@@ -390,8 +398,8 @@ interface LangChooserByLangProps extends LangChooserProps {
 
 const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange, activeLang}: LangChooserByLangProps) {
 	return (
-		<Button active={lang === activeLang} onClick={React.useCallback(() => onChange(lang), [lang, onChange])}
-		>{lang}
+		<Button active={lang === activeLang} onClick={React.useCallback(() => onChange(lang), [lang, onChange])}>
+			{lang}
 		</Button>
 	);
 });
