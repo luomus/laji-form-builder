@@ -9,7 +9,7 @@ import { Button } from "./components";
 import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
-import appTranslations from "./translations";
+import appTranslations from "./translations.json";
 import { PropertyModel, PropertyRange } from "./model";
 import MetadataService from "./metadata-service";
 import FormService from "./form-service";

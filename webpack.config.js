@@ -1,11 +1,11 @@
-var path = require("path");
-var webpack = require("webpack");
+const path = require("path");
+const webpack = require("webpack");
 
 module.exports = {
 	mode: "development",
 	devtool: "eval",
 	entry: [
-		path.join(__dirname, "playground", "app")
+		path.join(path.resolve(), "playground", "app")
 	],
 	output: {
 		publicPath: "/build/",
@@ -15,32 +15,53 @@ module.exports = {
 		new webpack.HotModuleReplacementPlugin(),
 		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"development\""})
 	],
+	devServer: {
+		contentBase: path.join(path.resolve(), "playground"),
+		host: "0.0.0.0",
+		port: 8082,
+		inline: true
+	},
 	module: {
 		rules: [
 			{
 				test: /\.(j|t)sx?$/,
-				loader: "awesome-typescript-loader?module=es6",
+				use: [{
+					loader: "ts-loader"
+				}],
 				include: [
-					path.join(__dirname, "src"),
-					path.join(__dirname, "playground")
-				]
+					path.join(path.resolve(), "src"),
+					path.join(path.resolve(), "playground")
+				],
+				exclude: /node_modules|.d.ts$/
+			},
+			{
+				test: /.d.ts$/,
+				use: [{
+					loader: "ignore-loader"
+				}]
 			},
 			{
 				test: /\.s?css$/,
-				loader: "style-loader!css-loader!sass-loader"
+				use: [
+					{
+						loader: "style-loader"
+					},
+					{
+						loader: "css-loader"
+					},
+					{
+						loader: "sass-loader"
+					}
+				]
 			},
 			{
 				test: /\.(png|gif)$/,
-				loader: "url-loader?limit=100000"
+				type: "asset/inline"
 			},
 			{
-				test: /\.(jpg|ttf||eot)$/,
-				loader: "file-loader"
+				test: /\.(jpg|ttf||eot|svg)$/,
+				type: "asset/resource"
 			},
-			{
-				test: /\.svg/,
-				loader: "svg-url-loader"
-			}
 		],
 		noParse: [
 			/dist\/(ol|proj4).js/

@@ -1,7 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
 	mode: "production",
@@ -23,17 +22,19 @@ module.exports = {
 		rules: [
 			{
 				test: /\.(j|t)sx?$/,
-				loader: "awesome-typescript-loader?module=es6",
+				use: [{
+					loader: "ts-loader"
+				}],
 				include: [
-					path.join(__dirname, "src"),
-				]
+					path.join(path.resolve(), "src"),
+				],
+				exclude: /.d.ts$/
 			},
 			{
-				test: /\.json$/,
-				loader: "json-loader",
-				include: [
-					path.join(__dirname, "node_modules", "ajv", "libs", "refs", "json-schema-draft-07.json"),
-				]
+				test: /.d.ts$/,
+				use: [{
+					loader: "ignore-loader"
+				}]
 			},
 			{
 				test: /\.s?css$/,
@@ -48,13 +49,9 @@ module.exports = {
 				]
 			},
 			{
-				test: /\.woff(2)?(\?v=[0-9].[0-9].[0-9])?$/,
-				loader: "url-loader?mimetype=application/font-woff"
-			},
-			{
-				test: /\.(ttf|eot|svg|png|jpg|gif)(\?v=[0-9].[0-9].[0-9])?$/,
-				loader: "file-loader?name=images/[name].[ext]"
-			},
+				test: /\.(jpg|gif|ttf|eot|svg|woff2?)$/,
+				type: "asset/inline"
+			}
 		],
 		noParse: [
 			/node_modules\/proj4\/dist\/proj4\.js/

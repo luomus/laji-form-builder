@@ -1,15 +1,14 @@
 {
 	"compilerOptions": {
 		"outDir": "./lib",
-		"module": "commonjs",
-		"target": "es5",
+		"module": "es6",
+		"target": "es6",
+		"sourceMap": true,
 		"lib": [
 			"dom",
 			"es7",
 			"es2016.array.include"
 		],
-		"sourceMap": true,
-		"allowJs": true,
 		"jsx": "react",
 		"moduleResolution": "node",
 		"noImplicitReturns": true,
@@ -21,7 +20,6 @@
 		"resolveJsonModule": true
 	},
 	"include": [
-		"./src/**/*",
-		"node_modules/laji-form/lib/**/*.d.ts"
-  ]
+		"./src/**/*"
+	]
 }
