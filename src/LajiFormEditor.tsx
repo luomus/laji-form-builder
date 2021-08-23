@@ -227,13 +227,13 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			}
 		},
 		onClick: () => {
+			const id = this.highlightedLajiFormElem?.id
+				.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
+				.replace(/_/g, "/");
+			if (!id) {
+				return;
+			}
 			this.setState({pointerChoosingActive: false}, () => {
-				const id = this.highlightedLajiFormElem?.id
-					.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
-					.replace(/_/g, "/");
-				if (!id) {
-					return;
-				}
 				this.pointerChoosing.stop();
 				this.setState({selected: `/document${id}`});
 			});
