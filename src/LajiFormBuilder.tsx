@@ -4,7 +4,7 @@ import lajiFormTranslations from "laji-form/lib/translations";
 import { Translations, Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPath, immutableDelete, constructTranslations } = LajiFormUtils;
+const { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button } from "./components";
 import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
@@ -173,7 +173,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			if (isUiSchemaChangeEvent(event)) {
 				changed.master = {
 					...(changed.master || {}),
-					uiSchema: updateSafelyWithJSONPath(
+					uiSchema: updateSafelyWithJSONPointer(
 						changed.master.uiSchema,
 						event.value,
 						fieldPointerToUiSchemaPointer(this.state.schemas.schema, event.selected)
@@ -335,7 +335,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 									nextValidators = {items: nextCurrentValidators.items, ...nextValidators};
 								}
 							}
-							return updateSafelyWithJSONPath(currentValidators, nextValidators, nextPath);
+							return updateSafelyWithJSONPointer(currentValidators, nextValidators, nextPath);
 						}
 						return newValidators;
 					};
@@ -359,7 +359,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				}
 			} else if (isOptionChangeEvent(event)) {
 				const {path, value} = event;
-				changed.master = updateSafelyWithJSONPath(changed.master, value, path);
+				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
 			}
 		});
 		this.setState(changed, () => {

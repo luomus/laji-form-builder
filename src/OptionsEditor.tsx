@@ -7,7 +7,7 @@ import { PropertyModel, PropertyRange } from "./model";
 import MetadataService from "./metadata-service";
 import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer, classNames } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPath } = LajiFormUtils;
+const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
 
 interface Schemas {
@@ -100,7 +100,7 @@ export default React.memo(function OptionsEditor({onClose, options, onChange}: F
 					events.push({type: "translations", key: currentValue, value: newValue});
 				} else {
 					const translationKey =  `@${changedPath}`;
-					newFormData = updateSafelyWithJSONPath(newFormData, translationKey, changedPath);
+					newFormData = updateSafelyWithJSONPointer(newFormData, translationKey, changedPath);
 					events.push({type: "translations", key: translationKey, value: newValue});
 					events.push({type: "options", value: translationKey, path: changedPath});
 				}

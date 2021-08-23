@@ -3,7 +3,7 @@ import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
 import { FieldOptions } from "./LajiFormBuilder";
 import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { dictionarify, updateSafelyWithJSONPath } = LajiFormUtils;
+const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "./Context";
 import LajiForm from "./LajiForm";
 import { Spinner } from "./components";
@@ -170,11 +170,11 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					events.push({type: "translations", key: currentValue, value: newValue});
 				} else {
 					const translationKey =  `@${this.props.path}${changedPath}`;
-					newFormData = updateSafelyWithJSONPath(newFormData, translationKey, changedPath);
+					newFormData = updateSafelyWithJSONPointer(newFormData, translationKey, changedPath);
 					events.push({type: "translations", key: translationKey, value: newValue});
 				}
 			} else {
-				newFormData = updateSafelyWithJSONPath(newFormData, newValue, changedPath);
+				newFormData = updateSafelyWithJSONPointer(newFormData, newValue, changedPath);
 			}
 		});
 		if (newFormData !== formData) {

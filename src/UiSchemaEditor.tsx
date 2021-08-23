@@ -8,7 +8,7 @@ import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPath, isObject, getInnerUiSchema, getUiOptions, isEmptyString } = LajiFormUtils;
+const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions, isEmptyString } = LajiFormUtils;
 import { JSONEditor } from "./components";
 import { Context } from "./Context";
 import { FieldProps } from "@rjsf/core";
@@ -125,9 +125,9 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 					const translationKey =  `@${this.props.path}${changedPath}`;
 					if (isEmptyString(currentValue)) {
 						events.push({type: "translations", key: translationKey, value: newValue});
-						newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
+						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
 					} else if (doConfirm()) {
-						newUiSchema = updateSafelyWithJSONPath(newUiSchema, translationKey, changedPath);
+						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, translationKey, changedPath);
 						events.push(
 							{
 								type: "translations",
@@ -139,11 +139,11 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 								}), {})
 							});
 					} else {
-						newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
+						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
 					}
 				}
 			} else {
-				newUiSchema = updateSafelyWithJSONPath(newUiSchema, newValue, changedPath);
+				newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
 			}
 		});
 		if (newUiSchema !== uiSchema) {
