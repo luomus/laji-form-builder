@@ -167,7 +167,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			if (next === undefined) {
 				return _field;
 			}
-			const child  = (_field.fields as FieldOptions[]).find(_child => _child.name.replace(/^[^.]+\./, "") === next) as FieldOptions;
+			const child  = (_field.fields as FieldOptions[]).find(_child => _child.name.replace(/[^./]+\./g, "") === next) as FieldOptions;
 			return findField(child, rest.join("/"));
 		};
 		return {
@@ -192,7 +192,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.setState({activeEditorMode: newActive});
 	}
 
-	getSelected = () => this.getFieldPath(this.state.selected || "").replace(/\/[^.]+\./, "");
+	getSelected = () => this.getFieldPath(this.state.selected || "").replace(/[^./]+\./g, "");
 
 	getFieldPath = ((path: string) => path === "/document" ? "" : path.replace("/document", ""));
 
