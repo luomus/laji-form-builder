@@ -77,12 +77,12 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.schemasPromise?.cancel();
 	}
 
-	componentWillReceiveProps({id, lang}: LajiFormBuilderProps) {
-		lang !== this.props.lang && this.apiClient?.setLang(lang);
-		this.updateFromId(id);
+	componentDidUpdate({lang: prevLang}: LajiFormBuilderProps) {
+		prevLang !== this.props.lang && this.apiClient?.setLang(this.props.lang);
+		this.updateFromId(this.state.id);
 	}
 
-	updateFromId(id: string) {
+	updateFromId(id?: string) {
 		if (id === this.state.id) {
 			return;
 		}
