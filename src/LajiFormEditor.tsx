@@ -36,6 +36,9 @@ export interface LajiFormEditorState {
 	pointerChoosingActive: boolean;
 	formOptionsModalOpen: boolean;
 }
+
+const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
+
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	static contextType = Context;
 	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false, formOptionsModalOpen: false};
@@ -167,7 +170,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			if (next === undefined) {
 				return _field;
 			}
-			const child  = (_field.fields as FieldOptions[]).find(_child => _child.name.replace(/[^./]+\./g, "") === next) as FieldOptions;
+			const child  = (_field.fields as FieldOptions[]).find(_child => withoutNameSpacePrefix(_child.name) === next) as FieldOptions;
 			return findField(child, rest.join("/"));
 		};
 		return {
@@ -192,7 +195,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.setState({activeEditorMode: newActive});
 	}
 
-	getSelected = () => this.getFieldPath(this.state.selected || "").replace(/[^./]+\./g, "");
+	getSelected = () => this.getFieldPath(this.state.selected || "");
 
 	getFieldPath = ((path: string) => path === "/document" ? "" : path.replace("/document", ""));
 
@@ -270,7 +273,7 @@ const Fields = React.memo(function _Fields({fields = [], onSelected, onDeleted, 
 	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string, expanded?: boolean} & Stylable & Classable) {
 	return (
 		<div style={{...style, display: "flex", flexDirection: "column"}} className={className}>
-			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${f.name}`} expanded={expanded} />)}
+			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${withoutNameSpacePrefix(f.name)}`} expanded={expanded} />)}
 		</div>
 	);
 });
@@ -363,12 +366,11 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 					onClick={this.onThisSelected}
 				>
 					<Clickable className={expandClassName} onClick={fields.length ? this.toggleExpand : undefined} key="expand" />
-					<Clickable className={this.nmspc("label")}>{name.replace(/^[^.]+\./, "")}</Clickable>
+					<Clickable className={this.nmspc("label")}>{withoutNameSpacePrefix(name)}</Clickable>
 					<Clickable className={this.nmspc("delete")} onClick={this.onThisDeleted} />
 				</Clickable>
 				{this.state.expanded && (
 					<Fields
-						key="fields"
 						fields={fields}
 						onSelected={this.onChildSelected}
 						onDeleted={this.onChildDeleted}
