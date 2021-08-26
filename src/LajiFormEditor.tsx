@@ -118,7 +118,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 										<Editor
 											key={this.state.selected}
 											active={this.state.activeEditorMode}
-											{...this.getEditorProps()}
+											{...this.getFieldEditorProps()}
 											className={gnmspc("field-editor")}
 											style={fieldEditorContentStyle}
 										/>
@@ -127,7 +127,8 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 								{this.state.formOptionsModalOpen &&
 									<OptionsEditor
 										onClose={this.closeFormOptionsEditor}
-										options={this.getFormOptions(this.props.master)}
+										master={this.props.master}
+										translations={this.props.master.translations[this.context.lang]}
 										onChange={this.props.onChange}
 									/>
 								}
@@ -161,7 +162,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
 	}
 
-	getEditorProps(): FieldEditorProps {
+	getFieldEditorProps(): FieldEditorProps {
 		const { schemas, master } = this.props;
 		const { lang } = this.context;
 		const selected = this.getSelected();
@@ -251,10 +252,6 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	}
 	closeFormOptionsEditor = () => {
 		this.setState({formOptionsModalOpen: false});
-	}
-	getFormOptions = (master: any) => {
-		const {uiSchema, fields, translations, ...options} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
-		return options;
 	}
 }
 

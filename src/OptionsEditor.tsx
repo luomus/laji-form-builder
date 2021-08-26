@@ -71,26 +71,55 @@ const propertiesToSchema = (modelProperties: PropertyModel[], metadataService: M
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
 interface FormOptionsEditorProps {
 	onClose: () => void;
-	options: any;
+	master: any;
+	translations: any;
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
 }
 
-const formProperty = {range: ["MHL.formOptionsClass"], isEmbeddable: true, label: "", comment: "", maxOccurs: "1", multiLanguage: false};
+const formProperty = {range: ["MHL.form"], isEmbeddable: true, label: "", comment: "", maxOccurs: "1", multiLanguage: false};
 
-export default React.memo(function OptionsEditor({onClose, options, onChange}: FormOptionsEditorProps) {
-	const { metadataService, theme: { Modal }, translations } = React.useContext(Context);
+const prepareSchema = (schema: any) => {
+	delete schema.properties.fields;
+	delete schema.properties.uiSchema;
+	delete schema.properties.translations;
+	return schema;
+};
+
+const prepareUiSchema = (uiSchema: any) => {
+	uiSchema["ui:order"] = [
+		"name",
+		"title",
+		"description",
+		"shortDescription",
+		"collectionID",
+		"category",
+		"logo",
+		"options",
+		"*"
+	];
+	return uiSchema;
+};
+
+const prepareMaster = (master: any) => {
+	const {fields, uiSchema: _uiSchema, translations, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
+	return _master;
+};
+
+export default React.memo(function OptionsEditor({onClose, master, onChange, translations}: FormOptionsEditorProps) {
+	const { metadataService, theme: { Modal }, translations: appTranslations } = React.useContext(Context);
 	const [schema, setModelSchema] = React.useState<any[]>();
 	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
 	React.useEffect(() => {
 		mapPropertyToSchemas(formProperty, metadataService).then(({schema, uiSchema}) => {
-			setModelSchema(schema);
-			setModelUiSchema(uiSchema);
+			setModelSchema(prepareSchema(schema));
+			setModelUiSchema(prepareUiSchema(uiSchema));
 		});
 	}, [metadataService]);
-	const formData = translate(options, translations);
+	const _master = prepareMaster(master);
+	const formData = translate(_master, translations);
 	const onLajiFormChange = React.useCallback((viewFormData) => {
 		const changedPaths = detectChangePaths(viewFormData, formData);
-		let newFormData = options;
+		let newFormData = _master;
 		const events: FormOptionEvent[] = [];
 		changedPaths.forEach(changedPath => {
 			const currentValue = parseJSONPointer(newFormData, changedPath);
@@ -109,10 +138,10 @@ export default React.memo(function OptionsEditor({onClose, options, onChange}: F
 			}
 		});
 		onChange(events);
-	}, [formData, onChange, options]);
+	}, [formData, onChange, _master]);
 	return (
 		<Modal onHide={onClose} show={true} dialogClassName={classNames(gnmspc(), gnmspc("editor"))}>
-			<Modal.Header closeButton={true}>{translations["Editor.options.header"]}</Modal.Header>
+			<Modal.Header closeButton={true}>{appTranslations["Editor.options.header"]}</Modal.Header>
 			<Modal.Body>
 				<div style={{width: 500}} className={gnmspc("field-editor")}>
 					{!schema
