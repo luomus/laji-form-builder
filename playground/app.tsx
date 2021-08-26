@@ -27,8 +27,8 @@ function getJsonFromUrl() {
 }
 
 const query = getJsonFromUrl();
-const id = query.id || "JX.519";
-const lang = query.lang || "fi";
+const {id = "JX.519", lang = "fi", localFormData, ..._query} = query;
+
 
 const apiClient = new ApiClientImplementation(
 	"https://apitest.laji.fi/v0",
@@ -36,14 +36,16 @@ const apiClient = new ApiClientImplementation(
 	properties.userToken,
 	lang
 );
-//const onChange = () => {};
 apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json()).then(form => {
+	const formData = localFormData
+		? require(`/forms/${localFormData === true ? id  : localFormData}.formData.json`)
+		: form.options?.prepopulatedDocument || {};
 	const LajiFormApp = () => {
 		const [_form, onChange] = React.useState(form);
 		return (
 			<React.Fragment>
-				<LajiForm {..._form} lang={lang} apiClient={apiClient} theme={lajiFormBs3} />
-				<LajiFormBuilder id={id} lang={lang} {...query} {...properties} onChange={onChange} apiClient={apiClient} theme={lajiFormBs3} />
+				<LajiForm {..._form} lang={lang} formData={formData} apiClient={apiClient} theme={lajiFormBs3} uiSchemaContext={{}} />
+				<LajiFormBuilder id={id} lang={lang} {..._query} {...properties} onChange={onChange} apiClient={apiClient} theme={lajiFormBs3} />
 			</React.Fragment>
 		);
 	};
