@@ -1,13 +1,10 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import { Lang } from "./LajiFormBuilder";
 
 export default class FormService {
 	private apiClient: ApiClient;
-	private lang: Lang;
 
-	constructor(apiClient: ApiClient, lang: Lang) {
+	constructor(apiClient: ApiClient) {
 		this.apiClient = apiClient;
-		this.lang = lang;
 	}
 
 	getMaster(id: string) {
@@ -15,7 +12,7 @@ export default class FormService {
 	}
 
 	getSchemas(id: string) {
-		return this.apiClient.fetch(`/forms/${id}`, {lang: this.lang, format: "schema"});
+		return this.apiClient.fetch(`/forms/${id}`, {format: "schema"});
 	}
 
 	update(form: any) {

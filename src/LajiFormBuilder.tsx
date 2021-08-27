@@ -61,7 +61,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
 		this.appTranslations = constructTranslations(appTranslations);
 		this.metadataService = new MetadataService(this.apiClient);
-		this.formService = new FormService(this.apiClient, props.lang);
+		this.formService = new FormService(this.apiClient);
 		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
 			notifier[method] = msg => console.log(`LajiFormBuilder notification ${method}: ${msg}`);
 			return notifier;
