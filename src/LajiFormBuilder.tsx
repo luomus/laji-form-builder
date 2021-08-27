@@ -111,17 +111,17 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.setState({lang}, this.updateSchemas);
 	}
 
-	getContext = memoize((): ContextProps => ({
+	getContext = memoize((lang: Lang): ContextProps => ({
 		apiClient: this.apiClient,
-		lang: this.state.lang,
-		translations: this.appTranslations[this.state.lang],
+		lang,
+		translations: this.appTranslations[lang],
 		metadataService: this.metadataService,
 		formService: this.formService,
 		theme: this.props.theme
 	}))
 
 	render() {
-		const context = this.getContext();
+		const context = this.getContext(this.state.lang);
 		return (
 			<Context.Provider value={context}>
 				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
@@ -370,8 +370,8 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	onSave = () => {
 		this.formService.update(this.state.master)
-			.then(() => this.notifier.success(this.getContext().translations["save.success"]))
-			.catch(() => this.notifier.error(this.getContext().translations["save.error"]));
+			.then(() => this.notifier.success(this.getContext(this.state.lang).translations["save.success"]))
+			.catch(() => this.notifier.error(this.getContext(this.state.lang).translations["save.error"]));
 	}
 }
 
