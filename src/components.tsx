@@ -230,8 +230,10 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 };
 export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable = true}
 	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number, resizable?: boolean}) => {
+	const stringValue = JSON.stringify(value, undefined, 2);
+	const [tmpValue, setTmpValue] = React.useState<string>(stringValue);
+	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
 
-	const [tmpValue, setTmpValue] = React.useState(JSON.stringify(value, undefined, 2));
 	const [valid, setValid] = React.useState(true);
 	const [touched, setToutched] = React.useState(false);
 
