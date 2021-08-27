@@ -19,6 +19,7 @@ export interface LajiFormBuilderProps {
 	id: string;
 	lang: Lang;
 	onChange: (form: any) => void;
+	onLangChange: (lang: Lang) => void;
 	apiClient: ApiClientImplementation;
 	theme: Theme;
 	notifier?: Notifier;
@@ -103,12 +104,19 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		const schemasPromise = id
 			? this.formService.getSchemas(id) 
 			: Promise.resolve(undefined);
-		this.schemasPromise = makeCancellable(schemasPromise
-			.then((schemas: any) => this.setState({schemas})));
+		const promise = new Promise<void>(resolve => schemasPromise
+			.then((schemas: any) => this.setState({schemas}, resolve)));
+		this.schemasPromise = makeCancellable(promise);
+		return promise;
 	}
 
 	onLangChange = (lang: Lang) => {
-		this.setState({lang}, this.updateSchemas);
+		this.apiClient.setLang(lang);
+		this.setState({lang}, () => this.updateSchemas().then(() => {
+			this.props.onLangChange(this.state.lang);
+			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
+			this.props.onChange({...this.state.schemas, uiSchema});
+		}));
 	}
 
 	getContext = memoize((lang: Lang): ContextProps => ({

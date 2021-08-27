@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
 import { classNames, nmspc, gnmspc } from "./utils";
