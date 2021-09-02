@@ -65,17 +65,20 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	normalizeUiSchema(uiSchema: any, prefix = ""): any {
 		const key = `${prefix}ui:title`;
 		const getFieldName = () => {
-			const {field, translations} = this.props;
+			const {field} = this.props;
 			if (!field) {
 				return "";
 			}
 			const uiTitle = uiSchema[key];
-			return (uiTitle ?? getTranslation(field.label || "", translations)) || "";
+			return (uiTitle ?? (field.label ?? undefined)) || undefined;
 		};
-		return {
-			...uiSchema,
-			[key]: getFieldName()
-		};
+		const uiTitle = getFieldName();
+		return uiTitle === undefined
+			? uiSchema
+			: {
+				...uiSchema,
+				[key]: getFieldName()
+			};
 	}
 
 	render() {
@@ -85,9 +88,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 
 		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema, PREFIX);
 		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
-		const formData = this.normalizeUiSchema(
-			getTranslatedUiSchema(this.props.uiSchema, this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema)
-			), PREFIX);
+		const formData = getTranslatedUiSchema(this.normalizeUiSchema(this.props.uiSchema, PREFIX), this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema));
 		const formContext = {
 			path: this.props.path,
 			rootSchema: this.props.schema,
@@ -110,7 +111,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		const { schema, uiSchema } = this.props;
 		const changedPaths = detectChangePaths(eventUiSchema, viewUiSchema);
 		const events: FieldEditorChangeEvent[] = [];
-		let newUiSchema = uiSchema;
+		let newUiSchema = this.normalizeUiSchema(uiSchema);
 		changedPaths.forEach(changedPath => {
 			const schemaForUiSchema = parseSchemaFromFormDataPointer(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX), changedPath);
 			const currentValue = parseJSONPointer(newUiSchema, changedPath);
