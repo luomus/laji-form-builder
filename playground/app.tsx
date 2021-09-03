@@ -45,6 +45,8 @@ apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => respo
 		const [_lang, onLangChange] = React.useState(lang);
 		return (
 			<React.Fragment>
+				{ _form.name }
+				{ _form.description }
 				<LajiForm {..._form} lang={_lang} formData={formData} apiClient={apiClient} theme={lajiFormBs3} uiSchemaContext={{}} />
 				<LajiFormBuilder id={id} lang={lang} {..._query} {...properties} onChange={onChange} onLangChange={onLangChange} apiClient={apiClient} theme={lajiFormBs3} />
 			</React.Fragment>

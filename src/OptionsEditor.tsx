@@ -3,17 +3,12 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
-import { PropertyModel, PropertyRange } from "./model";
+import { PropertyModel, PropertyRange, Schemas, Master } from "./model";
 import MetadataService from "./metadata-service";
 import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer, classNames } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
-
-interface Schemas {
-	schema: any;
-	uiSchema: any;
-}
 
 const mapRangeToSchema = (property: Pick<PropertyModel, "range" | "isEmbeddable" | "multiLanguage">, metadataService: MetadataService): Promise<Schemas> => {
 	const range = property.range[0];
@@ -71,8 +66,8 @@ const propertiesToSchema = (modelProperties: PropertyModel[], metadataService: M
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
 interface FormOptionsEditorProps {
 	onClose: () => void;
-	master: any;
-	translations: any;
+	master: Master;
+	translations: {[key: string]: string};
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
 }
 
@@ -100,7 +95,7 @@ const prepareUiSchema = (uiSchema: any) => {
 	return uiSchema;
 };
 
-const prepareMaster = (master: any) => {
+const prepareMaster = (master: Master) => {
 	const {fields, uiSchema: _uiSchema, translations, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
 	return _master;
 };

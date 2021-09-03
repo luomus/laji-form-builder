@@ -1,6 +1,6 @@
 import * as React from "react";
 import ApiClient from "laji-form/lib/ApiClient";
-import { Lang } from "./LajiFormBuilder";
+import { Lang } from "./model";
 import MetadataService from "./metadata-service";
 import FormService from "./form-service";
 import { Theme } from "./themes/theme";
@@ -14,4 +14,3 @@ export interface ContextProps {
 	theme: Theme;
 }
 export const Context = React.createContext<ContextProps> ({} as ContextProps);
-

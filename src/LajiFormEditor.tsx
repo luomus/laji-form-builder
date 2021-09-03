@@ -2,13 +2,14 @@ import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer } from "./utils";
-import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, Lang, Schemas, FieldOptions } from "./LajiFormBuilder";
+import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, FieldOptions } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { findNearestParentSchemaElem } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
+import { Lang, Master, Schemas } from "./model";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -20,11 +21,10 @@ export type FieldEditorChangeEvent =
 	| Omit<FieldUpdateEvent, "selected">;
 
 export interface LajiFormEditorProps {
-	master: any;
-	schemas: Schemas;
+	master?: Master;
+	schemas?: Schemas;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
 	onLangChange: (lang: Lang) => void;
-	loading?: boolean;
 	height?: number;
 	onHeightChange?: (height: number) => void;
 	onSave: () => void;
@@ -50,6 +50,23 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			flexDirection: "row",
 			width: "100%"
 		};
+		return (
+			<React.Fragment>
+				<DraggableHeight
+					style={containerStyle}
+					fixed="bottom"
+					height={this.props.height}
+					className={gnmspc("editor")}
+					thickness={2}
+					onChange={this.onHeightChange}
+				>
+					{this.renderEditor()}
+				</DraggableHeight>
+			</React.Fragment>
+		);
+	}
+
+	renderEditor() {
 		const fieldsStyle: React.CSSProperties = {
 			overflowY: "auto",
 			display: "flex",
@@ -75,68 +92,58 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		};
 		const {Glyphicon} = this.context.theme;
 		const {translations} = this.context;
-		return (
-			<React.Fragment>
-				<DraggableHeight
-					style={containerStyle}
-					fixed="bottom"
-					height={this.props.height}
-					className={gnmspc("editor")}
-					thickness={2}
-					onChange={this.onHeightChange}
-				>
-					{this.props.loading
-						? <Spinner size={100} />
-						: (
-							<React.Fragment>
-								<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
-									<div style={sidebarToolbarContainer}>
-										<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
-										<Clickable className="glyph-container"
-										           onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}>
-											<Glyphicon glyph="magnet" className={classNames(this.state.pointerChoosingActive && "active")} />
-										</Clickable>
-										<Clickable className="glyph-container" onClick={this.openFormOptionsEditor}>
-											<Glyphicon glyph="cog" />
-										</Clickable>
-									</div>
-									<Fields
-										style={fieldsStyle}
-										className={gnmspc("field-chooser")}
-										fields={this.getFields(this.props.master.fields)}
-										onSelected={this.onFieldSelected}
-										onDeleted={this.onFieldDeleted}
-										selected={this.state.selected}
-										pointer=""
-										expanded={true}
-									/>
-									<Button small variant="success" onClick={this.onSave}>{translations.Save}</Button>
-								</DraggableWidth>
-								<div style={fieldEditorStyle}>
-									<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
-									{this.state.selected &&	(
-										<Editor
-											key={this.state.selected}
-											active={this.state.activeEditorMode}
-											{...this.getFieldEditorProps()}
-											className={gnmspc("field-editor")}
-											style={fieldEditorContentStyle}
-										/>
-									)}
-								</div>
-								{this.state.formOptionsModalOpen &&
-									<OptionsEditor
-										onClose={this.closeFormOptionsEditor}
-										master={this.props.master}
-										translations={this.props.master.translations[this.context.lang]}
-										onChange={this.props.onChange}
-									/>
-								}
-							</React.Fragment>
+		const {master, schemas} = this.props;
+		if (!master || !schemas) {
+			return <Spinner size={100} />;
+		} else {
+			return (
+				<React.Fragment>
+					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
+						<div style={sidebarToolbarContainer}>
+							<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
+							<Clickable className="glyph-container"
+									   onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}>
+								<Glyphicon glyph="magnet" className={classNames(this.state.pointerChoosingActive && "active")} />
+							</Clickable>
+							<Clickable className="glyph-container" onClick={this.openFormOptionsEditor}>
+								<Glyphicon glyph="cog" />
+							</Clickable>
+						</div>
+						<Fields
+							style={fieldsStyle}
+							className={gnmspc("field-chooser")}
+							fields={this.getFields(master.fields)}
+							onSelected={this.onFieldSelected}
+							onDeleted={this.onFieldDeleted}
+							selected={this.state.selected}
+							pointer=""
+							expanded={true}
+						/>
+						<Button small variant="success" onClick={this.onSave}>{translations.Save}</Button>
+					</DraggableWidth>
+					<div style={fieldEditorStyle}>
+						<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
+						{this.state.selected &&	(
+							<Editor
+								key={this.state.selected}
+								active={this.state.activeEditorMode}
+								{...this.getFieldEditorProps(master, schemas)}
+								className={gnmspc("field-editor")}
+								style={fieldEditorContentStyle}
+							/>
 						)}
-				</DraggableHeight>
-			</React.Fragment>
-		);
+					</div>
+					{this.state.formOptionsModalOpen &&
+						<OptionsEditor
+							onClose={this.closeFormOptionsEditor}
+							master={master}
+							translations={master.translations?.[this.context.lang as Lang] || {}}
+							onChange={this.props.onChange}
+						/>
+					}
+				</React.Fragment>
+			);
+		}
 	}
 
 	onSave = () => {
@@ -162,8 +169,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
 	}
 
-	getFieldEditorProps(): FieldEditorProps {
-		const { schemas, master } = this.props;
+	getFieldEditorProps(master: Master, schemas: Schemas): FieldEditorProps {
 		const { lang } = this.context;
 		const selected = this.getSelected();
 		const findField = (_field: FieldOptions, path: string): FieldOptions => {
@@ -177,8 +183,8 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		return {
 			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected)),
 			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected), !!"safely"),
-			field: findField(this.getFields(this.props.master.fields)[0], selected),
-			translations: master.translations[lang],
+			field: findField(this.getFields(master.fields)[0], selected),
+			translations: master.translations?.[lang as Lang] || {},
 			path: selected,
 			onChange: this.onEditorChange
 		};

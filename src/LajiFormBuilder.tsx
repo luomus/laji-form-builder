@@ -1,7 +1,7 @@
 import * as React from "react";
 import ApiClient, { ApiClientImplementation } from "laji-form/lib/ApiClient";
-import lajiFormTranslations from "laji-form/lib/translations";
-import { Translations, Notifier } from "laji-form/lib/components/LajiForm";
+import lajiFormTranslations from "laji-form/lib/translations.json";
+import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } = LajiFormUtils;
@@ -10,7 +10,7 @@ import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, mak
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations.json";
-import { PropertyModel, PropertyRange } from "./model";
+import { PropertyModel, PropertyRange, Lang, Translations, Master, Schemas } from "./model";
 import MetadataService from "./metadata-service";
 import FormService from "./form-service";
 import memoize from "memoizee";
@@ -26,9 +26,8 @@ export interface LajiFormBuilderProps {
 }
 export interface LajiFormBuilderState {
 	id?: string;
-	master?: "loading" | any;
-	schemas?: "loading" | any;
-	uiSchema?: any;
+	master?: Master;
+	schemas?: Schemas;
 	lang: Lang;
 	editorHeight?: number;
 }
@@ -38,8 +37,6 @@ const EDITOR_HEIGHT = 400;
 export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
 	apiClient: ApiClient;
 	state: LajiFormBuilderState = {
-		master: "loading",
-		schemas: "loading",
 		lang: this.props.lang,
 		editorHeight: EDITOR_HEIGHT
 	};
@@ -88,34 +85,37 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			return;
 		}
 		this.formPromise?.cancel();
-		this.setState({master: "loading", schemas: "loading", id}, () => {
+		this.setState({master: undefined, schemas: undefined, id}, () => {
 			const formPromise = id
 				? this.formService.getMaster(id)
 				: Promise.resolve(undefined);
 			this.formPromise = makeCancellable(formPromise
-				.then((master: any) => this.setState({master})));
+				.then((master: Master) => this.setState({master})));
 			this.updateSchemas();
 		});
 	}
 
-	updateSchemas() {
+	updateSchemas(): Promise<Schemas> {
 		this.schemasPromise?.cancel();
 		const {id} = this.state;
 		const schemasPromise = id
 			? this.formService.getSchemas(id) 
 			: Promise.resolve(undefined);
-		const promise = new Promise<void>(resolve => schemasPromise
-			.then((schemas: any) => this.setState({schemas}, resolve)));
+		const promise = new Promise<Schemas>(resolve => schemasPromise
+			.then((schemas: Schemas) => this.setState({schemas}, () => resolve(schemas))));
 		this.schemasPromise = makeCancellable(promise);
 		return promise;
 	}
 
 	onLangChange = (lang: Lang) => {
 		this.apiClient.setLang(lang);
-		this.setState({lang}, () => this.updateSchemas().then(() => {
+		this.setState({lang}, () => this.updateSchemas().then((schemas) => {
 			this.props.onLangChange(this.state.lang);
-			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
-			this.props.onChange({...this.state.schemas, uiSchema});
+			const {master} = this.state;
+			const uiSchema = master
+				? getTranslatedUiSchema(master.uiSchema || {}, master.translations?.[this.state.lang] || {})
+				: schemas.uiSchema;
+			this.props.onChange({...schemas, uiSchema});
 		}));
 	}
 
@@ -144,7 +144,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		const {schemas, master} = this.state;
 		return (
 			<LajiFormEditor
-				loading={master === "loading"}
 				master={master}
 				schemas={schemas}
 				onChange={this.onEditorChange}
@@ -176,7 +175,13 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
-		const changed: any = {master: this.state.master, schemas: this.state.schemas};
+		const {master, schemas} = this.state;
+		if (!master || !schemas) {
+			return;
+		}
+
+		const {translations = {fi: {}, sv: {}, en: {}}} = master;
+		const changed: any = {master, schemas};
 		(events instanceof Array ? events : [events]).forEach(event => {
 			if (isUiSchemaChangeEvent(event)) {
 				changed.master = {
@@ -184,7 +189,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 					uiSchema: updateSafelyWithJSONPointer(
 						changed.master.uiSchema,
 						event.value,
-						fieldPointerToUiSchemaPointer(this.state.schemas.schema, event.selected)
+						fieldPointerToUiSchemaPointer(schemas.schema, event.selected)
 					)
 				};
 			} else if (isTranslationsAddEvent(event)) {
@@ -197,7 +202,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							...translations[lang],
 							[key]: value[lang]
 						}
-					}), this.state.master.translations)
+					}), translations)
 				};
 			} else if (isTranslationsChangeEvent(event)) {
 				const {key, value} = event;
@@ -209,9 +214,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							...translations[lang],
 							[key]: lang === this.state.lang
 								? value
-								: (this.state.master.translations[lang][key] || value)
+								: (translations[lang][key] || value)
 						}
-					}), this.state.master.translations)
+					}), translations)
 				};
 			} else if (isTranslationsDeleteEvent(event)) {
 				const {key} = event;
@@ -219,7 +224,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 					...(changed.master || {}),
 					translations: ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
 						...byLang,
-						[lang]: immutableDelete(this.state.master.translations[lang], key)
+						[lang]: immutableDelete(translations[lang], key)
 					}), {})
 				};
 			} else if (event.type === "field") {
@@ -368,10 +373,14 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			} else if (isOptionChangeEvent(event)) {
 				const {path, value} = event;
 				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
+				changed.schemas = updateSafelyWithJSONPointer(changed.schemas, value, path);
 			}
 		});
 		this.setState(changed, () => {
-			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations[this.state.lang]);
+			if (!this.state.master) {
+				return;
+			}
+			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations?.[this.state.lang] || {});
 			this.props.onChange({...this.state.schemas, uiSchema});
 		});
 	}
@@ -382,8 +391,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			.catch(() => this.notifier.error(this.getContext(this.state.lang).translations["save.error"]));
 	}
 }
-
-export type Lang = "fi" | "sv" | "en";
 
 export interface UiSchemaChangeEvent {
 	type: "uiSchema";
@@ -460,11 +467,6 @@ export type ChangeEvent = UiSchemaChangeEvent
 	| FieldAddEvent
 	| FieldUpdateEvent
 	| OptionChangeEvent;
-
-export interface Schemas {
-	schema: any;
-	uiSchema: any;
-}
 
 export interface FieldOptions {
 	label?: string;

@@ -47,7 +47,7 @@ export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	}
 };
 
-export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, prefix?: string, schemaForUiSchema?: any): any => {
+export const getTranslatedUiSchema = memoize((uiSchema: any, translations: {[key: string]: string}, prefix?: string, schemaForUiSchema?: any): any => {
 	function translate(obj: any, schemaForUiSchema?: any): any {
 		if (isObject(obj)) {
 			return Object.keys(obj).reduce<any>((translated, key) => {
@@ -67,7 +67,7 @@ export const getTranslatedUiSchema = memoize((uiSchema: any, translations: any, 
 	return translate(uiSchema, schemaForUiSchema);
 });
 
-export const translate = (obj: any, translations: any) => {
+export const translate = (obj: any, translations: {[key: string]: string}) => {
 	function translate(_any: any): any {
 		if (isObject(_any)) {
 			return Object.keys(_any).reduce<any>((translated, key) => {
