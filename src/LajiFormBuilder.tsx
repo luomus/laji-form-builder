@@ -6,7 +6,7 @@ import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button } from "./components";
-import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema } from "./utils";
+import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations.json";
@@ -109,13 +109,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	onLangChange = (lang: Lang) => {
 		this.apiClient.setLang(lang);
-		this.setState({lang}, () => this.updateSchemas().then((schemas) => {
+		this.setState({lang}, () => this.updateSchemas().then(() => {
 			this.props.onLangChange(this.state.lang);
-			const {master} = this.state;
-			const uiSchema = master
-				? getTranslatedUiSchema(master.uiSchema || {}, master.translations?.[this.state.lang] || {})
-				: schemas.uiSchema;
-			this.props.onChange({...schemas, uiSchema});
+			this.propagateState();
 		}));
 	}
 
@@ -373,16 +369,28 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			} else if (isOptionChangeEvent(event)) {
 				const {path, value} = event;
 				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
-				changed.schemas = updateSafelyWithJSONPointer(changed.schemas, value, path);
+				changed.schemas = updateSafelyWithJSONPointer(changed.schemas, translate(value, changed.master.translations?.[this.state.lang]), path);
 			}
 		});
 		this.setState(changed, () => {
 			if (!this.state.master) {
 				return;
 			}
-			const uiSchema = getTranslatedUiSchema(this.state.master.uiSchema, this.state.master.translations?.[this.state.lang] || {});
-			this.props.onChange({...this.state.schemas, uiSchema});
+			this.propagateState();
 		});
+	}
+
+	propagateState() {
+		if (!this.state.master) {
+			return;
+		}
+		const {translations, fields, ...toTranslate} = this.state.master; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const translated = translate(toTranslate, this.state.master.translations?.[this.state.lang] || {});
+		const updated = {
+			...this.state.schemas,
+			...translated
+		};
+		this.props.onChange(updated);
 	}
 
 	onSave = () => {
