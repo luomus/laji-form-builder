@@ -17,8 +17,8 @@ const PREFIX = "$";
 
 const unprefix = unprefixer(PREFIX);
 
-const LabelWithoutPrefix = React.memo((props: any) => <LajiFormLabel {...props} label={unprefix(props.label)} />);
-const TitleWithoutPrefix = React.memo((props: any) => <LajiFormTitle {...props} title={unprefix(props.title)} />);
+const LabelWithoutPrefix = React.memo((props: any) => <LajiFormLabel {...props} label={unprefix(props.label ?? "")} />);
+const TitleWithoutPrefix = React.memo((props: any) => <LajiFormTitle {...props} title={unprefix(props.title ?? "")} />);
 
 export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
 	static contextType = Context;
