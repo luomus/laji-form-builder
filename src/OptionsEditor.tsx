@@ -1,11 +1,11 @@
 import * as React from "react";
 import LajiForm from "./LajiForm";
 import { Context } from "./Context";
-import { Spinner } from "./components";
+import { Spinner, Classable, Stylable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
 import { PropertyModel, PropertyRange, Schemas, Master } from "./model";
 import MetadataService from "./metadata-service";
-import { translate, JSONSchema, gnmspc, detectChangePaths, parseJSONPointer, classNames } from "./utils";
+import { translate, JSONSchema, detectChangePaths, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
@@ -64,8 +64,7 @@ const propertiesToSchema = (modelProperties: PropertyModel[], metadataService: M
 	}));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
-interface FormOptionsEditorProps {
-	onClose: () => void;
+interface FormOptionsEditorProps extends Classable, Stylable {
 	master: Master;
 	translations: {[key: string]: string};
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
@@ -100,8 +99,8 @@ const prepareMaster = (master: Master) => {
 	return _master;
 };
 
-export default React.memo(function OptionsEditor({onClose, master, onChange, translations}: FormOptionsEditorProps) {
-	const { metadataService, theme: { Modal }, translations: appTranslations } = React.useContext(Context);
+export default React.memo(function OptionsEditor({master, onChange, translations, className, style}: FormOptionsEditorProps) {
+	const { metadataService } = React.useContext(Context);
 	const [schema, setModelSchema] = React.useState<any[]>();
 	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
 	React.useEffect(() => {
@@ -135,22 +134,17 @@ export default React.memo(function OptionsEditor({onClose, master, onChange, tra
 		onChange(events);
 	}, [formData, onChange, _master]);
 	return (
-		<Modal onHide={onClose} show={true} dialogClassName={classNames(gnmspc(), gnmspc("editor"))}>
-			<Modal.Header closeButton={true}>{appTranslations["Editor.options.header"]}</Modal.Header>
-			<Modal.Body>
-				<div style={{width: 500}} className={gnmspc("field-editor")}>
-					{!schema
-						? <Spinner />
-						: <LajiForm
-							schema={schema}
-							uiSchema={uiSchema}
-							formData={formData}
-							onChange={onLajiFormChange}
-							fields={{TextareaEditorField}}
-						/>
-					}
+		!schema
+			? <Spinner />
+			: (
+				<div className={className} style={style}>
+					<LajiForm schema={schema}
+				              uiSchema={uiSchema}
+				              formData={formData}
+				              onChange={onLajiFormChange}
+				              fields={{TextareaEditorField}}
+					/>
 				</div>
-			</Modal.Body>
-		</Modal>
+			)
 	);
 });

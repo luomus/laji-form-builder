@@ -6,7 +6,7 @@ import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } = LajiFormUtils;
 import { Button } from "./components";
-import { getTranslatedUiSchema, fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate } from "./utils";
+import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations.json";

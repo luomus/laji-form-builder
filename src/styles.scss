@@ -81,16 +81,8 @@ $bRadius: 2px;
 		padding: $padding;
 		background-color: $darker;
 	}
-	&-editor-nav-bar .glyph-container > * {
-		color: white;
-		padding: 2px;
-
-		&:hover {
-			color: $def_accent;
-		}
-		&.active {
-			color: $red;
-		}
+	&-editor-toolbar .glyphicon.active {
+		color: $red;
 	}
 	&-field-editor {
 		padding: $padding;
@@ -112,15 +104,32 @@ $bRadius: 2px;
 	&-draggable-line {
 		background-color: black;
 	}
-	&-editor-chooser {
+	&-editor-toolbar {
 		background-color: darken($def, 4%);
 		border-bottom: 1px solid $def_accent;
+		padding: 2px;
+
+		&-separator {
+			padding: 0px 4px;
+			&:before {
+				content: "|";
+				color: $def_separating;
+			}
+		}
+
+		#{$root}-ml {
+			margin-left: 2px;
+		}
+	}
+	&-editor-chooser {
+		margin: -2px;
 
 		&-button {
-			padding: 0px 6px;
+			padding: 2px 6px;
 		}
 		&-button#{$root}-active {
 			border-bottom: 2px solid blue;
+			background-color: darken($def, 12%);
 		}
 	}
 	&-spinner-black .react-spinner_bar {

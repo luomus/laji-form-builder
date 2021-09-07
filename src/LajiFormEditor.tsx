@@ -34,14 +34,13 @@ export interface LajiFormEditorState {
 	selected?: string;
 	activeEditorMode: ActiveEditorMode;
 	pointerChoosingActive: boolean;
-	formOptionsModalOpen: boolean;
 }
 
 const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
 
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	static contextType = Context;
-	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false, formOptionsModalOpen: false};
+	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false};
 	highlightedLajiFormElem?: HTMLElement;
 
 	render() {
@@ -67,20 +66,29 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	}
 
 	renderEditor() {
-		const fieldsStyle: React.CSSProperties = {
-			overflowY: "auto",
-			display: "flex",
-			flexDirection: "column",
-			overflowX: "auto",
-			height: "100%"
-		};
 		const fieldEditorStyle: React.CSSProperties = {
 			width: "100%"
 		};
-		const fieldEditorContentStyle: React.CSSProperties = {
-			overflow: "auto",
-			height: "100%"
-		};
+		const {master, schemas} = this.props;
+		if (!master || !schemas) {
+			return <Spinner size={100} />;
+		}
+		return (
+			<React.Fragment>
+				<div style={fieldEditorStyle}>
+					<EditorToolbar active={this.state.activeEditorMode}
+					               onEditorChange={this.onActiveEditorChange}
+					               lang={this.context.lang}
+								   onLangChange={this.props.onLangChange}
+								   onSave={this.onSave} 
+							       onSelected={this.onPickerSelected} />
+					{this.renderActiveEditor()}
+				</div>
+			</React.Fragment>
+		);
+	}
+
+	renderActiveEditor() {
 		const fieldsBlockStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "column",
@@ -89,61 +97,49 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		const sidebarToolbarContainer: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "row",
+			position: "relative",
+			height: "100%"
 		};
-		const {Glyphicon} = this.context.theme;
-		const {translations} = this.context;
+		const fieldEditorContentStyle: React.CSSProperties = {
+			overflow: "auto",
+			height: "100%",
+			width: "100%"
+		};
 		const {master, schemas} = this.props;
+		const {activeEditorMode} = this.state;
 		if (!master || !schemas) {
 			return <Spinner size={100} />;
-		} else {
-			return (
-				<React.Fragment>
-					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
-						<div style={sidebarToolbarContainer}>
-							<LangChooser lang={this.context.lang} onChange={this.props.onLangChange} />
-							<Clickable className="glyph-container"
-									   onClick={this.state.pointerChoosingActive ? this.pointerChoosing.stop : this.pointerChoosing.start}>
-								<Glyphicon glyph="magnet" className={classNames(this.state.pointerChoosingActive && "active")} />
-							</Clickable>
-							<Clickable className="glyph-container" onClick={this.openFormOptionsEditor}>
-								<Glyphicon glyph="cog" />
-							</Clickable>
-						</div>
-						<Fields
-							style={fieldsStyle}
-							className={gnmspc("field-chooser")}
-							fields={this.getFields(master.fields)}
-							onSelected={this.onFieldSelected}
-							onDeleted={this.onFieldDeleted}
-							selected={this.state.selected}
-							pointer=""
-							expanded={true}
-						/>
-						<Button small variant="success" onClick={this.onSave}>{translations.Save}</Button>
-					</DraggableWidth>
-					<div style={fieldEditorStyle}>
-						<EditorChooser active={this.state.activeEditorMode} onChange={this.onActiveEditorChange} />
-						{this.state.selected &&	(
-							<Editor
-								key={this.state.selected}
-								active={this.state.activeEditorMode}
-								{...this.getFieldEditorProps(master, schemas)}
-								className={gnmspc("field-editor")}
-								style={fieldEditorContentStyle}
-							/>
-						)}
-					</div>
-					{this.state.formOptionsModalOpen &&
-						<OptionsEditor
-							onClose={this.closeFormOptionsEditor}
-							master={master}
-							translations={master.translations?.[this.context.lang as Lang] || {}}
-							onChange={this.props.onChange}
-						/>
-					}
-				</React.Fragment>
-			);
 		}
+		if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
+			return (
+				<div style={sidebarToolbarContainer}>
+					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
+						<Fields className={gnmspc("field-chooser")}
+						        fields={this.getFields(master.fields)}
+						        onSelected={this.onFieldSelected}
+						        onDeleted={this.onFieldDeleted}
+						        selected={this.state.selected}
+						        pointer=""
+						        expanded={true}
+						/>
+					</DraggableWidth>
+					<Editor key={this.state.selected}
+					        active={this.state.activeEditorMode}
+					        {...this.getFieldEditorProps(master, schemas)}
+					        className={gnmspc("field-editor")}
+					        style={fieldEditorContentStyle}
+					/>
+				</div>
+			);
+		} else if (activeEditorMode === "options") {
+			return <OptionsEditor master={master}
+			                      translations={master.translations?.[this.context.lang as Lang] || {}}
+			                      className={gnmspc("field-editor")}
+					              style={fieldEditorContentStyle}
+			                      onChange={this.props.onChange}
+			/>;
+		}
+		return null;
 	}
 
 	onSave = () => {
@@ -206,59 +202,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 
 	getFieldPath = ((path: string) => path === "/document" ? "" : path.replace("/document", ""));
 
-	pointerChoosing = {
-		start: () => {
-			this.setState({pointerChoosingActive: true}, () => {
-				document.addEventListener("mousemove", this.pointerChoosing.onMouseMove);
-				document.addEventListener("click", this.pointerChoosing.onClick);
-				document.addEventListener("keydown", this.pointerChoosing.onKeyDown);
-			});
-		},
-		stop: () => {
-			this.setState({pointerChoosingActive: false}, () => {
-				document.removeEventListener("mousemove", this.pointerChoosing.onMouseMove);
-				document.removeEventListener("click", this.pointerChoosing.onClick);
-				document.removeEventListener("keydown", this.pointerChoosing.onKeyDown);
-				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
-				this.highlightedLajiFormElem = undefined;
-			});
-		},
-		rmHighlight: (elem?: HTMLElement) => {
-			if (elem) {
-				elem.className = elem.className.replace(` ${gnmspc("form-highlight")}`, "");
-			}
-		},
-		onMouseMove: ({clientX, clientY}: MouseEvent) => {
-			const lajiFormElem = findNearestParentSchemaElem(document.elementFromPoint(clientX, clientY));
-			if (lajiFormElem) {
-				this.pointerChoosing.rmHighlight(this.highlightedLajiFormElem);
-				this.highlightedLajiFormElem = lajiFormElem;
-				this.highlightedLajiFormElem.className = `${this.highlightedLajiFormElem.className} ${gnmspc("form-highlight")}`;
-			}
-		},
-		onClick: () => {
-			const id = this.highlightedLajiFormElem?.id
-				.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
-				.replace(/_/g, "/");
-			if (!id) {
-				return;
-			}
-			this.setState({pointerChoosingActive: false}, () => {
-				this.pointerChoosing.stop();
-				this.setState({selected: `/document${id}`});
-			});
-		},
-		onKeyDown: (e: KeyboardEvent) => {
-			e.key === "Escape" && this.pointerChoosing.stop();
-		}
-	}
-
-	openFormOptionsEditor = () => {
-		this.setState({formOptionsModalOpen: true});
-	}
-	closeFormOptionsEditor = () => {
-		this.setState({formOptionsModalOpen: false});
-	}
+	onPickerSelected = (selected: string) => this.setState({selected})
 }
 
 export interface FieldEditorProps extends Classable {
@@ -412,16 +356,116 @@ const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange,
 	);
 });
 
+interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">, Omit<LangChooserProps, "onChange">, Pick<ElemPickerProps, "onSelected"> {
+	onEditorChange: EditorChooserProps["onChange"];
+	onLangChange: LangChooserProps["onChange"];
+	onSave: () => void;
+}
+
+const toolbarNmspc = nmspc("editor-toolbar");
+
+const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() { return <span className={toolbarNmspc("separator")}></span>; });
+
+const EditorToolbar = React.memo(function EditorToolbar({active, onEditorChange, lang, onLangChange, onSave, onSelected}: ToolbarEditorProps) {
+	const {translations} = React.useContext(Context);
+	return (
+		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
+			<LangChooser lang={lang} onChange={onLangChange} />
+			<ElemPicker className={gnmspc("ml")} onSelected={onSelected} />
+			<EditorToolbarSeparator />
+			<EditorChooser active={active} onChange={onEditorChange} />
+			<div style={{marginLeft: "auto"}}>
+				<EditorToolbarSeparator />
+				<Button small variant="success" onClick={onSave}>{translations.Save}</Button>
+			</div>
+		</div>
+	);
+});
+
+const usePrevious = <T extends unknown>(value: T): T | undefined => {
+	  const ref = React.useRef<T>();
+	  React.useEffect(() => {
+		      ref.current = value;
+		    });
+	  return ref.current;
+};
+interface ElemPickerProps extends Classable {
+	onSelected: (selected: string) => void;
+}
+const ElemPicker = React.memo(function ElemPicker({onSelected, className}: ElemPickerProps) {
+	const [isActive, setActive] = React.useState(false);
+	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<HTMLElement>();
+	const prevHighlightedLajiFormElem = usePrevious(highlightedLajiFormElem);
+	const onMouseMove = React.useCallback(({clientX, clientY}: MouseEvent) => {
+		const lajiFormElem = findNearestParentSchemaElem(document.elementFromPoint(clientX, clientY));
+		lajiFormElem && setHighlightedLajiFormElem(lajiFormElem);
+	}, []);
+	const onClick = React.useCallback(() => {
+		const id = highlightedLajiFormElem?.id
+			.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
+			.replace(/_/g, "/");
+		if (!id) {
+			return;
+		}
+		onSelected(`/document${id}`);
+		setActive(false);
+	}, [setActive, highlightedLajiFormElem, onSelected]);
+	const onKeyDown = React.useCallback((e: KeyboardEvent) => {
+		e.key === "Escape" && setActive(false);
+	}, [setActive]);
+	React.useEffect(() => {
+		if (isActive) {
+			document.addEventListener("mousemove", onMouseMove);
+			document.addEventListener("click", onClick);
+			document.addEventListener("keydown", onKeyDown);
+			return () => {
+				document.removeEventListener("mousemove", onMouseMove);
+				document.removeEventListener("click", onClick);
+				document.removeEventListener("keydown", onKeyDown);
+			};
+		} else {
+			document.removeEventListener("mousemove", onMouseMove);
+			document.removeEventListener("click", onClick);
+			document.removeEventListener("keydown", onKeyDown);
+			return undefined;
+		}
+	}, [isActive, onClick, onKeyDown, onMouseMove]);
+	React.useEffect(() => {
+		if (highlightedLajiFormElem) {
+			highlightedLajiFormElem.className = `${highlightedLajiFormElem.className} ${gnmspc("form-highlight")}`;
+		}
+		if (prevHighlightedLajiFormElem) {
+			prevHighlightedLajiFormElem.className = prevHighlightedLajiFormElem.className.replace(` ${gnmspc("form-highlight")}`, "");
+		}
+	}, [highlightedLajiFormElem, prevHighlightedLajiFormElem]);
+	React.useEffect(() => {
+		!isActive && setHighlightedLajiFormElem(undefined);
+	}, [isActive]);
+	const start = React.useCallback(() => setActive(true), [setActive]);
+	const stop = React.useCallback(() => setActive(false), [setActive]);
+	const {Button, Glyphicon} = React.useContext(Context).theme;
+	return (
+		<Button active={isActive} onClick={isActive ? stop : start} small className={className}>
+			<Glyphicon glyph="magnet" className={classNames(isActive && "active")} />
+		</Button>
+	);
+});
+
+interface EditorChooserProps { 
+	active: ActiveEditorMode;
+	onChange: (activeEditorMode: ActiveEditorMode) => void;
+}
+
 const editorNmspc = nmspc("editor-chooser");
 
-type ActiveEditorMode = "uiSchema" | "basic";
-const tabs = {basic: "Basic", uiSchema: "Editor.tab.uiSchema"};
+type ActiveEditorMode = "uiSchema" | "basic" | "options";
+const tabs = {options: "Editor.tab.options", basic: "Editor.tab.basic", uiSchema: "Editor.tab.uiSchema"};
 const EditorChooser = React.memo(function EditorChooser(
 	{active, onChange}
-	: {active: ActiveEditorMode, onChange: (activeEditorMode: ActiveEditorMode) => void}) {
+	: EditorChooserProps) {
 	return (
 		<div className={editorNmspc()} style={{display: "flex"}}>{
-			Object.keys(tabs).map((_active: ActiveEditorMode) => <EditorChooserTab  key={_active} active={active === _active} tab={_active} translationKey={tabs[_active]}  onActivate={onChange} />)
+			Object.keys(tabs).map((_active: ActiveEditorMode) => <EditorChooserTab key={_active} active={active === _active} tab={_active} translationKey={tabs[_active]}  onActivate={onChange} />)
 		}</div>
 	);
 });
@@ -431,10 +475,9 @@ const EditorChooserTab = React.memo(function EditorChooserTab(
 	: {tab: ActiveEditorMode, translationKey: string, active: boolean, onActivate: (active: ActiveEditorMode) => void}) {
 	const translation = (React.useContext(Context).translations as any)[translationKey];
 	return (
-		<Clickable
-			className={classNames(editorNmspc("button"), active && gnmspc("active"))}
-			onClick={React.useCallback(() => onActivate(tab), [tab, onActivate])}
-		>{translation}
+		<Clickable className={classNames(editorNmspc("button"), active && gnmspc("active"))}
+		           onClick={React.useCallback(() => onActivate(tab), [tab, onActivate])} >
+			{translation}
 		</Clickable>
 	);
 });
