@@ -190,18 +190,30 @@ export const DraggableWidth = React.memo(function DraggableWidth(props: Draggabl
 	return <DraggableWidthHeight {...props} dragWidth={true} />;
 });
 
-export const Clickable = React.memo(function Clickable(
-	{children, onClick, className}
-	: {children?: React.ReactNode, onClick?: (e: React.MouseEvent) => any} & Classable) {
+
+interface ClickableProps extends Classable {
+	children?: React.ReactNode;
+	onClick?: (e: React.MouseEvent) => any;
+	tag?: string;
+}
+
+
+interface ClickableElem extends Omit<ClickableProps, "tag"> {
+	role: "button"
+	tabIndex?: number;
+}
+
+export const Clickable = React.memo(function Clickable({children, onClick, className, tag} : ClickableProps) {
+	const Elem = (props: ClickableElem) => React.createElement(tag || "span", props);
 	return (
-		<span
+		<Elem
 			onClick={onClick}
 			tabIndex={onClick ? 0 : undefined}
 			className={classNames(gnmspc("clickable"), className)}
 			role="button"
 		>
 			{children || <span>&#8203;</span>}
-		</span>
+		</Elem>
 	);
 });
 
