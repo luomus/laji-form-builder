@@ -1,8 +1,20 @@
-$def: #f2f6ff;
-$def_separating: darken($def, 30%);
+
+
+$neutral: #f5f5f5;
+$neutral-1: lighten($neutral, 4 * 10%);
+$neutral-2: lighten($neutral, 3 * 10%);
+$neutral-3: lighten($neutral, 2 * 10%);
+$neutral-4: lighten($neutral, 1 * 10%);
+$neutral-5: $neutral;
+$neutral-6: darken($neutral, 1 * 10%);
+$neutral-7: darken($neutral, 2 * 10%);
+$neutral-8: darken($neutral, 3 * 10%);
+$neutral-9: darken($neutral, 4 * 10%);
+
+$neutral-separating: darken($neutral, 30%);
 $darker: #47494e;
-$def_accent: #337ab7;
-$red: darken(red, 10%);
+$accent: #337ab7;
+$hilight: darken(red, 10%);
 
 $padding: 10px;
 $bRadius: 2px;
@@ -12,7 +24,7 @@ $bRadius: 2px;
 }
 
 @mixin editor {
-	background-color: $def;
+	background-color: $neutral;
 	*:focus {
 		outline: none;
 	}
@@ -72,9 +84,11 @@ $bRadius: 2px;
 	}
 
 	&-editor {
+		box-shadow: 0px -2px 6px 1px #0000004d;
+
 		@include editor;
 		#{$root}-draggable-line {
-			background-color: $def_separating;
+			background-color: $neutral-separating;
 		}
 	}
 	&-editor-nav-bar {
@@ -82,7 +96,7 @@ $bRadius: 2px;
 		background-color: $darker;
 	}
 	&-editor-toolbar .glyphicon.active {
-		color: $red;
+		color: $hilight;
 	}
 	&-field-editor {
 		padding: $padding;
@@ -102,18 +116,19 @@ $bRadius: 2px;
 	}
 
 	&-draggable-line {
-		background-color: black;
+		background-color: #717171;
 	}
+
 	&-editor-toolbar {
-		background-color: darken($def, 4%);
-		border-bottom: 1px solid $def_accent;
+		background-color: $neutral-6;
+		border-bottom: 1px solid $neutral-separating;
 		padding: 2px;
 
 		&-separator {
 			padding: 0px 4px;
 			&:before {
 				content: "|";
-				color: $def_separating;
+				color: $neutral-separating;
 			}
 		}
 
@@ -126,17 +141,21 @@ $bRadius: 2px;
 
 		&-button {
 			padding: 2px 6px;
+
+			&:hover {
+				border-bottom: 2px solid $accent;
+			}
 		}
 		&-button#{$root}-active {
-			border-bottom: 2px solid blue;
-			background-color: darken($def, 12%);
+			border-bottom: 2px solid $accent;
+			background-color: $neutral-7;
 		}
 	}
 	&-spinner-black .react-spinner_bar {
 		background-color: black;
 	}
 	&-form-highlight {
-		outline: 3px solid lighten($red, 10%);
+		outline: 3px solid lighten($hilight, 10%);
 	}
 	
 	&-json-editor-invalid {
@@ -151,7 +170,7 @@ $bRadius: 2px;
 
 		&:before {
 			content: "✖";
-			color: $def_accent;
+			color: $accent;
 		 }
 	}
 }

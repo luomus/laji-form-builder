@@ -50,18 +50,14 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			width: "100%"
 		};
 		return (
-			<React.Fragment>
-				<DraggableHeight
-					style={containerStyle}
-					fixed="bottom"
-					height={this.props.height}
-					className={gnmspc("editor")}
-					thickness={2}
-					onChange={this.onHeightChange}
-				>
-					{this.renderEditor()}
-				</DraggableHeight>
-			</React.Fragment>
+			<DraggableHeight style={containerStyle}
+			                 fixed="bottom"
+				             height={this.props.height}
+				             className={gnmspc("editor")}
+				             thickness={2}
+			                 onChange={this.onHeightChange} >
+				{this.renderEditor()}
+			</DraggableHeight>
 		);
 	}
 
@@ -74,17 +70,15 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			return <Spinner size={100} />;
 		}
 		return (
-			<React.Fragment>
-				<div style={fieldEditorStyle}>
-					<EditorToolbar active={this.state.activeEditorMode}
-					               onEditorChange={this.onActiveEditorChange}
-					               lang={this.context.lang}
-								   onLangChange={this.props.onLangChange}
-								   onSave={this.onSave} 
-							       onSelected={this.onPickerSelected} />
-					{this.renderActiveEditor()}
-				</div>
-			</React.Fragment>
+			<div style={fieldEditorStyle}>
+				<EditorToolbar active={this.state.activeEditorMode}
+							   onEditorChange={this.onActiveEditorChange}
+							   lang={this.context.lang}
+							   onLangChange={this.props.onLangChange}
+							   onSave={this.onSave} 
+							   onSelected={this.onPickerSelected} />
+				{this.renderActiveEditor()}
+			</div>
 		);
 	}
 

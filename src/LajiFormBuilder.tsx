@@ -128,9 +128,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		const context = this.getContext(this.state.lang);
 		return (
 			<Context.Provider value={context}>
-				<div style={{ position: "absolute", display: "flex", flexDirection: "column" }}>
-					{this.renderEditor()}
-				</div>
+				{this.renderEditor()}
 				<div style={{height: this.state.editorHeight}} />
 			</Context.Provider>
 		);
