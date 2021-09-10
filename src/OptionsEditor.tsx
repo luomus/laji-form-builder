@@ -3,65 +3,23 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Classable, Stylable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
-import { PropertyModel, PropertyRange, Schemas, Master } from "./model";
-import MetadataService from "./metadata-service";
-import { translate, JSONSchema, detectChangePaths, parseJSONPointer } from "./utils";
+import { PropertyModel, Schemas, Master } from "./model";
+import { translate, detectChangePaths, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
 
-const mapRangeToSchema = (property: Pick<PropertyModel, "range" | "isEmbeddable" | "multiLanguage">, metadataService: MetadataService): Promise<Schemas> => {
+export const mapRangeToUiSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">) => {
 	const range = property.range[0];
-	if (range.match(/Enum$/)) {
-		return metadataService.getRange(range).then(enums => ({schema: {type: "string", enum: enums}, uiSchema: {}}));
-	}
-	if (property.multiLanguage) {
-		return Promise.resolve({schema: JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {})), uiSchema: {}});
-	}
 
-	let schema, uiSchema = {};
-	switch (range) {
-	case PropertyRange.String:
-		schema = JSONSchema.str;
-		break;
-	case PropertyRange.Boolean:
-		schema = JSONSchema.bool;
-		break;
-	case PropertyRange.NonNegativeInteger:
-	case PropertyRange.PositiveInteger:
-		schema = JSONSchema.integer;
-		break;
-	case PropertyRange.keyValue:
-	case PropertyRange.keyAny:
-	case "MY.document":
-		schema = JSONSchema.object();
-		uiSchema = {"ui:field": "TextareaEditorField"};
-		break;
-	default:
-		if (!property.isEmbeddable) {
-			schema = JSONSchema.str;
-		} else {
-			return metadataService.getProperties(range).then(_model => propertiesToSchema(_model, metadataService));
-		}
-	}
-	return Promise.resolve({schema, uiSchema});
+	return range === "MY.document"
+		? {"ui:field": "TextareaEditorField"}
+		: {};
 };
-const mapMaxOccurs = (maxOccurs: string, schema: any): Promise<Schemas> => maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
-
 const mapComment = (comment: string | undefined, uiSchema: any) => ({...uiSchema, "ui:help": comment});
-const mapLabel = (label: string | undefined, schema: any) => ({...schema, title: label});
 
-const mapPropertyToSchemas = ({label, comment, range, maxOccurs, multiLanguage, isEmbeddable}: Pick<PropertyModel, "label" | "comment" | "range" | "maxOccurs" | "multiLanguage" | "isEmbeddable">, metadataService: MetadataService): Promise<Schemas> =>
-	(mapRangeToSchema({range, isEmbeddable, multiLanguage}, metadataService)).then(schemas => ({
-		schema: mapLabel(label, mapMaxOccurs(maxOccurs, schemas.schema)),
-		uiSchema: mapComment(comment, schemas.uiSchema)
-	}));
-
-const propertiesToSchema = (modelProperties: PropertyModel[], metadataService: MetadataService): Promise<Schemas> => Promise.all(modelProperties.map(m => mapPropertyToSchemas(m, metadataService).then(schemas => ({property: m.shortName, schemas}))))
-	.then(propertiesAndSchemas => ({
-		schema: JSONSchema.object(propertiesAndSchemas.reduce((properties, {property, schemas: {schema}}) => ({...properties, [property]: schema}), {})),
-		uiSchema: propertiesAndSchemas.reduce((_uiSchema, {property, schemas: {uiSchema}}) => ({..._uiSchema, [property]: uiSchema}), {})
-	}));
+export const mapPropertyToUiSchema = ({property, comment, range, multiLanguage, isEmbeddable}: Pick<PropertyModel, "property" | "comment" | "range" | "multiLanguage" | "isEmbeddable">): Promise<Schemas> =>
+	mapComment(comment, mapRangeToUiSchema({property, range, isEmbeddable, multiLanguage}));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
 interface FormOptionsEditorProps extends Classable, Stylable {
@@ -70,7 +28,7 @@ interface FormOptionsEditorProps extends Classable, Stylable {
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
 }
 
-const formProperty = {range: ["MHL.form"], isEmbeddable: true, label: "", comment: "", maxOccurs: "1", multiLanguage: false};
+const formProperty = {range: ["MHL.form"], property: "MHL.form", isEmbeddable: true, label: "", comment: "", maxOccurs: "1", multiLanguage: false, shortName: "form"};
 
 const prepareSchema = (schema: any) => {
 	delete schema.properties.fields;
@@ -104,9 +62,9 @@ export default React.memo(function OptionsEditor({master, onChange, translations
 	const [schema, setModelSchema] = React.useState<any[]>();
 	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
 	React.useEffect(() => {
-		mapPropertyToSchemas(formProperty, metadataService).then(({schema, uiSchema}) => {
+		metadataService.getJSONSchemaFromProperty(formProperty).then(schema => {
 			setModelSchema(prepareSchema(schema));
-			setModelUiSchema(prepareUiSchema(uiSchema));
+			setModelUiSchema(prepareUiSchema(mapPropertyToUiSchema(formProperty)));
 		});
 	}, [metadataService]);
 	const _master = prepareMaster(master);

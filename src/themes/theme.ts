@@ -2,6 +2,7 @@ import { Theme as LajiFormTheme, ButtonGroupProps } from "laji-form/lib/themes/t
 
 interface BuilderButtonGroupProps extends ButtonGroupProps {
 	small?: true;
+	vertical?: true;
 }
 
 export interface Theme extends LajiFormTheme {

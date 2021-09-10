@@ -38,5 +38,25 @@
 		"fi": "Tallennus epäonnistui",
 		"sv": "Inspelningen misslyckades",
 		"en": "Save failed"
+	},
+	"wizard.header": {
+		"fi": "Luo uusi lomake",
+		"sv": "Skapa en ny form",
+		"en": "Create a new form"
+	},
+	"wizard.option.dataset": {
+		"fi": "Luo aineistopankki",
+		"sv": "Skapa en ny databank",
+		"en": "Create a new databank"
+	},
+	"wizard.option.json": {
+		"fi": "Tuo JSONista",
+		"sv": "Importera från JSON",
+		"en": "Import from JSON"
+	},
+	"wizard.option.json.import": {
+		"fi": "Tuo",
+		"sv": "Importera",
+		"en": "Import"
 	}
 }

@@ -240,22 +240,26 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 	}
 	return val;
 };
-export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable = true}
-	: {value: any, onChange: (value: any) => void, rows?: number, minRows?: number, maxRows?: number, resizable?: boolean}) => {
+interface JSONEditorProps {
+	value: any;
+	onChange: (value: any) => void;
+	rows?: number;
+	minRows?: number;
+	maxRows?: number;
+	resizable?: boolean;
+	onValidChange?: (valid: boolean) => void;
+	live?: boolean;
+}
+export const JSONEditor = React.forwardRef(({value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live} : JSONEditorProps, ref: React.Ref<HTMLTextAreaElement>) => {
 	const stringValue = JSON.stringify(value, undefined, 2);
 	const [tmpValue, setTmpValue] = React.useState<string>(stringValue);
-	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
-
 	const [valid, setValid] = React.useState(true);
-	const [touched, setToutched] = React.useState(false);
+	const [touched, setTouched] = React.useState(false);
 
-	const _onChange = React.useCallback((e: any) => {
-		setToutched(true);
-		setTmpValue(e.target.value);
-	}, []);
-
-	const onBlur = React.useCallback(() => {
-		if (!touched) {
+	const tryOnChange = React.useCallback(() => {
+		if (tmpValue === "" || tmpValue === undefined) {
+			setValid(true);
+			onChange(undefined);
 			return;
 		}
 		try {
@@ -266,7 +270,26 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable =
 		} catch (e) {
 			setValid(false);
 		}
-	}, [onChange, tmpValue, touched, valid]);
+	}, [onChange, valid, tmpValue]);
+
+	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
+	React.useEffect(() => {
+		touched && live && tryOnChange();
+	}, [touched, live, tryOnChange]);
+
+	React.useEffect(() => onValidChange?.(valid), [valid, onValidChange]);
+
+	const _onChange = React.useCallback((e: any) => {
+		setTouched(true);
+		setTmpValue(e.target.value);
+	}, []);
+
+	const onBlur = React.useCallback(() => {
+		if (!touched) {
+			return;
+		}
+		tryOnChange();
+	}, [touched, tryOnChange]);
 
 	const _rows = getMinMaxed(
 		rows === undefined
@@ -284,6 +307,7 @@ export const JSONEditor = ({value, onChange, rows, minRows, maxRows, resizable =
 			style={{width: "100%", resize: resizable ? "vertical" : "none"}}
 			onChange={_onChange}
 			value={tmpValue}
+			ref={ref}
 		/>
 	);
-};
+});

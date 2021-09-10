@@ -1,6 +1,5 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
-import { FieldOptions } from "./LajiFormBuilder";
 import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
@@ -8,7 +7,7 @@ import { Context } from "./Context";
 import LajiForm from "./LajiForm";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { PropertyModel, PropertyRange, PropertyContext } from "./model";
+import { PropertyModel, PropertyRange, PropertyContext, Field } from "./model";
 
 interface BasicEditorState {
 	childProps?: PropertyModel[] | false;
@@ -57,7 +56,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	renderAdder = () => {
 		if (this.state.childProps) {
-			const existing = dictionarify(this.props.field.fields as FieldOptions[], (field: FieldOptions) => field.name);
+			const existing = dictionarify(this.props.field.fields as Field[], (field: Field) => field.name);
 			const [enums, enumNames] = this.state.childProps
 				.filter(s => !existing[unprefixProp(s.property)])
 				.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
@@ -91,7 +90,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		}
 	}
 
-	propertyModelToFieldOptions(property?: PropertyModel) {
+	propertyModelToField(property?: PropertyModel) {
 		if (!property) {
 			throw new Error("Tried to add nonexisting property");
 		}
@@ -126,7 +125,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			? maybePrimitiveDefault
 			: JSONSchema.object({});
 		const optionsProps: any = {
-			excludeFromCopy: JSONSchema.bool,
+			excludeFromCopy: JSONSchema.Boolean(),
 			default: _default
 		};
 		const {enum: _enum, enumNames} = this.props.schema;

@@ -1,7 +1,8 @@
 import memoize from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
-import { PropertyModel, PropertyContext } from "./model";
-import { fetchJSON } from "./utils";
+import { PropertyModel, PropertyContext, PropertyRange } from "./model";
+import { fetchJSON, JSONSchema } from "./utils";
+import { JSONSchema7 } from "json-schema";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
@@ -12,10 +13,14 @@ export default class MetadataService {
 		this.apiClient = apiClient;
 	}
 
-	getPropertyNameFromContext(propertyContext: PropertyContext) {
-		let id = propertyContext["@id"];
-		id = id.replace("http://tun.fi/", "");
-		switch (id) {
+	getPropertyNameFromContext(property: PropertyContext | string) {
+		let propertyName = typeof property === "string"
+			? property
+			: property["@id"].replace("http://tun.fi/", "");
+		if (!propertyName.match(/[^.]+\./)) {
+			propertyName = `MY.${propertyName}`;
+		}
+		switch (propertyName) {
 		case  "MY.gatherings":
 			return "MY.gathering";
 		case  "MY.gatheringEvent":
@@ -33,7 +38,7 @@ export default class MetadataService {
 		case  "MY.identifications":
 			return "MY.identification";
 		}
-		return id;
+		return propertyName;
 	}
 
 	propertiesContext = new Promise<PropertyContextDict>(
@@ -42,7 +47,7 @@ export default class MetadataService {
 		}, reject))
 
 	getProperties = memoize((property: PropertyContext | string): Promise<PropertyModel[]> => 
-		new Promise((resolve, reject) => this.apiClient.fetch(`/metadata/classes/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}/properties`).then(
+		new Promise((resolve, reject) => this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`).then(
 			(r: any) => 
 				r?.results
 					? resolve(r.results as PropertyModel[])
@@ -51,7 +56,60 @@ export default class MetadataService {
 	)
 
 	getRange = memoize((property: PropertyContext | string): Promise<string[]> => this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`).then((result: {id: string}[]) => result.map(({id}) => id)))
+
+	getJSONSchemaFromProperty(property: PropertyModel) {
+		const mapRangeToSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">): Promise<JSONSchema7> => {
+			const range = property.range[0];
+			if (range.match(/Enum$/)) {
+				return this.getRange(range).then(enums => ({type: "string", enum: enums}));
+			}
+			if (property.multiLanguage) {
+				return Promise.resolve(JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {})));
+			}
+
+			let schema;
+			switch (range) {
+			case PropertyRange.String:
+				schema = JSONSchema.String();
+				break;
+			case PropertyRange.Boolean:
+				schema = JSONSchema.Boolean();
+				break;
+			case PropertyRange.NonNegativeInteger:
+			case PropertyRange.PositiveInteger:
+				schema = JSONSchema.Integer();
+				break;
+			case PropertyRange.keyValue:
+			case PropertyRange.keyAny:
+			case "MY.document":
+				schema = JSONSchema.object();
+				break;
+			default:
+				if (!property.isEmbeddable && property.property !== "MY.geometry") {
+					schema = JSONSchema.String();
+				} else {
+					return this.getProperties(range).then(_model => propertiesToSchema(_model));
+				}
+			}
+			return Promise.resolve(schema);
+		};
+		const mapMaxOccurs = (maxOccurs: string, schema: JSONSchema7): JSONSchema7 => maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
+		const mapLabel = (label: string | undefined, schema: JSONSchema7) => ({...schema, title: label});
+
+		const mapPropertyToJSONSchema = ({property, label, range, maxOccurs, multiLanguage, isEmbeddable}: Pick<PropertyModel, "property" | "label" | "range" | "maxOccurs" | "multiLanguage" | "isEmbeddable">): Promise<JSONSchema7> =>
+			(mapRangeToSchema({property, range, isEmbeddable, multiLanguage})).then(schema => 
+				mapLabel(label, mapMaxOccurs(maxOccurs, schema)),
+			);
+
+		const propertiesToSchema = (modelProperties: PropertyModel[]): Promise<JSONSchema7> => Promise.all(modelProperties.map(m => mapPropertyToJSONSchema(m).then(schema => ({property: m.shortName, schema}))))
+			.then(propertiesAndSchemas => (
+				JSONSchema.object(propertiesAndSchemas.reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {}))
+			));
+
+		return mapPropertyToJSONSchema(property);
+	}
 }
+
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({
 	document: {
@@ -59,4 +117,4 @@ const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({
 		"@container": "@set" as const,
 	},
 	...propertiesContext
-})
+});

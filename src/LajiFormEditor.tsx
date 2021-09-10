@@ -2,14 +2,14 @@ import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer } from "./utils";
-import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, FieldOptions } from "./LajiFormBuilder";
+import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { findNearestParentSchemaElem } = LajiFormUtils;
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, Schemas } from "./model";
+import { Lang, Master, Schemas, Field as FieldOptions } from "./model";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -488,3 +488,4 @@ const Editor = React.memo(function Editor({active, style, className, ...props}: 
 		}</div>
 	);
 });
+

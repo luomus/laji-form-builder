@@ -3,6 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
 import * as LajiFormUtils from "laji-form/lib/utils";
+import { JSONSchema7 } from "json-schema";
 const { isObject, parseJSONPointer: _parseJSONPointer } = LajiFormUtils;
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
@@ -294,15 +295,11 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 };
 
 export class JSONSchema {
-	static type = (type: string) => (options = {}) => ({type, ...options});
+	static type = (type: string) => (options = {}) => ({type, ...options} as JSONSchema7);
 	static String = JSONSchema.type("string");
-	static str = JSONSchema.String();
 	static Number = JSONSchema.type("number");
-	static number = JSONSchema.Number();
 	static Integer = JSONSchema.type("integer");
-	static integer = JSONSchema.Integer();
 	static Boolean = JSONSchema.type("boolean");
-	static bool = JSONSchema.Boolean();
 	static array = (items: any, options = {}) => JSONSchema.type("array")({items, ...options});
 	static enu = (_enum: {enum: string[], enumNames: string[]}, options?: any) => ({
 		...JSONSchema.String(options),

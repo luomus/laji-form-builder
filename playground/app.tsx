@@ -27,8 +27,7 @@ function getJsonFromUrl() {
 }
 
 const query = getJsonFromUrl();
-const {id = "JX.519", lang = "fi", localFormData, ..._query} = query;
-
+const {id, lang = "fi", localFormData, ..._query} = query;
 
 const apiClient = new ApiClientImplementation(
 	"https://apitest.laji.fi/v0",
@@ -36,10 +35,13 @@ const apiClient = new ApiClientImplementation(
 	properties.userToken,
 	lang
 );
-apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json()).then(form => {
+const formPromise = id
+	? apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json())
+	: Promise.resolve();
+formPromise.then((form: any) => {
 	const formData = localFormData
 		? require(`/forms/${localFormData === true ? id  : localFormData}.formData.json`)
-		: form.options?.prepopulatedDocument || {};
+		: form?.options?.prepopulatedDocument || {};
 	const LajiFormApp = () => {
 		const [_form, onChange] = React.useState(form);
 		const [_lang, onLangChange] = React.useState(lang);

@@ -5,15 +5,16 @@ import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } = LajiFormUtils;
-import { Button } from "./components";
 import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations.json";
-import { PropertyModel, PropertyRange, Lang, Translations, Master, Schemas } from "./model";
+import { PropertyModel, PropertyRange, Lang, Translations, Master, Schemas, Field } from "./model";
 import MetadataService from "./metadata-service";
 import FormService from "./form-service";
 import memoize from "memoizee";
+import { FormCreatorWizard } from "./Wizard";
+import FieldService from "./field-service";
 
 export interface LajiFormBuilderProps {
 	id: string;
@@ -30,6 +31,7 @@ export interface LajiFormBuilderState {
 	schemas?: Schemas;
 	lang: Lang;
 	editorHeight?: number;
+	tmp?: boolean;
 }
 
 const EDITOR_HEIGHT = 400;
@@ -40,14 +42,12 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		lang: this.props.lang,
 		editorHeight: EDITOR_HEIGHT
 	};
-	getSetLangFor: {[lang in Lang]: () => void} = ["fi", "sv", "en"].reduce((fns, lang: Lang) => ({
-		...fns, [lang]: () => this.setState({lang})
-	}), {} as any);
 	appTranslations: {[key: string]: {[lang in Lang]: string}};
 	schemasPromise: CancellablePromise<any>;
 	formPromise: CancellablePromise<any>;
 	metadataService: MetadataService;
 	formService: FormService;
+	fieldService: FieldService;
 	notifier: Notifier;
 
 	static defaultProps = {
@@ -60,6 +60,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.appTranslations = constructTranslations(appTranslations);
 		this.metadataService = new MetadataService(this.apiClient);
 		this.formService = new FormService(this.apiClient);
+		this.fieldService = new FieldService(this.metadataService);
 		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
 			notifier[method] = msg => console.log(`LajiFormBuilder notification ${method}: ${msg}`);
 			return notifier;
@@ -128,8 +129,16 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		const context = this.getContext(this.state.lang);
 		return (
 			<Context.Provider value={context}>
-				{this.renderEditor()}
-				<div style={{height: this.state.editorHeight}} />
+				{
+					this.props.id || this.state.tmp ? (
+						<React.Fragment>
+							{this.renderEditor()}
+							<div style={{height: this.state.editorHeight}} />
+						</React.Fragment>
+					) : (
+						<FormCreatorWizard onCreate={this.onCreate} />
+					)
+				}
 			</Context.Provider>
 		);
 	}
@@ -151,21 +160,6 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 
 	onHeightChange = (editorHeight: number) => {
 		this.setState({editorHeight});
-	}
-
-	renderLangChooser = () => {
-		return (
-			<div className="btn-group">{
-				["fi", "sv", "en"].map((lang: Lang) => (
-					<Button
-						active={this.state.lang === lang}
-						onClick={this.getSetLangFor[lang]}
-						key={lang}
-					>{lang}
-					</Button>
-				))
-			}</div>
-		);
 	}
 
 	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
@@ -224,13 +218,13 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			} else if (event.type === "field") {
 				const splitted = event.selected.split("/").filter(s => s);
 				if (isFieldDeleteEvent(event)) {
-					const filterFields = (field: FieldOptions, pointer: string[]): FieldOptions => {
+					const filterFields = (field: Field, pointer: string[]): Field => {
 						const [p, ...remaining] = pointer;
 						return {
 							...field,
 							fields: remaining.length
-								? (field.fields as FieldOptions[]).map((f: FieldOptions) => f.name === p ? filterFields(f, remaining) : f)
-								: (field.fields as FieldOptions[]).filter((f: FieldOptions) => f.name !== p)
+								? (field.fields as Field[]).map((f: Field) => f.name === p ? filterFields(f, remaining) : f)
+								: (field.fields as Field[]).filter((f: Field) => f.name !== p)
 						};
 					};
 					const filterSchema = (schema: any, pointer: string[]): any => {
@@ -268,28 +262,28 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				} else if (isFieldAddEvent(event)) {
 					const propertyModel = event.value;
 					if (propertyModel.range[0] !== PropertyRange.Id) {
-						const addField = (fields: FieldOptions[], path: string[], property: string): FieldOptions[] => {
+						const addField = (fields: Field[], path: string[], property: string): Field[] => {
 							if (!path.length) {
 								return [...fields, {name: property}];
 							}
 							const [next, ...remaining] = path;
 							return fields.map(field => field.name === next
-								? {...field, fields: addField(field.fields as FieldOptions[], remaining, property)}
+								? {...field, fields: addField(field.fields as Field[], remaining, property)}
 								: field
 							);
 						};
 						const getSchemaForProperty = (property: PropertyModel) => {
 							switch (property.range[0]) {
 							case PropertyRange.String:
-								return JSONSchema.str;
+								return JSONSchema.String();
 							case PropertyRange.Boolean:
-								return JSONSchema.bool;
+								return JSONSchema.Boolean();
 							case PropertyRange.Int:
-								return JSONSchema.integer;
+								return JSONSchema.Integer();
 							case PropertyRange.PositiveInteger: // TODO validator
-								return JSONSchema.number;
+								return JSONSchema.Number();
 							case PropertyRange.DateTime: // TODO datetime uiSchema
-								return JSONSchema.str;
+								return JSONSchema.String();
 							default:
 								throw new Error("Unknown property range");
 							}
@@ -314,13 +308,13 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 						};
 					}
 				} else if (isFieldUpdateEvent(event)) {
-					const updateField = (fields: FieldOptions[], path: string[], value: FieldOptions): FieldOptions[] => {
+					const updateField = (fields: Field[], path: string[], value: Field): Field[] => {
 						if (path.length === 1) {
 							return fields.map(field => field.name === value.name ? value : field);
 						}
 						const [next, ...remaining] = path;
 						return fields.map(field => field.name === next
-							? {...field, fields: updateField(field.fields as FieldOptions[], remaining, value)}
+							? {...field, fields: updateField(field.fields as Field[], remaining, value)}
 							: field
 						);
 					};
@@ -378,7 +372,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		});
 	}
 
-	propagateState() {
+	propagateState = () => {
 		if (!this.state.master) {
 			return;
 		}
@@ -395,6 +389,13 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.formService.update(this.state.master)
 			.then(() => this.notifier.success(this.getContext(this.state.lang).translations["save.success"]))
 			.catch(() => this.notifier.error(this.getContext(this.state.lang).translations["save.error"]));
+	}
+
+	onCreate = (master: Master) => {
+		this.fieldService.masterToJSONSchema(master, this.state.lang).then((schema: any) => {
+			const uiSchema = master.translations ? translate(master.uiSchema, master.translations[this.state.lang]) : master.uiSchema;
+			this.setState({master, schemas: {schema, uiSchema}, tmp: true}, this.propagateState);
+		});
 	}
 }
 
@@ -444,7 +445,7 @@ export interface FieldAddEvent extends FieldEvent {
 }
 export interface FieldUpdateEvent extends FieldEvent {
 	op: "update";
-	value: FieldOptions;
+	value: Field;
 }
 function isFieldDeleteEvent(event: ChangeEvent): event is FieldDeleteEvent {
 	return event.type === "field" &&  event.op === "delete";
@@ -473,13 +474,3 @@ export type ChangeEvent = UiSchemaChangeEvent
 	| FieldAddEvent
 	| FieldUpdateEvent
 	| OptionChangeEvent;
-
-export interface FieldOptions {
-	label?: string;
-	name: string;
-	options?: any;
-	type?: string;
-	validators?: any;
-	warnings?: any;
-	fields?: FieldOptions[];
-}
