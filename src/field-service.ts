@@ -64,6 +64,13 @@ const filterWhitelist = (schema: any, field: Field) => {
 		: schema;
 };
 
+const excludeFromCopy = (schema: any, field: Field) => {
+	if (field.options?.excludeFromCopy) {
+		schema.excludeFromCopy = true;
+	}
+	return schema;
+}
+
 const fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[], metadataService: MetadataService): Promise<any> => {
 	const {name, options, validators, warnings, fields} = field;
 
@@ -89,6 +96,7 @@ const fieldToSchema = (field: Field, translations: Record<string, string> | unde
 	} else {
 		return metadataService.getJSONSchemaFromProperty(property).then((schema) => {
 			schema = filterWhitelist(schema, field);
+			schema = excludeFromCopy(schema, field);
 			return addTitleAndDefault(schema, field, property, translations);
 		});
 	}
