@@ -66,7 +66,7 @@ export default class MetadataService {
 			const range = property.range[0];
 			if (this.isAltRange(range)) {
 				return this.getRange(range).then(_enums => {
-					let enums = [], enumNames = [];
+					let enums = [""], enumNames = [""];
 					for (const e of _enums) {
 						enums.push(e.id);
 						enumNames.push(e.value);
