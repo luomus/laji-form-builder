@@ -55,13 +55,20 @@ export default class MetadataService {
 			reject))
 	)
 
-	getRange = memoize((property: PropertyContext | string): Promise<string[]> => this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`).then((result: {id: string}[]) => result.map(({id}) => id)))
+	getRange = memoize((property: PropertyContext | string): Promise<{id: string, value: string}[]> => this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`));
 
 	getJSONSchemaFromProperty(property: PropertyModel) {
 		const mapRangeToSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">): Promise<JSONSchema7> => {
 			const range = property.range[0];
-			if (range.match(/Enum$/)) {
-				return this.getRange(range).then(enums => ({type: "string", enum: enums}));
+			if (range.match(/Enum$/) || range === "MX.secureLevels") {
+				return this.getRange(range).then(_enums => {
+					let enums = [], enumNames = [];
+					for (const e of _enums) {
+						enums.push(e.id);
+						enumNames.push(e.value);
+					}
+					return ({type: "string", enum: enums, enumNames})
+				});
 			}
 			if (property.multiLanguage) {
 				return Promise.resolve(JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {})));
