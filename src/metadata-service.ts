@@ -108,24 +108,24 @@ export default class MetadataService {
 			return Promise.resolve(schema);
 		};
 
-		const mapMaxOccurs = (maxOccurs: string) => (schema: JSONSchema7) =>
+		const mapMaxOccurs = (schema: JSONSchema7, {maxOccurs}: PropertyModel) =>
 			maxOccurs === "unbounded"
 				? JSONSchema.array(schema)
 				: schema;
 
-		const mapUniqueItemsForUnboundedAlt = (range: (PropertyRange | string)[], maxOccurs: string) => (schema: JSONSchema7) => 
+		const mapUniqueItemsForUnboundedAlt = (schema: JSONSchema7, {range, maxOccurs}: PropertyModel) =>
 			maxOccurs === "unbounded" && this.isAltRange(range[0])
 				? {...schema, uniqueItems: true}
 				: schema;
 
-		const mapLabel = (label: string | undefined) => (schema: JSONSchema7) => ({...schema, title: label});
+		const mapLabel = (schema: JSONSchema7, {label}: PropertyModel) => ({...schema, title: label});
 
-		const mapPropertyToJSONSchema = ({property, label, range, maxOccurs, multiLanguage, isEmbeddable}: Pick<PropertyModel, "property" | "label" | "range" | "maxOccurs" | "multiLanguage" | "isEmbeddable">): Promise<JSONSchema7> =>
-			(mapRangeToSchema({property, range, isEmbeddable, multiLanguage})).then(schema => 
-				applyTransformations<JSONSchema7>(schema, [
-					mapMaxOccurs(maxOccurs),
-					mapUniqueItemsForUnboundedAlt(range, maxOccurs),
-					mapLabel(label)
+		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchema7> =>
+			(mapRangeToSchema(property)).then(schema => 
+				applyTransformations(schema, property, [
+					mapMaxOccurs,
+					mapUniqueItemsForUnboundedAlt,
+					mapLabel
 				])
 			);
 
@@ -138,8 +138,8 @@ export default class MetadataService {
 	}
 }
 
-function applyTransformations<T>(schema: T, fns: ((schema: T) => T)[]) {
-	return fns.reduce((schema, fn) => fn(schema), schema);
+function applyTransformations<T, P>(schema: T, property: P, fns: ((schema: T, property: P) => T)[]) {
+	return fns.reduce((schema, fn) => fn(schema, property), schema);
 }
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({
