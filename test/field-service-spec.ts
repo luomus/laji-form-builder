@@ -29,8 +29,6 @@ describe("Field service", () => {
 
 		it("converts schema correct", async () => {
 			const schema = await fieldService.masterToJSONSchema(master);
-			console.log(schemas.schema);
-			console.log(schema);
 			expect(schema).toEqual(schemas.schema);
 		});
 	});

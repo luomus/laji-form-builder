@@ -80,7 +80,7 @@ function FormCreatorJSON({onCreate}: FormCreatorJSONProps) {
 
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
-	React.useEffect(() => {console.log(ref.current);  ref.current?.focus();}, []);
+	React.useEffect(() => ref.current?.focus(), []);
 
 	return (
 		<React.Fragment>

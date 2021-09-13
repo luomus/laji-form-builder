@@ -51,9 +51,21 @@ const addTitleAndDefault = (schema: any, field: Field, property: Pick<PropertyMo
 	return schema;
 };
 
+const filterWhitelist = (schema: any, field: Field) => {
+	const {whitelist} = field.options || {};
+	const origSchema = schema;
+	return whitelist
+		? whitelist.reverse().reduce((schema, w) => {
+			const idx = origSchema.enum.indexOf(w);
+			return idx !== -1
+				? {...schema, enum: [...schema.enum, w], enumNames: [...schema.enumNames, origSchema.enumNames[idx]]}
+				: schema;
+		}, {...schema, enum: [], enumNames: []})
+		: schema;
+};
+
 const fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[], metadataService: MetadataService): Promise<any> => {
 	const {name, options, validators, warnings, fields} = field;
-	const {whitelist} = options || {};
 
 	const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
 	if (!property) {
@@ -76,6 +88,7 @@ const fieldToSchema = (field: Field, translations: Record<string, string> | unde
 		});
 	} else {
 		return metadataService.getJSONSchemaFromProperty(property).then((schema) => {
+			schema = filterWhitelist(schema, field);
 			return addTitleAndDefault(schema, field, property, translations);
 		});
 	}

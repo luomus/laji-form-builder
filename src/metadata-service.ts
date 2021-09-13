@@ -6,6 +6,8 @@ import { JSONSchema7 } from "json-schema";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
+const specialRanges = ["MX.secureLevels", "MY.recordBases"];
+
 export default class MetadataService {
 	private apiClient: ApiClient;
 
@@ -60,7 +62,7 @@ export default class MetadataService {
 	getJSONSchemaFromProperty(property: PropertyModel) {
 		const mapRangeToSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">): Promise<JSONSchema7> => {
 			const range = property.range[0];
-			if (range.match(/Enum$/) || range === "MX.secureLevels") {
+			if (range.match(/Enum$/) || specialRanges.includes(range)) {
 				return this.getRange(range).then(_enums => {
 					let enums = [], enumNames = [];
 					for (const e of _enums) {
