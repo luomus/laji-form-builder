@@ -6,7 +6,7 @@ import { JSONSchema7 } from "json-schema";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
-const specialRanges = ["MX.secureLevels", "MY.recordBases"];
+const specialRanges = ["MX.secureLevels", "MY.recordBases", "MY.samplingMethods"];
 
 export default class MetadataService {
 	private apiClient: ApiClient;
