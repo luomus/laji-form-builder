@@ -35,13 +35,19 @@ const mapPropertyFieldsetOrCollection = (field: Field, properties: any) => {
 	return field.type === "fieldset" ? objectSchema : JSONSchema.array(objectSchema);
 };
 
-const addTitleAndDefault = (schema: any, field: Field, property: Pick<PropertyModel, "label">, translations?: Record<string, string>) => {
+const titleHacks: Record<string, string | undefined> = {
+	"MY.gatherings": undefined
+};
+
+const addTitleAndDefault = (schema: any, field: Field, property: Pick<PropertyModel, "label" | "property">, translations?: Record<string, string>) => {
 	const _default = field.options?.default;
-	const title = typeof field.label === "string"
-		? translations
-			? translate(field.label, translations)
-			: field.label
-		: property.label;
+	const title = property.property in titleHacks
+		? titleHacks[property.property]
+			: typeof field.label === "string"
+			? translations
+				? translate(field.label, translations)
+				: field.label
+			: property.label;
 	if (title !== undefined) {
 		schema.title = title;
 	}
