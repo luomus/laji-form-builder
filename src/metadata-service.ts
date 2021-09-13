@@ -88,8 +88,10 @@ export default class MetadataService {
 				break;
 			case PropertyRange.Int:
 			case PropertyRange.NonNegativeInteger:
-			case PropertyRange.PositiveInteger:
 				schema = JSONSchema.Integer();
+				break;
+			case PropertyRange.PositiveInteger:
+					schema = JSONSchema.Integer({exclusiveMinimum: 0});
 				break;
 			case PropertyRange.keyValue:
 			case PropertyRange.keyAny:
