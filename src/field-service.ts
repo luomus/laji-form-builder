@@ -25,7 +25,13 @@ export default class FieldService {
 }
 
 const mapPropertyFieldsetOrCollection = (field: Field, properties: any) => {
-	const objectSchema = JSONSchema.object(properties);
+	const required = field.fields?.reduce<string[]>((reqs, f) => {
+		if (f.options?.required) {
+			reqs.push(unprefixProp(f.name));
+		}
+		return reqs;
+	}, []);
+	const objectSchema = JSONSchema.object(properties, {required});
 	return field.type === "fieldset" ? objectSchema : JSONSchema.array(objectSchema);
 };
 

@@ -53,7 +53,8 @@ export interface Field {
 	options?: {
 		excludeFromCopy?: boolean;
 		default?: any;
-		whitelist?: string[]
+		required?: boolean;
+		whitelist?: string[];
 	};
 	validators?: any;
 	warnings?: any;
