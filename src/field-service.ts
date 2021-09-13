@@ -4,17 +4,23 @@ import { JSONSchema, translate, unprefixProp } from "./utils";
 
 export default class FieldService {
 	private metadataService: MetadataService;
+	private lang: Lang;
 
-	constructor(metadataService: MetadataService) {
+	constructor(metadataService: MetadataService, lang: Lang) {
 		this.metadataService = metadataService;
+		this.lang = lang;
 	}
 
-	masterToJSONSchema(master: Master, lang: Lang) {
+	setLang(lang: Lang) {
+		this.lang = lang;
+	}
+
+	masterToJSONSchema(master: Master) {
 		const {fields, translations} = master;
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}});
 		}
-		return fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[lang], [{property: "MY.document"} as PropertyModel], this.metadataService);
+		return fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document"} as PropertyModel], this.metadataService);
 	}
 }
 

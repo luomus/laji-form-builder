@@ -60,7 +60,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.appTranslations = constructTranslations(appTranslations);
 		this.metadataService = new MetadataService(this.apiClient);
 		this.formService = new FormService(this.apiClient);
-		this.fieldService = new FieldService(this.metadataService);
+		this.fieldService = new FieldService(this.metadataService, props.lang);
 		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
 			notifier[method] = msg => console.log(`LajiFormBuilder notification ${method}: ${msg}`);
 			return notifier;
@@ -91,25 +91,26 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				? this.formService.getMaster(id)
 				: Promise.resolve(undefined);
 			this.formPromise = makeCancellable(formPromise
-				.then((master: Master) => this.setState({master})));
+				.then((master) => this.setState({master})));
 			this.updateSchemas();
 		});
 	}
 
-	updateSchemas(): Promise<Schemas> {
+	updateSchemas(): Promise<Schemas | undefined> {
 		this.schemasPromise?.cancel();
 		const {id} = this.state;
 		const schemasPromise = id
 			? this.formService.getSchemas(id) 
 			: Promise.resolve(undefined);
-		const promise = new Promise<Schemas>(resolve => schemasPromise
-			.then((schemas: Schemas) => this.setState({schemas}, () => resolve(schemas))));
+		const promise = new Promise<Schemas | undefined>(resolve => schemasPromise
+			.then((schemas) => this.setState({schemas}, () => resolve(schemas))));
 		this.schemasPromise = makeCancellable(promise);
 		return promise;
 	}
 
 	onLangChange = (lang: Lang) => {
 		this.apiClient.setLang(lang);
+		this.fieldService.setLang(lang);
 		this.setState({lang}, () => this.updateSchemas().then(() => {
 			this.props.onLangChange(this.state.lang);
 			this.propagateState();
@@ -392,7 +393,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	onCreate = (master: Master) => {
-		this.fieldService.masterToJSONSchema(master, this.state.lang).then((schema: any) => {
+		this.fieldService.masterToJSONSchema(master).then((schema: any) => {
 			const uiSchema = master.translations ? translate(master.uiSchema, master.translations[this.state.lang]) : master.uiSchema;
 			this.setState({master, schemas: {schema, uiSchema}, tmp: true}, this.propagateState);
 		});
