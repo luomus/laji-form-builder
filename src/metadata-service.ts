@@ -59,10 +59,12 @@ export default class MetadataService {
 
 	getRange = memoize((property: PropertyContext | string): Promise<{id: string, value: string}[]> => this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`));
 
+	isAltRange = (range: string) => range.match(/Enum$/) || specialRanges.includes(range);
+
 	getJSONSchemaFromProperty(property: PropertyModel) {
 		const mapRangeToSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">): Promise<JSONSchema7> => {
 			const range = property.range[0];
-			if (range.match(/Enum$/) || specialRanges.includes(range)) {
+			if (this.isAltRange(range)) {
 				return this.getRange(range).then(_enums => {
 					let enums = [], enumNames = [];
 					for (const e of _enums) {
@@ -102,12 +104,26 @@ export default class MetadataService {
 			}
 			return Promise.resolve(schema);
 		};
-		const mapMaxOccurs = (maxOccurs: string, schema: JSONSchema7): JSONSchema7 => maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
-		const mapLabel = (label: string | undefined, schema: JSONSchema7) => ({...schema, title: label});
+
+		const mapMaxOccurs = (maxOccurs: string) => (schema: JSONSchema7) =>
+			maxOccurs === "unbounded"
+				? JSONSchema.array(schema)
+				: schema;
+
+		const mapUniqueItemsForUnboundedAlt = (range: (PropertyRange | string)[], maxOccurs: string) => (schema: JSONSchema7) => 
+			maxOccurs === "unbounded" && this.isAltRange(range[0])
+				? {...schema, uniqueItems: true}
+				: schema;
+
+		const mapLabel = (label: string | undefined) => (schema: JSONSchema7) => ({...schema, title: label});
 
 		const mapPropertyToJSONSchema = ({property, label, range, maxOccurs, multiLanguage, isEmbeddable}: Pick<PropertyModel, "property" | "label" | "range" | "maxOccurs" | "multiLanguage" | "isEmbeddable">): Promise<JSONSchema7> =>
 			(mapRangeToSchema({property, range, isEmbeddable, multiLanguage})).then(schema => 
-				mapLabel(label, mapMaxOccurs(maxOccurs, schema)),
+				applyTransformations<JSONSchema7>(schema, [
+					mapMaxOccurs(maxOccurs),
+					mapUniqueItemsForUnboundedAlt(range, maxOccurs),
+					mapLabel(label)
+				])
 			);
 
 		const propertiesToSchema = (modelProperties: PropertyModel[]): Promise<JSONSchema7> => Promise.all(modelProperties.map(m => mapPropertyToJSONSchema(m).then(schema => ({property: m.shortName, schema}))))
@@ -119,6 +135,9 @@ export default class MetadataService {
 	}
 }
 
+function applyTransformations<T>(schema: T, fns: ((schema: T) => T)[]) {
+	return fns.reduce((schema, fn) => fn(schema), schema);
+}
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({
 	document: {
