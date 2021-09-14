@@ -1,3 +1,4 @@
+import {JSONSchema7} from "json-schema";
 import { Translations as _Translations } from "laji-form/lib/components/LajiForm";
 
 export enum PropertyRange {
@@ -69,4 +70,9 @@ export interface Schemas {
 	uiSchema?: any;
 	validators?: any;
 	warnings?: any;
+}
+
+export interface JSONSchemaE extends JSONSchema7 {
+	excludeFromCopy?: boolean;
+	enumNames?: string[];
 }

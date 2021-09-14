@@ -1,8 +1,7 @@
 import memoize from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
-import { PropertyModel, PropertyContext, PropertyRange } from "./model";
-import { fetchJSON, JSONSchema } from "./utils";
-import { JSONSchema7 } from "json-schema";
+import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE } from "./model";
+import { applyTransformations, fetchJSON, JSONSchema } from "./utils";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
@@ -62,7 +61,7 @@ export default class MetadataService {
 	isAltRange = (range: string) => range.match(/Enum$/) || specialRanges.includes(range);
 
 	getJSONSchemaFromProperty(property: PropertyModel) {
-		const mapRangeToSchema = (property: PropertyModel): Promise<JSONSchema7> => {
+		const mapRangeToSchema = (property: PropertyModel): Promise<JSONSchemaE> => {
 			const range = property.range[0];
 			if (this.isAltRange(range)) {
 				return this.getRange(range).then(_enums => {
@@ -110,19 +109,19 @@ export default class MetadataService {
 			return Promise.resolve(schema);
 		};
 
-		const mapMaxOccurs = (schema: JSONSchema7, {maxOccurs}: PropertyModel) =>
+		const mapMaxOccurs = (schema: JSONSchemaE, {maxOccurs}: PropertyModel) =>
 			maxOccurs === "unbounded"
 				? JSONSchema.array(schema)
 				: schema;
 
-		const mapUniqueItemsForUnboundedAlt = (schema: JSONSchema7, {range, maxOccurs}: PropertyModel) =>
+		const mapUniqueItemsForUnboundedAlt = (schema: JSONSchemaE, {range, maxOccurs}: PropertyModel) =>
 			maxOccurs === "unbounded" && this.isAltRange(range[0])
 				? {...schema, uniqueItems: true}
 				: schema;
 
-		const mapLabel = (schema: JSONSchema7, {label}: PropertyModel) => ({...schema, title: label});
+		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) => ({...schema, title: label});
 
-		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchema7> =>
+		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
 			(mapRangeToSchema(property)).then(schema => 
 				applyTransformations(schema, property, [
 					mapMaxOccurs,
@@ -131,17 +130,13 @@ export default class MetadataService {
 				])
 			);
 
-		const propertiesToSchema = (modelProperties: PropertyModel[]): Promise<JSONSchema7> => Promise.all(modelProperties.map(m => mapPropertyToJSONSchema(m).then(schema => ({property: m.shortName, schema}))))
+		const propertiesToSchema = (modelProperties: PropertyModel[]): Promise<JSONSchemaE> => Promise.all(modelProperties.map(m => mapPropertyToJSONSchema(m).then(schema => ({property: m.shortName, schema}))))
 			.then(propertiesAndSchemas => (
 				JSONSchema.object(propertiesAndSchemas.reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {}))
 			));
 
 		return mapPropertyToJSONSchema(property);
 	}
-}
-
-function applyTransformations<T, P>(schema: T, property: P, fns: ((schema: T, property: P) => T)[]) {
-	return fns.reduce((schema, fn) => fn(schema, property), schema);
 }
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({

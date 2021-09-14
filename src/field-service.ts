@@ -1,6 +1,6 @@
 import MetadataService from "./metadata-service";
-import { Field, Lang, Master, PropertyModel } from "./model";
-import { JSONSchema, translate, unprefixProp } from "./utils";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel } from "./model";
+import { applyTransformations, JSONSchema, translate, unprefixProp } from "./utils";
 
 export default class FieldService {
 	private metadataService: MetadataService;
@@ -20,11 +20,51 @@ export default class FieldService {
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}});
 		}
-		return fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel], this.metadataService);
+		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
 	}
+
+
+	fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
+		const {name, options, validators, warnings, fields} = field;
+
+		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
+		if (!property) {
+			throw new Error(`Bad field ${field}`);
+		}
+		if (property.isEmbeddable) {
+			if (!fields) {
+				return Promise.resolve(mapEmbeddable(field, {}, property));
+			}
+			return this.metadataService.getProperties(field.name).then(properties => {
+				return Promise.all(
+					fields.map((field: Field) => this.fieldToSchema(field, translations, properties)
+						.then(schema => Promise.resolve([field.name, schema] as [string, JSONSchemaE])))
+				).then(schemaProperties => {
+					return applyTransformations(
+						undefined as unknown as JSONSchemaE, field, [
+							(_, field) => mapEmbeddable(
+								field,
+								schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
+								property
+							),
+							addTitleAndDefault(property, translations)
+						]
+					);
+				});
+			});
+		} else {
+			return this.metadataService.getJSONSchemaFromProperty(property).then(schema => 
+				applyTransformations(schema, field, [
+					filterWhitelist,
+					excludeFromCopy,
+					addTitleAndDefault(property, translations)
+				])
+			);
+		}
+	};
 }
 
-const mapEmbeddable = (field: Field, properties: any, {maxOccurs}: PropertyModel) => {
+const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"], {maxOccurs}: PropertyModel) => {
 	const required = field.fields?.reduce<string[]>((reqs, f) => {
 		if (f.options?.required) {
 			reqs.push(unprefixProp(f.name));
@@ -39,78 +79,42 @@ const titleHacks: Record<string, string | undefined> = {
 	"MY.gatherings": undefined
 };
 
-const addTitleAndDefault = (schema: any, field: Field, property: Pick<PropertyModel, "label" | "property">, translations?: Record<string, string>) => {
-	const _default = field.options?.default;
-	const title = property.property in titleHacks
-		? titleHacks[property.property]
+const addTitleAndDefault =
+	(property: PropertyModel, translations?: Record<string, string>) =>
+	(schema: any, field: Field) => {
+		const _default = field.options?.default;
+		const title = property.property in titleHacks
+			? titleHacks[property.property]
 			: typeof field.label === "string"
 			? translations
-				? translate(field.label, translations)
-				: field.label
+			? translate(field.label, translations)
+			: field.label
 			: property.label;
-	if (title !== undefined) {
-		schema.title = title;
-	}
-	if (_default !== undefined) {
-		schema.default = _default;
-	}
-	return schema;
-};
+		if (title !== undefined) {
+			schema.title = title;
+		}
+		if (_default !== undefined) {
+			schema.default = _default;
+		}
+		return schema;
+	};
 
-const filterWhitelist = (schema: any, field: Field) => {
+const filterWhitelist = (schema: JSONSchemaE, field: Field) => {
 	const {whitelist} = field.options || {};
-	const origSchema = schema;
-	return whitelist
-		? whitelist.reverse().reduce((schema, w) => {
-			const idx = origSchema.enum.indexOf(w);
+	const origSchema: JSONSchemaE = schema;
+	return whitelist && origSchema.enum && origSchema.enumNames
+		? whitelist.reverse().reduce((schema, w) => { 
+			const idx = origSchema.enum!.indexOf(w);
 			return idx !== -1
-				? {...schema, enum: [...schema.enum, w], enumNames: [...schema.enumNames, origSchema.enumNames[idx]]}
+				? {...schema, enum: [...schema.enum, w], enumNames: [...schema.enumNames, origSchema.enumNames![idx]]}
 				: schema;
 		}, {...schema, enum: [], enumNames: []})
 		: schema;
 };
 
-const excludeFromCopy = (schema: any, field: Field) => {
+const excludeFromCopy = (schema: JSONSchemaE, field: Field) => {
 	if (field.options?.excludeFromCopy) {
-		schema.excludeFromCopy = true;
+		(schema as any).excludeFromCopy = true;
 	}
-	return schema;
+	return schema as JSONSchemaE;
 }
-
-const fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[], metadataService: MetadataService): Promise<any> => {
-	const {name, options, validators, warnings, fields} = field;
-
-	const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
-	if (!property) {
-		throw new Error(`Bad field ${field}`);
-	}
-	if (property.isEmbeddable) {
-		if (!fields) {
-			return Promise.resolve(mapEmbeddable(field, {}, property));
-		}
-		return metadataService.getProperties(field.name).then(properties => {
-			return Promise.all(
-				fields.map((field: Field) => fieldToSchema(field, translations, properties, metadataService)
-					.then(schema => Promise.resolve([field.name, schema])))
-			).then(schemaProperties => {
-				return addTitleAndDefault(mapEmbeddable(
-					field,
-					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
-					property
-				), field, property, translations);
-			});
-		});
-	} else {
-		return metadataService.getJSONSchemaFromProperty(property).then((schema) => {
-			schema = filterWhitelist(schema, field);
-			schema = excludeFromCopy(schema, field);
-			if (schema.type === "object" || schema.type === "array") {
-				if (!fields) {
-					Promise.resolve(mapEmbeddable(field, {}, property));
-				}
-
-			}
-			return addTitleAndDefault(schema, field, property, translations);
-		});
-	}
-};

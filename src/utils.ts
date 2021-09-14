@@ -3,7 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
 import * as LajiFormUtils from "laji-form/lib/utils";
-import { JSONSchema7 } from "json-schema";
+import { JSONSchemaE } from "./model";
 const { isObject, parseJSONPointer: _parseJSONPointer } = LajiFormUtils;
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
@@ -295,7 +295,7 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 };
 
 export class JSONSchema {
-	static type = (type: string) => (options = {}) => ({type, ...options} as JSONSchema7);
+	static type = (type: string) => (options = {}) => ({type, ...options} as JSONSchemaE);
 	static String = JSONSchema.type("string");
 	static Number = JSONSchema.type("number");
 	static Integer = JSONSchema.type("integer");
@@ -311,3 +311,7 @@ export class JSONSchema {
 export const parseJSONPointer = (obj: any, path: string, safeMode?: boolean | "createParents") => {
 	return _parseJSONPointer(obj, path, safeMode, true);
 };
+
+export function applyTransformations<T, P>(schema: T, property: P, fns: ((schema: T, property: P) => T)[]) {
+	return fns.reduce((schema, fn) => fn(schema, property), schema);
+}
