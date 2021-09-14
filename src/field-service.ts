@@ -20,11 +20,11 @@ export default class FieldService {
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}});
 		}
-		return fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document"} as PropertyModel], this.metadataService);
+		return fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel], this.metadataService);
 	}
 }
 
-const mapPropertyFieldsetOrCollection = (field: Field, properties: any) => {
+const mapEmbeddable = (field: Field, properties: any, {maxOccurs}: PropertyModel) => {
 	const required = field.fields?.reduce<string[]>((reqs, f) => {
 		if (f.options?.required) {
 			reqs.push(unprefixProp(f.name));
@@ -32,7 +32,7 @@ const mapPropertyFieldsetOrCollection = (field: Field, properties: any) => {
 		return reqs;
 	}, []);
 	const objectSchema = JSONSchema.object(properties, {required});
-	return field.type === "fieldset" ? objectSchema : JSONSchema.array(objectSchema);
+	return maxOccurs === "unbounded" ? JSONSchema.array(objectSchema) : objectSchema
 };
 
 const titleHacks: Record<string, string | undefined> = {
@@ -84,18 +84,19 @@ const fieldToSchema = (field: Field, translations: Record<string, string> | unde
 	if (!property) {
 		throw new Error(`Bad field ${field}`);
 	}
-	if (field.type === "fieldset" || field.type === "collection") {
+	if (property.isEmbeddable) {
 		if (!fields) {
-			return Promise.resolve(mapPropertyFieldsetOrCollection(field, {}));
+			return Promise.resolve(mapEmbeddable(field, {}, property));
 		}
 		return metadataService.getProperties(field.name).then(properties => {
 			return Promise.all(
 				fields.map((field: Field) => fieldToSchema(field, translations, properties, metadataService)
 					.then(schema => Promise.resolve([field.name, schema])))
 			).then(schemaProperties => {
-				return addTitleAndDefault(mapPropertyFieldsetOrCollection(
+				return addTitleAndDefault(mapEmbeddable(
 					field,
-					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {})
+					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
+					property
 				), field, property, translations);
 			});
 		});
@@ -103,6 +104,12 @@ const fieldToSchema = (field: Field, translations: Record<string, string> | unde
 		return metadataService.getJSONSchemaFromProperty(property).then((schema) => {
 			schema = filterWhitelist(schema, field);
 			schema = excludeFromCopy(schema, field);
+			if (schema.type === "object" || schema.type === "array") {
+				if (!fields) {
+					Promise.resolve(mapEmbeddable(field, {}, property));
+				}
+
+			}
 			return addTitleAndDefault(schema, field, property, translations);
 		});
 	}

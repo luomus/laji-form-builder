@@ -95,11 +95,12 @@ export default class MetadataService {
 				break;
 			case PropertyRange.keyValue:
 			case PropertyRange.keyAny:
-			case "MY.document":
 				schema = JSONSchema.object();
 				break;
 			default:
-				if (!property.isEmbeddable && property.property !== "MY.geometry") {
+				if (property.property === "MHL.prepopulatedDocument") {
+					schema = JSONSchema.object();
+				} else if (!property.isEmbeddable && property.property !== "MY.geometry") {
 					schema = JSONSchema.String();
 				} else {
 					return this.getProperties(range).then(_model => propertiesToSchema(_model));
