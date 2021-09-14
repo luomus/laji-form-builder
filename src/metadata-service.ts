@@ -62,11 +62,12 @@ export default class MetadataService {
 	isAltRange = (range: string) => range.match(/Enum$/) || specialRanges.includes(range);
 
 	getJSONSchemaFromProperty(property: PropertyModel) {
-		const mapRangeToSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">): Promise<JSONSchema7> => {
+		const mapRangeToSchema = (property: PropertyModel): Promise<JSONSchema7> => {
 			const range = property.range[0];
 			if (this.isAltRange(range)) {
 				return this.getRange(range).then(_enums => {
-					let enums = [""], enumNames = [""];
+					const empty = property.minOccurs === "1" ? [] : [""];
+					let enums = [...empty], enumNames = [...empty];
 					for (const e of _enums) {
 						enums.push(e.id);
 						enumNames.push(e.value);

@@ -28,7 +28,7 @@ interface FormOptionsEditorProps extends Classable, Stylable {
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
 }
 
-const formProperty = {range: ["MHL.form"], property: "MHL.form", isEmbeddable: true, label: "", comment: "", maxOccurs: "1", multiLanguage: false, shortName: "form"};
+const formProperty = {range: ["MHL.form"], property: "MHL.form", isEmbeddable: true, label: "", comment: "", maxOccurs: "1", minOccurs: "1", multiLanguage: false, shortName: "form"};
 
 const prepareSchema = (schema: any) => {
 	delete schema.properties.fields;

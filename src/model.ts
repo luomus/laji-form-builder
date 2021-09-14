@@ -19,6 +19,7 @@ export interface PropertyModel {
 	shortName: string;
 	comment?: string;
 	maxOccurs: string;
+	minOccurs: string;
 	multiLanguage: boolean;
 	isEmbeddable?: boolean;
 }
