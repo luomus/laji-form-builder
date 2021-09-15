@@ -25,17 +25,17 @@ export default class FieldService {
 
 
 	fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
-		const {name, options, validators, warnings, fields} = field;
+		const {name, options, validators, warnings, fields = []} = field;
 
 		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
 		if (!property) {
 			throw new Error(`Bad field ${field}`);
 		}
 		if (property.isEmbeddable) {
-			if (!fields) {
-				return Promise.resolve(mapEmbeddable(field, {}, property));
-			}
-			return this.metadataService.getProperties(field.name).then(properties => {
+			const propertiesPromise = fields
+				? this.metadataService.getProperties(field.name)
+				: Promise.resolve([] as PropertyModel[]);
+			return propertiesPromise.then(properties => {
 				return Promise.all(
 					fields.map((field: Field) => this.fieldToSchema(field, translations, properties)
 						.then(schema => Promise.resolve([field.name, schema] as [string, JSONSchemaE])))
