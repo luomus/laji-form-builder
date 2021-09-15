@@ -12,14 +12,15 @@ module.exports = {
 		filename: "main.js"
 	},
 	plugins: [
-		new webpack.HotModuleReplacementPlugin(),
 		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"development\""})
 	],
 	devServer: {
-		contentBase: path.join(path.resolve(), "playground"),
+		static: {
+			directory: path.join(path.resolve(), "playground"),
+		},
 		host: "0.0.0.0",
 		port: 8082,
-		inline: true
+		hot: true
 	},
 	module: {
 		rules: [
