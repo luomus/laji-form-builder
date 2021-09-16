@@ -31,7 +31,6 @@ export default class FieldService {
 		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
 	}
 
-
 	fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
 		const {name, options, validators, warnings, fields = []} = field;
 
@@ -39,6 +38,13 @@ export default class FieldService {
 		if (!property) {
 			throw new Error(`Bad field ${field}`);
 		}
+
+		const transformationsForAllTypes = [
+			excludeFromCopy,
+			optionsToSchema,
+			addTitleAndDefault(property, translations)
+		];
+
 		if (property.isEmbeddable) {
 			const propertiesPromise = fields
 				? this.metadataService.getProperties(field.name)
@@ -56,7 +62,7 @@ export default class FieldService {
 							),
 							addRequireds(properties),
 							mapMaxOccurs(property),
-							addTitleAndDefault(property, translations),
+							...transformationsForAllTypes
 						]
 					);
 				});
@@ -65,8 +71,7 @@ export default class FieldService {
 			return this.metadataService.getJSONSchemaFromProperty(property).then(schema => 
 				applyTransformations(schema, field, [
 					filterWhitelist,
-					excludeFromCopy,
-					addTitleAndDefault(property, translations)
+					...transformationsForAllTypes
 				])
 			);
 		}
@@ -140,3 +145,11 @@ const addRequireds = (properties: PropertyModel[]) => (schema: JSONSchemaE) => p
 	}
 	return schema;
 }, schema);
+
+const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
+	if (field.options) {
+		const {excludeFromCopy, whitelist, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
+		return {...schema, ...schemaOptions} as JSONSchemaE;
+	}
+	return schema;
+}
