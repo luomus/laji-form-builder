@@ -47,83 +47,73 @@ export default class MetadataService {
 			result?.["@context"] ? resolve(preparePropertiesContext(result?.["@context"])) : reject();
 		}, reject))
 
-	getProperties = memoize((property: PropertyContext | string): Promise<PropertyModel[]> => 
-		new Promise((resolve, reject) => this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`).then(
-			(r: any) => 
-				r?.results
-					? resolve(r.results as PropertyModel[])
-					: reject(),
-			reject))
+	getProperties = memoize(async (property: PropertyContext | string): Promise<PropertyModel[]> => 
+		(await this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`)).results as PropertyModel[]
 	)
 
 	getRange = memoize((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
 			|| this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`))
 
-	getAllRanges = () => {
+	getAllRanges = async () => {
 		if (this.allRanges) {
-			return Promise.resolve(this.allRanges);
+			return this.allRanges;
 		}
-		return (this.apiClient.fetch("/metadata/ranges") as Promise<Record<string, Range[]>>).then(ranges => {
-			this.allRanges = ranges;
-			return ranges;
-		});
+		const ranges = await (this.apiClient.fetch("/metadata/ranges") as Promise<Record<string, Range[]>>);
+		this.allRanges = ranges;
+		return ranges;
 	}
 
-	isAltRange = (range: string) => this.getAllRanges().then(ranges => !!ranges[range]);
+	isAltRange = async (range: string) => !!(await this.getAllRanges())[range];
 
 	getJSONSchemaFromProperty(property: PropertyModel) {
-		const mapRangeToSchema = (property: PropertyModel): Promise<JSONSchemaE> => {
+		const mapRangeToSchema = async (property: PropertyModel): Promise<JSONSchemaE> => {
 			const range = property.range[0];
-			return this.isAltRange(range).then(isRange => {
-				if (isRange) {
-					return this.getRange(range).then(_enums => {
-						const empty = property.minOccurs === "1" ? [] : [""];
-						let enums = [...empty], enumNames = [...empty];
-						for (const e of _enums) {
-							enums.push(e.id);
-							enumNames.push(e.value);
-						}
-						return ({type: "string", enum: enums, enumNames});
-					});
+			const isRange = await this.isAltRange(range);
+			if (isRange) {
+				const _enums = await this.getRange(range)
+				const empty = property.minOccurs === "1" ? [] : [""];
+				let enums = [...empty], enumNames = [...empty];
+				for (const e of _enums) {
+					enums.push(e.id);
+					enumNames.push(e.value);
 				}
-
-				if (property.multiLanguage) {
-					return Promise.resolve(JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {})));
-				}
-
-				let schema;
-				switch (range) {
-				case PropertyRange.String:
-					schema = JSONSchema.String();
-					break;
-				case PropertyRange.Boolean:
-					schema = JSONSchema.Boolean();
-					break;
-				case PropertyRange.Int:
-					schema = JSONSchema.Integer();
-					break;
-				case PropertyRange.NonNegativeInteger:
-					schema = JSONSchema.Integer({minimum: 0});
-					break;
-				case PropertyRange.PositiveInteger:
-					schema = JSONSchema.Integer({exclusiveMinimum: 0});
-					break;
-				case PropertyRange.keyValue:
-				case PropertyRange.keyAny:
+				return ({type: "string", enum: enums, enumNames});
+			}
+			if (property.multiLanguage) {
+				return JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {}));
+			}
+			let schema;
+			switch (range) {
+			case PropertyRange.String:
+				schema = JSONSchema.String();
+				break;
+			case PropertyRange.Boolean:
+				schema = JSONSchema.Boolean();
+				break;
+			case PropertyRange.Int:
+				schema = JSONSchema.Integer();
+				break;
+			case PropertyRange.NonNegativeInteger:
+				schema = JSONSchema.Integer({minimum: 0});
+				break;
+			case PropertyRange.PositiveInteger:
+				schema = JSONSchema.Integer({exclusiveMinimum: 0});
+				break;
+			case PropertyRange.keyValue:
+			case PropertyRange.keyAny:
+				schema = JSONSchema.object();
+				break;
+			default:
+				if (property.property === "MHL.prepopulatedDocument") {
 					schema = JSONSchema.object();
-					break;
-				default:
-					if (property.property === "MHL.prepopulatedDocument") {
-						schema = JSONSchema.object();
-					} else if (!property.isEmbeddable && property.property !== "MY.geometry") {
-						schema = JSONSchema.String();
-					} else {
-						return this.getProperties(range).then(_model => propertiesToSchema(_model));
-					}
+				} else if (!property.isEmbeddable && property.property !== "MY.geometry") {
+					schema = JSONSchema.String();
+				} else {
+					return propertiesToSchema(await this.getProperties(range));
 				}
-				return Promise.resolve(schema);
-			});
+			}
+			return schema;
 		};
 
 		const mapMaxOccurs = (schema: JSONSchemaE, {maxOccurs}: PropertyModel) =>
@@ -131,11 +121,10 @@ export default class MetadataService {
 				? JSONSchema.array(schema)
 				: schema;
 
-		const mapUniqueItemsForUnboundedAlt = (schema: JSONSchemaE, {range, maxOccurs}: PropertyModel) => 
-			this.isAltRange(range[0]).then(isAlt => isAlt && maxOccurs === "unbounded"
+		const mapUniqueItemsForUnboundedAlt = async (schema: JSONSchemaE, {range, maxOccurs}: PropertyModel) => 
+			(await this.isAltRange(range[0])) && maxOccurs === "unbounded"
 				? {...schema, uniqueItems: true}
-				: schema
-			);
+				: schema;
 
 		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) => ({...schema, title: label});
 
@@ -146,10 +135,11 @@ export default class MetadataService {
 				mapLabel
 			]);
 
-		const propertiesToSchema = (modelProperties: PropertyModel[]): Promise<JSONSchemaE> => Promise.all(modelProperties.map(m => mapPropertyToJSONSchema(m).then(schema => ({property: m.shortName, schema}))))
-			.then(propertiesAndSchemas => (
-				JSONSchema.object(propertiesAndSchemas.reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {}))
-			));
+		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<JSONSchemaE> =>
+			JSONSchema.object(
+				(await Promise.all(modelProperties.map(async m => ({property: m.shortName, schema: (await mapPropertyToJSONSchema(m))}))))
+					.reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {})
+			);
 
 		return mapPropertyToJSONSchema(property);
 	}

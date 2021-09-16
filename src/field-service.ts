@@ -31,7 +31,7 @@ export default class FieldService {
 		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
 	}
 
-	fieldToSchema = (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
+	fieldToSchema = async (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
 		const {name, options, validators, warnings, fields = []} = field;
 
 		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
@@ -46,28 +46,25 @@ export default class FieldService {
 		];
 
 		if (property.isEmbeddable) {
-			const propertiesPromise = fields
-				? this.metadataService.getProperties(field.name)
-				: Promise.resolve([] as PropertyModel[]);
-			return propertiesPromise.then(properties => {
-				return Promise.all(
-					fields.map((field: Field) => this.fieldToSchema(field, translations, properties)
-						.then(schema => Promise.resolve([field.name, schema] as [string, JSONSchemaE])))
-				).then(schemaProperties =>
-					applyTransformations(
-						mapEmbeddable(
-							field,
-							schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
-						),
-						field,
-						[
-							addRequireds(properties),
-							mapMaxOccurs(property),
-							...transformationsForAllTypes
-						]
-					)
-				);
-			});
+			const properties = fields
+				? (await this.metadataService.getProperties(field.name))
+				: [];
+
+			const schemaProperties = await Promise.all(
+				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, translations, properties)] as [string, JSONSchemaE])
+			);
+			return applyTransformations(
+				mapEmbeddable(
+					field,
+					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
+				),
+				field,
+				[
+					addRequireds(properties),
+					mapMaxOccurs(property),
+					...transformationsForAllTypes
+				]
+			);
 		} else {
 			return applyTransformations<JSONSchemaE, Field>(this.metadataService.getJSONSchemaFromProperty(property), field, [
 				filterWhitelist,
