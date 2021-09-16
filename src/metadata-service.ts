@@ -5,7 +5,12 @@ import { applyTransformations, fetchJSON, JSONSchema } from "./utils";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
-const specialRanges = ["MX.secureLevels", "MY.recordBases", "MY.samplingMethods"];
+const specialRanges = [
+	"MX.secureLevels",
+	"MY.recordBases",
+	"MY.samplingMethods",
+	"MY.sexes",
+];
 
 export default class MetadataService {
 	private apiClient: ApiClient;
