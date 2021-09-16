@@ -312,6 +312,6 @@ export const parseJSONPointer = (obj: any, path: string, safeMode?: boolean | "c
 	return _parseJSONPointer(obj, path, safeMode, true);
 };
 
-export function applyTransformations<T, P>(schema: T, property: P, fns: ((schema: T, property: P) => T)[]) {
+export function applyTransformations<T, P>(schema: T, property: P, fns: ([((schema: T | undefined, property: P) => T), ...((schema: T, property: P) => T)[]])) {
 	return fns.reduce((schema, fn) => fn(schema, property), schema);
 }

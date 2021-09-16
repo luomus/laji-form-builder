@@ -22,7 +22,8 @@ export interface PropertyModel {
 	maxOccurs: string;
 	minOccurs: string;
 	multiLanguage: boolean;
-	isEmbeddable?: boolean;
+	isEmbeddable: boolean;
+	required: boolean
 }
 
 export interface PropertyContext {
