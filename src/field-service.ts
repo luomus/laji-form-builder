@@ -53,27 +53,26 @@ export default class FieldService {
 				return Promise.all(
 					fields.map((field: Field) => this.fieldToSchema(field, translations, properties)
 						.then(schema => Promise.resolve([field.name, schema] as [string, JSONSchemaE])))
-				).then(schemaProperties => {
-					return applyTransformations(
-						undefined, field, [
-							(_, field) => mapEmbeddable(
-								field,
-								schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
-							),
+				).then(schemaProperties =>
+					applyTransformations(
+						mapEmbeddable(
+							field,
+							schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
+						),
+						field,
+						[
 							addRequireds(properties),
 							mapMaxOccurs(property),
 							...transformationsForAllTypes
 						]
-					);
-				});
+					)
+				);
 			});
 		} else {
-			return this.metadataService.getJSONSchemaFromProperty(property).then(schema => 
-				applyTransformations(schema, field, [
-					filterWhitelist,
-					...transformationsForAllTypes
-				])
-			);
+			return applyTransformations<JSONSchemaE, Field>(this.metadataService.getJSONSchemaFromProperty(property), field, [
+				filterWhitelist,
+				...transformationsForAllTypes
+			]);
 		}
 	};
 }
@@ -111,17 +110,28 @@ const addTitleAndDefault = (property: PropertyModel, translations?: Record<strin
 
 const filterWhitelist = (schema: JSONSchemaE, field: Field) => {
 	const {whitelist} = field.options || {};
-	const origSchema = schema;
-	const {enum: _enum, enumNames} = origSchema;
-	return whitelist && _enum && enumNames
-		? whitelist.reverse().reduce((schema, w) => { 
-			const idx = _enum.indexOf(w);
-			return idx !== -1
-				? {...schema, enum: [...schema.enum, w], enumNames: [...schema.enumNames, enumNames[idx]]}
-				: schema;
-		}, {...schema, enum: [], enumNames: []})
+
+	if (!whitelist) {
+		return schema;
+	}
+
+	const indexedWhitelist = whitelist.reduce<Record<string, number>>((index, e, idx) => {
+		index[e] = idx;
+		return index;
+	}, {});
+
+	return whitelist && schema.enum
+		? [...schema.enum].reduce((schema, w: string) => {
+			if (indexedWhitelist[w] === undefined && schema.enum && schema.enumNames) {
+				const idxInEnum = schema.enum.indexOf(w);
+				schema.enum.splice(idxInEnum, 1);
+				schema.enumNames.splice(idxInEnum, 1);
+			}
+			return schema;
+		}, schema)
 		: schema;
 };
+
 
 const excludeFromCopy = (schema: JSONSchemaE, field: Field) => {
 	if (field.options?.excludeFromCopy) {
@@ -152,4 +162,4 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 		return {...schema, ...schemaOptions} as JSONSchemaE;
 	}
 	return schema;
-}
+};

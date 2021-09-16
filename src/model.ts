@@ -77,3 +77,8 @@ export interface JSONSchemaE extends JSONSchema7 {
 	excludeFromCopy?: boolean;
 	enumNames?: string[];
 }
+
+export interface Range {
+	id: string;
+	value: string;
+}
