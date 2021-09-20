@@ -117,12 +117,14 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 						        expanded={true}
 						/>
 					</DraggableWidth>
-					<Editor key={this.state.selected}
-					        active={this.state.activeEditorMode}
-					        {...this.getFieldEditorProps(master, schemas)}
-					        className={gnmspc("field-editor")}
-					        style={fieldEditorContentStyle}
-					/>
+					{this.state.selected && 
+						<Editor key={this.state.selected}
+						        active={this.state.activeEditorMode}
+						        {...this.getFieldEditorProps(master, schemas)}
+						        className={gnmspc("field-editor")}
+						        style={fieldEditorContentStyle}
+						/>
+					}
 				</div>
 			);
 		} else if (activeEditorMode === "options") {
@@ -332,7 +334,7 @@ interface LangChooserProps {
 const LangChooser = React.memo(function LangChooser({lang, onChange}: LangChooserProps) {
 	const {ButtonGroup} = React.useContext(Context).theme;
 	return (
-		<ButtonGroup small>{
+		<ButtonGroup small className={gnmspc("editor-lang-chooser")}>{
 			["fi", "sv", "en"].map((_lang: Lang) => <LangChooserByLang key={_lang} onChange={onChange} lang={_lang} activeLang={lang} />)
 		}</ButtonGroup>
 	);

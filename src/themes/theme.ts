@@ -1,6 +1,10 @@
 import { Theme as LajiFormTheme, ButtonGroupProps } from "laji-form/lib/themes/theme";
 
-interface BuilderButtonGroupProps extends ButtonGroupProps {
+interface HasMaybeClassName {
+	className?: string;
+}
+
+interface BuilderButtonGroupProps extends ButtonGroupProps, HasMaybeClassName {
 	small?: true;
 	vertical?: true;
 }

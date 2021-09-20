@@ -27,7 +27,7 @@ function getJsonFromUrl() {
 }
 
 const query = getJsonFromUrl();
-const {id, lang = "fi", localFormData, ..._query} = query;
+const {id, lang = "fi", local, localFormData, ..._query} = query;
 
 const apiClient = new ApiClientImplementation(
 	"https://apitest.laji.fi/v0",
@@ -36,7 +36,9 @@ const apiClient = new ApiClientImplementation(
 	lang
 );
 const formPromise = id
-	? apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json())
+	? local
+		? Promise.resolve(require(`../forms/${id}.json`))
+		: apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json())
 	: Promise.resolve();
 formPromise.then((form: any) => {
 	const formData = localFormData
