@@ -58,6 +58,7 @@ export interface Field {
 		default?: any;
 		required?: boolean;
 		whitelist?: string[];
+		value_options?: Record<string, string>
 	};
 	validators?: any;
 	warnings?: any;

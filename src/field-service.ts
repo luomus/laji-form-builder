@@ -67,6 +67,7 @@ export default class FieldService {
 			);
 		} else {
 			return applyTransformations<JSONSchemaE, Field>(this.metadataService.getJSONSchemaFromProperty(property), field, [
+				addValueOptions(translations),
 				filterWhitelist,
 				...transformationsForAllTypes
 			]);
@@ -129,6 +130,23 @@ const filterWhitelist = (schema: JSONSchemaE, field: Field) => {
 		: schema;
 };
 
+const addValueOptions = (translations: Record<string, string> | undefined) => (schema: JSONSchemaE, field: Field) => {
+	const {value_options} = field.options || {};
+	if (!value_options) {
+		return schema;
+	}
+	const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(([_enum, enumNames], option) => {
+		_enum.push(option);
+		const label = value_options[option];
+		enumNames.push(translations ? translate(label, translations) : label);
+		return [_enum, enumNames];
+	}, [[], []]);
+	return {
+		...schema,
+		enum: _enum,
+		enumNames
+	};
+};
 
 const excludeFromCopy = (schema: JSONSchemaE, field: Field) => {
 	if (field.options?.excludeFromCopy) {
@@ -155,7 +173,7 @@ const addRequireds = (properties: PropertyModel[]) => (schema: JSONSchemaE) => p
 
 const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	if (field.options) {
-		const {excludeFromCopy, whitelist, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {excludeFromCopy, whitelist, value_options, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
 		return {...schema, ...schemaOptions} as JSONSchemaE;
 	}
 	return schema;

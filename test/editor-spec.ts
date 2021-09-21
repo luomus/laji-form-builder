@@ -79,6 +79,7 @@ describe("Editor", () => {
 		it("fi selected by default", async () => {
 			expect(await builder.lang.$fi.getText()).toBe(await builder.lang.$active.getText());
 		});
+
 		describe("changing", () => {
 			beforeAll(async () => {
 				await builder.lang.$sv.click();
