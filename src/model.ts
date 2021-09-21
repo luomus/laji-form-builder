@@ -41,6 +41,7 @@ export interface FormListing {
 	options?: any;
 	title?: string;
 }
+
 export interface Master extends FormListing {
 	language: Lang;
 	name?: string;

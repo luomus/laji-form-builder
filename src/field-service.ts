@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel } from "./model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas } from "./model";
 import { applyTransformations, JSONSchema, translate, unprefixProp } from "./utils";
 import merge from "deepmerge";
 
@@ -30,15 +30,24 @@ export default class FieldService {
 		this.lang = lang;
 	}
 
-	async masterToJSONSchema(master: Master) {
-		const {fields, translations} = await this.parseMaster(master);
+	async masterToJSONFormat(master: Master): Promise<Schemas> {
+		master = await this.parseMaster(master);
+		const {fields, translations, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
+		return {
+			...(master.translations ? translate(_master, master.translations[this.lang]) : _master),
+			schema: await this.masterToJSONSchema(master)
+		};
+	}
+
+	private async masterToJSONSchema(master: Master) {
+		const {fields, translations} = master;
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}});
 		}
 		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
 	}
 
-	fieldToSchema = async (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
+	private fieldToSchema = async (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
 		const {name, options, validators, warnings, fields = []} = field;
 
 		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));

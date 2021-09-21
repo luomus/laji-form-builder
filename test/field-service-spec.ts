@@ -35,9 +35,20 @@ describe("Field service", () => {
 				schemas = await formService.getSchemas(id);
 			});
 
-			it("converts schema correct", async () => {
-				const schema = await fieldService.masterToJSONSchema(master);
+			let jsonFormat: Schemas;
+
+			it("converts without errors", async () => {
+				jsonFormat = await fieldService.masterToJSONFormat(master);
+			});
+
+			it("converts schema correct", () => {
+				const {schema} = jsonFormat;
 				expect(schema).toEqual(schemas.schema);
+			});
+
+			it("converts uiSchema correct", () => {
+				const {uiSchema} = jsonFormat;
+				expect(uiSchema).toEqual(schemas.uiSchema);
 			});
 		});
 	}

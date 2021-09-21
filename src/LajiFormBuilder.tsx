@@ -393,9 +393,8 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	onCreate = (master: Master) => {
-		this.fieldService.masterToJSONSchema(master).then((schema: any) => {
-			const uiSchema = master.translations ? translate(master.uiSchema, master.translations[this.state.lang]) : master.uiSchema;
-			this.setState({master, schemas: {schema, uiSchema}, tmp: true}, this.propagateState);
+		this.fieldService.masterToJSONFormat(master).then((schemas: Schemas) => {
+			this.setState({master, schemas, tmp: true}, this.propagateState);
 		});
 	}
 }
