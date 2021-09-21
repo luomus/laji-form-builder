@@ -116,11 +116,12 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
 		const schemaTypeToJSONSchemaUtilType = (type: string) =>
-			type === "boolean" && "bool"
-			|| type === "string" && "str"
+			type === "boolean" && "Boolean"
+			|| type === "string" && "String"
+			|| type === "array" && "object"
 			|| type;
 
-		const maybePrimitiveDefault = (JSONSchema as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)];
+		const maybePrimitiveDefault = (JSONSchema as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)]?.();
 		const _default = typeof maybePrimitiveDefault !== "function"
 			? maybePrimitiveDefault
 			: JSONSchema.object({});
@@ -140,10 +141,13 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			warnings: JSONSchema.object({}),
 		});
 		const itemUiSchema = { "ui:field": "TextareaEditorField", "ui:options": { minRows: 5 } };
-		const uiSchema = {
+		const uiSchema: any = {
 			validators: itemUiSchema,
 			warnings: itemUiSchema
 		};
+		if ((schema as any)?.properties.options.properties.default.type === "object") {
+			uiSchema.options = {default: itemUiSchema};
+		}
 		const formData = { options, validators, warnings };
 		return (
 			<EditorLajiForm

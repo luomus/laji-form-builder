@@ -232,8 +232,8 @@ const customPropTypeSchemaMappings: {
 	},
 	"ui:field": {
 		schema: (): any => {
-			const {object, array} = LajiFormInterface.getFieldTypes();
-			const _enum = ["", ...Object.keys({...object, ...array})];
+			const {object, array, string} = LajiFormInterface.getFieldTypes();
+			const _enum = ["", ...Object.keys({...object, ...array, ...string})];
 			return {type: "string", enum: _enum, enumNames: _enum};
 		}
 	},

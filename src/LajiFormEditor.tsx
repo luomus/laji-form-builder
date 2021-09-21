@@ -86,13 +86,15 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		const fieldsBlockStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "column",
-			height: "100%"
+			height: "100%",
+			overflowY: "auto"
 		};
 		const sidebarToolbarContainer: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "row",
 			position: "relative",
-			height: "100%"
+			height: "100%",
+			paddingBottom: 27
 		};
 		const fieldEditorContentStyle: React.CSSProperties = {
 			overflow: "auto",

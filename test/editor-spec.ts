@@ -1,4 +1,4 @@
-import { browser } from "protractor";
+import { $, browser } from "protractor";
 import { createBuilder, BuilderPO, isDisplayed, FieldSelectorPO } from "./test-utils";
 
 describe("Editor", () => {
@@ -10,10 +10,23 @@ describe("Editor", () => {
 
 	describe("tabs", () => {
 
+		const testFieldDisplaysEditor = async (field: FieldSelectorPO, parentPath: string) => {
+			const path = `${parentPath}/${await field.label}`;
+			const fields = await field.getFieldSelectors();
+			// idk why, but protractor throws errors without this.
+			await builder.$fieldEditor.isPresent();
+			await field.$field.click();
+			expect(await isDisplayed(builder.$fieldEditor)).toBe(true, `Editor didn't display when selected ${path}`);
+			for (const field of fields) {
+				await testFieldDisplaysEditor(field, path);
+			}
+		};
+
 		describe("basic editor", () => {
 			it("selected by default", async () => {
 				expect(await builder.tabs.$basic.getText()).toBe(await builder.tabs.$active.getText());
 			});
+
 			it("field selector displayed", async () => {
 				expect(await isDisplayed(builder.$fieldSelectorContainer)).toBe(true);
 			});
@@ -22,18 +35,25 @@ describe("Editor", () => {
 				expect(await isDisplayed(builder.$fieldEditor)).toBe(false);
 			});
 
-			const testFieldDisplaysEditor = async (field: FieldSelectorPO) => {
-				await field.$field.click();
-				expect(await isDisplayed(builder.$fieldEditor)).toBe(true);
-				const fields = await field.getFieldSelectors();
-				for (const field of fields) {
-					await testFieldDisplaysEditor(field);
-				}
-			}
+			it("field editor displayed for all forms", async () => {
+				let $field = builder.$rootFieldSelector;
+				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
+			});
+		});
+
+		describe("UI editor", () => {
+			it("selected when clicked", async () => {
+				await builder.tabs.$ui.click();
+				expect(await builder.tabs.$ui.getText()).toBe(await builder.tabs.$active.getText());
+			});
+
+			it("field selector displayed", async () => {
+				expect(await isDisplayed(builder.$fieldSelectorContainer)).toBe(true);
+			});
 
 			it("field editor displayed for all forms", async () => {
 				let $field = builder.$rootFieldSelector;
-				await testFieldDisplaysEditor(builder.getFieldSelector($field));
+				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
 			});
 		});
 	});

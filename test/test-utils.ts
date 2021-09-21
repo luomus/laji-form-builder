@@ -57,11 +57,11 @@ export class BuilderPO {
 
 	$fieldSelectorContainer = $(gcnmspc("field-chooser"))
 	$fieldEditor = $(gcnmspc("field-editor"))
-	$rootFieldSelector = $(gcnmspc("field"));
+	$rootFieldSelector = this.$fieldSelectorContainer.$(`:scope > ${gcnmspc("field")}`);
 	getFieldSelector = ($field: ElementFinder): FieldSelectorPO => ({
 		$field,
-		label: $field.$(gcnmspc("field-label")).getText() as Promise<string>,
-		getFieldSelectors: () => new Promise(resolve => $field.$$(gcnmspc("field")).then($es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))))
+		label: $field.$(`:scope > span > ${gcnmspc("field-label")}`).getText() as Promise<string>,
+		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then($es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))))
 		//getFieldSelectors: () => ($field.$$(gcnmspc("field")).map($e => this.getFieldSelector($e as ElementFinder)) as Promise<FieldSelectorPO[]>)
 	});
 
