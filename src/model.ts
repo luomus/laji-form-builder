@@ -35,13 +35,16 @@ export interface PropertyContext {
 export type Lang = "fi" | "sv" | "en";
 export type Translations = Record<Lang, {[key: string]: string}>;
 
-export interface Master {
+
+export interface FormListing {
 	id: string;
+	options?: any;
+	title?: string;
+}
+export interface Master extends FormListing {
 	language: Lang;
 	name?: string;
-	options?: any;
 	shortDescription?: string;
-	title?: string;
 	translations?: Translations;
 	fields?: Field[];
 	baseFormID?: string;

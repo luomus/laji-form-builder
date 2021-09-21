@@ -1,6 +1,8 @@
+import FormService from "./form-service";
 import MetadataService from "./metadata-service";
 import { Field, JSONSchemaE, Lang, Master, PropertyModel } from "./model";
 import { applyTransformations, JSONSchema, translate, unprefixProp } from "./utils";
+import merge from "deepmerge";
 
 const requiredHacks: Record<string, boolean> = {
 	"MY.gatherings": false
@@ -15,10 +17,12 @@ const titleHacks: Record<string, string | undefined> = {
 
 export default class FieldService {
 	private metadataService: MetadataService;
+	private formService: FormService;
 	private lang: Lang;
 
-	constructor(metadataService: MetadataService, lang: Lang) {
+	constructor(metadataService: MetadataService, formService: FormService, lang: Lang) {
 		this.metadataService = metadataService;
+		this.formService = formService;
 		this.lang = lang;
 	}
 
@@ -26,12 +30,12 @@ export default class FieldService {
 		this.lang = lang;
 	}
 
-	masterToJSONSchema(master: Master) {
-		const {fields, translations} = master;
+	async masterToJSONSchema(master: Master) {
+		const {fields, translations} = await this.parseMaster(master);
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}});
 		}
-		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields: master.fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
+		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
 	}
 
 	fieldToSchema = async (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
@@ -76,6 +80,26 @@ export default class FieldService {
 			]);
 		}
 	};
+
+
+	private parseMaster(master: Master) {
+		return this.mapBaseForm(master);
+	}
+
+	private async mapBaseForm(master: Master) {
+		if (!master.baseFormID) {
+			return master;
+		}
+		const baseForm = await this.mapBaseForm(await this.formService.getMaster(master.baseFormID));
+		delete master.baseFormID;
+		master = {
+			...baseForm,
+			...master,
+			translations: merge(baseForm.translations || {}, master.translations || {}),
+			uiSchema: merge(baseForm.uiSchema || {}, master.uiSchema || {})
+		};
+		return master;
+	}
 }
 
 const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
@@ -181,3 +205,4 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	}
 	return schema;
 };
+

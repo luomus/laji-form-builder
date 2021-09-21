@@ -1,9 +1,7 @@
 import React from "react";
 import { HasChildren, JSONEditor } from "./components";
 import { Context } from "./Context";
-import MetadataService from "./metadata-service";
-import { Field, Master } from "./model";
-import { JSONSchema } from "./utils";
+import { Master } from "./model";
 
 type FormCreatorWizardOption = "dataset" | "json";
 

@@ -1,5 +1,5 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import { Master, Schemas } from "./model";
+import { FormListing, Master, Schemas } from "./model";
 
 export default class FormService {
 	private apiClient: ApiClient;
@@ -18,5 +18,9 @@ export default class FormService {
 
 	update(form: any): Promise<void> {
 		return this.apiClient.fetch(`/forms/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form)});
+	}
+
+	async getForms(): Promise<FormListing[]> {
+		return (await this.apiClient.fetch("/forms", undefined)).results;
 	}
 }
