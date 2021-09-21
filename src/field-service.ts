@@ -7,7 +7,10 @@ const requiredHacks: Record<string, boolean> = {
 };
 
 const titleHacks: Record<string, string | undefined> = {
-	"MY.gatherings": undefined
+	"MY.gatherings": undefined,
+	"MY.identifications": undefined,
+	"MY.unitGathering": undefined,
+	"MY.unitFact": undefined
 };
 
 export default class FieldService {
