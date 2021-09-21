@@ -56,6 +56,23 @@ describe("Editor", () => {
 				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
 			});
 		});
+
+
+		describe("Options editor", () => {
+			it("selected when clicked", async () => {
+				await builder.tabs.$options.click();
+				expect(await builder.tabs.$options.getText()).toBe(await builder.tabs.$active.getText());
+			});
+
+			it("shows spinner", async () => {
+				expect(await isDisplayed(builder.optionsEditor.$spinner)).toBe(true);
+			});
+
+			it("shows form after loaded", async () => {
+				await builder.optionsEditor.waitUntilLoaded();
+				expect(await isDisplayed(builder.optionsEditor.$form)).toBe(true);
+			});
+		});
 	});
 
 	describe("lang", () => {

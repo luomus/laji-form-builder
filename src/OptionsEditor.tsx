@@ -91,18 +91,17 @@ export default React.memo(function OptionsEditor({master, onChange, translations
 		});
 		onChange(events);
 	}, [formData, onChange, _master]);
-	return (
+	const content = (
 		!schema
 			? <Spinner />
 			: (
-				<div className={className} style={style}>
-					<LajiForm schema={schema}
-				              uiSchema={uiSchema}
-				              formData={formData}
-				              onChange={onLajiFormChange}
-				              fields={{TextareaEditorField}}
-					/>
-				</div>
+				<LajiForm schema={schema}
+						  uiSchema={uiSchema}
+						  formData={formData}
+						  onChange={onLajiFormChange}
+						  fields={{TextareaEditorField}}
+				/>
 			)
 	);
+	return <div className={className} style={style}>{content}</div>
 });

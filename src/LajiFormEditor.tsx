@@ -132,7 +132,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		} else if (activeEditorMode === "options") {
 			return <OptionsEditor master={master}
 			                      translations={master.translations?.[this.context.lang as Lang] || {}}
-			                      className={gnmspc("field-editor")}
+			                      className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
 					              style={fieldEditorContentStyle}
 			                      onChange={this.props.onChange}
 			/>;

@@ -34,16 +34,18 @@ export class BuilderPO {
 
 	$editor = $(this.nmspc(""));
 	$toolbar = $(this.nmspc("toolbar"));
-	$langsContainer = this.$toolbar.$(this.nmspc("lang-chooser"));
-	$$langs = this.$langsContainer.$$(this.nmspc("lang-chooser button"));
+
+	private $langsContainer = this.$toolbar.$(this.nmspc("lang-chooser"));
+	private $$langs = this.$langsContainer.$$(this.nmspc("lang-chooser button"));
 	lang = {
 		$fi: this.$$langs.get(0),
 		$sv: this.$$langs.get(1),
 		$en: this.$$langs.get(2),
 		$active: this.$langsContainer.$(".active")
 	};
-	$tabsContainer = this.$toolbar.$(this.nmspc("chooser"));
-	$$tabs = this.$tabsContainer.$$(this.nmspc("chooser-button"));
+
+	private $tabsContainer = this.$toolbar.$(this.nmspc("chooser"));
+	private $$tabs = this.$tabsContainer.$$(this.nmspc("chooser-button"));
 	tabs = {
 		$options: this.$$tabs.get(0),
 		$basic: this.$$tabs.get(1),
@@ -62,10 +64,17 @@ export class BuilderPO {
 		$field,
 		label: $field.$(`:scope > span > ${gcnmspc("field-label")}`).getText() as Promise<string>,
 		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then($es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))))
-		//getFieldSelectors: () => ($field.$$(gcnmspc("field")).map($e => this.getFieldSelector($e as ElementFinder)) as Promise<FieldSelectorPO[]>)
 	});
+	
+	private $optionsEditorContainer = $(gcnmspc("options-editor"));
+	optionsEditor = {
+		$container: this.$optionsEditorContainer,
+		$spinner: this.$optionsEditorContainer.$(":scope > .react-spinner"),
+		$form: this.$optionsEditorContainer.$(".laji-form"),
+		waitUntilLoaded: () => (browser.wait(EC.visibilityOf(this.optionsEditor.$form)) as Promise<void>)
+	}
 
-	async waitUntilLoaded()  {
+	async waitUntilLoaded() {
 		await (browser.wait(EC.visibilityOf(this.formPreview.$container)) as Promise<void>);
 		await (browser.wait(EC.visibilityOf(this.$toolbar)) as Promise<void>);
 		return;
