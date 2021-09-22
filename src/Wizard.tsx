@@ -7,50 +7,86 @@ import { Context } from "./Context";
 import { Master } from "./model";
 import { JSONSchema } from "./utils";
 
-type FormCreatorWizardOption = "databank" | "json";
+interface WizardStep {
+	label: string;
+	component: React.ComponentType<WizardStepProps>;
+	children?: WizardStepChildren;
+}
+type WizardStepChildren = Record<string, WizardStep>;
 
-const databankOptions: Record<FormCreatorWizardOption, [string, any]> = {
-	"json": [
-		"Wizard.option.json",
-		FormCreatorJSON
-	],
-	"databank": [
-		"Wizard.option.databank",
-		FormCreatorDatabank
-	],
+const wizardSteps: WizardStepChildren = {
+	"create": {
+		label: "Wizard.header",
+		component: WizardStart,
+		children: {
+			"json": {
+				label: "Wizard.option.json",
+				component: FormCreatorJSON
+			},
+			"databank": {
+				label: "Wizard.option.databank",
+				component: FormCreatorDatabank
+			}
+		}
+	}
 };
+type WizardStepChildrenGuaranteed = WizardStep & {children: WizardStepChildren}
+
+const getStep = (steps: string[]) => steps.reduce<WizardStep>(
+	(wizardStep: WizardStepChildrenGuaranteed, stepName) => wizardStep.children[stepName],
+	{children: wizardSteps} as WizardStep
+);
 
 export const FormCreatorWizard = ({onCreate, ...config}: FormCreatorProps) => {
-	const {theme, translations} = React.useContext(Context);
-	const {Modal, ButtonGroup, Breadcrumb} = theme;
+	const {theme} = React.useContext(Context);
+	const {Modal, Breadcrumb} = theme;
 	const onHide = React.useCallback(() => {}, []);
-	const [option, setOption] = React.useState<FormCreatorWizardOption>();
-	const NextStep = option && databankOptions[option][1] || <div />;
+	const [stepsTaken, setStepsTaken] = React.useState<string[]>(["create"]);
+	const takeStep = React.useCallback(step => setStepsTaken([...stepsTaken, step]), [stepsTaken]);
+	const wizardStep = stepsTaken.reduce<WizardStep>((step: WizardStepChildrenGuaranteed, child) => step.children[child], {children: wizardSteps} as WizardStep);
+	const Step = wizardStep.component;
 	return (
 		<Modal onHide={onHide} show={true}>
-			<Modal.Header>{translations["Wizard.header"]}</Modal.Header>
+			<Modal.Header>
+				<Breadcrumb>{stepsTaken.map((step, i) =>
+					<BreadcrumbItem key={step} setStepsTaken={setStepsTaken} steps={stepsTaken.slice(0, i + 1)} />
+				)}</Breadcrumb>
+			</Modal.Header>
 			<Modal.Body>
-				{!option ? (
-					<ButtonGroup vertical>
-						{(Object.keys(databankOptions) as FormCreatorWizardOption[]).map(key =>
-							<FormCreatorWizardOptionButton key={key}
-														   onSelect={setOption}
-														   option={key}>
-								{translations[databankOptions[key][0]]}
-							</FormCreatorWizardOptionButton>
-						)}
-					</ButtonGroup>
-				) : (
-					<NextStep onCreate={onCreate} {...config} />
-				)}
+				<Step onCreate={onCreate} takeStep={takeStep} {...config} />
 			</Modal.Body>
 		</Modal>
 	);
 };
 
+function BreadcrumbItem({setStepsTaken, steps}: {setStepsTaken: React.Dispatch<React.SetStateAction<string[]>>, steps: string[]}) {
+	const {theme, translations} = React.useContext(Context);
+	const {Breadcrumb} = theme;
+	const onClick = React.useCallback(() => setStepsTaken(steps), [setStepsTaken, steps]);
+	const wizardStep = getStep(steps);
+	return <Breadcrumb.Item onClick={onClick}>{translations[wizardStep.label]}</Breadcrumb.Item>;
+}
+
+function WizardStart({takeStep}: WizardStepProps) {
+	const {theme, translations} = React.useContext(Context);
+	const {ButtonGroup} = theme;
+	const wizardsFirstSteps = wizardSteps.create.children as WizardStepChildren;
+	return (
+		<ButtonGroup vertical>
+			{(Object.keys(wizardsFirstSteps)).map(key =>
+				<FormCreatorWizardOptionButton key={key}
+				                               onSelect={takeStep}
+				                               option={key}>
+					{translations[wizardsFirstSteps[key].label]}
+				</FormCreatorWizardOptionButton>
+			)}
+		</ButtonGroup>
+	);
+}
+
 interface FormCreatorWizardOptionButtonProps extends HasChildren {
-	option: FormCreatorWizardOption;
-	onSelect: (option: FormCreatorWizardOption) => void;
+	option: string;
+	onSelect: (option: string) => void;
 }
 
 const FormCreatorWizardOptionButton = ({children, option, onSelect}: FormCreatorWizardOptionButtonProps) => {
@@ -65,6 +101,10 @@ interface FormCreatorProps {
 	secondaryDataBankFormID: string;
 }
 
+interface WizardStepProps extends FormCreatorProps {
+	takeStep: (step: string) => void;
+}
+
 const prepareImportedJSON = (json: any) => {
 	const _json = JSON.parse(JSON.stringify(json));
 	delete _json.id;
@@ -77,7 +117,7 @@ const SubmitButton = (props: ButtonProps) => {
 	return <Button variant={"success"} {...props}>{translations["Wizard.option.json.import"]}</Button>;
 };
 
-function FormCreatorJSON({onCreate}: FormCreatorProps) {
+function FormCreatorJSON({onCreate}: WizardStepProps) {
 	const [json, setJSON] = React.useState();
 	const [valid, setValid] = React.useState(false);
 	const onClick = React.useCallback(() => onCreate(prepareImportedJSON(json) as unknown as Master), [json, onCreate]);
@@ -95,7 +135,7 @@ function FormCreatorJSON({onCreate}: FormCreatorProps) {
 	);
 }
 
-interface FormCreatorDatabankProps extends FormCreatorProps {
+interface FormCreatorDatabankProps extends WizardStepProps {
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
 }
