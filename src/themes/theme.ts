@@ -4,7 +4,11 @@ interface HasMaybeClassName {
 	className?: string;
 }
 
-interface BuilderButtonGroupProps extends ButtonGroupProps, HasMaybeClassName {
+interface HasMaybeStyle {
+	style?: React.CSSProperties;
+}
+
+interface BuilderButtonGroupProps extends ButtonGroupProps, HasMaybeClassName, HasMaybeStyle {
 	small?: true;
 	vertical?: true;
 }

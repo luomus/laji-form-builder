@@ -72,7 +72,7 @@ function WizardStart({takeStep}: WizardStepProps) {
 	const {ButtonGroup} = theme;
 	const wizardsFirstSteps = wizardSteps.create.children as WizardStepChildren;
 	return (
-		<ButtonGroup vertical>
+		<ButtonGroup vertical style={{margin: "auto", width: "50%", display: "block"}}>
 			{(Object.keys(wizardsFirstSteps)).map(key =>
 				<FormCreatorWizardOptionButton key={key}
 				                               onSelect={takeStep}
