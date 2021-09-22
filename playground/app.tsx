@@ -50,7 +50,7 @@ formPromise.then((form: any) => {
 		return (
 			<React.Fragment>
 				<LajiForm {..._form} lang={_lang} formData={formData} apiClient={apiClient} theme={lajiFormBs3} uiSchemaContext={{}} />
-				<LajiFormBuilder id={id} lang={lang} {..._query} {...properties} onChange={onChange} onLangChange={onLangChange} apiClient={apiClient} theme={lajiFormBs3} />
+				<LajiFormBuilder id={id} lang={lang} {..._query} {...properties} onChange={onChange} onLangChange={onLangChange} apiClient={apiClient} theme={lajiFormBs3} primaryDataBankFormID="MHL.70" secondaryDataBankFormID="MHL.68" />
 			</React.Fragment>
 		);
 	};

@@ -23,6 +23,8 @@ export interface LajiFormBuilderProps {
 	onLangChange: (lang: Lang) => void;
 	apiClient: ApiClientImplementation;
 	theme: Theme;
+	primaryDataBankFormID: string;
+	secondaryDataBankFormID: string;
 	notifier?: Notifier;
 }
 export interface LajiFormBuilderState {
@@ -137,7 +139,9 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 							<div style={{height: this.state.editorHeight}} />
 						</React.Fragment>
 					) : (
-						<FormCreatorWizard onCreate={this.onCreate} />
+						<FormCreatorWizard onCreate={this.onCreate}
+						                   primaryDataBankFormID={this.props.primaryDataBankFormID}
+						                   secondaryDataBankFormID={this.props.secondaryDataBankFormID} />
 					)
 				}
 			</Context.Provider>

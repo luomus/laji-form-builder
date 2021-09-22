@@ -43,14 +43,15 @@ export interface FormListing {
 }
 
 export interface Master extends FormListing {
-	language: Lang;
+	language?: Lang;
 	name?: string;
 	shortDescription?: string;
 	translations?: Translations;
 	fields?: Field[];
 	baseFormID?: string;
-	patch: any[];
+	patch?: any[];
 	uiSchema?: any;
+	collectionID?: string;
 }
 
 export interface Field {

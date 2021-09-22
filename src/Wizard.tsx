@@ -1,43 +1,47 @@
 import React from "react";
+import LajiForm from "./LajiForm";
+import _LajiForm from "laji-form/lib/components/LajiForm";
+import { ButtonProps } from "laji-form/lib/themes/theme";
 import { HasChildren, JSONEditor } from "./components";
 import { Context } from "./Context";
 import { Master } from "./model";
+import { JSONSchema } from "./utils";
 
-type FormCreatorWizardOption = "dataset" | "json";
+type FormCreatorWizardOption = "databank" | "json";
 
-const datasetOptions: Record<FormCreatorWizardOption, [string, any]> = {
-	"dataset": [
-		"Wizard.option.dataset",
-		FormCreatorDataset
-	],
+const databankOptions: Record<FormCreatorWizardOption, [string, any]> = {
 	"json": [
 		"Wizard.option.json",
 		FormCreatorJSON
 	],
+	"databank": [
+		"Wizard.option.databank",
+		FormCreatorDatabank
+	],
 };
 
-export const FormCreatorWizard = ({onCreate}: FormCreatorProps) => {
+export const FormCreatorWizard = ({onCreate, ...config}: FormCreatorProps) => {
 	const {theme, translations} = React.useContext(Context);
-	const {Modal, ButtonGroup} = theme;
+	const {Modal, ButtonGroup, Breadcrumb} = theme;
 	const onHide = React.useCallback(() => {}, []);
 	const [option, setOption] = React.useState<FormCreatorWizardOption>();
-	const NextStep = option && datasetOptions[option][1] || <div />;
+	const NextStep = option && databankOptions[option][1] || <div />;
 	return (
 		<Modal onHide={onHide} show={true}>
 			<Modal.Header>{translations["Wizard.header"]}</Modal.Header>
 			<Modal.Body>
 				{!option ? (
 					<ButtonGroup vertical>
-						{(Object.keys(datasetOptions) as FormCreatorWizardOption[]).map(key =>
+						{(Object.keys(databankOptions) as FormCreatorWizardOption[]).map(key =>
 							<FormCreatorWizardOptionButton key={key}
 														   onSelect={setOption}
 														   option={key}>
-								{translations[datasetOptions[key][0]]}
+								{translations[databankOptions[key][0]]}
 							</FormCreatorWizardOptionButton>
 						)}
 					</ButtonGroup>
 				) : (
-					<NextStep onCreate={onCreate}/>
+					<NextStep onCreate={onCreate} {...config} />
 				)}
 			</Modal.Body>
 		</Modal>
@@ -48,6 +52,7 @@ interface FormCreatorWizardOptionButtonProps extends HasChildren {
 	option: FormCreatorWizardOption;
 	onSelect: (option: FormCreatorWizardOption) => void;
 }
+
 const FormCreatorWizardOptionButton = ({children, option, onSelect}: FormCreatorWizardOptionButtonProps) => {
 	const onClick = React.useCallback(() => onSelect(option), [option, onSelect]);
 	const {Button} = React.useContext(Context).theme;
@@ -55,11 +60,9 @@ const FormCreatorWizardOptionButton = ({children, option, onSelect}: FormCreator
 };
 
 interface FormCreatorProps {
-	onCreate: (form: Master) => void;
-}
-
-function FormCreatorDataset () {
-	return <div />;
+	onCreate: (form: Omit<Master, "id">) => void;
+	primaryDataBankFormID: string;
+	secondaryDataBankFormID: string;
 }
 
 const prepareImportedJSON = (json: any) => {
@@ -68,12 +71,15 @@ const prepareImportedJSON = (json: any) => {
 	return _json;
 };
 
-type FormCreatorJSONProps = FormCreatorProps;
-function FormCreatorJSON({onCreate}: FormCreatorJSONProps) {
+const SubmitButton = (props: ButtonProps) => {
+	const {theme, translations} = React.useContext(Context);
+	const {Button} = theme;
+	return <Button variant={"success"} {...props}>{translations["Wizard.option.json.import"]}</Button>;
+};
+
+function FormCreatorJSON({onCreate}: FormCreatorProps) {
 	const [json, setJSON] = React.useState();
 	const [valid, setValid] = React.useState(false);
-	const {translations, theme} = React.useContext(Context);
-	const {Button} = theme;
 	const onClick = React.useCallback(() => onCreate(prepareImportedJSON(json) as unknown as Master), [json, onCreate]);
 
 	// Focus on mount.
@@ -83,7 +89,45 @@ function FormCreatorJSON({onCreate}: FormCreatorJSONProps) {
 	return (
 		<React.Fragment>
 			<JSONEditor value={json} onChange={setJSON} rows={20} onValidChange={setValid} live={true} ref={ref} />
-			<Button onClick={onClick} variant={"success"} disabled={!json || !valid}>{translations["Wizard.option.json.import"]}</Button>
+			<SubmitButton onClick={onClick} disabled={!json || !valid} />
+
 		</React.Fragment>
+	);
+}
+
+interface FormCreatorDatabankProps extends FormCreatorProps {
+	primaryDataBankFormID: string;
+	secondaryDataBankFormID: string;
+}
+
+function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBankFormID}: FormCreatorDatabankProps) {
+	const {translations} = React.useContext(Context);
+	const submitRef = React.useRef<_LajiForm>(null);
+	const schema = JSONSchema.object({
+		name: JSONSchema.String({title: translations["Wizard.databank.form.name"]}),
+		collectionID: JSONSchema.String({title: translations["Wizard.databank.form.collectionID"]}),
+		primary: JSONSchema.Boolean({title: translations["Wizard.databank.form.primary"], default: true})
+	}, {required: ["name", "collectionID"]});
+	const uiSchema = {
+		primary: {
+			"ui:options": {
+				allowUndefined: false
+			}
+		}
+	};
+	const onSubmit = React.useCallback(() => {
+		submitRef.current?.submit();
+	}, [submitRef]);
+	const onLajiFormSubmit = React.useCallback(({formData: {name, collectionID, primary}}: {formData: {name: string, collectionID: string, primary: boolean}}) => onCreate({
+		name,
+		collectionID,
+		baseFormID: primary
+			? primaryDataBankFormID
+			: secondaryDataBankFormID
+	}), [onCreate, primaryDataBankFormID, secondaryDataBankFormID]);
+	return (
+		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit}>
+			<SubmitButton onClick={onSubmit} />
+		</LajiForm>
 	);
 }

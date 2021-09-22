@@ -44,7 +44,7 @@
 		"sv": "Skapa en ny form",
 		"en": "Create a new form"
 	},
-	"wizard.option.dataset": {
+	"wizard.option.databank": {
 		"fi": "Luo aineistopankki",
 		"sv": "Skapa en ny databank",
 		"en": "Create a new databank"
@@ -58,5 +58,20 @@
 		"fi": "Tuo",
 		"sv": "Importera",
 		"en": "Import"
+	},
+	"Wizard.databank.form.primary": {
+		"fi": "Onko aineisto primääridataa?",
+		"sv": "Är data primära data?",
+		"en": "Is the data primary data?"
+	},
+	"Wizard.databank.form.name": {
+		"fi": "Aineistopankin nimi",
+		"sv": "Databanknamn",
+		"en": "Data bank name"
+	},
+	"Wizard.databank.form.collectionID": {
+		"fi": "Kokoelman tunniste",
+		"sv": "Samlings ID",
+		"en": "Collection ID"
 	}
 }
