@@ -166,7 +166,7 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 			: secondaryDataBankFormID
 	}), [onCreate, primaryDataBankFormID, secondaryDataBankFormID]);
 	return (
-		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit}>
+		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
 			<SubmitButton onClick={onSubmit} />
 		</LajiForm>
 	);
