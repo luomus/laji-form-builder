@@ -113,10 +113,11 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	onLangChange = (lang: Lang) => {
 		this.apiClient.setLang(lang);
 		this.fieldService.setLang(lang);
-		this.setState({lang}, () => this.updateSchemas().then(() => {
+		this.setState({lang}, async () => {
+			await this.updateSchemas();
 			this.props.onLangChange(this.state.lang);
 			this.propagateState();
-		}));
+		});
 	}
 
 	getContext = memoize((lang: Lang): ContextProps => ({
@@ -390,16 +391,18 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.props.onChange(updated);
 	}
 
-	onSave = () => {
-		this.formService.update(this.state.master)
-			.then(() => this.notifier.success(this.getContext(this.state.lang).translations["save.success"]))
-			.catch(() => this.notifier.error(this.getContext(this.state.lang).translations["save.error"]));
+	onSave = async () => {
+		try {
+			await this.formService.update(this.state.master);
+			this.notifier.success(this.getContext(this.state.lang).translations["save.success"]);
+		} catch (e) {
+			this.notifier.error(this.getContext(this.state.lang).translations["save.error"]);
+		}
 	}
 
-	onCreate = (master: Master) => {
-		this.fieldService.masterToJSONFormat(master).then((schemas: Schemas) => {
-			this.setState({master, schemas, tmp: true}, this.propagateState);
-		});
+	onCreate = async (master: Master) => {
+		const schemas = await this.fieldService.masterToJSONFormat(master);
+		this.setState({master, schemas, tmp: true}, this.propagateState);
 	}
 }
 
