@@ -50,6 +50,12 @@ describe("Field service", () => {
 				const {uiSchema} = jsonFormat;
 				expect(uiSchema).toEqual(schemas.uiSchema);
 			});
+
+			it("converts options correct", () => {
+				const {options} = jsonFormat;
+				console.log(options, schemas.options);
+				expect(options).toEqual(schemas.options);
+			});
 		});
 	}
 });

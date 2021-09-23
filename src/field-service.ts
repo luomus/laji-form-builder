@@ -100,7 +100,7 @@ export default class FieldService {
 			return master;
 		}
 		const baseForm = await this.mapBaseForm(await this.formService.getMaster(master.baseFormID));
-		delete master.baseFormID;
+		delete (baseForm as any).id;
 		master = {
 			...baseForm,
 			...master,
