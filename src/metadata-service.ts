@@ -71,7 +71,7 @@ export default class MetadataService {
 			const range = property.range[0];
 			const isRange = await this.isAltRange(range);
 			if (isRange) {
-				const _enums = await this.getRange(range)
+				const _enums = await this.getRange(range);
 				const empty = property.minOccurs === "1" ? [] : [""];
 				let enums = [...empty], enumNames = [...empty];
 				for (const e of _enums) {

@@ -1,5 +1,4 @@
-import {JSONSchema7} from "json-schema";
-import { Translations as _Translations } from "laji-form/lib/components/LajiForm";
+import { JSONSchema7 } from "json-schema";
 
 export enum PropertyRange {
 	Int = "xsd:integer",

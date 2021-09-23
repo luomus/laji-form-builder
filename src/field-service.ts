@@ -48,7 +48,7 @@ export default class FieldService {
 	}
 
 	private fieldToSchema = async (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
-		const {name, options, validators, warnings, fields = []} = field;
+		const {fields = []} = field;
 
 		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
 		if (!property) {

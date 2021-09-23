@@ -103,5 +103,5 @@ export default React.memo(function OptionsEditor({master, onChange, translations
 				/>
 			)
 	);
-	return <div className={className} style={style}>{content}</div>
+	return <div className={className} style={style}>{content}</div>;
 });

@@ -53,7 +53,6 @@ describe("Field service", () => {
 
 			it("converts options correct", () => {
 				const {options} = jsonFormat;
-				console.log(options, schemas.options);
 				expect(options).toEqual(schemas.options);
 			});
 		});
