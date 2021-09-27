@@ -34,6 +34,7 @@ export interface LajiFormBuilderState {
 	lang: Lang;
 	editorHeight?: number;
 	tmp?: boolean;
+	saving?: boolean
 }
 
 const EDITOR_HEIGHT = 400;
@@ -150,7 +151,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	renderEditor() {
-		const {schemas, master} = this.state;
+		const {schemas, master, saving} = this.state;
 		return (
 			<LajiFormEditor
 				master={master}
@@ -160,6 +161,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				onLangChange={this.onLangChange}
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
+				saving={saving}
 			/>
 		);
 	}
@@ -396,23 +398,28 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 			return;
 		}
 		try {
+			this.setState({saving: true});
 			if (this.state.master.id) {
 				await this.formService.update(this.state.master);
+				this.setState({saving: false});
 			} else {
 				const master = await this.formService.create(this.state.master);
-				this.setState({master}, () => {
+				this.setState({master, saving: false}, () => {
 					this.propagateState();
 				});
 			}
 			this.notifier.success(this.getContext(this.state.lang).translations["save.success"]);
 		} catch (e) {
 			this.notifier.error(this.getContext(this.state.lang).translations["save.error"]);
+			this.setState({saving: false});
 		}
 	}
 
 	onCreate = async (master: Master) => {
-		const schemas = await this.fieldService.masterToJSONFormat(master);
-		this.setState({master, schemas, tmp: true}, this.propagateState);
+		this.setState({tmp: true}, async () => {
+			const schemas = await this.fieldService.masterToJSONFormat(master);
+			this.setState({master, schemas}, this.propagateState);
+		});
 	}
 }
 

@@ -28,6 +28,7 @@ export interface LajiFormEditorProps {
 	height?: number;
 	onHeightChange?: (height: number) => void;
 	onSave: () => void;
+	saving?: boolean;
 }
 
 export interface LajiFormEditorState {
@@ -76,7 +77,8 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							   lang={this.context.lang}
 							   onLangChange={this.props.onLangChange}
 							   onSave={this.onSave} 
-							   onSelected={this.onPickerSelected} />
+							   onSelected={this.onPickerSelected}
+						       saving={this.props.saving} />
 				{this.renderActiveEditor()}
 			</div>
 		);
@@ -364,13 +366,14 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">, Omit<
 	onEditorChange: EditorChooserProps["onChange"];
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
+	saving?: boolean;
 }
 
 const toolbarNmspc = nmspc("editor-toolbar");
 
 const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() { return <span className={toolbarNmspc("separator")}></span>; });
 
-const EditorToolbar = React.memo(function EditorToolbar({active, onEditorChange, lang, onLangChange, onSave, onSelected}: ToolbarEditorProps) {
+const EditorToolbar = React.memo(function EditorToolbar({active, onEditorChange, lang, onLangChange, onSave, onSelected, saving}: ToolbarEditorProps) {
 	const {translations} = React.useContext(Context);
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
@@ -380,7 +383,7 @@ const EditorToolbar = React.memo(function EditorToolbar({active, onEditorChange,
 			<EditorChooser active={active} onChange={onEditorChange} />
 			<div style={{marginLeft: "auto"}}>
 				<EditorToolbarSeparator />
-				<Button small variant="success" onClick={onSave}>{translations.Save}</Button>
+				<Button small variant="success" disabled={saving} onClick={onSave}>{translations.Save}</Button>
 			</div>
 		</div>
 	);
