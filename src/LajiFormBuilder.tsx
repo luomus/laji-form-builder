@@ -392,8 +392,18 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	}
 
 	onSave = async () => {
+		if (!this.state.master) {
+			return;
+		}
 		try {
-			await this.formService.update(this.state.master);
+			if (this.state.master.id) {
+				await this.formService.update(this.state.master);
+			} else {
+				const master = await this.formService.create(this.state.master);
+				this.setState({master}, () => {
+					this.propagateState();
+				});
+			}
 			this.notifier.success(this.getContext(this.state.lang).translations["save.success"]);
 		} catch (e) {
 			this.notifier.error(this.getContext(this.state.lang).translations["save.error"]);

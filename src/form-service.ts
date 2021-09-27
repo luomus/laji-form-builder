@@ -20,6 +20,10 @@ export default class FormService {
 		return this.apiClient.fetch(`/forms/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form)});
 	}
 
+	create(form: any): Promise<Master> {
+		return this.apiClient.fetch("/forms", undefined, {method: "POST", body: JSON.stringify(form)});
+	}
+
 	async getForms(): Promise<FormListing[]> {
 		return (await this.apiClient.fetch("/forms", undefined)).results;
 	}
