@@ -89,7 +89,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			height: "100%",
 			overflowY: "auto"
 		};
-		const sidebarToolbarContainer: React.CSSProperties = {
+		const containerStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "row",
 			position: "relative",
@@ -106,9 +106,10 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		if (!master || !schemas) {
 			return <Spinner size={100} />;
 		}
+		let content;
 		if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
-			return (
-				<div style={sidebarToolbarContainer}>
+			content =  (
+				<React.Fragment>
 					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
 						<Fields className={gnmspc("field-chooser")}
 						        fields={this.getFields(master.fields)}
@@ -127,17 +128,22 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 						        style={fieldEditorContentStyle}
 						/>
 					}
-				</div>
+				</React.Fragment>
 			);
 		} else if (activeEditorMode === "options") {
-			return <OptionsEditor master={master}
+			content = <OptionsEditor master={master}
 			                      translations={master.translations?.[this.context.lang as Lang] || {}}
 			                      className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
 					              style={fieldEditorContentStyle}
 			                      onChange={this.props.onChange}
 			/>;
 		}
-		return null;
+		return content
+			? (
+				<div style={containerStyle}>
+					{content}
+				</div>
+			) : null;
 	}
 
 	onSave = () => {
