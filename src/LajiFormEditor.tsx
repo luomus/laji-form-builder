@@ -42,6 +42,7 @@ const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	static contextType = Context;
 	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false};
+	containerRef = React.createRef<HTMLDivElement>();
 	highlightedLajiFormElem?: HTMLElement;
 
 	render() {
@@ -78,6 +79,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							   onLangChange={this.props.onLangChange}
 							   onSave={this.onSave} 
 							   onSelected={this.onPickerSelected}
+							   containerRef={this.containerRef}
 						       saving={this.props.saving} />
 				{this.renderActiveEditor()}
 			</div>
@@ -142,7 +144,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		}
 		return content
 			? (
-				<div style={containerStyle}>
+				<div style={containerStyle} ref={this.containerRef}>
 					{content}
 				</div>
 			) : null;
@@ -367,18 +369,19 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">, Omit<
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
 	saving?: boolean;
+	containerRef: React.RefObject<HTMLDivElement>
 }
 
 const toolbarNmspc = nmspc("editor-toolbar");
 
 const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() { return <span className={toolbarNmspc("separator")}></span>; });
 
-const EditorToolbar = React.memo(function EditorToolbar({active, onEditorChange, lang, onLangChange, onSave, onSelected, saving}: ToolbarEditorProps) {
+const EditorToolbar = React.memo(function EditorToolbar({active, onEditorChange, lang, onLangChange, onSave, onSelected, saving, containerRef}: ToolbarEditorProps) {
 	const {translations} = React.useContext(Context);
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser lang={lang} onChange={onLangChange} />
-			<ElemPicker className={gnmspc("ml")} onSelected={onSelected} />
+			<ElemPicker className={gnmspc("ml")} onSelected={onSelected} containerRef={containerRef} />
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} />
 			<div style={{marginLeft: "auto"}}>
@@ -398,15 +401,18 @@ const usePrevious = <T extends unknown>(value: T): T | undefined => {
 };
 interface ElemPickerProps extends Classable {
 	onSelected: (selected: string) => void;
+	containerRef: React.RefObject<HTMLDivElement>;
 }
-const ElemPicker = React.memo(function ElemPicker({onSelected, className}: ElemPickerProps) {
+const ElemPicker = React.memo(function ElemPicker({onSelected, className, containerRef}: ElemPickerProps) {
 	const [isActive, setActive] = React.useState(false);
 	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<HTMLElement>();
 	const prevHighlightedLajiFormElem = usePrevious(highlightedLajiFormElem);
 	const onMouseMove = React.useCallback(({clientX, clientY}: MouseEvent) => {
 		const lajiFormElem = findNearestParentSchemaElem(document.elementFromPoint(clientX, clientY));
-		lajiFormElem && setHighlightedLajiFormElem(lajiFormElem);
-	}, []);
+		lajiFormElem && !containerRef.current?.contains(lajiFormElem)
+			? setHighlightedLajiFormElem(lajiFormElem)
+			: setHighlightedLajiFormElem(undefined);
+	}, [containerRef]);
 	const onClick = React.useCallback(() => {
 		const id = highlightedLajiFormElem?.id
 			.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
