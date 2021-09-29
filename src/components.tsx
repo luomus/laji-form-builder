@@ -30,6 +30,7 @@ interface DraggableWidthProps extends DraggablePublicProps  {
 interface DraggableWidthHeightProps extends DraggableWidthProps, DraggableHeightProps {
 	dragHeight: boolean;
 	dragWidth: boolean;
+	containerRef?: React.Ref<HTMLDivElement>;
 }
 interface DraggableWidthHeightState {
 	height?: number;
@@ -61,7 +62,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 	render() {
 		const { style, fixed } = this.props;
 		const children = (
-			<div style={style} className={this.props.className}>
+			<div style={style} className={this.props.className}  ref={this.props.containerRef}>
 				{this.props.children}
 			</div>
 		);
@@ -186,8 +187,8 @@ export const DraggableHeight = React.memo(function DraggableHeight(props: Dragga
 	return <DraggableWidthHeight {...props} dragHeight={true} />;
 });
 
-export const DraggableWidth = React.memo(function DraggableWidth(props: DraggableWidthProps & Stylable & Classable & HasChildren) {
-	return <DraggableWidthHeight {...props} dragWidth={true} />;
+export const DraggableWidth = React.forwardRef((props: DraggableWidthProps & Stylable & Classable & HasChildren, ref: React.Ref<HTMLDivElement>) => {
+	return <DraggableWidthHeight {...props} dragWidth={true} containerRef={ref} />;
 });
 
 

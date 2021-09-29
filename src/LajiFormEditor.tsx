@@ -1,7 +1,7 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer } from "./utils";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer, scrollIntoViewIfNeeded } from "./utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
@@ -51,6 +51,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	optionsEditorLajiFormRef = React.createRef<LajiForm>();
 	optionsEditorRef = React.createRef<HTMLDivElement>();
 	highlightedLajiFormElem?: HTMLElement;
+	fieldsRef = React.createRef<HTMLDivElement>();
 
 	render() {
 		const containerStyle: React.CSSProperties = {
@@ -122,7 +123,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
 			content =  (
 				<React.Fragment>
-					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2}>
+					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2} ref={this.fieldsRef}>
 						<Fields className={gnmspc("field-chooser")}
 						        fields={this.getFields(master.fields)}
 						        onSelected={this.onFieldSelected}
@@ -130,6 +131,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 						        selected={this.state.selected}
 						        pointer=""
 						        expanded={true}
+						        fieldsContainerElem={this.fieldsRef.current}
 						/>
 					</DraggableWidth>
 					{this.state.selected && 
@@ -253,11 +255,11 @@ export interface FieldEditorProps extends Classable {
 
 type OnSelectedCB = (field: string) => void;
 
-const Fields = React.memo(function _Fields({fields = [], onSelected, onDeleted, selected, pointer, style = {}, className, expanded}
-	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string, expanded?: boolean} & Stylable & Classable) {
+const Fields = React.memo(function _Fields({fields = [], onSelected, onDeleted, selected, pointer, style = {}, className, expanded, fieldsContainerElem}
+	: {fields: FieldProps[], onSelected: OnSelectedCB, onDeleted: OnSelectedCB, selected?: string, pointer: string, expanded?: boolean, fieldsContainerElem: HTMLDivElement | null} & Stylable & Classable) {
 	return (
 		<div style={{...style, display: "flex", flexDirection: "column"}} className={className}>
-			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${withoutNameSpacePrefix(f.name)}`} expanded={expanded} />)}
+			{fields.map((f: FieldProps) => <Field key={f.name} {...f} onSelected={onSelected} onDeleted={onDeleted} selected={selected} pointer={`${pointer}/${withoutNameSpacePrefix(f.name)}`} expanded={expanded} fieldsContainerElem={fieldsContainerElem} />)}
 		</div>
 	);
 });
@@ -269,6 +271,7 @@ interface FieldProps extends FieldOptions {
 	onDeleted: OnSelectedCB;
 	fields: FieldProps[];
 	expanded?: boolean;
+	fieldsContainerElem: HTMLDivElement | null;
 }
 interface FieldState {
 	expanded: boolean;
@@ -295,11 +298,19 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	}
 
 	componentDidUpdate(prevProps: FieldProps) {
-		if ((!Field.isSelected(prevProps.selected, prevProps.pointer) && Field.isSelected(this.props.selected, this.props.pointer))) {
-			if (this.fieldRef.current) {
-				// TODO doesn't work since container fixed?
-				//scrollIntoViewIfNeeded(this.fieldRef.current);
-			}
+		this.scrollToIfNeeded(prevProps);
+	}
+
+	componentDidMount() {
+		this.scrollToIfNeeded();
+	}
+
+	scrollToIfNeeded(prevProps?: FieldProps) {
+		if ((!prevProps || !Field.isSelected(prevProps.selected, prevProps.pointer))
+			&& Field.isSelected(this.props.selected, this.props.pointer)
+			&& this.fieldRef.current && this.props.fieldsContainerElem
+		) {
+			scrollIntoViewIfNeeded(this.fieldRef.current, 0, 0, this.props.fieldsContainerElem);
 		}
 	}
 
@@ -360,6 +371,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 						onDeleted={this.onChildDeleted}
 						selected={selected}
 						pointer={pointer}
+						fieldsContainerElem={this.props.fieldsContainerElem}
 					/>
 				)}
 			</div>

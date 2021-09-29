@@ -325,7 +325,7 @@ export function applyTransformations<T, P>(schemaOrPromise: T | Promise<T>, prop
 }
 
 export function getScrollPositionForScrollIntoViewIfNeeded(elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement): number {
-	if (!elem) return getElemScrolled(container);
+	if (!elem) return container.scrollTop;
 	const elemTop = elem.offsetTop;
 	const elemBottom = elemTop + elem.clientHeight;
 	const containerTop = container.scrollTop + topOffset;
@@ -336,13 +336,9 @@ export function getScrollPositionForScrollIntoViewIfNeeded(elem: HTMLElement, to
 	} else if (elemBottom > containerBottom) {
 		return container.scrollTop + elemBottom - containerBottom;
 	}
-	return getElemScrolled(container);
-}
-
-export function getElemScrolled(container = document.documentElement): number {
-	return  container.scrollTop || 0;
+	return container.scrollTop;
 }
 
 export function scrollIntoViewIfNeeded(elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement) {
-	(container || window).scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
+	container.scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
 }
