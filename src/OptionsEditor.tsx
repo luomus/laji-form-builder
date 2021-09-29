@@ -8,6 +8,7 @@ import { translate, detectChangePaths, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { TextareaEditorField } from "./UiSchemaEditor";
+import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
 
 export const mapRangeToUiSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">) => {
 	const range = property.range[0];
@@ -26,6 +27,8 @@ interface FormOptionsEditorProps extends Classable, Stylable {
 	master: Master;
 	translations: {[key: string]: string};
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
+	lajiFormRef?: React.Ref<_LajiForm>;
+	onLoaded?: () => void;
 }
 
 const formProperty = {range: ["MHL.form"], property: "MHL.form", isEmbeddable: true, label: "", comment: "", maxOccurs: "1", minOccurs: "1", multiLanguage: false, shortName: "form", required: false};
@@ -57,7 +60,7 @@ const prepareMaster = (master: Master) => {
 	return _master;
 };
 
-export default React.memo(function OptionsEditor({master, onChange, translations, className, style}: FormOptionsEditorProps) {
+export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor({master, onChange, translations, className, style, lajiFormRef, onLoaded}: FormOptionsEditorProps, ref) {
 	const { metadataService } = React.useContext(Context);
 	const [schema, setModelSchema] = React.useState<any[]>();
 	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
@@ -91,17 +94,27 @@ export default React.memo(function OptionsEditor({master, onChange, translations
 		});
 		onChange(events);
 	}, [formData, onChange, _master]);
+	let props: LajiFormProps & { ref?: React.Ref<_LajiForm> } = {
+		schema,
+		uiSchema,
+		formData,
+		onChange: onLajiFormChange,
+		fields: {TextareaEditorField}
+	};
+	if (lajiFormRef) {
+		props.ref = lajiFormRef;
+	}
+
+	React.useEffect(() => {
+		if (schema && onLoaded) {
+			onLoaded();
+		}
+	}, [schema, onLoaded]);
+
 	const content = (
 		!schema
 			? <Spinner />
-			: (
-				<LajiForm schema={schema}
-						  uiSchema={uiSchema}
-						  formData={formData}
-						  onChange={onLajiFormChange}
-						  fields={{TextareaEditorField}}
-				/>
-			)
+			: <LajiForm {...props} />
 	);
-	return <div className={className} style={style}>{content}</div>;
-});
+	return <div className={className} style={style} ref={ref}>{content}</div>;
+}));

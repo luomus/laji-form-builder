@@ -2,9 +2,8 @@ import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
-import * as LajiFormUtils from "laji-form/lib/utils";
+import { isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
 import { JSONSchemaE } from "./model";
-const { isObject, parseJSONPointer: _parseJSONPointer } = LajiFormUtils;
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -308,10 +307,9 @@ export class JSONSchema {
 	static object = (properties = {}, options = {}) => JSONSchema.type("object")({properties, ...options});
 }
 
-export const parseJSONPointer = (obj: any, path: string, safeMode?: boolean | "createParents") => {
+export const parseJSONPointer = (obj: any, path: string, safeMode?: true | "createParents") => {
 	return _parseJSONPointer(obj, path, safeMode, true);
 };
-
 
 function isPromise<T>(p: any): p is Promise<T> {
 	return !!p.then;
@@ -324,4 +322,27 @@ export function applyTransformations<T, P>(schemaOrPromise: T | Promise<T>, prop
 			: Promise.resolve(fn(schema as T, property))
 	)
 	, isPromise(schemaOrPromise) ? schemaOrPromise : Promise.resolve(schemaOrPromise));
+}
+
+export function getScrollPositionForScrollIntoViewIfNeeded(elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement): number {
+	if (!elem) return getElemScrolled(container);
+	const elemTop = elem.offsetTop;
+	const elemBottom = elemTop + elem.clientHeight;
+	const containerTop = container.scrollTop + topOffset;
+	const containerBottom = containerTop + container.clientHeight - bottomOffset;
+
+	if (elemTop < containerTop) {
+		return containerTop - containerTop + elemTop;
+	} else if (elemBottom > containerBottom) {
+		return container.scrollTop + elemBottom - containerBottom;
+	}
+	return getElemScrolled(container);
+}
+
+export function getElemScrolled(container = document.documentElement): number {
+	return  container.scrollTop || 0;
+}
+
+export function scrollIntoViewIfNeeded(elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement) {
+	(container || window).scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
 }

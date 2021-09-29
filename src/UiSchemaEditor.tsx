@@ -7,8 +7,7 @@ import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unpref
 import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
-import * as LajiFormUtils from "laji-form/lib/utils";
-const { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions, isEmptyString } = LajiFormUtils;
+import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions, isEmptyString } from "laji-form/lib/utils";
 import { JSONEditor } from "./components";
 import { Context } from "./Context";
 import { FieldProps } from "@rjsf/core";

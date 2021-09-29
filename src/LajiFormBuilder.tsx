@@ -3,8 +3,7 @@ import ApiClient, { ApiClientImplementation } from "laji-form/lib/ApiClient";
 import lajiFormTranslations from "laji-form/lib/translations.json";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
-import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } = LajiFormUtils;
+import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
 import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
@@ -60,7 +59,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	constructor(props: LajiFormBuilderProps) {
 		super(props);
 		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
-		this.appTranslations = constructTranslations(appTranslations);
+		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient);
 		this.formService = new FormService(this.apiClient);
 		this.fieldService = new FieldService(this.metadataService, this.formService, props.lang);
