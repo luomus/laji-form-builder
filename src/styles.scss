@@ -171,4 +171,19 @@ $bRadius: 2px;
 			color: $accent;
 		 }
 	}
+
+	&-options-editor-clear {
+		background: white;
+		border: 1px solid $hilight;
+		border-radius: $bRadius;
+		color: $hilight;
+		font-weight: bold;
+		padding: 0 $padding;
+		margin-right: -$padding;
+		margin-left: -$padding;
+		&:after {
+			content: "✖";
+			padding: 5px;
+		 }
+	}
 }

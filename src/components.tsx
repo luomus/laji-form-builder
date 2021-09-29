@@ -191,7 +191,7 @@ export const DraggableWidth = React.memo(function DraggableWidth(props: Draggabl
 });
 
 
-interface ClickableProps extends Classable {
+interface ClickableProps extends Classable, Stylable {
 	children?: React.ReactNode;
 	onClick?: (e: React.MouseEvent) => any;
 	tag?: string;

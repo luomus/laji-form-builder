@@ -1,14 +1,13 @@
 import * as React from "react";
 import LajiForm from "./LajiForm";
 import { Context } from "./Context";
-import { Spinner, Classable, Stylable } from "./components";
+import { Spinner, Classable, Stylable, Clickable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
-import { PropertyModel, Schemas, Master } from "./model";
-import { translate, detectChangePaths, parseJSONPointer } from "./utils";
-import * as LajiFormUtils from "laji-form/lib/utils";
-const { updateSafelyWithJSONPointer } = LajiFormUtils;
+import { PropertyModel, Schemas, Master, JSONSchemaE } from "./model";
+import { translate, detectChangePaths, parseJSONPointer, gnmspc } from "./utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
+import { updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 
 export const mapRangeToUiSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">) => {
 	const range = property.range[0];
@@ -29,6 +28,8 @@ interface FormOptionsEditorProps extends Classable, Stylable {
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
 	lajiFormRef?: React.Ref<_LajiForm>;
 	onLoaded?: () => void;
+	filter?: string[];
+	clearFilters: () => void;
 }
 
 const formProperty = {range: ["MHL.form"], property: "MHL.form", isEmbeddable: true, label: "", comment: "", maxOccurs: "1", minOccurs: "1", multiLanguage: false, shortName: "form", required: false};
@@ -40,7 +41,11 @@ const prepareSchema = (schema: any) => {
 	return schema;
 };
 
-const prepareUiSchema = (uiSchema: any) => {
+interface FilterTreeNode {
+	[node: string ]: FilterTreeNode | true;
+}
+
+const prepareUiSchema = (schema: any, uiSchema: any, filter?: string[]) => {
 	uiSchema["ui:order"] = [
 		"name",
 		"title",
@@ -52,6 +57,52 @@ const prepareUiSchema = (uiSchema: any) => {
 		"options",
 		"*"
 	];
+
+	if (!filter) {
+		return uiSchema;
+	}
+
+	const doFilter = (schema: JSONSchemaE, uiSchema: any, filter: FilterTreeNode) => {
+		const getProperties = (schema: any): any => schema.properties || schema.items.properties;
+		const properties = getProperties(schema);
+		Object.keys(properties).forEach((prop: string) => {
+			if (!filter[prop]) {
+				uiSchema[prop] = {"ui:field": "HiddenField"};
+			}
+		});
+		Object.keys(filter).forEach(k => {
+			if (filter[k] !== true) {
+				if (schema.items && !uiSchema.items) {
+					uiSchema.items = {};
+				}
+				if (schema.items) {
+					uiSchema = uiSchema.items;
+				}
+				if (!uiSchema[k]) {
+					uiSchema[k] = {};
+				}
+				doFilter(properties[k], uiSchema[k], filter[k] as FilterTreeNode);
+			}
+		});
+	};
+
+	const filterTree: FilterTreeNode = filter.reduce<FilterTreeNode>((tree, f) => {
+		const splits = f.split("/").filter(s => s);
+		let treePointer = tree;
+		splits.forEach((s, i) => {
+			if (i === splits.length - 1) {
+				treePointer[s] = true;
+			} else {
+				if (!treePointer[s]) {
+					treePointer[s] = {} as FilterTreeNode;
+				}
+				treePointer = treePointer[s] as FilterTreeNode;
+			}
+		});
+		return tree;
+	}, {});
+	doFilter(schema, uiSchema, filterTree);
+	
 	return uiSchema;
 };
 
@@ -60,16 +111,16 @@ const prepareMaster = (master: Master) => {
 	return _master;
 };
 
-export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor({master, onChange, translations, className, style, lajiFormRef, onLoaded}: FormOptionsEditorProps, ref) {
-	const { metadataService } = React.useContext(Context);
-	const [schema, setModelSchema] = React.useState<any[]>();
-	const [uiSchema, setModelUiSchema] = React.useState<any[]>();
+export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor({master, onChange, translations, className, style, lajiFormRef, onLoaded, filter, clearFilters}: FormOptionsEditorProps, ref) {
+	const { metadataService, translations: appTranslations } = React.useContext(Context);
+	const [schema, setModelSchema] = React.useState<null>();
+	const [uiSchema, setModelUiSchema] = React.useState<null>();
 	React.useEffect(() => {
 		metadataService.getJSONSchemaFromProperty(formProperty).then(schema => {
 			setModelSchema(prepareSchema(schema));
-			setModelUiSchema(prepareUiSchema(mapPropertyToUiSchema(formProperty)));
+			setModelUiSchema(prepareUiSchema(schema, mapPropertyToUiSchema(formProperty), filter));
 		});
-	}, [metadataService]);
+	}, [metadataService, filter]);
 	const _master = prepareMaster(master);
 	const formData = translate(_master, translations);
 	const onLajiFormChange = React.useCallback((viewFormData) => {
@@ -116,5 +167,8 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			? <Spinner />
 			: <LajiForm {...props} />
 	);
-	return <div className={className} style={style} ref={ref}>{content}</div>;
+	return <div className={className} style={style} ref={ref}>
+		{filter?.length && <Clickable className={gnmspc("options-editor-clear")} onClick={clearFilters} tag="div">{appTranslations["Editor.options.clear"]}</Clickable>}
+		{content}
+	</div>;
 }));

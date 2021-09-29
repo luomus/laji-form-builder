@@ -1,7 +1,7 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer, scrollIntoViewIfNeeded } from "./utils";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer } from "./utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./LajiFormBuilder";
 import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
@@ -9,7 +9,7 @@ import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
 import { Lang, Master, Schemas, Field as FieldOptions } from "./model";
 import LajiForm from "laji-form/lib/components/LajiForm";
-import { findNearestParentSchemaElem, getSchemaElementById, highlightElem } from "laji-form/lib/utils";
+import { findNearestParentSchemaElem } from "laji-form/lib/utils";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -32,17 +32,21 @@ export interface LajiFormEditorProps {
 }
 
 export interface LajiFormEditorState {
-	selected?: string;
 	activeEditorMode: ActiveEditorMode;
 	pointerChoosingActive: boolean;
+	selected?: string;
 	optionsEditorLoadedCallback?: () => void;
+	optionsEditorFilter?: string[];
 }
 
 const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
 
 export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
 	static contextType = Context;
-	state = {selected: undefined, activeEditorMode: "basic" as ActiveEditorMode, pointerChoosingActive: false, optionsEditorLoadedCallback: undefined};
+	state: LajiFormEditorState = {
+		activeEditorMode: "basic" as ActiveEditorMode,
+		pointerChoosingActive: false
+	};
 	containerRef = React.createRef<HTMLDivElement>();
 	optionsEditorLajiFormRef = React.createRef<LajiForm>();
 	optionsEditorRef = React.createRef<HTMLDivElement>();
@@ -82,7 +86,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							   onLangChange={this.props.onLangChange}
 							   onSave={this.onSave} 
 							   onSelectedField={this.onPickerSelectedField}
-				               onSelectedOption={this.onPickerSelectedOption}
+				               onSelectedOptions={this.onPickerSelectedOptions}
 							   containerRef={this.containerRef}
 						       saving={this.props.saving} />
 				{this.renderActiveEditor()}
@@ -140,13 +144,15 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 			);
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={master}
-			                      translations={master.translations?.[this.context.lang as Lang] || {}}
-			                      className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
-					              style={fieldEditorContentStyle}
-			                      onChange={this.props.onChange}
-								  lajiFormRef={this.optionsEditorLajiFormRef}
-								  ref={this.optionsEditorRef}
-								  onLoaded={this.state.optionsEditorLoadedCallback}
+			                         translations={master.translations?.[this.context.lang as Lang] || {}}
+			                         className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
+			                         style={fieldEditorContentStyle}
+			                         onChange={this.props.onChange}
+			                         lajiFormRef={this.optionsEditorLajiFormRef}
+			                         ref={this.optionsEditorRef}
+			                         onLoaded={this.state.optionsEditorLoadedCallback}
+			                         filter={this.state.optionsEditorFilter}
+									 clearFilters={this.clearOptionsEditorFilters}
 			/>;
 		}
 		return content
@@ -225,29 +231,15 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 		this.setState(state as LajiFormEditorState);
 	}
 
-	onPickerSelectedOption = (selected: string) => {
-		const scrollToElem = () => {
-			if (!this.optionsEditorLajiFormRef.current) {
-				return;
-			}
-			const contextId = this.optionsEditorLajiFormRef.current._id;
-			const elem = getSchemaElementById(contextId, "root" + selected.replace(/\//g, "_"));
-			if (!elem) {
-				return;
-			}
-			if (!this.optionsEditorRef.current) {
-				return;
-			}
-			scrollIntoViewIfNeeded(elem, 0, 27, this.optionsEditorRef.current);
-			highlightElem(elem);
-			this.state.optionsEditorLoadedCallback && this.setState({optionsEditorLoadedCallback: undefined});
-		};
+	onPickerSelectedOptions = (selected: string[]) => {
 		if (this.state.activeEditorMode === "options" && this.optionsEditorLajiFormRef.current) {
-			scrollToElem();
+			this.setState({optionsEditorFilter: selected});
 		} else {
-			this.setState({activeEditorMode: "options", optionsEditorLoadedCallback: scrollToElem});
+			this.setState({activeEditorMode: "options", optionsEditorLoadedCallback: () => this.setState({optionsEditorFilter: selected, optionsEditorLoadedCallback: undefined})});
 		}
 	}
+
+	clearOptionsEditorFilters = () => this.setState({optionsEditorFilter: undefined});
 }
 
 export interface FieldEditorProps extends Classable {
@@ -401,7 +393,7 @@ const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange,
 	);
 });
 
-interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">, Omit<LangChooserProps, "onChange">, Pick<ElemPickerProps, "onSelectedField" | "onSelectedOption"> {
+interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">, Omit<LangChooserProps, "onChange">, Pick<ElemPickerProps, "onSelectedField" | "onSelectedOptions"> {
 	onEditorChange: EditorChooserProps["onChange"];
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
@@ -413,12 +405,12 @@ const toolbarNmspc = nmspc("editor-toolbar");
 
 const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() { return <span className={toolbarNmspc("separator")}></span>; });
 
-const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSelectedField, onSelectedOption, saving, containerRef}: ToolbarEditorProps) => {
+const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSelectedField, onSelectedOptions, saving, containerRef}: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser lang={lang} onChange={onLangChange} />
-			<ElemPicker className={gnmspc("ml")} onSelectedField={onSelectedField} onSelectedOption={onSelectedOption} containerRef={containerRef} />
+			<ElemPicker className={gnmspc("ml")} onSelectedField={onSelectedField} onSelectedOptions={onSelectedOptions} containerRef={containerRef} />
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} />
 			<div style={{marginLeft: "auto"}}>
@@ -429,10 +421,10 @@ const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSe
 	);
 };
 
-const parseOptionPath = (elem: HTMLElement) => {
-	const match = elem.className.match(/laji-form-option-([^ ]+)/);
-	return match && match[1]
-		? "/" + match[1].replace(/-/g, "/")
+const parseOptionPaths = (elem: HTMLElement) => {
+	const matches = elem.className.match(/laji-form-option-[^ ]+/g);
+	return matches
+		?  matches.map(s => s.replace("laji-form-option-", "").replace(/-/g, "/")) 
 		: undefined;
 };
 
@@ -456,10 +448,10 @@ const usePrevious = <T extends unknown>(value: T): T | undefined => {
 };
 interface ElemPickerProps extends Classable {
 	onSelectedField: (selected: string) => void;
-	onSelectedOption: (selected: string) => void;
+	onSelectedOptions: (selected: string[]) => void;
 	containerRef: React.RefObject<HTMLDivElement>;
 }
-const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOption, className, containerRef}: ElemPickerProps) {
+const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOptions, className, containerRef}: ElemPickerProps) {
 	const [isActive, setActive] = React.useState(false);
 	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<HTMLElement>();
 	const [highlightedOptionElem, setHighlightedOptionElem] = React.useState<HTMLElement>();
@@ -503,13 +495,13 @@ const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOp
 			onSelectedField(`/document${id}`);
 			setActive(false);
 		} else if (highlightedOptionElem) {
-			const optionPath = parseOptionPath(highlightedOptionElem);
-			if (optionPath) {
-				onSelectedOption(optionPath);
+			const optionPaths = parseOptionPaths(highlightedOptionElem);
+			if (optionPaths) {
+				onSelectedOptions(optionPaths);
 				setActive(false);
 			}
 		}
-	}, [setActive, highlightedLajiFormElem, highlightedOptionElem, onSelectedOption, onSelectedField]);
+	}, [setActive, highlightedLajiFormElem, highlightedOptionElem, onSelectedOptions, onSelectedField]);
 	const onKeyDown = React.useCallback((e: KeyboardEvent) => {
 		e.key === "Escape" && setActive(false);
 	}, [setActive]);

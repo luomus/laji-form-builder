@@ -59,19 +59,24 @@
 		"sv": "Importera",
 		"en": "Import"
 	},
-	"Wizard.databank.form.primary": {
+	"wizard.databank.form.primary": {
 		"fi": "Onko aineisto primääridataa?",
 		"sv": "Är data primära data?",
 		"en": "Is the data primary data?"
 	},
-	"Wizard.databank.form.name": {
+	"wizard.databank.form.name": {
 		"fi": "Aineistopankin nimi",
 		"sv": "Databanknamn",
 		"en": "Data bank name"
 	},
-	"Wizard.databank.form.collectionID": {
+	"wizard.databank.form.collectionID": {
 		"fi": "Kokoelman tunniste",
 		"sv": "Samlings ID",
 		"en": "Collection ID"
+	},
+	"editor.options.clear": {
+		"fi": "Tyhjennä rajaukset",
+		"sv": "Rensa filter",
+		"en": "Clear filters"
 	}
 }
