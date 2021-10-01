@@ -21,7 +21,7 @@ export type FieldEditorChangeEvent =
 	| Omit<FieldAddEvent, "selected">
 	| Omit<FieldUpdateEvent, "selected">;
 
-export interface LajiFormEditorProps {
+export interface LajiFormEditorProps extends Stylable {
 	master?: Master;
 	schemas?: Schemas;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
@@ -30,6 +30,7 @@ export interface LajiFormEditorProps {
 	onHeightChange?: (height: number) => void;
 	onSave: () => void;
 	saving?: boolean;
+	documentFormVisible: boolean;
 }
 
 export interface LajiFormEditorState {
@@ -42,10 +43,10 @@ export interface LajiFormEditorState {
 
 const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
 
-export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & Stylable, LajiFormEditorState> {
+export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps, LajiFormEditorState> {
 	static contextType = Context;
 	state: LajiFormEditorState = {
-		activeEditorMode: "basic" as ActiveEditorMode,
+		activeEditorMode: this.props.documentFormVisible ? "basic" as ActiveEditorMode : "options" as ActiveEditorMode,
 		pointerChoosingActive: false
 	};
 	containerRef = React.createRef<HTMLDivElement>();
@@ -53,6 +54,13 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 	optionsEditorRef = React.createRef<HTMLDivElement>();
 	highlightedLajiFormElem?: HTMLElement;
 	fieldsRef = React.createRef<HTMLDivElement>();
+
+	static getDerivedStateFromProps(props: LajiFormEditorProps) {
+		if (!props.documentFormVisible) {
+			return {activeEditorMode: "options"};
+		}
+		return {};
+	}
 
 	render() {
 		const containerStyle: React.CSSProperties = {
@@ -90,7 +98,8 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps & St
 							   onSelectedField={this.onPickerSelectedField}
 				               onSelectedOptions={this.onPickerSelectedOptions}
 							   containerRef={this.containerRef}
-						       saving={this.props.saving} />
+							   saving={this.props.saving}
+				               documentFormVisible={this.props.documentFormVisible} />
 				{this.renderActiveEditor()}
 			</div>
 		);
@@ -418,14 +427,14 @@ const toolbarNmspc = nmspc("editor-toolbar");
 
 const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() { return <span className={toolbarNmspc("separator")}></span>; });
 
-const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSelectedField, onSelectedOptions, saving, containerRef}: ToolbarEditorProps) => {
+const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSelectedField, onSelectedOptions, saving, containerRef, documentFormVisible}: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser lang={lang} onChange={onLangChange} />
 			<ElemPicker className={classNames(gnmspc("elem-picker"), gnmspc("ml"))} onSelectedField={onSelectedField} onSelectedOptions={onSelectedOptions} containerRef={containerRef} />
 			<EditorToolbarSeparator />
-			<EditorChooser active={active} onChange={onEditorChange} />
+			<EditorChooser active={active} onChange={onEditorChange} documentFormVisible={documentFormVisible} />
 			<div style={{marginLeft: "auto"}}>
 				<EditorToolbarSeparator />
 				<Button small variant="success" disabled={saving} onClick={onSave}>{translations.Save}</Button>
@@ -596,6 +605,7 @@ const Highlighter = ({highlightedElem, active, onElemHighlighted}
 interface EditorChooserProps { 
 	active: ActiveEditorMode;
 	onChange: (activeEditorMode: ActiveEditorMode) => void;
+	documentFormVisible: boolean;
 }
 
 const editorNmspc = nmspc("editor-chooser");
@@ -603,11 +613,12 @@ const editorNmspc = nmspc("editor-chooser");
 type ActiveEditorMode = "uiSchema" | "basic" | "options";
 const tabs = {options: "Editor.tab.options", basic: "Editor.tab.basic", uiSchema: "Editor.tab.uiSchema"};
 const EditorChooser = React.memo(function EditorChooser(
-	{active, onChange}
+	{active, onChange, documentFormVisible}
 	: EditorChooserProps) {
+	const _tabs = documentFormVisible ? tabs : {options: tabs.options};
 	return (
 		<div className={editorNmspc()} style={{display: "flex"}}>{
-			Object.keys(tabs).map((_active: ActiveEditorMode) => <EditorChooserTab key={_active} active={active === _active} tab={_active} translationKey={tabs[_active]}  onActivate={onChange} />)
+			Object.keys(_tabs).map((_active: ActiveEditorMode) => <EditorChooserTab key={_active} active={active === _active} tab={_active} translationKey={tabs[_active]}  onActivate={onChange} />)
 		}</div>
 	);
 });

@@ -49,8 +49,6 @@ formPromise.then((form: any) => {
 		const [_lang, onLangChange] = React.useState(lang);
 		return (
 			<React.Fragment>
-				<div className="laji-form-option-description laji-form-option-title">{form.description || "desc "}</div>
-				<div className="laji-form-option-options-namedPlaceOptions-createDescription">{form.options?.namedPlaceOptions?.createDescription || "create descip"}</div>
 				<LajiForm {..._form} lang={_lang} formData={formData} apiClient={apiClient} theme={lajiFormBs3} uiSchemaContext={{}} />
 				<LajiFormBuilder id={id} lang={lang} {..._query} {...properties} onChange={onChange} onLangChange={onLangChange} apiClient={apiClient} theme={lajiFormBs3} primaryDataBankFormID="MHL.70" secondaryDataBankFormID="MHL.68" />
 			</React.Fragment>

@@ -25,6 +25,7 @@ export interface LajiFormBuilderProps {
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
 	notifier?: Notifier;
+	documentFormVisible?: boolean;
 }
 export interface LajiFormBuilderState {
 	id?: string;
@@ -53,7 +54,8 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	notifier: Notifier;
 
 	static defaultProps = {
-		lang: "fi" as Lang
+		lang: "fi" as Lang,
+		documentFormVisible: true
 	};
 
 	constructor(props: LajiFormBuilderProps) {
@@ -161,6 +163,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
 				saving={saving}
+				documentFormVisible={this.props.documentFormVisible ?? true}
 			/>
 		);
 	}
