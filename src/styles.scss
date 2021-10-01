@@ -94,8 +94,13 @@ $bRadius: 2px;
 		background-color: $darker;
 	}
 	&-editor-toolbar .glyphicon.active {
-		color: $hilight;
+		color: $accent;
 	}
+
+	&-elem-picker:focus {
+		outline: none;
+	}
+
 	&-field-editor {
 		padding: $padding;
 
@@ -185,5 +190,10 @@ $bRadius: 2px;
 			content: "✖";
 			padding: 5px;
 		 }
+	}
+
+	&-picker-highlighter {
+		background: $accent;
+		opacity: 0.2;
 	}
 }

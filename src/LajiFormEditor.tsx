@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer, scrollIntoViewIfNeeded } from "./utils";
@@ -422,7 +423,7 @@ const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSe
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser lang={lang} onChange={onLangChange} />
-			<ElemPicker className={gnmspc("ml")} onSelectedField={onSelectedField} onSelectedOptions={onSelectedOptions} containerRef={containerRef} />
+			<ElemPicker className={classNames(gnmspc("elem-picker"), gnmspc("ml"))} onSelectedField={onSelectedField} onSelectedOptions={onSelectedOptions} containerRef={containerRef} />
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} />
 			<div style={{marginLeft: "auto"}}>
@@ -433,14 +434,14 @@ const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSe
 	);
 };
 
-const parseOptionPaths = (elem: HTMLElement) => {
+const parseOptionPaths = (elem: Element) => {
 	const matches = elem.className.match(/laji-form-option-[^ ]+/g);
 	return matches
 		?  matches.map(s => s.replace("laji-form-option-", "").replace(/-/g, "/")) 
 		: undefined;
 };
 
-const findOptionElem = (elem: HTMLElement) => {
+const findOptionElem = (elem: Element) => {
 	while (elem) {
 		const match = (typeof elem.className === "string") && elem.className.match(/laji-form-option-/);
 		if (match) {
@@ -451,13 +452,6 @@ const findOptionElem = (elem: HTMLElement) => {
 	return undefined;
 };
 
-const usePrevious = <T extends unknown>(value: T): T | undefined => {
-	  const ref = React.useRef<T>();
-	  React.useEffect(() => {
-		      ref.current = value;
-		    });
-	  return ref.current;
-};
 interface ElemPickerProps extends Classable {
 	onSelectedField: (selected: string) => void;
 	onSelectedOptions: (selected: string[]) => void;
@@ -465,24 +459,18 @@ interface ElemPickerProps extends Classable {
 }
 const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOptions, className, containerRef}: ElemPickerProps) {
 	const [isActive, setActive] = React.useState(false);
-	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<HTMLElement>();
-	const [highlightedOptionElem, setHighlightedOptionElem] = React.useState<HTMLElement>();
-	const [highlightedElem, setHighlightedElem] = React.useState<HTMLElement>();
-	const prevHighlightedElem = usePrevious(highlightedElem);
-	const onMouseMove = React.useCallback(({clientX, clientY}: MouseEvent) => {
-		const elem = document.elementFromPoint(clientX, clientY) as HTMLElement;
-		const lajiFormElem = findNearestParentSchemaElem(elem);
+	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<Element>();
+	const [highlightedOptionElem, setHighlightedOptionElem] = React.useState<Element>();
+	const [highlightedElem, setHighlightedElem] = React.useState<Element>();
+	const onElemHighlighted = React.useCallback((elem: Element) => {
+		const lajiFormElem = findNearestParentSchemaElem(elem as HTMLElement);
+		const optionElem = elem && findOptionElem(elem);
 		if (lajiFormElem && !containerRef.current?.contains(lajiFormElem)) {
 			setHighlightedLajiFormElem(lajiFormElem);
-		} else {
-			setHighlightedLajiFormElem(undefined);
-		}
-
-		const optionElem = elem && findOptionElem(elem);
-		if (optionElem) {
+		} else if (optionElem) {
 			setHighlightedOptionElem(optionElem);
 		} else {
-			setHighlightedOptionElem(undefined);
+			setHighlightedLajiFormElem(undefined);
 		}
 	}, [containerRef]);
 
@@ -496,7 +484,7 @@ const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOp
 		}
 	}, [highlightedElem, highlightedLajiFormElem, highlightedOptionElem]);
 
-	const onClick = React.useCallback(() => {
+	const onClick = React.useCallback((e) => {
 		if (highlightedLajiFormElem) {
 			const id = highlightedLajiFormElem?.id
 				.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
@@ -504,6 +492,8 @@ const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOp
 			if (!id) {
 				return;
 			}
+			e.preventDefault();
+			e.stopPropagation();
 			onSelectedField(`/document${id}`);
 			setActive(false);
 		} else if (highlightedOptionElem) {
@@ -519,29 +509,18 @@ const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOp
 	}, [setActive]);
 	React.useEffect(() => {
 		if (isActive) {
-			document.addEventListener("mousemove", onMouseMove);
 			document.addEventListener("click", onClick);
 			document.addEventListener("keydown", onKeyDown);
 			return () => {
-				document.removeEventListener("mousemove", onMouseMove);
 				document.removeEventListener("click", onClick);
 				document.removeEventListener("keydown", onKeyDown);
 			};
 		} else {
-			document.removeEventListener("mousemove", onMouseMove);
 			document.removeEventListener("click", onClick);
 			document.removeEventListener("keydown", onKeyDown);
 			return undefined;
 		}
-	}, [isActive, onClick, onKeyDown, onMouseMove]);
-	React.useEffect(() => {
-		if (highlightedElem) {
-			highlightedElem.className = `${highlightedElem.className} ${gnmspc("form-highlight")}`;
-		}
-		if (prevHighlightedElem) {
-			prevHighlightedElem.className = prevHighlightedElem.className.replace(` ${gnmspc("form-highlight")}`, "");
-		}
-	}, [highlightedElem, prevHighlightedElem]);
+	}, [isActive, onClick, onKeyDown]);
 	React.useEffect(() => {
 		if (!isActive) {
 			setHighlightedLajiFormElem(undefined);
@@ -552,11 +531,67 @@ const ElemPicker = React.memo(function ElemPicker({onSelectedField, onSelectedOp
 	const stop = React.useCallback(() => setActive(false), [setActive]);
 	const {Button, Glyphicon} = React.useContext(Context).theme;
 	return (
-		<Button active={isActive} onClick={isActive ? stop : start} small className={className}>
-			<Glyphicon glyph="magnet" className={classNames(isActive && "active")} />
-		</Button>
+		<React.Fragment>
+			<Button active={isActive} onClick={isActive ? stop : start} small className={className}>
+				<Glyphicon glyph="magnet" className={classNames(isActive && "active")} />
+			</Button>
+			<Highlighter highlightedElem={highlightedElem} active={isActive} onElemHighlighted={onElemHighlighted} />
+		</React.Fragment>
 	);
 });
+
+const Highlighter = ({highlightedElem, active, onElemHighlighted}
+	: {highlightedElem?: Element, active?: boolean, onElemHighlighted: (e: Element) => void}) => {
+	const ref = React.useRef<HTMLDivElement>(null);
+	const highlighter = ref.current;
+	if (highlighter) {
+		highlighter.className = gnmspc("picker-highlighter");
+		highlighter.style.position = "absolute";
+		highlighter.style.zIndex = "1039";
+	}
+	const onMouseMove = React.useCallback(({clientX, clientY}: MouseEvent) => {
+		const elems = document.elementsFromPoint(clientX, clientY);
+		onElemHighlighted(highlighter && elems[0] === highlighter ? elems[1] : elems[0]);
+	}, [highlighter, onElemHighlighted]);
+
+	React.useEffect(() => {
+		if (active) {
+			document.addEventListener("mousemove", onMouseMove);
+			return () => {
+				document.removeEventListener("mousemove", onMouseMove);
+			};
+		} else {
+			document.removeEventListener("mousemove", onMouseMove);
+			return undefined;
+		}
+	}, [active, onMouseMove]);
+
+	const {top, width, left, height} = highlightedElem?.getBoundingClientRect() || {};
+	const scrolled = window.pageYOffset;
+	React.useEffect(() => {
+		if (!highlighter) {
+			return;
+		}
+		if (!highlightedElem) {
+			highlighter.style.display = "none";
+			return;
+		}
+		highlighter.style.display = "block";
+		if (typeof top === "number") {
+			highlighter.style.top = top + scrolled + "px";
+		}
+		if (typeof left === "number") {
+			highlighter.style.left = left + "px";
+		}
+		if (typeof width === "number") {
+			highlighter.style.width = width + "px";
+		}
+		if (typeof height === "number") {
+			highlighter.style.height = height + "px";
+		}
+	}, [highlighter, highlightedElem, top, width, left, height, scrolled]);
+	return createPortal(<div ref={ref} />, document.body);
+};
 
 interface EditorChooserProps { 
 	active: ActiveEditorMode;
