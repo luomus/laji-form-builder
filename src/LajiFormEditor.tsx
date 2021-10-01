@@ -442,7 +442,7 @@ const parseOptionPaths = (elem: HTMLElement) => {
 
 const findOptionElem = (elem: HTMLElement) => {
 	while (elem) {
-		const match = elem.className?.match(/laji-form-option-/);
+		const match = (typeof elem.className === "string") && elem.className.match(/laji-form-option-/);
 		if (match) {
 			return elem;
 		}
