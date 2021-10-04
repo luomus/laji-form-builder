@@ -3,23 +3,32 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Classable, Stylable, Clickable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./LajiFormBuilder";
-import { PropertyModel, Schemas, Master, JSONSchemaE } from "./model";
-import { translate, detectChangePaths, parseJSONPointer, gnmspc } from "./utils";
+import { PropertyModel, Schemas, Master, JSONSchemaE, PropertyRange } from "./model";
+import { translate, detectChangePaths, parseJSONPointer, gnmspc, unprefixProp } from "./utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
 import { updateSafelyWithJSONPointer } from "laji-form/lib/utils";
+import MetadataService from "./metadata-service";
 
-export const mapRangeToUiSchema = (property: Pick<PropertyModel, "property" | "range" | "isEmbeddable" | "multiLanguage">) => {
+export const mapRangeToUiSchema = async (property: PropertyModel, metadataService: MetadataService) => {
 	const range = property.range[0];
 
-	return range === "MY.document"
-		? {"ui:field": "TextareaEditorField"}
-		: {};
+	if (range === "MY.document" || range === PropertyRange.keyValue) {
+		return {"ui:field": "TextareaEditorField"};
+	}
+	if (property.isEmbeddable) {
+		const properties = await metadataService.getProperties(range);
+		const propertiesUiSchemas = await Promise.all((properties).map(p => mapPropertyToUiSchema(p, metadataService)));
+		return propertiesUiSchemas.reduce(
+			(ps, p, i) => ({...ps, [unprefixProp(properties[i].property)]: p}), {}
+		);
+	}
+	return {};
 };
 const mapComment = (comment: string | undefined, uiSchema: any) => ({...uiSchema, "ui:help": comment});
 
-export const mapPropertyToUiSchema = ({property, comment, range, multiLanguage, isEmbeddable}: Pick<PropertyModel, "property" | "comment" | "range" | "multiLanguage" | "isEmbeddable">): Promise<Schemas> =>
-	mapComment(comment, mapRangeToUiSchema({property, range, isEmbeddable, multiLanguage}));
+export const mapPropertyToUiSchema = async (property: PropertyModel, metadataService: MetadataService): Promise<Schemas> =>
+	mapComment(property.comment, await mapRangeToUiSchema(property, metadataService));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
 interface FormOptionsEditorProps extends Classable, Stylable {
@@ -116,10 +125,11 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 	const [schema, setModelSchema] = React.useState<null>();
 	const [uiSchema, setModelUiSchema] = React.useState<null>();
 	React.useEffect(() => {
-		metadataService.getJSONSchemaFromProperty(formProperty).then(schema => {
+		(async () => {
+			const schema = await metadataService.getJSONSchemaFromProperty(formProperty);
 			setModelSchema(prepareSchema(schema));
-			setModelUiSchema(prepareUiSchema(schema, mapPropertyToUiSchema(formProperty), filter));
-		});
+			setModelUiSchema(prepareUiSchema(schema, await mapPropertyToUiSchema(formProperty, metadataService), filter));
+		})();
 	}, [metadataService, filter]);
 	const _master = prepareMaster(master);
 	const formData = translate(_master, translations);
