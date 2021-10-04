@@ -13,7 +13,7 @@ export const nmspc = (_nmspc?: string) => (s?: any) => s === undefined
 	? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}`
 	: s
 		? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}-${s}`
-		: "";
+		: CSS_NAMESPACE;
 
 export const gnmspc  = nmspc();
 

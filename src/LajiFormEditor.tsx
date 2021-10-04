@@ -21,7 +21,7 @@ export type FieldEditorChangeEvent =
 	| Omit<FieldAddEvent, "selected">
 	| Omit<FieldUpdateEvent, "selected">;
 
-export interface LajiFormEditorProps extends Stylable {
+export interface LajiFormEditorProps extends Stylable, Classable {
 	master?: Master;
 	schemas?: Schemas;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
@@ -73,6 +73,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps, Laj
 			                 fixed="bottom"
 				             height={this.props.height}
 				             className={gnmspc("editor")}
+							 containerClassName={gnmspc("")}
 				             thickness={2}
 			                 onChange={this.onHeightChange} >
 				{this.renderEditor()}

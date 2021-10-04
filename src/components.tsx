@@ -18,6 +18,7 @@ interface DraggablePublicProps extends Stylable, Classable, HasChildren {
 	color?: string;
 	thickness?: number;
 	dragClassName?: string;
+	containerClassName?: string;
 	onChange?: (change: any) => void;
 }
 interface DraggableHeightProps extends DraggablePublicProps {
@@ -60,9 +61,9 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 	nmspc = nmspc("draggable");
 
 	render() {
-		const { style, fixed } = this.props;
+		const { style, fixed, containerClassName } = this.props;
 		const children = (
-			<div style={style} className={this.props.className}  ref={this.props.containerRef}>
+			<div style={style} className={this.props.className} ref={this.props.containerRef}>
 				{this.props.children}
 			</div>
 		);
@@ -86,7 +87,8 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 			} as React.CSSProperties
 			: {};
 		return (
-			<div style={this.props.dragHeight && {...heightContainerStyle, height: this.state.height || 0, width: "100%"} || {}}>
+			<div style={this.props.dragHeight && {...heightContainerStyle, height: this.state.height || 0, width: "100%"} || {}}
+			     className={containerClassName}>
 				{this.getHeightDragLine()}
 				{content}
 			</div>

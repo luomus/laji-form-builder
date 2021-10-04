@@ -4,7 +4,7 @@ import lajiFormTranslations from "laji-form/lib/translations.json";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
-import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate } from "./utils";
+import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate, gnmspc } from "./utils";
 import { LajiFormEditor } from "./LajiFormEditor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations.json";
@@ -164,6 +164,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 				height={EDITOR_HEIGHT}
 				saving={saving}
 				documentFormVisible={this.props.documentFormVisible ?? true}
+				className={gnmspc("")}
 			/>
 		);
 	}
