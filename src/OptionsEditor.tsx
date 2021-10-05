@@ -142,7 +142,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			const newValue = parseJSONPointer(viewFormData, changedPath);
 			if (typeof currentValue === "string") {
 				if (currentValue[0] === "@") {
-					events.push({type: "translations", key: currentValue, value: newValue});
+					events.push({type: "translations", key: currentValue, value: newValue ?? ""});
 				} else {
 					const translationKey =  `@${changedPath}`;
 					newFormData = updateSafelyWithJSONPointer(newFormData, translationKey, changedPath);
