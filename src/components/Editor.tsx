@@ -10,7 +10,7 @@ import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
 import { Lang, Master, Schemas, Field as FieldOptions } from "../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
-import { findNearestParentSchemaElem } from "laji-form/lib/utils";
+import { findNearestParentSchemaElem, translate as translateKey } from "laji-form/lib/utils";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -89,8 +89,11 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		if (!master || !schemas) {
 			return <Spinner size={100} />;
 		}
+		const {translations} = this.context;
 		return (
 			<div style={fieldEditorStyle}>
+				{master.baseFormID && <div className={gnmspc("warning")}>{translateKey(translations, "Editor.warning.baseFormID", {baseFormID: master.baseFormID})}</div>}
+				{master.patch && <div className={gnmspc("warning")}>{translations["Editor.warning.patch"]}</div>}
 				<EditorToolbar active={this.state.activeEditorMode}
 							   onEditorChange={this.onActiveEditorChange}
 							   lang={this.context.lang}

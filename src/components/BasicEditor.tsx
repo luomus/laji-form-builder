@@ -56,7 +56,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	renderAdder = () => {
 		if (this.state.childProps) {
-			const existing = dictionarify(this.props.field.fields as Field[], (field: Field) => field.name);
+			const existing = dictionarify(this.props.field.fields || [], (field: Field) => field.name);
 			const [enums, enumNames] = this.state.childProps
 				.filter(s => !existing[unprefixProp(s.property)])
 				.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {

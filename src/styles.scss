@@ -9,10 +9,21 @@ $neutral-7: darken($neutral, 2 * 10%);
 $neutral-8: darken($neutral, 3 * 10%);
 $neutral-9: darken($neutral, 4 * 10%);
 
+$danger: #d22d2d;
+$danger-1: lighten($danger, 4 * 10%);
+$danger-2: lighten($danger, 3 * 10%);
+$danger-3: lighten($danger, 2 * 10%);
+$danger-4: lighten($danger, 1 * 10%);
+$danger-5: $danger;
+$danger-6: darken($danger, 1 * 10%);
+$danger-7: darken($danger, 2 * 10%);
+$danger-8: darken($danger, 3 * 10%);
+$danger-9: darken($danger, 4 * 10%);
+
 $neutral-separating: darken($neutral, 30%);
 $darker: #47494e;
 $accent: #337ab7;
-$hilight: darken(red, 10%);
+$hilight: $danger;
 
 $padding: 10px;
 $bRadius: 2px;
@@ -88,6 +99,14 @@ $bRadius: 2px;
 		#{$root}-draggable-line {
 			background-color: $neutral-separating;
 		}
+
+		#{$root}-warning {
+			background-color: $danger-1;
+			color: $danger-6;
+			padding: 0 $padding;
+			border-bottom: 1px solid $danger-6;
+			width: 100%;
+		}
 	}
 	&-editor-nav-bar {
 		padding: $padding;
@@ -157,9 +176,6 @@ $bRadius: 2px;
 	}
 	&-spinner-black .react-spinner_bar {
 		background-color: black;
-	}
-	&-form-highlight {
-		outline: 3px solid lighten($hilight, 10%);
 	}
 	
 	&-json-editor-invalid {

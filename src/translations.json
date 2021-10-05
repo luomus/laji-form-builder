@@ -78,5 +78,15 @@
 		"fi": "Tyhjennä rajaukset",
 		"sv": "Rensa filter",
 		"en": "Clear filters"
+	},
+	"editor.warning.patch": {
+		"fi": "Muokkaus toimii rajatusti lomakkeelle jolla on '$.patches'",
+		"sv": "Redigering av ett formulär med '$.patches' fungerar begränsat",
+		"en": "Editing a form with '$.patches' works limitedly"
+	},
+	"editor.warning.baseFormID": {
+		"fi": "Lomake perii lomakkeen %{baseFormID} ('$.baseFormID'), eli sen muokkaus rajoittuu ko. lomakkeen yliajamiseen",
+		"sv": "Form ärver %{baseFormID}, ('$.baseFormID') redigering är begränsad till att åsidosätta det formuläret",
+		"en": "Form inherits %{baseFormID}, ('$.baseFormID') editing is limited to overriding that form"
 	}
 }
