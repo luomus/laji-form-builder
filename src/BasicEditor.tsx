@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
+import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
 import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "./utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;

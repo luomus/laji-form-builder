@@ -1,7 +1,7 @@
 import memoize from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
-import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range } from "./model";
-import { applyTransformations, fetchJSON, JSONSchema } from "./utils";
+import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range } from "../model";
+import { applyTransformations, fetchJSON, JSONSchema } from "../utils";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 

@@ -5,17 +5,17 @@ import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
 import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate, gnmspc } from "./utils";
-import { LajiFormEditor } from "./LajiFormEditor";
+import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "./translations.json";
 import { PropertyModel, PropertyRange, Lang, Translations, Master, Schemas, Field } from "./model";
-import MetadataService from "./metadata-service";
-import FormService from "./form-service";
+import MetadataService from "./service/metadata-service";
+import FormService from "./service/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import FieldService from "./field-service";
+import FieldService from "./service/field-service";
 
-export interface LajiFormBuilderProps {
+export interface BuilderProps {
 	id: string;
 	lang: Lang;
 	onChange: (form: any) => void;
@@ -27,7 +27,7 @@ export interface LajiFormBuilderProps {
 	notifier?: Notifier;
 	documentFormVisible?: boolean;
 }
-export interface LajiFormBuilderState {
+export interface BuilderState {
 	id?: string;
 	master?: Master;
 	schemas?: Schemas;
@@ -39,9 +39,9 @@ export interface LajiFormBuilderState {
 
 const EDITOR_HEIGHT = 400;
 
-export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilderProps, LajiFormBuilderState> {
+export default class Builder extends React.PureComponent<BuilderProps, BuilderState> {
 	apiClient: ApiClient;
-	state: LajiFormBuilderState = {
+	state: BuilderState = {
 		lang: this.props.lang,
 		editorHeight: EDITOR_HEIGHT
 	};
@@ -58,7 +58,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		documentFormVisible: true
 	};
 
-	constructor(props: LajiFormBuilderProps) {
+	constructor(props: BuilderProps) {
 		super(props);
 		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
 		this.appTranslations = constructTranslations(appTranslations) as any;
@@ -66,7 +66,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.formService = new FormService(this.apiClient);
 		this.fieldService = new FieldService(this.metadataService, this.formService, props.lang);
 		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
-			notifier[method] = msg => console.log(`LajiFormBuilder notification ${method}: ${msg}`); // eslint-disable-line no-console
+			notifier[method] = msg => console.log(`Builder notification ${method}: ${msg}`); // eslint-disable-line no-console
 			return notifier;
 		}, {} as Notifier);
 	}
@@ -80,7 +80,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 		this.schemasPromise?.cancel();
 	}
 
-	componentDidUpdate({lang: prevLang}: LajiFormBuilderProps) {
+	componentDidUpdate({lang: prevLang}: BuilderProps) {
 		prevLang !== this.props.lang && this.apiClient?.setLang(this.props.lang);
 		this.updateFromId(this.state.id);
 	}
@@ -154,7 +154,7 @@ export default class LajiFormBuilder extends React.PureComponent<LajiFormBuilder
 	renderEditor() {
 		const {schemas, master, saving} = this.state;
 		return (
-			<LajiFormEditor
+			<Editor
 				master={master}
 				schemas={schemas}
 				onChange={this.onEditorChange}

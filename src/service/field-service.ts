@@ -1,7 +1,7 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas } from "./model";
-import { applyTransformations, JSONSchema, translate, unprefixProp } from "./utils";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas } from "../model";
+import { applyTransformations, JSONSchema, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 
 const requiredHacks: Record<string, boolean> = {

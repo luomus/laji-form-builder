@@ -1,13 +1,13 @@
-import LajiFormBuilder, { LajiFormBuilderProps } from "./LajiFormBuilder";
+import Builder, { BuilderProps } from "./Builder";
 import * as React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 
-export default class LajiFormBuilderWrapper {
+export default class BuilderWrapper {
 	rootElem: HTMLElement;
-	constructor(props: LajiFormBuilderProps & {rootElem: HTMLElement}) {
+	constructor(props: BuilderProps & {rootElem: HTMLElement}) {
 		this.rootElem = props.rootElem;
 		render(
-			React.createElement(LajiFormBuilder, props, null),
+			React.createElement(Builder, props, null),
 			this.rootElem
 		);
 	}

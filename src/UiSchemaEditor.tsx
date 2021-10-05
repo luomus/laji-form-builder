@@ -1,7 +1,7 @@
 import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
-import { FieldEditorProps, FieldEditorChangeEvent } from "./LajiFormEditor";
+import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
 import LajiFormInterface from "./LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, parseJSONPointer } from "./utils";
 import LajiForm from "./LajiForm";

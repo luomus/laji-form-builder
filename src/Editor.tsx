@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer, scrollIntoViewIfNeeded } from "./utils";
-import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./LajiFormBuilder";
+import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./Builder";
 import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
@@ -21,7 +21,7 @@ export type FieldEditorChangeEvent =
 	| Omit<FieldAddEvent, "selected">
 	| Omit<FieldUpdateEvent, "selected">;
 
-export interface LajiFormEditorProps extends Stylable, Classable {
+export interface EditorProps extends Stylable, Classable {
 	master?: Master;
 	schemas?: Schemas;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
@@ -33,7 +33,7 @@ export interface LajiFormEditorProps extends Stylable, Classable {
 	documentFormVisible: boolean;
 }
 
-export interface LajiFormEditorState {
+export interface EditorState {
 	activeEditorMode: ActiveEditorMode;
 	pointerChoosingActive: boolean;
 	selected?: string;
@@ -43,9 +43,9 @@ export interface LajiFormEditorState {
 
 const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
 
-export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps, LajiFormEditorState> {
+export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	static contextType = Context;
-	state: LajiFormEditorState = {
+	state: EditorState = {
 		activeEditorMode: this.props.documentFormVisible ? "basic" as ActiveEditorMode : "options" as ActiveEditorMode,
 		pointerChoosingActive: false
 	};
@@ -55,7 +55,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps, Laj
 	highlightedLajiFormElem?: HTMLElement;
 	fieldsRef = React.createRef<HTMLDivElement>();
 
-	static getDerivedStateFromProps(props: LajiFormEditorProps) {
+	static getDerivedStateFromProps(props: EditorProps) {
 		if (!props.documentFormVisible) {
 			return {activeEditorMode: "options"};
 		}
@@ -146,7 +146,7 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps, Laj
 						/>
 					</DraggableWidth>
 					{this.state.selected && 
-						<Editor key={this.state.selected}
+						<ActiveEditor key={this.state.selected}
 						        active={this.state.activeEditorMode}
 						        {...this.getFieldEditorProps(master, schemas)}
 						        className={gnmspc("field-editor")}
@@ -237,11 +237,11 @@ export class LajiFormEditor extends React.PureComponent<LajiFormEditorProps, Laj
 	getFieldPath = ((path: string) => path === "/document" ? "" : path.replace("/document", ""));
 
 	onPickerSelectedField = (selected: string) => {
-		const state: Partial<LajiFormEditorState> = {selected};
+		const state: Partial<EditorState> = {selected};
 		if (!["basic", "ui"].includes(this.state.activeEditorMode)) {
 			state.activeEditorMode = "basic";
 		}
-		this.setState(state as LajiFormEditorState);
+		this.setState(state as EditorState);
 	}
 
 	onPickerSelectedOptions = (selected: string[]) => {
@@ -636,10 +636,10 @@ const EditorChooserTab = React.memo(function EditorChooserTab(
 	);
 });
 
-interface EditorProps extends FieldEditorProps {
+interface ActiveEditorProps extends FieldEditorProps {
 	active: ActiveEditorMode;
 }
-const Editor = React.memo(function Editor({active, style, className, ...props}: EditorProps & Classable & Stylable) {
+const ActiveEditor = React.memo(function ActiveEditor({active, style, className, ...props}: ActiveEditorProps & Classable & Stylable) {
 	return (
 		<div style={style} className={className}>{
 			active === "uiSchema" && <UiSchemaEditor {...props} />

@@ -1,5 +1,5 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import { FormListing, Master, Schemas } from "./model";
+import { FormListing, Master, Schemas } from "../model";
 
 export default class FormService {
 	private apiClient: ApiClient;
