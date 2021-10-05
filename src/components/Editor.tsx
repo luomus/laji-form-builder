@@ -2,13 +2,13 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer, scrollIntoViewIfNeeded } from "./utils";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer, scrollIntoViewIfNeeded } from "../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent, FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./Builder";
 import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, Schemas, Field as FieldOptions } from "./model";
+import { Lang, Master, Schemas, Field as FieldOptions } from "../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { findNearestParentSchemaElem } from "laji-form/lib/utils";
 

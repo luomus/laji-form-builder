@@ -1,4 +1,4 @@
-import LajiFormBuilder from "../src/Builder";
+import LajiFormBuilder from "../src/components/Builder";
 import properties from "../properties.json";
 import * as React from "react";
 import { render } from "react-dom";

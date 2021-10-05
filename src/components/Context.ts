@@ -1,9 +1,9 @@
 import * as React from "react";
 import ApiClient from "laji-form/lib/ApiClient";
-import { Lang } from "./model";
-import MetadataService from "./service/metadata-service";
-import FormService from "./service/form-service";
-import { Theme } from "./themes/theme";
+import { Lang } from "../model";
+import MetadataService from "../services/metadata-service";
+import FormService from "../services/form-service";
+import { Theme } from "../themes/theme";
 
 export interface ContextProps {
 	apiClient: ApiClient;
