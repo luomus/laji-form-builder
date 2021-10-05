@@ -78,7 +78,7 @@ export const translate = (obj: any, translations: {[key: string]: string}) => {
 			return _any.map(translate);
 		}
 		if (typeof _any === "string" && _any[0] === "@") {
-			if (translations[_any]) {
+			if (typeof translations[_any] === "string") {
 				return translations[_any];
 			}
 			// Return the key if it doesn't have the @ prefix
