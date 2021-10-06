@@ -122,9 +122,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		});
 	}
 
-	getContext = memoize((lang: Lang): ContextProps => ({
+	getContext = memoize((lang: Lang, editorLang: Lang): ContextProps => ({
 		apiClient: this.apiClient,
 		lang,
+		editorLang,
 		translations: this.appTranslations[lang],
 		metadataService: this.metadataService,
 		formService: this.formService,
@@ -132,7 +133,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}))
 
 	render() {
-		const context = this.getContext(this.state.lang);
+		const context = this.getContext(this.props.lang, this.state.lang);
 		return (
 			<Context.Provider value={context}>
 				{
@@ -411,9 +412,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					this.propagateState();
 				});
 			}
-			this.notifier.success(this.getContext(this.state.lang).translations["save.success"]);
+			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["save.success"]);
 		} catch (e) {
-			this.notifier.error(this.getContext(this.state.lang).translations["save.error"]);
+			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["save.error"]);
 			this.setState({saving: false});
 		}
 	}

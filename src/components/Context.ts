@@ -8,6 +8,7 @@ import { Theme } from "../themes/theme";
 export interface ContextProps {
 	apiClient: ApiClient;
 	lang: Lang;
+	editorLang: Lang;
 	translations: {[key: string]: string};
 	metadataService: MetadataService;
 	formService: FormService;

@@ -96,7 +96,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				{master.patch && <div className={gnmspc("warning")}>{translations["Editor.warning.patch"]}</div>}
 				<EditorToolbar active={this.state.activeEditorMode}
 							   onEditorChange={this.onActiveEditorChange}
-							   lang={this.context.lang}
 							   onLangChange={this.props.onLangChange}
 							   onSave={this.onSave} 
 							   onSelectedField={this.onPickerSelectedField}
@@ -160,7 +159,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			);
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={master}
-			                         translations={master.translations?.[this.context.lang as Lang] || {}}
+			                         translations={master.translations?.[this.context.editorLang as Lang] || {}}
 			                         className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
 			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
@@ -203,7 +202,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	}
 
 	getFieldEditorProps(master: Master, schemas: Schemas): FieldEditorProps {
-		const { lang } = this.context;
+		const { editorLang } = this.context;
 		const selected = this.getSelected();
 		const findField = (_field: FieldOptions, path: string): FieldOptions => {
 			const [next, ...rest] = path.split("/").filter(s => s);
@@ -217,7 +216,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected)),
 			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected), !!"safely"),
 			field: findField(this.getFields(master.fields)[0], selected),
-			translations: master.translations?.[lang as Lang] || {},
+			translations: master.translations?.[editorLang as Lang] || {},
 			path: selected,
 			onChange: this.onEditorChange
 		};
@@ -394,21 +393,22 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 }
 
 interface LangChooserProps {
-	lang: Lang;
 	onChange: (lang: Lang) => void;
 }
 
-const LangChooser = React.memo(function LangChooser({lang, onChange}: LangChooserProps) {
-	const {ButtonGroup} = React.useContext(Context).theme;
+const LangChooser = React.memo(function LangChooser({onChange}: LangChooserProps) {
+	const {theme, editorLang} = React.useContext(Context);
+	const {ButtonGroup} = theme;
 	return (
 		<ButtonGroup small className={gnmspc("editor-lang-chooser")}>{
-			["fi", "sv", "en"].map((_lang: Lang) => <LangChooserByLang key={_lang} onChange={onChange} lang={_lang} activeLang={lang} />)
+			["fi", "sv", "en"].map((_lang: Lang) => <LangChooserByLang key={_lang} onChange={onChange} lang={_lang} activeLang={editorLang} />)
 		}</ButtonGroup>
 	);
 });
 
 interface LangChooserByLangProps extends LangChooserProps {
 	activeLang: Lang;
+	lang: Lang;
 }
 
 const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange, activeLang}: LangChooserByLangProps) {
@@ -431,11 +431,11 @@ const toolbarNmspc = nmspc("editor-toolbar");
 
 const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() { return <span className={toolbarNmspc("separator")}></span>; });
 
-const EditorToolbar = ({active, onEditorChange, lang, onLangChange, onSave, onSelectedField, onSelectedOptions, saving, containerRef, documentFormVisible}: ToolbarEditorProps) => {
+const EditorToolbar = ({active, onEditorChange, onLangChange, onSave, onSelectedField, onSelectedOptions, saving, containerRef, documentFormVisible}: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
-			<LangChooser lang={lang} onChange={onLangChange} />
+			<LangChooser onChange={onLangChange} />
 			<ElemPicker className={classNames(gnmspc("elem-picker"), gnmspc("ml"))} onSelectedField={onSelectedField} onSelectedOptions={onSelectedOptions} containerRef={containerRef} />
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} documentFormVisible={documentFormVisible} />
