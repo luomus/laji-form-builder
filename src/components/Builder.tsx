@@ -202,7 +202,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 							...translations[lang],
 							[key]: value[lang]
 						}
-					}), translations)
+					}), changed.master.translations || translations)
 				};
 			} else if (isTranslationsChangeEvent(event)) {
 				const {key, value} = event;
@@ -216,7 +216,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 								? value
 								: (translations[lang][key] || value)
 						}
-					}), translations)
+					}), changed.master.translations || translations)
 				};
 			} else if (isTranslationsDeleteEvent(event)) {
 				const {key} = event;
@@ -224,7 +224,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					...(changed.master || {}),
 					translations: ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
 						...byLang,
-						[lang]: immutableDelete(translations[lang], key)
+						[lang]: immutableDelete((changed.master.translations || translations)[lang], key)
 					}), {})
 				};
 			} else if (event.type === "field") {

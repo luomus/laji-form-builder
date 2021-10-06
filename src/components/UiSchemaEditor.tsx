@@ -120,7 +120,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 				const doConfirm = () => !confirm(this.context.translations["editor.confirmDontTranslate"]);
 
 				if (currentValue?.[0] === "@") {
-					events.push({type: "translations", key: currentValue, value: newValue});
+					events.push({type: "translations", key: currentValue, value: newValue ?? ""});
 				} else {
 					const translationKey =  `@${this.props.path}${changedPath}`;
 					if (isEmptyString(currentValue)) {
