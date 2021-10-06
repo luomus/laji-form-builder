@@ -240,7 +240,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	onPickerSelectedField = (selected: string) => {
 		const state: Partial<EditorState> = {selected};
-		if (!["basic", "ui"].includes(this.state.activeEditorMode)) {
+		if (!["basic", "uiSchema"].includes(this.state.activeEditorMode)) {
 			state.activeEditorMode = "basic";
 		}
 		this.setState(state as EditorState);
