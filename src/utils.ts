@@ -331,10 +331,16 @@ export function getScrollPositionForScrollIntoViewIfNeeded(elem: HTMLElement, to
 	const containerTop = container.scrollTop + topOffset;
 	const containerBottom = containerTop + container.clientHeight - bottomOffset;
 
+	const toTop = () => containerTop - containerTop + elemTop;
+	const toBottom = () => container.scrollTop + elemBottom - containerBottom;
+
 	if (elemTop < containerTop) {
-		return containerTop - containerTop + elemTop;
+		return toTop();
 	} else if (elemBottom > containerBottom) {
-		return container.scrollTop + elemBottom - containerBottom;
+		// Priorize scrolling to top if scrolling to bottom would obscure top.
+		return elemTop < toBottom() + topOffset
+			? toTop()
+			: toBottom();
 	}
 	return container.scrollTop;
 }
