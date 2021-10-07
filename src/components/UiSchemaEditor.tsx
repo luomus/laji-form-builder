@@ -135,7 +135,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 								key: translationKey,
 								value: ["fi", "sv", "en"].reduce((byLang, lang) => ({
 									...byLang,
-									[lang]: lang === this.context.lang ? newValue : currentValue
+									[lang]: lang === this.context.editorLang ? newValue : currentValue
 								}), {})
 							});
 					} else {
