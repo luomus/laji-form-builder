@@ -119,6 +119,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			type === "boolean" && "Boolean"
 			|| type === "string" && "String"
 			|| type === "array" && "object"
+			|| type === "integer" && "Integer"
 			|| type;
 
 		const maybePrimitiveDefault = (JSONSchema as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)]?.();

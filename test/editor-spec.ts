@@ -8,14 +8,43 @@ describe("Editor", () => {
 		builder = await createBuilder({id: "JX.519"});
 	});
 
+	describe("lang", () => {
+		it("fi selected by default", async () => {
+			expect(await builder.lang.$fi.getText()).toBe(await builder.lang.$active.getText());
+		});
+
+		describe("changing", () => {
+			beforeAll(async () => {
+				await builder.lang.$sv.click();
+			});
+
+			afterAll(async () => {
+				await builder.lang.$fi.click();
+			});
+
+			it("changes active", async () => {
+				expect(await builder.lang.$sv.getText()).toBe(await builder.lang.$active.getText());
+			});
+
+			it("changes preview form lang", async () => {
+				await browser.sleep(100);
+				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText()).toBe("Observatörernas namn är offentliga");
+			});
+
+			it("doesn't change editor UI lang", async () => {
+				expect(await builder.tabs.$options.getText()).toBe("Ominaisuudet");
+			});
+		});
+	});
+
 	describe("tabs", () => {
 
 		const testFieldDisplaysEditor = async (field: FieldSelectorPO, parentPath: string) => {
 			const path = `${parentPath}/${await field.label}`;
-			const fields = await field.getFieldSelectors();
 			// idk why, but protractor throws errors without this.
 			await builder.$fieldEditor.isPresent();
 			await field.$field.click();
+			const fields = await field.getFieldSelectors();
 			expect(await isDisplayed(builder.$fieldEditor)).toBe(true, `Editor didn't display when selected ${path}`);
 			for (const field of fields) {
 				await testFieldDisplaysEditor(field, path);
@@ -75,28 +104,4 @@ describe("Editor", () => {
 		});
 	});
 
-	describe("lang", () => {
-		it("fi selected by default", async () => {
-			expect(await builder.lang.$fi.getText()).toBe(await builder.lang.$active.getText());
-		});
-
-		describe("changing", () => {
-			beforeAll(async () => {
-				await builder.lang.$sv.click();
-			});
-
-			afterAll(async () => {
-				await builder.lang.$fi.click();
-			});
-
-			it("changes active", async () => {
-				expect(await builder.lang.$sv.getText()).toBe(await builder.lang.$active.getText());
-			});
-
-			it("changes preview form lang", async () => {
-				await browser.sleep(100);
-				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText()).toBe("Observatörernas namn är offentliga");
-			});
-		});
-	});
 });
