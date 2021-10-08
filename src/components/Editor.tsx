@@ -366,6 +366,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		const isSelected = Field.isSelected(this.props.selected, this.props.pointer);
 		const containerClassName = classNames(
 			this.nmspc("item"),
+			this.nmspc(pointer.substr(1).replace(/\//g, "-")),
 			isSelected && this.nmspc("item-selected")
 		);
 		return (

@@ -7,7 +7,7 @@ import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unpref
 import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
-import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions, isEmptyString } from "laji-form/lib/utils";
+import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions, isEmptyString, immutableDelete } from "laji-form/lib/utils";
 import { JSONEditor } from "./components";
 import { Context } from "./Context";
 import { FieldProps } from "@rjsf/core";
@@ -119,7 +119,12 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			if (schemaForUiSchema?.type === "string" && !schemaForUiSchema?.enum) {
 				const doConfirm = () => !confirm(this.context.translations["editor.confirmDontTranslate"]);
 
-				if (currentValue?.[0] === "@") {
+				if (newValue === undefined) {
+					if (currentValue?.[0] === "@") {
+						events.push({type: "translations", op: "delete", key: currentValue});
+					}
+					newUiSchema = immutableDelete(newUiSchema, changedPath);
+				} else if (currentValue?.[0] === "@") {
 					events.push({type: "translations", key: currentValue, value: newValue ?? ""});
 				} else {
 					const translationKey =  `@${this.props.path}${changedPath}`;

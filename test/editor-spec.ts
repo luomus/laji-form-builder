@@ -1,5 +1,6 @@
+import { updateValue } from "laji-form/test-export/test-utils";
 import { $, browser, protractor } from "protractor";
-import { createBuilder, BuilderPO, isDisplayed, FieldSelectorPO } from "./test-utils";
+import { createBuilder, BuilderPO, isDisplayed, ElementFinder } from "./test-utils";
 
 describe("Editor", () => {
 
@@ -83,6 +84,88 @@ describe("Editor", () => {
 			it("field editor displayed for all forms", async () => {
 				let $field = builder.$rootFieldSelector;
 				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
+			});
+
+			describe("ui:title", () => {
+				const fieldName = "gatheringEvent.dateBegin";
+				const getRenderedUiTitle = () => builder.formPreview.locate(fieldName).$("label").getText();
+				let origFi: string, origSv: string, origEn: string;
+				let $uiTitle: ElementFinder;
+
+				beforeAll(async (done) => {
+					await builder.activateFieldByPointer(fieldName);
+					$uiTitle = (await builder.editorLocate("$ui:title")).$("input");
+
+					origFi = await getRenderedUiTitle();
+					await builder.lang.changeTo("sv");
+					origSv = await getRenderedUiTitle();
+					await builder.lang.changeTo("en");
+					origEn = await getRenderedUiTitle();
+					await builder.lang.changeTo("fi");
+
+					done();
+				});
+
+				it("when empty adding when empty adds with all langs", async () => {
+					await updateValue($uiTitle, "foo");
+
+					expect(await getRenderedUiTitle()).toBe("foo");
+					await builder.lang.$sv.click();
+					expect(await getRenderedUiTitle()).toBe("foo");
+					await builder.lang.$en.click();
+					expect(await getRenderedUiTitle()).toBe("foo");
+
+					await builder.lang.$fi.click();
+				});
+
+				describe("when not empty", () => {
+
+					it("if value same for all, editing asks if the edition should be done for all langs", async () => {
+						await updateValue($uiTitle, "foobar");
+						expect(await browser.switchTo().alert().getText()).not.toBeFalsy();
+					});
+
+					it("accepting updates only for selected lang", async () => {
+						await browser.switchTo().alert().accept();
+						expect(await getRenderedUiTitle()).toBe("foobar");
+						await builder.lang.changeTo("sv");
+						expect(await getRenderedUiTitle()).toBe("foobar");
+						await builder.lang.changeTo("en");
+						expect(await getRenderedUiTitle()).toBe("foobar");
+
+						await builder.lang.changeTo("fi");
+					});
+
+					it("editing asks if the edition should be done for all langs after all-lang update", async () => {
+						await updateValue($uiTitle, "foobarbar");
+						expect(await browser.switchTo().alert().getText()).not.toBeFalsy();
+					});
+
+					it("dismissing updates only for selected lang", async () => {
+						await browser.switchTo().alert().dismiss();
+						expect(await getRenderedUiTitle()).toBe("foobarbar");
+						await builder.lang.changeTo("sv");
+						expect(await getRenderedUiTitle()).toBe("foobar");
+						await builder.lang.changeTo("en");
+						expect(await getRenderedUiTitle()).toBe("foobar");
+
+						await builder.lang.changeTo("fi");
+					});
+
+					it("clearing value clears for all langs without confirming and restores original label", async () => {
+						await updateValue($uiTitle, "");
+						expect(await getRenderedUiTitle()).toBe(origFi);
+						expect(await $uiTitle.getAttribute("value")).toBe("");
+						await builder.lang.changeTo("sv");
+						expect(await getRenderedUiTitle()).toBe(origSv);
+						expect(await $uiTitle.getAttribute("value")).toBe("");
+						await builder.lang.changeTo("en");
+						expect(await getRenderedUiTitle()).toBe(origEn);
+						expect(await $uiTitle.getAttribute("value")).toBe("");
+
+						await builder.lang.changeTo("fi");
+					});
+				});
 			});
 		});
 

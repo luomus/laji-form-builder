@@ -1,8 +1,13 @@
-import { $, protractor, browser, ElementFinder } from "protractor";
+import { $, protractor, browser, ElementFinder as _ElementFinder, by, element } from "protractor";
 import { gnmspc, nmspc } from "../src/utils";
-import { navigateToForm, emptyForm, lajiFormLocate } from "laji-form/test-export/test-utils";
+import { navigateToForm, emptyForm, lajiFormLocate, getLocatorForContextId } from "laji-form/test-export/test-utils";
+import { Lang } from "../src/model";
 
 const EC = protractor.ExpectedConditions;
+
+export declare class ElementFinder extends _ElementFinder {
+		then: (fn: (value: any) => any, errorFn?: (error: any) => any) => Promise<any>;
+}
 
 // Class namespace
 const cnmspc = (fn: (str: string) => string) => (str: string) => `.${(fn(str))}`;
@@ -41,7 +46,19 @@ export class BuilderPO {
 		$fi: this.$$langs.get(0),
 		$sv: this.$$langs.get(1),
 		$en: this.$$langs.get(2),
-		$active: this.$langsContainer.$(".active")
+		$active: this.$langsContainer.$(".active"),
+		changeTo: async (lang: Lang) => {
+			function waitForCssClass(elementFinder: ElementFinder, desiredClass: string) {
+				return async function () {
+					const className = await elementFinder.getAttribute("class");
+					return className && className.indexOf(desiredClass) >= 0;
+				};
+			}
+			const order: Record<Lang, number> = {fi: 0, sv: 1, en: 2};
+			const idx = order[lang];
+			await this.$$langs.get(idx).click();
+			await browser.wait(waitForCssClass(this.formPreview.$rjsf, lang));
+		}
 	};
 
 	private $tabsContainer = this.$toolbar.$(this.nmspc("chooser"));
@@ -54,25 +71,49 @@ export class BuilderPO {
 	};
 	formPreview = {
 		$container: $("#app > .laji-form"),
+		$rjsf: $("#app > .laji-form form") as ElementFinder,
 		locate: lajiFormLocate
 	}
 
-	$fieldSelectorContainer = $(gcnmspc("field-chooser"))
-	$fieldEditor = $(gcnmspc("field-editor"))
-	$rootFieldSelector = this.$fieldSelectorContainer.$(`:scope > ${gcnmspc("field")}`);
+	$fieldSelectorContainer = $(gcnmspc("field-chooser")) as ElementFinder
+	$fieldEditor = $(gcnmspc("field-editor")) as ElementFinder
+	$rootFieldSelector = this.$fieldSelectorContainer.$(`:scope > ${gcnmspc("field")}`) as ElementFinder;
 	getFieldSelector = ($field: ElementFinder): FieldSelectorPO => ({
 		$field,
 		label: $field.$(`:scope > span > ${gcnmspc("field-label")}`).getText() as Promise<string>,
 		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then($es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))))
 	});
-	getActiveField = () => this.getFieldSelector(this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`));
+	getActiveField = () => this.getFieldSelector(this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`) as ElementFinder);
+	getFieldByPointer = (pointer: string) => $(gcnmspc(`field-document-${pointer.replace(/\./g, "-")}`))
+	activateFieldByPointer = async (pointer: string) => {
+		let splittedCumulated = "";
+		for (const split of pointer.split(".")) {
+			splittedCumulated += split;
+			await this.getFieldByPointer(splittedCumulated).click();
+			splittedCumulated += ".";
+		}
+	}
 
 	private $optionsEditorContainer = $(gcnmspc("options-editor"));
 	optionsEditor = {
 		$container: this.$optionsEditorContainer,
-		$spinner: this.$optionsEditorContainer.$(":scope > .react-spinner"),
-		$form: this.$optionsEditorContainer.$(".laji-form"),
+		$spinner: this.$optionsEditorContainer.$(":scope > .react-spinner") as ElementFinder,
+		$form: this.$optionsEditorContainer.$(".laji-form") as ElementFinder,
 		waitUntilLoaded: () => (browser.wait(EC.visibilityOf(this.optionsEditor.$form)) as Promise<void>)
+	}
+
+	async editorLocate(path: string): Promise<ElementFinder> {
+		const $root = this.$editor.$(".laji-form .rjsf > div");
+		const id = await $root.getAttribute("id");
+		const contextId = id.match(/\d+/)?.[0];
+		if (typeof contextId !== "string") {
+			throw "No form found for editorLocate()";
+		}
+		const asNumber = +contextId;
+		if (typeof asNumber !== "number" || isNaN(asNumber)) {
+			throw "No form found for editorLocate()";
+		}
+		return element(by.id(getLocatorForContextId(asNumber)(path).substr(1))) as ElementFinder;
 	}
 
 	async waitUntilLoaded() {
@@ -83,9 +124,9 @@ export class BuilderPO {
 
 	$pickerButton = $(gcnmspc("elem-picker"));
 	picker = {
-		$button: this.$pickerButton,
-		isButtonActive: () => isDisplayed(this.$pickerButton.$(".active")),
-		$highlighter: $(gcnmspc("picker-highlighter"))
+		$button: this.$pickerButton as ElementFinder,
+		isButtonActive: () => isDisplayed(this.$pickerButton.$(".active") as ElementFinder),
+		$highlighter: $(gcnmspc("picker-highlighter")) as ElementFinder
 	}
 }
 
