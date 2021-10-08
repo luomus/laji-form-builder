@@ -20,10 +20,30 @@ $danger-7: darken($danger, 2 * 10%);
 $danger-8: darken($danger, 3 * 10%);
 $danger-9: darken($danger, 4 * 10%);
 
-$neutral-separating: darken($neutral, 30%);
-$darker: #47494e;
+$dark: #47494e;
+$dark-1: lighten($dark, 4 * 10%);
+$dark-2: lighten($dark, 3 * 10%);
+$dark-3: lighten($dark, 2 * 10%);
+$dark-4: lighten($dark, 1 * 10%);
+$dark-5: $dark;
+$dark-6: darken($dark, 1 * 10%);
+$dark-7: darken($dark, 2 * 10%);
+$dark-8: darken($dark, 3 * 10%);
+$dark-9: darken($dark, 4 * 10%);
+
 $accent: #337ab7;
+$accent-1: lighten($accent, 4 * 10%);
+$accent-2: lighten($accent, 3 * 10%);
+$accent-3: lighten($accent, 2 * 10%);
+$accent-4: lighten($accent, 1 * 10%);
+$accent-5: $accent;
+$accent-6: darken($accent, 1 * 10%);
+$accent-7: darken($accent, 2 * 10%);
+$accent-8: darken($accent, 3 * 10%);
+$accent-9: darken($accent, 4 * 10%);
+
 $hilight: $danger;
+$neutral-separating: $neutral-2;
 
 $padding: 10px;
 $bRadius: 2px;
@@ -46,8 +66,11 @@ $bRadius: 2px;
 .ljb {
 	$root: &;
 	&-field {
-		& > span:hover:not(&-selected) {
-			background-color: lighten($darker, 20%);
+		& > span:hover {
+			background-color: $dark-3;
+		}
+		& > &-item-selected:hover {
+			background-color: $accent-4;
 		}
 		&-expanded, &-contracted {
 			width: 0px;
@@ -68,17 +91,17 @@ $bRadius: 2px;
 			&:before {
 				content: "✕";
 				font-weight: bold;
-				color: lighten(red, 20%);
+				color: $danger-3;
 			}
 			&:hover:before {
-				color: #ff0000;
+				color: $danger;
 			}
 		}
 		&-item {
 			display: flex;
 
 			&-selected {
-				background-color: #337ab7;
+				background-color: $accent;
 				color: white;
 			}
 		}
@@ -111,7 +134,7 @@ $bRadius: 2px;
 	}
 	&-editor-nav-bar {
 		padding: $padding;
-		background-color: $darker;
+		background-color: $dark;
 	}
 	&-editor-toolbar .glyphicon.active {
 		color: $accent;
@@ -180,7 +203,7 @@ $bRadius: 2px;
 	}
 	
 	&-json-editor-invalid {
-		background-color: lighten(#ff0000, 30%);
+		background-color: $danger-2;
 	}
 
 	&-close-button {
