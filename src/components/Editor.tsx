@@ -363,12 +363,13 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 				? "expanded"
 				: "contracted"
 			: "nonexpandable");
+		const isSelected = Field.isSelected(this.props.selected, this.props.pointer);
 		const containerClassName = classNames(
 			this.nmspc("item"),
-			this.nmspc(Field.isSelected(this.props.selected, this.props.pointer) && "selected")
+			isSelected && this.nmspc("item-selected")
 		);
 		return (
-			<div className={this.nmspc()} ref={this.fieldRef}>
+			<div className={classNames(this.nmspc(), isSelected && this.nmspc("selected"))} ref={this.fieldRef}>
 				<Clickable
 					className={containerClassName}
 					onClick={this.onThisSelected}

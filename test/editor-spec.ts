@@ -1,4 +1,4 @@
-import { $, browser } from "protractor";
+import { $, browser, protractor } from "protractor";
 import { createBuilder, BuilderPO, isDisplayed, FieldSelectorPO } from "./test-utils";
 
 describe("Editor", () => {
@@ -101,6 +101,46 @@ describe("Editor", () => {
 				await builder.optionsEditor.waitUntilLoaded();
 				expect(await isDisplayed(builder.optionsEditor.$form)).toBe(true);
 			});
+		});
+	});
+
+	describe("picker", () => {
+		it("activates on click", async (done) => {
+			await builder.picker.$button.click();
+			expect(await builder.picker.isButtonActive()).toBe(true);
+			done();
+		});
+
+		it("displays highlighter", async (done) => {
+			await browser.actions()
+			  .mouseMove(builder.formPreview.locate("secureLevel").getWebElement())
+			  .perform();
+
+			expect(await isDisplayed(builder.picker.$highlighter)).toBe(true);
+			done();
+		});
+
+		it("inactives on elem click", async (done) => {
+			await builder.picker.$highlighter.click();
+			await builder.picker.$button.click();
+			done();
+		});
+
+		it("clears highlighter on elem click", async (done) => {
+			expect(await isDisplayed(builder.picker.$highlighter)).toBe(false);
+			done();
+		});
+
+		it("selects clicked field on editor", async (done) => {
+			expect(await builder.getActiveField().label).toBe("secureLevel");
+			done();
+		});
+
+		it("inactivates on esc", async (done) => {
+			await builder.picker.$button.click();
+			$("body").sendKeys(protractor.Key.ESCAPE);
+			expect(await builder.picker.isButtonActive()).toBe(false);
+			done();
 		});
 	});
 

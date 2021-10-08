@@ -6,6 +6,7 @@
   "scripts": {
     "start": "npx webpack serve",
     "test": "HOST=127.0.0.1 PORT=8082 protractor protractor.conf.js",
+    "test:debug": "HEADLESS=false HOST=127.0.0.1 PORT=8082 node --inspect-brk node_modules/protractor/bin/protractor protractor.conf.js",
     "lint": "eslint -c .eslintrc.prod.json src playground",
     "build:lib": "rimraf lib && NODE_ENV=production tsc -p tsconfig.lib.json",
     "build:dist": "rimraf dist && NODE_ENV=production webpack --config webpack.config.dist.js && rimraf dist/styles.js",

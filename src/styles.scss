@@ -62,10 +62,6 @@ $bRadius: 2px;
 		&-contracted:before {
 			content: "►";
 		}
-		&-selected {
-			background-color: #337ab7;
-			color: white;
-		}
 		&-delete {
 			margin-left: auto;
 
@@ -80,6 +76,11 @@ $bRadius: 2px;
 		}
 		&-item {
 			display: flex;
+
+			&-selected {
+				background-color: #337ab7;
+				color: white;
+			}
 		}
 		&-label {
 			text-overflow: ellipsis;

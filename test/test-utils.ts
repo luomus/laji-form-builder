@@ -65,7 +65,8 @@ export class BuilderPO {
 		label: $field.$(`:scope > span > ${gcnmspc("field-label")}`).getText() as Promise<string>,
 		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then($es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))))
 	});
-	
+	getActiveField = () => this.getFieldSelector(this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`));
+
 	private $optionsEditorContainer = $(gcnmspc("options-editor"));
 	optionsEditor = {
 		$container: this.$optionsEditorContainer,
@@ -78,6 +79,13 @@ export class BuilderPO {
 		await (browser.wait(EC.visibilityOf(this.formPreview.$container)) as Promise<void>);
 		await (browser.wait(EC.visibilityOf(this.$toolbar)) as Promise<void>);
 		return;
+	}
+
+	$pickerButton = $(gcnmspc("elem-picker"));
+	picker = {
+		$button: this.$pickerButton,
+		isButtonActive: () => isDisplayed(this.$pickerButton.$(".active")),
+		$highlighter: $(gcnmspc("picker-highlighter"))
 	}
 }
 
