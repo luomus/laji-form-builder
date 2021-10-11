@@ -41,8 +41,6 @@ describe("Editor", () => {
 
 		const testFieldDisplaysEditor = async (field: FieldSelectorPO, parentPath: string) => {
 			const path = `${parentPath}/${await field.label}`;
-			// idk why, but protractor throws errors without this.
-			await builder.$fieldEditor.isPresent();
 			await field.$field.click();
 			const fields = await field.getFieldSelectors();
 			expect(await isDisplayed(builder.$fieldEditor)).toBe(true, `Editor didn't display when selected ${path}`);
