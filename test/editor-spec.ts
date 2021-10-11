@@ -1,6 +1,6 @@
 import { updateValue } from "laji-form/test-export/test-utils";
 import { $, browser, protractor } from "protractor";
-import { createBuilder, BuilderPO, isDisplayed, ElementFinder } from "./test-utils";
+import { createBuilder, BuilderPO, isDisplayed, ElementFinder, FieldSelectorPO } from "./test-utils";
 
 describe("Editor", () => {
 
@@ -16,11 +16,11 @@ describe("Editor", () => {
 
 		describe("changing", () => {
 			beforeAll(async () => {
-				await builder.lang.$sv.click();
+				await builder.lang.changeTo("sv");
 			});
 
 			afterAll(async () => {
-				await builder.lang.$fi.click();
+				await builder.lang.changeTo("fi");
 			});
 
 			it("changes active", async () => {
@@ -28,7 +28,6 @@ describe("Editor", () => {
 			});
 
 			it("changes preview form lang", async () => {
-				await browser.sleep(100);
 				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText()).toBe("Observatörernas namn är offentliga");
 			});
 
