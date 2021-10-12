@@ -62,7 +62,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		super(props);
 		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
 		this.appTranslations = constructTranslations(appTranslations) as any;
-		this.metadataService = new MetadataService(this.apiClient);
+		this.metadataService = new MetadataService(this.apiClient, props.lang);
 		this.formService = new FormService(this.apiClient);
 		this.fieldService = new FieldService(this.metadataService, this.formService, props.lang);
 		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
@@ -81,7 +81,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	componentDidUpdate({lang: prevLang}: BuilderProps) {
-		prevLang !== this.props.lang && this.apiClient?.setLang(this.props.lang);
+		if (prevLang !== this.props.lang && this.state.lang === prevLang) {
+			this.setState({lang: this.props.lang}, () => {
+				this.updateLang();
+			});
+		}
 		this.updateFromId(this.state.id);
 	}
 
@@ -113,13 +117,23 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	onLangChange = (lang: Lang) => {
-		this.apiClient.setLang(lang);
-		this.fieldService.setLang(lang);
 		this.setState({lang}, async () => {
-			await this.updateSchemas();
+			this.updateLang();
+			if (!this.state.tmp) {
+				await this.updateSchemas();
+				this.propagateState();
+			} else if (this.state.master) {
+				const schemas = await this.fieldService.masterToJSONFormat(this.state.master);
+				this.setState({schemas}, this.propagateState);
+			}
 			this.props.onLangChange(this.state.lang);
-			this.propagateState();
 		});
+	}
+
+	private updateLang() {
+		this.apiClient.setLang(this.state.lang);
+		this.fieldService.setLang(this.state.lang);
+		this.metadataService.setLang(this.state.lang);
 	}
 
 	getContext = memoize((lang: Lang, editorLang: Lang): ContextProps => ({

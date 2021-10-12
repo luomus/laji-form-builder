@@ -1,7 +1,7 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
 import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas } from "../model";
-import { applyTransformations, JSONSchema, translate, unprefixProp } from "../utils";
+import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 
 const requiredHacks: Record<string, boolean> = {
@@ -58,7 +58,7 @@ export default class FieldService {
 		const transformationsForAllTypes = [
 			excludeFromCopy,
 			optionsToSchema,
-			addTitleAndDefault(property, translations)
+			addTitleAndDefault(property, this.lang, translations)
 		];
 
 		if (property.isEmbeddable) {
@@ -124,7 +124,7 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 const mapMaxOccurs = ({maxOccurs}: PropertyModel) => (schema: JSONSchemaE) =>
 	maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
 
-const addTitleAndDefault = (property: PropertyModel, translations?: Record<string, string>) => (schema: any, field: Field) => {
+const addTitleAndDefault = (property: PropertyModel, lang: Lang, translations?: Record<string, string>) => (schema: any, field: Field) => {
 	const _default = field.options?.default;
 	const title = property.property in titleHacks
 		? titleHacks[property.property]
@@ -132,7 +132,7 @@ const addTitleAndDefault = (property: PropertyModel, translations?: Record<strin
 			? translations
 				? translate(field.label, translations)
 				: field.label
-			: property.label;
+			: multiLang(property.label, lang);
 	if (title !== undefined) {
 		schema.title = title;
 	}

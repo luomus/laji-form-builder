@@ -70,7 +70,7 @@ export class BuilderPO {
 		$active: this.$tabsContainer.$(gcnmspc("active"))
 	};
 	formPreview = {
-		$container: $("#app > .laji-form"),
+		$container: $("#app > .laji-form") as ElementFinder,
 		$rjsf: $("#app > .laji-form form") as ElementFinder,
 		locate: lajiFormLocate
 	}
@@ -127,6 +127,17 @@ export class BuilderPO {
 		$button: this.$pickerButton as ElementFinder,
 		isButtonActive: () => isDisplayed(this.$pickerButton.$(".active") as ElementFinder),
 		$highlighter: $(gcnmspc("picker-highlighter")) as ElementFinder
+	}
+
+	wizardNmspc = cnmspc(nmspc("creator-wizard"));
+	$creator = $(this.wizardNmspc(""));
+	create = {
+		$jsonButton: $(this.wizardNmspc("create-json")) as ElementFinder,
+		$DatabankButton: $(this.wizardNmspc("create-databank")) as ElementFinder,
+		json: {
+			$input: $(this.wizardNmspc("json")).$("textarea") as ElementFinder,
+			$submit: $(this.wizardNmspc("json")).$("button") as ElementFinder
+		}
 	}
 }
 

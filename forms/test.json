@@ -1,0 +1,1815 @@
+{
+  "name": "Retkilomake",
+  "description": "@description",
+  "id": "JX.519",
+  "language": "fi",
+  "title": "@tripReport",
+  "shortDescription": "@shortDescription",
+  "fields": [
+    {
+      "name": "MZ.editors",
+      "label": "@editorsLabel"
+    },
+    {
+      "name": "MX.secureLevel",
+      "label": "@secureLevelLabel",
+      "options": {
+        "default": "MX.secureLevelNone",
+        "whitelist": [
+          "MX.secureLevelKM10",
+          "MX.secureLevelNone"
+        ]
+      }
+    },
+    {
+      "name": "gatheringEvent",
+      "label": "",
+      "type": "fieldset",
+      "validators": {
+        "presence": {
+          "allowEmpty": false
+        }
+      },
+      "fields": [
+        {
+          "name": "MY.leg",
+          "label": "@legLabel",
+          "validators": {
+            "presence": {
+              "message": "@legPresenceValidation"
+            }
+          }
+        },
+        {
+          "name": "MY.legPublic",
+          "label": "@legPublicLabel",
+          "type": "checkbox",
+          "options": {
+            "default": true
+          }
+        },
+        {
+          "name": "MY.dateBegin",
+          "options": {
+            "excludeFromCopy": true
+          },
+          "validators": {
+            "datetime": {
+              "latest": "now",
+              "notValid": "@dateInvalid",
+              "tooLate": "@dateInTheFutureValidation"
+            },
+            "crossCheck": {
+              "check": "dateEnd",
+              "message": "@startMissingValidation"
+            },
+            "presence": {
+              "message": "@dateBeginPresenceValidation"
+            },
+            "compareDate": {
+              "hasTimeIfOtherHas": "dateEnd",
+              "message": "@dateBeginHasTimeIfOtherHasValidation"
+            }
+          }
+        },
+        {
+          "name": "MY.dateEnd",
+          "options": {
+            "excludeFromCopy": true
+          },
+          "validators": {
+            "datetime": {
+              "latest": "now",
+              "notValid": "@dateInvalid",
+              "tooLate": "@dateInTheFutureValidation"
+            },
+            "compareDate": {
+              "isAfter": "dateBegin",
+              "message": "@dateSpanValidation"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "MY.keywords"
+    },
+    {
+      "name": "gatherings",
+      "type": "collection",
+      "validators": {
+        "presence": {
+          "message": "@gatheringsPresenceValidation",
+          "allowEmpty": false
+        }
+      },
+      "fields": [
+        {
+          "name": "MY.dateBegin",
+          "options": {
+            "excludeFromCopy": true
+          },
+          "validators": {
+            "datetime": {
+              "latest": "now",
+              "notValid": "@dateInvalid",
+              "tooLate": "@dateInTheFutureValidation"
+            },
+            "crossCheck": {
+              "check": "dateEnd",
+              "message": "@startMissingValidation"
+            }
+          }
+        },
+        {
+          "name": "MY.dateEnd",
+          "validators": {
+            "datetime": {
+              "latest": "now",
+              "notValid": "@dateInvalid",
+              "tooLate": "@dateInTheFutureValidation"
+            },
+            "compareDate": {
+              "isAfter": "dateBegin",
+              "message": "@dateSpanValidation"
+            }
+          }
+        },
+        {
+          "name": "MY.namedPlaceID"
+        },
+        {
+          "name": "MY.geometry"
+        },
+        {
+          "name": "MY.coordinateRadius",
+          "label": "@coordinateRadiusLabel"
+        },
+        {
+          "name": "MY.alt"
+        },
+        {
+          "name": "MY.country"
+        },
+        {
+          "name": "MY.administrativeProvince"
+        },
+        {
+          "name": "MY.biologicalProvince"
+        },
+        {
+          "name": "MY.municipality"
+        },
+        {
+          "name": "MY.locality"
+        },
+        {
+          "name": "MY.localityDescription"
+        },
+        {
+          "name": "MZ.images",
+          "options": {
+            "excludeFromCopy": true
+          },
+          "label": "@gatheringsImagesLabel"
+        },
+        {
+          "name": "MY.habitat",
+          "label": "@biotooppiLabel"
+        },
+        {
+          "name": "MY.habitatDescription"
+        },
+        {
+          "name": "MY.weather",
+          "options": {
+            "excludeFromCopy": true
+          }
+        },
+        {
+          "name": "MY.notes",
+          "options": {
+            "excludeFromCopy": false
+          }
+        },
+        {
+          "name": "MY.samplingMethod"
+        },
+        {
+          "name": "MY.samplingMethodNotes"
+        },
+        {
+          "name": "MY.observationDays"
+        },
+        {
+          "name": "MY.observationMinutes"
+        },
+        {
+          "name": "MY.trapCount"
+        },
+        {
+          "name": "MY.taxonCensus",
+          "type": "fieldset",
+          "fields": [
+            {
+              "name": "MY.censusTaxonID"
+            },
+            {
+              "name": "MY.taxonCensusType"
+            }
+          ]
+        },
+        {
+          "name": "units",
+          "label": "@unitsLabel",
+          "type": "collection",
+          "options": {
+            "minItems": 1,
+            "uniqueItems": false,
+            "excludeFromCopy": true
+          },
+          "warnings": {
+            "presence": {
+              "message": "@unitsPresenceValidation",
+              "allowEmpty": false
+            }
+          },
+          "fields": [
+            {
+              "name": "MY.count"
+            },
+            {
+              "name": "MY.maleIndividualCount"
+            },
+            {
+              "name": "MY.femaleIndividualCount"
+            },
+            {
+              "name": "MY.sex"
+            },
+            {
+              "name": "MY.notes"
+            },
+            {
+              "name": "MY.taxonConfidence",
+              "options": {
+                "default": "MY.taxonConfidenceSure"
+              }
+            },
+            {
+              "name": "MY.recordBasis",
+              "options": {
+                "default": "MY.recordBasisHumanObservation",
+                "whitelist": [
+                  "",
+                  "MY.recordBasisHumanObservationPhoto",
+                  "MY.recordBasisPreservedSpecimen",
+                  "MY.recordBasisHumanObservationHandled",
+                  "MY.recordBasisHumanObservation",
+                  "MY.recordBasisHumanObservationAudio",
+                  "MY.recordBasisHumanObservationIndirect"
+                ]
+              }
+            },
+            {
+              "name": "MY.samplingMethod"
+            },
+            {
+              "name": "MY.samplingMethodNotes"
+            },
+            {
+              "name": "MY.preservation"
+            },
+            {
+              "name": "MY.wild"
+            },
+            {
+              "name": "MY.breeding"
+            },
+            {
+              "name": "MY.hostID",
+              "label": "@hostID"
+            },
+            {
+              "name": "MY.checklistID",
+              "options": {
+                "default": "",
+                "value_options": {
+                  "": "",
+                  "MR.1": "@checklistMR1Label"
+                }
+              },
+              "type": "select"
+            },
+            {
+              "name": "MY.atlasCode"
+            },
+            {
+              "name": "MY.twitched"
+            },
+            {
+              "name": "MY.plantLifeStage"
+            },
+            {
+              "name": "MY.plantStatusCode"
+            },
+            {
+              "name": "MY.lifeStage"
+            },
+            {
+              "name": "MY.hostInformalNameString"
+            },
+            {
+              "name": "MY.substrateSpecies"
+            },
+            {
+              "name": "MY.smell"
+            },
+            {
+              "name": "MY.smellNotes"
+            },
+            {
+              "name": "MY.taste"
+            },
+            {
+              "name": "MY.tasteNotes"
+            },
+            {
+              "name": "MY.informalTaxonGroups"
+            },
+            {
+              "name": "MZ.images"
+            },
+            {
+              "name": "identifications",
+              "options": {
+                "minItems": 1
+              },
+              "type": "collection",
+              "fields": [
+                {
+                  "name": "MY.taxon"
+                },
+                {
+                  "name": "MY.det"
+                },
+                {
+                  "name": "MY.detDate"
+                },
+                {
+                  "name": "MY.identificationBasis"
+                }
+              ]
+            },
+            {
+              "name": "unitGathering",
+              "type": "fieldset",
+              "fields": [
+                {
+                  "name": "MY.geometry"
+                },
+                {
+                  "name": "MY.dateBegin",
+                  "validators": {
+                    "datetime": {
+                      "latest": "now",
+                      "notValid": "@dateInvalid",
+                      "tooLate": "@dateInTheFutureValidation"
+                    },
+                    "crossCheck": {
+                      "check": "dateEnd",
+                      "message": "@startMissingValidation"
+                    }
+                  }
+                },
+                {
+                  "name": "MY.dateEnd",
+                  "validators": {
+                    "datetime": {
+                      "latest": "now",
+                      "notValid": "@dateInvalid",
+                      "tooLate": "@dateInTheFutureValidation"
+                    },
+                    "compareDate": {
+                      "isAfter": "dateBegin",
+                      "message": "@dateSpanValidation"
+                    }
+                  }
+                },
+                {
+                  "name": "MY.habitatIUCN"
+                },
+                {
+                  "name": "MY.habitatDescription"
+                },
+                {
+                  "name": "MY.substrate",
+                  "label": "@substrateLabel"
+                }
+              ]
+            },
+            {
+              "name": "unitFact",
+              "type": "fieldset",
+              "fields": [
+                {
+                  "name": "MY.autocompleteSelectedTaxonID"
+                }
+              ]
+            },
+            {
+              "name": "MY.birdPlumage"
+            },
+            {
+              "name": "MY.birdAge"
+            },
+            {
+              "name": "MY.movingStatus"
+            },
+            {
+              "name": "MY.distance"
+            },
+            {
+              "name": "MY.movingDirection"
+            },
+            {
+              "name": "MY.batBehavior"
+            },
+            {
+              "name": "MY.keywords",
+              "label": "@unitKeywordLabel"
+            },
+            {
+              "name": "MY.additionalIDs"
+            },
+            {
+              "name": "MY.areaInSquareMeters"
+            },
+            {
+              "name": "MZ.audio"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "translations": {
+    "en": {
+      "@hostID": "Host species identifier",
+      "@tripReport": "Field trip report",
+      "@description": "With this form you can record all observations and/or data from possible collection samples from a field trip which lasts one or several days.",
+      "@shortDescription": "Record all your observations and/or collection samples from a field trip.",
+      "@editorsLabel": "Edit rights",
+      "@legLabel": "Observers",
+      "@gatheringsLabel": "Location %{idx}",
+      "@gatheringsImagesLabel": "Images of the site",
+      "@unitsLabel": "Observations",
+      "@editorsHelp": "If you report an identified user as an observer and the user has added you as a friend, you can give the user rights to edit this field trip report. Additionally observations from this field trip report are shown to this particular user among his/her own observations.",
+      "@gatheringsHelp": "Start reporting observations by drawing the observation site on the map",
+      "@gatheringsItemsTitle": "Information about the observation site",
+      "@time": "Time",
+      "@addGathering": "Add a place",
+      "@addUnit": "Add an observation",
+      "@copyUnit": "Copy the observation",
+      "@youMustBeEditor": "You must be an editor.",
+      "@legPresenceValidation": "At least one observer must be reported.",
+      "@gatheringsPresenceValidation": "At least one location must be reported.",
+      "@unitsPresenceValidation": "At least one observation must be reported.",
+      "@dateSpanValidation": "The begin of the time span %{value} must be before it's end %{key}",
+      "@startMissingValidation": "The begin is required when the end is given.",
+      "@dateBeginPresenceValidation": "Date is required",
+      "@dateValidation": "Must be before %{date}",
+      "@all": "All",
+      "@mushroomsTitle": "Fungi",
+      "@substrateLabel": "Substrate notes",
+      "@addPhotoGlyphLabel": "Add a photo",
+      "@setLocationGlyphLabel": "Set location",
+      "@geometryValidation": "Gathering must have at least one feature.",
+      "@dateInTheFutureValidation": "Date can't be in the future",
+      "@dateInvalid": "Invalid date given. Please use format YYYY-MM-DD or YYYY-MM-DDTHH:MM.",
+      "@unitShortcutHelp": "unit",
+      "@gatheringShortcutHelp": "gathering",
+      "@gatheringShortcutNavigateHelp": "gathering",
+      "@unitShortcutNavigateHelp": "unit",
+      "@unitsTitleFormat": "Places %{idx} observations",
+      "@legHelp": "You can add your friend's username as an observer and the observation will also appear in his or her own observations. AutoComplete suggests the names of your verified friends. You can also add other observers by writing their names, even if they are not your friends. Then a red triangle with the name is displayed. Select \"Yes\" to let your friends edit the form. You can ask another user as your friend on your profile page. Your profile is opened by clicking on your username on the right in the top bar. Search for your friend by searching on the profile page and select \"Add as friend\". Once he or she has confirmed your request in his or her own profile, you are friends and you can, for example, in The notebook service reports common observations.",
+      "@taxonShorthandHelp": "Write (count) SPECIES (male individual count) (female individual count). The fields marked with brackets aren't required.",
+      "@checklistMR1Label": "FinBIF master checklist",
+      "@dateBeginHasTimeIfOtherHasValidation": "The time of the date begin must be given if date end has time.",
+      "@legPublicLabel": "Observer names are public",
+      "@legPublicHelp": "You can hide the observer names if needed by selecting \"No\". The observer names are always available to authoritatives.",
+      "@secureLevelLabel": "The observations geographic information is public in detail",
+      "@secureLevelHelp": "By selecting \"No\" the observations geographic information will be coarsened to a 10 x 10 km² square in public material. The geographic information will always be available to authoritatives in detail. Images attached to coarsened observations are public.",
+      "@gatheringsButtonsTitle": "Add a new place",
+      "@coordinateRadiusLabel": "Coordinate accuracy in meters",
+      "@batLifeStageLabel": "Age",
+      "@insectHostInformalNameStringLabel": "Host species or nutrition species",
+      "@insectLifeStageLabel": "Development stage",
+      "@taxonValidation": "Taxon name must be reported",
+      "@unitKeywordLabel": "Collection/Keywords",
+      "@addAudioGlyphLabel": "Add a recording",
+      "@addObserver": "Add an observer"
+    },
+    "sv": {
+      "@hostID": "Värdens artidentifierare",
+      "@tripReport": "Fältbesöksformulär",
+      "@description": "Med detta formulär kan du rapportera alla observationer och data från möjliga insamlingsprover från ett fältbesök som varar en eller flera dagar.",
+      "@shortDescription": "Du kan du rapportera alla observationer och möjliga insamlingsprover från ett fältbesök",
+      "@editorsLabel": "Redigeringsrättigheter",
+      "@legLabel": "Observatörer",
+      "@gatheringsLabel": "Plats %{idx}",
+      "@gatheringsImagesLabel": "Bilder av observationsplats",
+      "@unitsLabel": "Observationer",
+      "@editorsHelp": "Om du rapporterar en identifierad användare som observatör och användaren har lagt till dig som en vän, kan du ge användaren rätt att ändra denna fältbesöksrapport. Förutom observationer från denna fältbesöksrapport visas till användaren bland hans/hennes egna observationer.",
+      "@gatheringsHelp": "Börja rapportera observationer genom att dra observationsplatsen på kartan",
+      "@gatheringsItemsTitle": "Information av observationsplats",
+      "@time": "Tid",
+      "@addGathering": "Lägg till en plats",
+      "@addUnit": "Lägg till en observation",
+      "@copyUnit": "Kopiera observationen",
+      "@youMustBeEditor": "Du måste ha redigeringsrättigheter.",
+      "@legPresenceValidation": "Åtminstone en observatör måste rapporteras.",
+      "@gatheringsPresenceValidation": "Åtminstone ett plats måste rapporteras.",
+      "@unitsPresenceValidation": "Åtminstone en observation måste rapporteras.",
+      "@dateSpanValidation": "Början av tidsintervallet %{value} måste vara före slutet av den %{key}",
+      "@startMissingValidation": "Början krävs när slutet ges.",
+      "@dateBeginPresenceValidation": "Datumn krävs",
+      "@dateValidation": "Måste vara före %{date}",
+      "@dateInvalid": "Invalid date given. Please use format YYYY-MM-DD or YYYY-MM-DDTHH:MM.",
+      "@all": "Alla",
+      "@mushroomsTitle": "Svampar",
+      "@substrateLabel": "Anteckningar av substrat",
+      "@addPhotoGlyphLabel": "Lägg till en foto",
+      "@setLocationGlyphLabel": "Ange platsen",
+      "@geometryValidation": "Platsen måste ha åtminstone en figur",
+      "@dateInTheFutureValidation": "Datum bör inte vara i framtiden",
+      "@unitShortcutHelp": "observation",
+      "@gatheringShortcutHelp": "plats",
+      "@gatheringShortcutNavigateHelp": "plats",
+      "@unitShortcutNavigateHelp": "observation",
+      "@unitsTitleFormat": "Plats %{idx} observationer",
+      "@legHelp": "Du kan lägga till din väns användarnamn som observatör och observationen visas också i hans eller hennes egna observationer. Autoslutför föreslår namnen på dina verifierade vänner. Du kan också lägga till andra observatörer genom att skriva deras namn, även om de inte är dina vänner. Då visas en röd triangel med namnet. Välj \"Ja\" för att låta dina vänner redigera formuläret. Du kan fråga en annan användare som din vän på din profilsida. Din profil öppnas genom att klicka på ditt användarnamn till höger i den högsta fältet. Sök efter din vän genom att söka på profilsidan och välj \"Lägg till som vän\". När han eller hon har bekräftat din begäran i sin egen profil är ni vänner och ni kan till exempel i Skrivbok-tjänsten rapportera gemensamma observationer.",
+      "@biotooppiLabel": "biotop",
+      "@taxonShorthandHelp": "Skriv (antal) SPECIER (individantal av hane) (individantal av hone). Fälten markerade med parentes är inte nödvändiga.",
+      "@checklistMR1Label": "Finlands artdatacenters bemästra checklista",
+      "@dateBeginHasTimeIfOtherHasValidation": "Tidpunkten för datumet måste anges om datumänden har tid.",
+      "@legPublicLabel": "Observatörernas namn är offentliga",
+      "@legPublicHelp": "Om det behövs kan du dölja namnen på observatörerna från den öppna data genom att välja alternativet \"Nej\". Namnen på observatörerna är alltid tillgängliga för myndigheterna.",
+      "@secureLevelLabel": "De exakta platsinformationen för observationen är offentliga",
+      "@secureLevelHelp": "Om du väljer \"Nej\" diffuseras observationens platsdata i en 10 x 10 km2 kartruta i det öppna i materialet. Den exakta platsen för observationen är alltid tillgänglig för myndigheterna. För diffuserade observationer bifogade foton är offentliga.",
+      "@gatheringsButtonsTitle": "Lägg till en ny plats",
+      "@coordinateRadiusLabel": "Koordinera noggrannhet i meter",
+      "@batLifeStageLabel": "Ålder",
+      "@insectHostInformalNameStringLabel": "Värdart eller näringsart",
+      "@insectLifeStageLabel": "Utvecklingsstadie",
+      "@taxonValidation": "Taxonamn måste rapporteras",
+      "@unitKeywordLabel": "Samling/Nyckelord",
+      "@addAudioGlyphLabel": "Lägg till en inspelningen",
+      "@addObserver": "Lägg till en obvservatör"
+    },
+    "fi": {
+      "@hostID": "Isäntälajin tunniste",
+      "@tripReport": "Retkilomake",
+      "@description": "Tällä lomakkeella voit kirjata yhden tai useamman päivän kestäneen maastoretken kaikki havaintotiedot ja/tai kokoelmanäytteeksi otettujen yksilöiden tiedot. Havaintoja voi kirjata useammalta paikalta.",
+      "@shortDescription": "Kirjaa maastoretken kaikki havainto- ja/tai kokoelmanäytetiedot. Havaintoja voi kirjata myös usealta paikalta.",
+      "@editorsLabel": "Muokkausoikeus",
+      "@legLabel": "Havainnoijat",
+      "@gatheringsLabel": "Paikka %{idx}",
+      "@gatheringsImagesLabel": "Kuvat havaintopaikasta",
+      "@unitsLabel": "Havainnot",
+      "@editorsHelp": "Jos lisäät tälle lomakkeelle uuden havainnoijan, joka on profiilissasi luokiteltu kaveriksesi, voit antaa hänelle oikeuden muokata retkikertomusta. Muokkausoikeuden haltijoille kaikki lomakkeeseen tallennetut havainnot näkyvät myös heidän omina havaintoinaan.",
+      "@gatheringsHelp": "Aloita havaintojen ilmoittaminen piirtämällä havaintoalue kartalle",
+      "@gatheringsItemsTitle": "Havaintopaikan tiedot",
+      "@time": "Aika",
+      "@addGathering": "Lisää paikka",
+      "@addUnit": "Lisää havainto",
+      "@copyUnit": "Kopioi havainto",
+      "@youMustBeEditor": "Sinulla täytyy olla muokkausoikeus.",
+      "@legPresenceValidation": "Vähintään yksi havainnoija täytyy ilmoittaa.",
+      "@gatheringsPresenceValidation": "Vähintään yksi paikka täytyy ilmoittaa.",
+      "@unitsPresenceValidation": "Vähintään yksi havainto täytyy ilmoittaa.",
+      "@dateSpanValidation": "Aikavälin alun %{value} pitää olla ennen loppua %{key}",
+      "@dateBeginPresenceValidation": "Päivämäärä on pakollinen",
+      "@startMissingValidation": "Alku on pakollinen jos loppu on ilmoitettu.",
+      "@dateValidation": "Pitää olla ennen %{date}",
+      "@dateInvalid": "Virheellinen aika formaatti. Kirjoita aika formaatissa 'YYYY-MM-DD' tai 'YYYY-MM-DDTHH:MM'.",
+      "@all": "Kaikki",
+      "@mushroomsTitle": "Sienet",
+      "@substrateLabel": "Kasvualustamuistiinpanot",
+      "@addPhotoGlyphLabel": "Lisää valokuva",
+      "@setLocationGlyphLabel": "Valitse sijainti",
+      "@geometryValidation": "Paikalla täytyy olla vähintään yksi kuvio.",
+      "@dateInTheFutureValidation": "Päivämäärä ei voi olla tulevaisuudessa.",
+      "@unitShortcutInsertHelp": "havainto",
+      "@gatheringShortcutInsertHelp": "paikka",
+      "@gatheringShortcutNavigateHelp": "paikkaan",
+      "@unitShortcutNavigateHelp": "havaintoon",
+      "@unitsTitleFormat": "Paikan %{idx} havainnot",
+      "@legHelp": "Voit lisätä kaverisi käyttäjätunnuksen havainnoijaksi, jolloin havainto näkyy myös hänen omissa havainnoissaan. Automaattinen tekstin täydennys ehdottaa vahvistettujen kavereittesi nimiä. Voit myös lisätä muita havainnoijia kirjoittamalla heidän nimensä, vaikkeivat he olisi kavereitasi, tällöin näytetään punainen kolmio nimen kohdalla. Voit antaa kavereille oikeuden muokata lomaketta valitsemalla \"Kyllä\". Voit pyytää toista käyttäjää kaveriksesi profiilisivullasi. Profiilisi aukeaa klikkaamalla omaa käyttäjätunnustasi oikealla yläpalkissa. Etsi kaverisi nimellä hakemalla profiilisivulta ja valitse \"Lisää kaveriksi\". Sen jälkeen kun hän on vahvistanut pyyntösi omassa profiilissaan, olette kavereita ja voitte esim. Vihko-palvelussa tallentaa yhteisiä havaintoja.",
+      "@biotooppiLabel": "Biotooppi",
+      "@taxonShorthandHelp": "Kirjoita pikakirjoitukseen (määrä) LAJI (koiraiden yksilömäärä) (naaraiden yksilömäärä). Suluilla merkityt eivät ole pakollisia.",
+      "@checklistMR1Label": "Lajitietokeskuksen lajiluettelo",
+      "@dateBeginHasTimeIfOtherHasValidation": "Aikavälin alkamisen kellonaika on ilmoitettava jos loppumisen kellonaika ilmoitetaan",
+      "@legPublicLabel": "Havainnoijien nimet ovat julkisia",
+      "@legPublicHelp": "Tarvittaessa voit piilottaa havainnoijien nimet avoimesta aineistosta valitsemalla \"Ei\"-vaihtoehdon. Havainnoijien nimet ovat aina viranomaisten käytettävissä.",
+      "@secureLevelLabel": "Havainnon tarkat paikkatiedot ovat julkisia",
+      "@secureLevelHelp": "Valitsemalla \"Ei\"-vaihtoehdon havainnon paikkatiedot karkeistetaan 10 x 10 km² karttaruutuun avoimessa aineistossa. Havainnon tarkat paikkatiedot ovat aina viranomaisten käytettävissä. Karkeistettuihin havaintoihin liitetyt valokuvat ovat julkisia.",
+      "@gatheringsButtonsTitle": "Lisää uusi paikka",
+      "@coordinateRadiusLabel": "Koordinaattien tarkkuus metreinä",
+      "@batLifeStageLabel": "Ikä",
+      "@insectHostInformalNameStringLabel": "Isäntälaji tai ravintokasvi",
+      "@insectLifeStageLabel": "Kehitysaste",
+      "@taxonValidation": "Lajinimi täytyy ilmoittaa.",
+      "@unitKeywordLabel": "Kokoelma/Avainsanat",
+      "@addAudioGlyphLabel": "Lisää äänite",
+      "@addObserver": "Lisää havainnoitsija"
+    }
+  },
+  "uiSchema": {
+    "ui:shortcuts": {
+      "alt": {
+        "fn": "help",
+        "delay": 1
+      },
+      "alt+F5": {
+        "fn": "revalidate"
+      },
+      "Enter": {
+        "fn": "navigate"
+      },
+      "shift+Enter": {
+        "fn": "navigate",
+        "reverse": true
+      },
+      "ctrl+Enter": {
+        "fn": "textareaRowInsert"
+      },
+      "alt+ ": {
+        "fn": "navigate"
+      },
+      "alt+shift+ ": {
+        "fn": "navigate",
+        "reverse": true
+      },
+      "alt+PageDown": {
+        "fn": "navigateArray",
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutNavigateHelp"
+      },
+      "alt+PageUp": {
+        "fn": "navigateArray",
+        "reverse": true,
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutNavigateHelp"
+      },
+      "alt+ArrowRight": {
+        "fn": "navigateArray",
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutNavigateHelp"
+      },
+      "alt+ArrowLeft": {
+        "fn": "navigateArray",
+        "reverse": true,
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutNavigateHelp"
+      },
+      "alt+ArrowUp": {
+        "fn": "navigateArray",
+        "reverse": true,
+        "target": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units",
+        "targetLabel": "@unitShortcutNavigateHelp"
+      },
+      "alt+ArrowDown": {
+        "fn": "navigateArray",
+        "target": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units",
+        "targetLabel": "@unitShortcutNavigateHelp"
+      },
+      "alt+h": {
+        "fn": "navigateArray",
+        "reverse": true,
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutNavigateHelp"
+      },
+      "alt+j": {
+        "fn": "navigateArray",
+        "target": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units",
+        "targetLabel": "@unitShortcutNavigateHelp"
+      },
+      "alt+k": {
+        "fn": "navigateArray",
+        "reverse": true,
+        "target": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units",
+        "targetLabel": "@unitShortcutNavigateHelp"
+      },
+      "alt+l": {
+        "fn": "navigateArray",
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutNavigateHelp"
+      },
+      "alt+n": {
+        "fn": "navigateArray"
+      },
+      "alt+p": {
+        "fn": "navigateArray",
+        "reverse": true
+      },
+      "alt+Insert": {
+        "fn": "insert"
+      },
+      "alt+i": {
+        "fn": "insert"
+      },
+      "alt+Delete": {
+        "fn": "delete"
+      },
+      "alt+d": {
+        "fn": "delete"
+      },
+      "alt+u": {
+        "fn": "insert",
+        "target": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units",
+        "targetLabel": "@unitShortcutInsertHelp"
+      },
+      "alt+g": {
+        "fn": "insert",
+        "target": "root_gatherings",
+        "targetLabel": "@gatheringShortcutInsertHelp"
+      },
+      "alt+t": {
+        "fn": "autosuggestToggle"
+      }
+    },
+    "ui:order": [
+      "gatheringEvent",
+      "gatherings"
+    ],
+    "ui:field": "InjectField",
+    "ui:options": {
+      "injections": {
+        "fields": [
+          "editors",
+          "secureLevel",
+          "keywords"
+        ],
+        "target": "gatheringEvent"
+      }
+    },
+    "gatheringEvent": {
+      "ui:field": "NestField",
+      "classNames": "well well-sm",
+      "ui:order": [
+        "*",
+        "legPublic",
+        "secureLevel",
+        "eventTime",
+        "keywords"
+      ],
+      "ui:options": {
+        "nests": {
+          "legEditor": {
+            "fields": [
+              "leg",
+              "editors"
+            ],
+            "rootUiSchema": {
+              "ui:field": "NestField",
+              "ui:options": {
+                "nests": {
+                  "_legEditor": {
+                    "fields": [
+                      "leg",
+                      "editors"
+                    ],
+                    "title": "",
+                    "rootUiSchema": {
+                      "ui:functions": [
+                        {
+                          "ui:field": "DependentBooleanField",
+                          "ui:options": {
+                            "booleanField": "editors",
+                            "booleanDefiner": "leg"
+                          }
+                        },
+                        {
+                          "ui:field": "ArrayCombinerField"
+                        }
+                      ],
+                      "ui:field": "TableField",
+                      "ui:options": {
+                        "specialRules": "legEditors",
+                        "ui:buttonsDesktopLayout": true,
+                        "buttons": [
+                          {
+                            "fn": "add",
+                            "label": "@addObserver"
+                          }
+                        ]
+                      },
+                      "items": {
+                        "ui:functions": {
+                          "ui:field": "ContextInjectionField",
+                          "ui:options": {
+                            "injections": {
+                              "/ui:options/rules/0/regexp": "^%{/creator}$"
+                            }
+                          }
+                        },
+                        "ui:field": "DependentDisableField",
+                        "ui:options": {
+                          "rules": [
+                            {
+                              "disableDefiner": "leg",
+                              "disableField": "editors",
+                              "regexp": "creator is injected here",
+                              "inlineHelp": "@youMustBeEditor",
+                              "disabledValueToDisplay": true
+                            },
+                            {
+                              "disableDefiner": "leg",
+                              "disableField": "editors",
+                              "regexp": "^((?!(MA\\.\\d)).)*$"
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "legEditorSizeFixer": {
+                    "fields": [
+                      "_legEditor"
+                    ],
+                    "title": "",
+                    "rootUiSchema": {
+                      "ui:grid": {
+                        "lg": 6,
+                        "md": 6,
+                        "sm": 9,
+                        "xs": 12
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "eventTime": {
+            "fields": [
+              "dateBegin",
+              "dateEnd"
+            ],
+            "title": "",
+            "rootUiSchema": {
+              "ui:grid": {
+                "lg": {
+                  "dateBegin": 3,
+                  "dateEnd": 2
+                },
+                "md": {
+                  "dateBegin": 4,
+                  "dateEnd": 2
+                },
+                "sm": {
+                  "dateBegin": 5,
+                  "dateEnd": 3
+                },
+                "xs": 12
+              }
+            }
+          }
+        }
+      },
+      "leg": {
+        "ui:widget": "AutosuggestWidget",
+        "ui:help": "@legHelp",
+        "ui:options": {
+          "autosuggestField": "friends",
+          "allowNonsuggestedValue": true,
+          "suggestionReceive": "key",
+          "preventTypingPattern": "^MA\\.\\d+$"
+        }
+      },
+      "dateBegin": {
+        "ui:widget": "DateTimeWidget",
+        "ui:options": {
+          "showButtons": true
+        }
+      },
+      "dateEnd": {
+        "ui:widget": "DateTimeWidget"
+      },
+      "legPublic": {
+        "ui:options": {
+          "allowUndefined": false
+        },
+        "ui:help": "@legPublicHelp"
+      }
+    },
+    "editors": {
+      "ui:help": "@editorsHelp",
+      "ui:options": {
+        "allowUndefined": false
+      }
+    },
+    "secureLevel": {
+      "ui:widget": "AnyToBooleanWidget",
+      "ui:help": "@secureLevelHelp",
+      "ui:options": {
+        "trueValue": "MX.secureLevelNone",
+        "falseValue": "MX.secureLevelKM10",
+        "allowUndefined": false
+      }
+    },
+    "keywords": {
+      "ui:field": "TagArrayField"
+    },
+    "gatherings": {
+      "ui:functions": [
+        {
+          "ui:field": "NamedPlaceChooserField"
+        }
+      ],
+      "ui:field": "MapArrayField",
+      "ui:settings": [
+        "/mapOptions/tileLayerName",
+        "/mapOptions/overlayNames",
+        "/mapOptions/tileLayerOpacity",
+        "/mapOptions/tileLayers"
+      ],
+      "ui:options": {
+        "mapOptions": {
+          "controls": {
+            "draw": {
+              "clear": true,
+              "delete": true,
+              "reverse": true,
+              "undo": false,
+              "redo": false,
+              "upload": true,
+              "copy": true
+            }
+          }
+        },
+        "geometryField": "geometry",
+        "geometryMapper": "units",
+        "mapSizes": {
+          "lg": 8,
+          "md": 6,
+          "sm": 6,
+          "xs": 12
+        },
+        "buttons": [
+          {
+            "fn": "add",
+            "label": "@addGathering"
+          }
+        ],
+        "popupFields": [
+          {
+            "field": "/units/[idx]/identifications/0/taxon"
+          },
+          {
+            "field": "/units/[idx]/sex"
+          },
+          {
+            "field": "/units/[idx]/notes"
+          }
+        ],
+        "belowFields": [
+          "units"
+        ],
+        "belowUiSchemaRoot": {
+          "ui:field": "SingleItemArrayField",
+          "ui:title": "@unitsTitleFormat",
+          "ui:options": {
+            "titleClassName": "lg"
+          }
+        },
+        "inlineUiSchemaRoot": {
+          "ui:field": "SingleActiveArrayField",
+          "ui:title": "@gatheringsLabel",
+          "ui:options": {
+            "renderer": "accordion",
+            "headerFormatters": [
+              "units",
+              "namedPlace"
+            ],
+            "popupFields": [
+              {
+                "field": "units",
+                "mapper": "units",
+                "label": "@unitsLabel"
+              },
+              {
+                "field": "localityDescription"
+              }
+            ],
+            "confirmDelete": true
+          }
+        },
+        "propsToPassToInlineSchema": [
+          "formData"
+        ],
+        "minHeight": 435,
+        "resizeTimeout": 210,
+        "renderButtonsBelow": true,
+        "buttonsTitle": "@gatheringsButtonsTitle",
+        "emptyHelp": "@gatheringsHelp"
+      },
+      "items": {
+        "ui:functions": [
+          {
+            "ui:field": "GeocoderField",
+            "ui:options": {
+              "updateOnlyEmpty": true,
+              "button": true
+            }
+          },
+          {
+            "ui:field": "NamedPlaceSaverField"
+          }
+        ],
+        "ui:field": "NestField",
+        "ui:options": {
+          "nests": {
+            "eventTime": {
+              "title": "",
+              "fields": [
+                "dateBegin",
+                "dateEnd"
+              ],
+              "rootUiSchema": {
+                "ui:grid": {
+                  "lg": {
+                    "dateBegin": 6,
+                    "dateEnd": 3
+                  },
+                  "md": {
+                    "dateBegin": 7,
+                    "dateEnd": 4
+                  },
+                  "sm": 12,
+                  "xs": 12
+                }
+              }
+            },
+            "placeWrapper": {
+              "title": "@gatheringsItemsTitle",
+              "fields": [
+                "country",
+                "administrativeProvince",
+                "biologicalProvince",
+                "municipality",
+                "locality",
+                "localityDescription",
+                "coordinateRadius",
+                "alt",
+                "images",
+                "weather",
+                "eventTime",
+                "notes",
+                "namedPlaceID",
+                "samplingMethod",
+                "samplingMethodNotes",
+                "habitat",
+                "habitatDescription",
+                "observationDays",
+                "observationMinutes",
+                "trapCount",
+                "taxonCensus"
+              ],
+              "rootUiSchema": {
+                "ui:field": "ScopeField",
+                "ui:settings": [
+                  "%additionalFields/scopeField_gatherings"
+                ],
+                "ui:options": {
+                  "includeAdditionalFieldsChooserButton": true,
+                  "additionalsPersistenceKey": "gatherings",
+                  "fields": [
+                    "locality",
+                    "localityDescription",
+                    "weather",
+                    "notes",
+                    "namedPlaceID"
+                  ],
+                  "glyphFields": [
+                    {
+                      "glyph": "camera",
+                      "show": "images",
+                      "label": "@addPhotoGlyphLabel",
+                      "open": false
+                    }
+                  ],
+                  "titles": {
+                    "eventTime": "@time"
+                  }
+                },
+                "ui:order": [
+                  "country",
+                  "administrativeProvince",
+                  "biologicalProvince",
+                  "municipality",
+                  "locality",
+                  "localityDescription",
+                  "coordinateRadius",
+                  "alt",
+                  "images",
+                  "habitat",
+                  "habitatDescription",
+                  "weather",
+                  "eventTime",
+                  "notes",
+                  "geometry",
+                  "namedPlaceID",
+                  "samplingMethod",
+                  "samplingMethodNotes",
+                  "observationDays",
+                  "observationMinutes",
+                  "trapCount",
+                  "taxonCensus"
+                ]
+              }
+            }
+          },
+          "buttonsNest": "placeWrapper"
+        },
+        "ui:order": [
+          "*",
+          "units"
+        ],
+        "geometry": {
+          "ui:field": "HiddenField"
+        },
+        "namedPlaceID": {
+          "ui:field": "HiddenField"
+        },
+        "images": {
+          "ui:field": "ImageArrayField",
+          "ui:options": {
+            "capturerVerbatimPath": "/gatheringEvent/leg"
+          }
+        },
+        "dateBegin": {
+          "ui:widget": "DateTimeWidget",
+          "ui:options": {
+            "showButtons": true
+          }
+        },
+        "dateEnd": {
+          "ui:widget": "DateTimeWidget"
+        },
+        "taxonCensus": {
+          "items": {
+            "censusTaxonID": {
+              "ui:widget": "AutosuggestWidget",
+              "ui:options": {
+                "autosuggestField": "taxon",
+                "allowNonsuggestedValue": true,
+                "suggestionReceive": "key"
+              }
+            }
+          }
+        },
+        "municipality": {
+          "ui:functions": [
+            {
+              "ui:field": "StringToArrayField",
+              "ui:options": {
+                "delimiter": ", "
+              }
+            },
+            {
+              "ui:field": "TagArrayField"
+            }
+          ]
+        },
+        "biologicalProvince": {
+          "ui:functions": [
+            {
+              "ui:field": "StringToArrayField",
+              "ui:options": {
+                "delimiter": ", "
+              }
+            },
+            {
+              "ui:field": "TagArrayField"
+            }
+          ]
+        },
+        "administrativeProvince": {
+          "ui:functions": [
+            {
+              "ui:field": "StringToArrayField",
+              "ui:options": {
+                "delimiter": ", "
+              }
+            },
+            {
+              "ui:field": "TagArrayField"
+            }
+          ]
+        },
+        "units": {
+          "ui:childFunctions": {
+            "ui:field": "FlatField",
+            "ui:options": {
+              "fields": [
+                "identifications",
+                "unitGathering",
+                "unitFact"
+              ]
+            }
+          },
+          "ui:functions": [
+            {
+              "ui:field": "UnitListShorthandArrayField"
+            }
+          ],
+          "ui:field": "SingleActiveArrayField",
+          "ui:title": "",
+          "ui:options": {
+            "renderer": "table",
+            "normalRenderingTreshold": "sm",
+            "activeHeightOffset": -6,
+            "confirmDelete": true,
+            "buttons": [
+              {
+                "fn": "add",
+                "label": "@addUnit",
+                "variant": "primary"
+              },
+              {
+                "fn": "copy",
+                "label": "@copyUnit",
+                "type": "whitelist",
+                "filter": [
+                  "recordBasis",
+                  "informalTaxonGroups",
+                  "taxonConfidence",
+                  "lifeStage",
+                  "preservation",
+                  "plantLifeStage",
+                  "breeding",
+                  "atlasCode",
+                  "twitched",
+                  "wild",
+                  "identifications_0_det",
+                  "identifications_0_detDate",
+                  "identifications_0_identificationBasis",
+                  "samplingMethod",
+                  "samplingMethodNotes",
+                  "unitGathering_habitatIUCN",
+                  "unitGathering_habitatDescription",
+                  "unitGathering_dateBegin",
+                  "unitGathering_dateEnd"
+                ]
+              }
+            ],
+            "formatters": {
+              "identifications_0_taxon": {
+                "formatter": "unknownTaxon",
+                "idField": "unitFact_autocompleteSelectedTaxonID"
+              }
+            },
+            "idToScrollAfterAdd": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units-add",
+            "tableActiveItemClassNames": "panel panel-body gray"
+          },
+          "items": {
+            "ui:functions": [
+              {
+                "ui:field": "AutosuggestField",
+                "ui:settings": [
+                  "%toggled/AUTOSUGGEST_FIELD_TOGGLE_PERSISTENCE_unit",
+                  "%taxonGroupID/AUTOSUGGEST_FIELD_PERSISTENCE_units_informalTaxonGroup"
+                ],
+                "ui:options": {
+                  "autosuggestField": "taxon",
+                  "allowNonsuggestedValue": true,
+                  "suggestionInputField": "identifications_0_taxon",
+                  "suggestionValueField": "unitFact_autocompleteSelectedTaxonID",
+                  "suggestionValueParse": "autocompleteSelectedName || value",
+                  "suggestionReceivers": {
+                    "identifications_0_taxon": "autocompleteSelectedName || value",
+                    "informalTaxonGroups": "$taxonGroup",
+                    "unitFact_autocompleteSelectedTaxonID": "key"
+                  },
+                  "inputTransformer": {
+                    "regexp": "^(.*)\\?$",
+                    "transformations": {
+                      "taxonConfidence": "MY.taxonConfidenceUnsure"
+                    }
+                  },
+                  "informalTaxonGroups": "informalTaxonGroups",
+                  "informalTaxonGroupPersistenceKey": "units_informalTaxonGroup",
+                  "query": {
+                    "informalTaxonGroup": {
+                      "parser": "arrayJoin",
+                      "field": "informalTaxonGroups"
+                    }
+                  },
+                  "toggleable": {
+                    "autosuggestField": "unit",
+                    "query": {
+                      "includeNonMatching": true,
+                      "matchType": "exact,partial"
+                    },
+                    "selectOnlyOne": true,
+                    "nonMatchingBeforeUnsuggested": true
+                  },
+                  "togglePersistenceKey": "unit",
+                  "autocopy": {
+                    "type": "whitelist",
+                    "filter": [
+                      "recordBasis",
+                      "informalTaxonGroups",
+                      "taxonConfidence",
+                      "lifeStage",
+                      "preservation",
+                      "plantLifeStage",
+                      "breeding",
+                      "atlasCode",
+                      "twitched",
+                      "wild",
+                      "identifications_0_det",
+                      "identifications_0_detDate",
+                      "identifications_0_identificationBasis",
+                      "samplingMethod",
+                      "samplingMethodNotes",
+                      "unitGathering_habitatIUCN",
+                      "unitGathering_habitatDescription",
+                      "unitGathering_dateBegin",
+                      "unitGathering_dateEnd"
+                    ]
+                  }
+                }
+              },
+              {
+                "ui:field": "AutosuggestField",
+                "ui:options": {
+                  "autosuggestField": "taxon",
+                  "allowNonsuggestedValue": true,
+                  "suggestionInputField": "hostInformalNameString",
+                  "suggestionValueField": "hostID",
+                  "suggestionReceivers": {
+                    "hostInformalNameString": "value",
+                    "hostID": "key"
+                  }
+                }
+              },
+              {
+                "ui:field": "ScopeField",
+                "ui:settings": [
+                  "%additionalFields/scopeField_gathering_unit_informalTaxonGroups"
+                ],
+                "ui:options": {
+                  "additionalsGroupingPath": "/fieldScopes/informalTaxonGroups",
+                  "additionalsGroupingOrderer": "informalTaxonGroups",
+                  "additionalsGroupsTranslator": "taxonGroups",
+                  "additionalsPersistenceField": "informalTaxonGroups",
+                  "additionalPersistenceContextKey": "AUTOSUGGEST_FIELD_PERSISTENCE_units_informalTaxonGroup",
+                  "additionalsPersistenceKey": "gathering_unit_informalTaxonGroups",
+                  "taxonField": "identifications_0_taxon",
+                  "includeAdditionalFieldsChooserButton": true,
+                  "glyphFields": [
+                    {
+                      "glyph": "camera",
+                      "show": "images",
+                      "label": "@addPhotoGlyphLabel",
+                      "open": true
+                    },
+                    {
+                      "glyph": "headphones",
+                      "show": "audio",
+                      "label": "@addAudioGlyphLabel",
+                      "open": false
+                    }
+                  ],
+                  "fields": [
+                    "unitFact_autocompleteSelectedTaxonID",
+                    "identifications_0_taxon",
+                    "count",
+                    "notes",
+                    "informalTaxonGroups",
+                    "taxonConfidence",
+                    "recordBasis"
+                  ],
+                  "fieldScopes": {
+                    "informalTaxonGroups": {
+                      "*": {
+                        "title": "@all",
+                        "additionalFields": [
+                          "identifications_0_det",
+                          "identifications_0_detDate",
+                          "identifications_0_identificationBasis",
+                          "sex",
+                          "unitGathering_dateBegin",
+                          "unitGathering_dateEnd",
+                          "unitGathering_habitatIUCN",
+                          "unitGathering_habitatDescription",
+                          "preservation",
+                          "samplingMethod",
+                          "samplingMethodNotes",
+                          "breeding",
+                          "maleIndividualCount",
+                          "femaleIndividualCount",
+                          "wild",
+                          "checklistID",
+                          "keywords",
+                          "additionalIDs"
+                        ]
+                      },
+                      "MVL.1": {
+                        "defaultFields": [
+                          "sex",
+                          "birdPlumage",
+                          "birdAge",
+                          "movingStatus",
+                          "movingDirection",
+                          "breeding",
+                          "atlasCode",
+                          "twitched",
+                          "distance"
+                        ],
+                        "additionalFields": [
+                          "birdPlumage",
+                          "birdAge",
+                          "movingStatus",
+                          "movingDirection",
+                          "atlasCode",
+                          "twitched",
+                          "distance"
+                        ],
+                        "uiSchema": {
+                          "ui:order": [
+                            "identifications_0_taxon",
+                            "count",
+                            "sex",
+                            "birdPlumage",
+                            "birdAge",
+                            "movingStatus",
+                            "movingDirection",
+                            "breeding",
+                            "atlasCode",
+                            "twitched",
+                            "distance",
+                            "notes",
+                            "*",
+                            "images",
+                            "audio"
+                          ],
+                          "ui:grid": {
+                            "rows": null
+                          }
+                        }
+                      },
+                      "MVL.343": {
+                        "defaultFields": [
+                          "plantLifeStage",
+                          "plantStatusCode",
+                          "wild"
+                        ],
+                        "additionalFields": [
+                          "plantLifeStage",
+                          "plantStatusCode",
+                          "areaInSquareMeters"
+                        ]
+                      },
+                      "MVL.232": {
+                        "defaultFields": [
+                          "unitGathering_habitatIUCN",
+                          "unitGathering_habitatDescription",
+                          "identifications_0_det",
+                          "identifications_0_identificationBasis",
+                          "identifications_0_detDate",
+                          "lifeStage",
+                          "hostInformalNameString",
+                          "sex",
+                          "maleIndividualCount",
+                          "femaleIndividualCount",
+                          "preservation",
+                          "samplingMethod"
+                        ],
+                        "additionalFields": [
+                          "lifeStage",
+                          "hostInformalNameString"
+                        ],
+                        "uiSchema": {
+                          "ui:order": [
+                            "identifications_0_taxon",
+                            "count",
+                            "maleIndividualCount",
+                            "femaleIndividualCount",
+                            "sex",
+                            "lifeStage",
+                            "samplingMethod",
+                            "preservation",
+                            "unitGathering_habitatIUCN",
+                            "unitGathering_habitatDescription",
+                            "identifications_0_det",
+                            "identifications_0_detDate",
+                            "identifications_0_identificationBasis",
+                            "notes",
+                            "hostInformalNameString",
+                            "*",
+                            "images",
+                            "audio"
+                          ],
+                          "ui:grid": {
+                            "rows": null
+                          },
+                          "lifeStage": {
+                            "ui:title": "@insectLifeStageLabel"
+                          },
+                          "hostInformalNameString": {
+                            "ui:title": "@insectHostInformalNameStringLabel"
+                          }
+                        }
+                      },
+                      "MVL.233": {
+                        "title": "@mushroomsTitle",
+                        "additionalFields": [
+                          "unitGathering_substrate",
+                          "substrateSpecies",
+                          "smell",
+                          "smellNotes",
+                          "taste",
+                          "tasteNotes"
+                        ]
+                      },
+                      "MVL.187": {
+                        "defaultFields": [
+                          "sex",
+                          "identifications_0_identificationBasis",
+                          "lifeStage",
+                          "batBehavior"
+                        ],
+                        "additionalFields": [
+                          "batBehavior"
+                        ],
+                        "uiSchema": {
+                          "ui:order": [
+                            "identifications_0_taxon",
+                            "count",
+                            "sex",
+                            "lifeStage",
+                            "batBehavior",
+                            "taxonConfidence",
+                            "recordBasis",
+                            "identifications_0_identificationBasis",
+                            "notes",
+                            "*",
+                            "images",
+                            "audio"
+                          ],
+                          "lifeStage": {
+                            "ui:options": {
+                              "filterType": "whitelist",
+                              "filter": [
+                                "MY.lifeStageJuvenile",
+                                "MY.lifeStageSubimago",
+                                "MY.lifeStageAdult"
+                              ]
+                            }
+                          }
+                        }
+                      }
+                    }
+                  },
+                  "idToScroll": "root_gatherings_%{context[\"root_gatherings.activeIdx\"]}_units-add"
+                }
+              },
+              {
+                "ui:field": "LocationChooserField",
+                "ui:options": {
+                  "taxonField": "identifications_0_taxon",
+                  "geometryField": "unitGathering_geometry",
+                  "maxShapes": -1,
+                  "mapOptions": {
+                    "polygon": true,
+                    "polyline": true,
+                    "rectangle": true,
+                    "circle": true
+                  }
+                }
+              }
+            ],
+            "classNames": "well well-sm",
+            "ui:order": [
+              "identifications",
+              "count",
+              "notes",
+              "informalTaxonGroups",
+              "taxonConfidence",
+              "recordBasis",
+              "sex",
+              "unitGathering_dateBegin",
+              "unitGathering_dateEnd",
+              "unitGathering_habitatIUCN",
+              "unitGathering_habitatDescription",
+              "preservation",
+              "samplingMethod",
+              "samplingMethodNotes",
+              "breeding",
+              "maleIndividualCount",
+              "femaleIndividualCount",
+              "wild",
+              "checklistID",
+              "atlasCode",
+              "twitched",
+              "plantLifeStage",
+              "plantStatusCode",
+              "lifeStage",
+              "areaInSquareMeters",
+              "hostInformalNameString",
+              "unitGathering_substrate",
+              "substrateSpecies",
+              "smell",
+              "smellNotes",
+              "taste",
+              "tasteNotes",
+              "*",
+              "images",
+              "audio"
+            ],
+            "ui:annotations": {
+              "container": "modal",
+              "adminOnly": true,
+              "add": {
+                "type": "MAN.typeOpinion",
+                "filter": {
+                  "filterType": "blacklist",
+                  "filter": [
+                    "opinion"
+                  ]
+                },
+                "uiSchema": {
+                  "annotationClass": {
+                    "ui:widget": "AnyToBooleanWidget",
+                    "ui:options": {
+                      "trueValue": "MAN.annotationClassReliable",
+                      "falseValue": "MAN.annotationClassUnreliable",
+                      "allowUndefined": false
+                    }
+                  }
+                },
+                "formData": {
+                  "annotationClass": "MAN.annotationClassReliable"
+                }
+              }
+            },
+            "ui:grid": {
+              "lg": {
+                "identifications_0_taxon": 3,
+                "count": 1,
+                "notes": 2,
+                "taxonConfidence": 2,
+                "recordBasis": 2,
+                "identifications_0_identificationBasis": 2,
+                "unitGathering_dateBegin": 3,
+                "unitGathering_dateEnd": 3,
+                "*": 2
+              },
+              "md": {
+                "identifications_0_taxon": 3,
+                "count": 1,
+                "notes": 3,
+                "taxonConfidence": 2,
+                "recordBasis": 2,
+                "identifications_0_identificationBasis": 2,
+                "unitGathering_dateBegin": 3,
+                "unitGathering_dateEnd": 3,
+                "identifications_0_detDate": 3,
+                "twitched": 3,
+                "breeding": 3,
+                "*": 2
+              },
+              "sm": {
+                "identifications_0_taxon": 4,
+                "count": 2,
+                "identifications_0_identificationBasis": 6,
+                "unitGathering_dateBegin": 4,
+                "unitGathering_dateEnd": 4,
+                "notes": 5,
+                "*": 4
+              },
+              "xs": 12,
+              "rows": [
+                [
+                  "identifications_0_taxon",
+                  "taxonConfidence",
+                  "recordBasis",
+                  "count",
+                  "notes"
+                ]
+              ]
+            },
+            "identifications": {
+              "items": {
+                "detDate": {
+                  "ui:widget": "DateWidget",
+                  "ui:options": {
+                    "allowOnlyYear": true
+                  }
+                }
+              }
+            },
+            "informalTaxonGroups": {
+              "ui:field": "HiddenField"
+            },
+            "images": {
+              "ui:field": "ImageArrayField",
+              "ui:options": {
+                "capturerVerbatimPath": "/gatheringEvent/leg",
+                "sideEffects": {
+                  "/../recordBasis": "MY.recordBasisHumanObservationPhoto"
+                }
+              }
+            },
+            "audio": {
+              "ui:field": "AudioArrayField",
+              "ui:options": {
+                "capturerVerbatimPath": "/gatheringEvent/leg",
+                "sideEffects": {
+                  "/../recordBasis": "MY.recordBasisHumanObservationAudio"
+                }
+              }
+            },
+            "unitGathering": {
+              "geometry": {
+                "ui:field": "HiddenField"
+              },
+              "dateBegin": {
+                "ui:widget": "DateTimeWidget"
+              },
+              "dateEnd": {
+                "ui:widget": "DateTimeWidget"
+              }
+            },
+            "recordBasis": {
+              "ui:options": {
+                "filterType": "whitelist",
+                "filter": [
+                  "",
+                  "MY.recordBasisHumanObservationPhoto",
+                  "MY.recordBasisPreservedSpecimen",
+                  "MY.recordBasisHumanObservationHandled",
+                  "MY.recordBasisHumanObservation",
+                  "MY.recordBasisHumanObservationAudio",
+                  "MY.recordBasisHumanObservationIndirect"
+                ],
+                "order": [
+                  "",
+                  "MY.recordBasisHumanObservation",
+                  "MY.recordBasisHumanObservationPhoto",
+                  "MY.recordBasisPreservedSpecimen",
+                  "MY.recordBasisHumanObservationHandled",
+                  "MY.recordBasisHumanObservationAudio",
+                  "MY.recordBasisHumanObservationIndirect"
+                ]
+              }
+            },
+            "substrateSpecies": {
+              "ui:widget": "AutosuggestWidget",
+              "ui:options": {
+                "autosuggestField": "taxon",
+                "allowNonsuggestedValue": true,
+                "suggestionReceive": "key"
+              }
+            },
+            "unitFact": {
+              "autocompleteSelectedTaxonID": {
+                "ui:widget": "HiddenWidget"
+              }
+            },
+            "hostID": {
+              "ui:widget": "HiddenWidget"
+            },
+            "movingStatus": {
+              "ui:field": "EnumRangeArrayField",
+              "ui:options": {
+                "range": "MY.birdBehaviorEnum"
+              }
+            },
+            "keywords": {
+              "ui:field": "TagArrayField"
+            },
+            "additionalIDs": {
+              "ui:field": "TagArrayField"
+            }
+          }
+        }
+      }
+    }
+  },
+  "@type": "MHL.form",
+  "@context": "https://store-dev.luomus.fi/json-ld-context/MHL.form.json",
+  "options": {
+    "instructions": {
+      "fi": "https://laji.fi/about/1107",
+      "en": "https://laji.fi/about/1107",
+      "sv": "https://laji.fi/about/1107"
+    },
+    "allowExcel": true,
+    "simple": true
+  }
+}

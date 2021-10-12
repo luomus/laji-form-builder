@@ -14,10 +14,10 @@ export enum PropertyRange {
 
 export interface PropertyModel {
 	property: string;
-	label: string;
+	label: Partial<Record<Lang, string>>;
 	range: (PropertyRange | string)[];
 	shortName: string;
-	comment?: string;
+	comment?: Partial<Record<Lang, string>>;
 	maxOccurs: string;
 	minOccurs: string;
 	multiLanguage: boolean;
@@ -85,5 +85,5 @@ export interface JSONSchemaE extends JSONSchema7 {
 
 export interface Range {
 	id: string;
-	value: string;
+	value?: Partial<Record<Lang, string>>;
 }

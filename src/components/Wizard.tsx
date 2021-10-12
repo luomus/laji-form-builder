@@ -5,7 +5,7 @@ import { ButtonProps } from "laji-form/lib/themes/theme";
 import { HasChildren, JSONEditor } from "./components";
 import { Context } from "./Context";
 import { Master } from "../model";
-import { JSONSchema } from "../utils";
+import { JSONSchema, nmspc } from "../utils";
 
 interface WizardStep {
 	label: string;
@@ -21,11 +21,11 @@ const wizardSteps: WizardStepChildren = {
 		children: {
 			"json": {
 				label: "Wizard.option.json",
-				component: FormCreatorJSON
+				component: FormCreatorJSON,
 			},
 			"databank": {
 				label: "Wizard.option.databank",
-				component: FormCreatorDatabank
+				component: FormCreatorDatabank,
 			}
 		}
 	}
@@ -36,6 +36,8 @@ const getStep = (steps: string[]) => steps.reduce<WizardStep>(
 	(wizardStep: WizardStepChildrenGuaranteed, stepName) => wizardStep.children[stepName],
 	{children: wizardSteps} as WizardStep
 );
+
+const wizardNmspc = nmspc("creator-wizard");
 
 export const FormCreatorWizard = ({onCreate, ...config}: FormCreatorProps) => {
 	const {theme} = React.useContext(Context);
@@ -53,7 +55,9 @@ export const FormCreatorWizard = ({onCreate, ...config}: FormCreatorProps) => {
 				)}</Breadcrumb>
 			</Modal.Header>
 			<Modal.Body>
-				<Step onCreate={onCreate} takeStep={takeStep} {...config} />
+				<div className={wizardNmspc("")}>
+					<Step onCreate={onCreate} takeStep={takeStep} {...config} />
+				</div>
 			</Modal.Body>
 		</Modal>
 	);
@@ -92,7 +96,7 @@ interface FormCreatorWizardOptionButtonProps extends HasChildren {
 const FormCreatorWizardOptionButton = ({children, option, onSelect}: FormCreatorWizardOptionButtonProps) => {
 	const onClick = React.useCallback(() => onSelect(option), [option, onSelect]);
 	const {Button} = React.useContext(Context).theme;
-	return <Button onClick={onClick}>{children}</Button>;
+	return <Button onClick={onClick} className={wizardNmspc(`create-${option}`)}>{children}</Button>;
 };
 
 interface FormCreatorProps {
@@ -127,11 +131,10 @@ function FormCreatorJSON({onCreate}: WizardStepProps) {
 	React.useEffect(() => ref.current?.focus(), []);
 
 	return (
-		<React.Fragment>
+		<div className={wizardNmspc("json")}>
 			<JSONEditor value={json} onChange={setJSON} rows={20} onValidChange={setValid} live={true} ref={ref} />
 			<SubmitButton onClick={onClick} disabled={!json || !valid} />
-
-		</React.Fragment>
+		</div>
 	);
 }
 

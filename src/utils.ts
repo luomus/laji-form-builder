@@ -3,7 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
 import { isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
-import { JSONSchemaE } from "./model";
+import { JSONSchemaE, Lang } from "./model";
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -324,7 +324,7 @@ export function applyTransformations<T, P>(schemaOrPromise: T | Promise<T>, prop
 	, isPromise(schemaOrPromise) ? schemaOrPromise : Promise.resolve(schemaOrPromise));
 }
 
-export function getScrollPositionForScrollIntoViewIfNeeded(elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement): number {
+export const getScrollPositionForScrollIntoViewIfNeeded = (elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement): number => {
 	if (!elem) return container.scrollTop;
 	const elemTop = elem.offsetTop;
 	const elemBottom = elemTop + elem.clientHeight;
@@ -343,8 +343,10 @@ export function getScrollPositionForScrollIntoViewIfNeeded(elem: HTMLElement, to
 			: toBottom();
 	}
 	return container.scrollTop;
-}
+};
 
-export function scrollIntoViewIfNeeded(elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement) {
+export const scrollIntoViewIfNeeded = (elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement) => {
 	container.scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
-}
+};
+
+export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) => !obj ? undefined : (obj[lang] ?? obj["en"]);

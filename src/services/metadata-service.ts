@@ -1,17 +1,23 @@
 import memoize from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
-import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range } from "../model";
-import { applyTransformations, fetchJSON, JSONSchema } from "../utils";
+import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang } from "../model";
+import { applyTransformations, fetchJSON, JSONSchema, multiLang } from "../utils";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
 export default class MetadataService {
 	private apiClient: ApiClient;
+	private lang: Lang;
 
 	private allRanges: Record<string, Range[]>;
 
-	constructor(apiClient: ApiClient) {
+	constructor(apiClient: ApiClient, lang: Lang) {
 		this.apiClient = apiClient;
+		this.lang = lang;
+	}
+
+	setLang(lang: Lang) {
+		this.lang = lang;
 	}
 
 	getPropertyNameFromContext(property: PropertyContext | string) {
@@ -48,18 +54,18 @@ export default class MetadataService {
 		}, reject))
 
 	getProperties = memoize(async (property: PropertyContext | string): Promise<PropertyModel[]> => 
-		(await this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`)).results as PropertyModel[]
+		(await this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`, {lang: "multi"})).results as PropertyModel[]
 	)
 
 	getRange = memoize((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
-			|| this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`))
+		|| this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`, {lang: "multi"}))
 
 	getAllRanges = async () => {
 		if (this.allRanges) {
 			return this.allRanges;
 		}
-		const ranges = await (this.apiClient.fetch("/metadata/ranges") as Promise<Record<string, Range[]>>);
+		const ranges = await (this.apiClient.fetch("/metadata/ranges", {lang: "multi"}) as Promise<Record<string, Range[]>>);
 		this.allRanges = ranges;
 		return ranges;
 	}
@@ -76,7 +82,10 @@ export default class MetadataService {
 				let enums = [...empty], enumNames = [...empty];
 				for (const e of _enums) {
 					enums.push(e.id);
-					enumNames.push(e.value);
+					enumNames.push(e.value
+						? (e.value[this.lang] ?? e.value["en"] ?? e.id)
+						: e.id
+					);
 				}
 				return ({type: "string", enum: enums, enumNames});
 			}
@@ -126,7 +135,7 @@ export default class MetadataService {
 				? {...schema, uniqueItems: true}
 				: schema;
 
-		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) => ({...schema, title: label});
+		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) => ({...schema, title: multiLang(label, this.lang)});
 
 		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
 			applyTransformations<JSONSchema, PropertyModel>(mapRangeToSchema(property), property, [

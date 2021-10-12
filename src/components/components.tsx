@@ -243,7 +243,7 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 	}
 	return val;
 };
-interface JSONEditorProps {
+interface JSONEditorProps extends Classable {
 	value: any;
 	onChange: (value: any) => void;
 	rows?: number;
@@ -253,7 +253,9 @@ interface JSONEditorProps {
 	onValidChange?: (valid: boolean) => void;
 	live?: boolean;
 }
-export const JSONEditor = React.forwardRef(({value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live} : JSONEditorProps, ref: React.Ref<HTMLTextAreaElement>) => {
+export const JSONEditor = React.forwardRef((
+	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className} : JSONEditorProps,
+	ref: React.Ref<HTMLTextAreaElement>) => {
 	const stringValue = JSON.stringify(value, undefined, 2);
 	const [tmpValue, setTmpValue] = React.useState<string>(stringValue);
 	const [valid, setValid] = React.useState(true);
@@ -304,7 +306,7 @@ export const JSONEditor = React.forwardRef(({value, onChange, rows, minRows, max
 
 	return (
 		<textarea
-			className={classNames("form-control", !valid && gnmspc("json-editor-invalid"))}
+			className={classNames("form-control", !valid && gnmspc("json-editor-invalid"), className)}
 			onBlur={onBlur}
 			rows={_rows}
 			style={{width: "100%", resize: resizable ? "vertical" : "none"}}

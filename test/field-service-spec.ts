@@ -17,7 +17,7 @@ const apiClient = new ApiClient(new ApiClientImplementation(
 
 describe("Field service", () => {
 
-	const fieldService = new FieldService(new MetadataService(apiClient), new FormService(apiClient), LANG);
+	const fieldService = new FieldService(new MetadataService(apiClient, LANG), new FormService(apiClient), LANG);
 	const formService = new FormService(apiClient);
 
 	const forms: {id: string, label: string}[] = [
