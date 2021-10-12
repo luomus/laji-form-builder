@@ -15,7 +15,6 @@ export interface HasChildren {
 
 type Position = "bottom";
 interface DraggablePublicProps extends Stylable, Classable, HasChildren {
-	color?: string;
 	thickness?: number;
 	dragClassName?: string;
 	containerClassName?: string;
@@ -43,10 +42,9 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 		width: this.props.dragWidth ? this.props.width || 200 : undefined
 	};
 	static defaultProps = {
-		color: "black",
 		dragHeight: false,
 		dragWidth: false,
-		thickness: 1
+		thickness: 4
 	};
 	dragging = false;
 	startY: number;
@@ -104,7 +102,8 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 			width: "100%",
 			cursor: "row-resize",
 			height: this.props.thickness,
-			marginTop: -(this.props.thickness as number)
+			marginTop: -Math.floor((this.props.thickness as number) / 2),
+			opacity: 0
 		};
 		return (
 			<div
@@ -125,8 +124,9 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 			height: "100%",
 			paddingLeft: 1,
 			position: "absolute",
-			left: (this.state.width || 0) - (this.props.thickness as number),
-			top: 0
+			left: (this.state.width || 0) - ((this.props.thickness as number) / 2), 
+			top: 0,
+			opacity: 0
 		};
 		return (
 			<div

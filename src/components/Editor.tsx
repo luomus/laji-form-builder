@@ -74,8 +74,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				             height={this.props.height}
 				             className={gnmspc("editor")}
 							 containerClassName={gnmspc("")}
-				             thickness={2}
-			                 onChange={this.onHeightChange} >
+			                 onChange={this.onHeightChange}>
 				{this.renderEditor()}
 			</DraggableHeight>
 		);
@@ -136,7 +135,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
 			content =  (
 				<React.Fragment>
-					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} thickness={2} ref={this.fieldsRef}>
+					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} ref={this.fieldsRef}>
 						<Fields className={gnmspc("field-chooser")}
 						        fields={this.getFields(master.fields)}
 						        onSelected={this.onFieldSelected}
