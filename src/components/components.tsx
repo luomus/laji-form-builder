@@ -140,6 +140,7 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 	onMouseDown = (dir: "height" | "width") => {
 		if (!this._onMouseDown[dir]) {
 			this._onMouseDown[dir] = (e: React.MouseEvent) => {
+				e.preventDefault();
 				if (this.dragging) {
 					return;
 				}
