@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas } from "../model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas, Translations } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 
@@ -32,14 +32,22 @@ export default class FieldService {
 
 	async masterToJSONFormat(master: Master): Promise<Schemas> {
 		master = await this.parseMaster(master);
-		const {fields, translations, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
-		return {
-			...(master.translations ? translate(_master, master.translations[this.lang]) : _master),
-			schema: await this.masterToJSONSchema(master)
-		};
+		const schema = await this.masterToJSONSchema(master);
+		const {fields, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {translations, ...jsonFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
+			await applyTransformations({schema, ..._master} as (Schemas & Pick<Master, "translations">),
+				master,
+				[
+					addValidators("validators"),
+					addValidators("warnings"),
+					(jsonFormat, master) => jsonFormat.translations ? translate(jsonFormat, jsonFormat.translations[this.lang]) : master
+				]
+			)
+		);
+		return jsonFormat;
 	}
 
-	private async masterToJSONSchema(master: Master) {
+	private async masterToJSONSchema(master: Master): Promise<JSONSchemaE> {
 		const {fields, translations} = master;
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}});
@@ -215,3 +223,110 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema;
 };
 
+const addValidators = (type: "validators" | "warnings") => (jsonFormat: Schemas & Pick<Master, "translations">, master: Master) => {
+	const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
+		let validators: any = {};
+		if (field[type]) {
+			validators = field[type];
+		}
+		return field.fields
+			? field.fields.reduce<any>((validators, field) => {
+				const schemaForField = schema.type === "object"
+					? (schema.properties as any)[unprefixProp(field.name)]
+					: (schema as any).items.properties[unprefixProp(field.name)];
+				const nextPath =  `${path}/${unprefixProp(field.name)}`;
+				const fieldValidators = addDefaultValidators(recursively(field, schemaForField, nextPath), nextPath);
+				if (fieldValidators && Object.keys(fieldValidators).length) {
+					let validatorsTarget: any;
+					if (schema.type === "object") {
+						validators.properties = validators.properties || {};
+						validatorsTarget = validators.properties;
+					} else if (schema.type === "array") {
+						validators.items = validators.items || {properties: {}};
+						validatorsTarget = validators.items.properties;
+					}
+					validatorsTarget[unprefixProp(field.name)] = fieldValidators;
+				}
+				return validators;
+			}, validators)
+			: validators;
+	};
+
+	const addDefaultValidators = (validators: Schemas["validators"] | Schemas["warnings"], path: string) => {
+		const _defaultValidators = defaultValidators[path]?.[type];
+		if (!_defaultValidators) {
+			return validators;
+		}
+		return Object.keys(_defaultValidators).reduce((validators, validatorName) => {
+			const defaultValidator = _defaultValidators[validatorName];
+			if (!validators[validatorName]) {
+				if (defaultValidator.translations) {
+					jsonFormat.translations = {
+						...(jsonFormat.translations || {}),
+						fi: (jsonFormat.translations?.fi || {}),
+						sv: (jsonFormat.translations?.sv || {}),
+						en: (jsonFormat.translations?.en || {}),
+					};
+					Object.keys(defaultValidator.translations).forEach(translationKey => {
+						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
+							(jsonFormat.translations as Translations)[lang][translationKey] = defaultValidator.translations[translationKey][lang];
+						});
+					});
+				}
+				return {...validators, [validatorName]: defaultValidator.validator};
+			}
+			return validators;
+		}, validators);
+	};
+
+	const validators = recursively({fields: master.fields, name: ""}, jsonFormat.schema, "");
+	return {...jsonFormat, [type]: validators.properties || {}};
+};
+
+interface DefaultValidatorItem {
+	validator: any;
+	translations: Record<string, Record<Lang, string>>;
+}
+
+interface DefaultValidator {
+	validators?: {[validatorName: string]: DefaultValidatorItem};
+	warnings?: {[validatorName: string]: DefaultValidatorItem};
+}
+
+const defaultGeometryValidator: DefaultValidator = {
+	validators: {
+		geometry: {
+			validator: {
+				requireShape: true,
+				maximumSize: 10,
+				includeGatheringUnits: true,
+				message: {
+					missingGeometries: "@geometryValidation",
+					invalidBoundingBoxHectares: "@geometryHectaresMaxValidation",
+					notGeometry: "@geometryValidation",
+					missingType: "@geometryValidation",
+					invalidRadius: "@geometryValidation",
+					invalidCoordinates: "@geometryValidation",
+					invalidGeometries: "@geometryValidation",
+					noOverlap: "@geometryValidation"
+				},
+				boundingBoxMaxHectares: 1000000
+			},
+			translations: {
+				"@geometryValidation": {
+					en: "Gathering must have at least one feature.",
+					sv: "Platsen måste ha åtminstone en figur.",
+					fi: "Paikalla täytyy olla vähintään yksi kuvio."
+				},
+				"@geometryHectaresMaxValidation": {
+					en: "Too big area. Maximum is %{max} hectares",
+					sv: "För stort område. Maximalt är %{max} hektar",
+					fi: "Liian iso alue. Maksimi on %{max} hehtaaria",
+				}
+			}
+		}
+	}
+};
+const defaultValidators: {[propName: string]: DefaultValidator} = {
+	"/gatherings/geometry": defaultGeometryValidator
+};

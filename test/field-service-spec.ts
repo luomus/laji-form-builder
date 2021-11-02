@@ -30,6 +30,7 @@ describe("Field service", () => {
 		describe(`${label} (${id})`, () => {
 			let master: Master;
 			let schemas: Schemas;
+
 			beforeAll(async () => {
 				master = await formService.getMaster(id);
 				schemas = await formService.getSchemas(id);
@@ -41,19 +42,10 @@ describe("Field service", () => {
 				jsonFormat = await fieldService.masterToJSONFormat(master);
 			});
 
-			it("converts schema correct", () => {
-				const {schema} = jsonFormat;
-				expect(schema).toEqual(schemas.schema);
-			});
-
-			it("converts uiSchema correct", () => {
-				const {uiSchema} = jsonFormat;
-				expect(uiSchema).toEqual(schemas.uiSchema);
-			});
-
-			it("converts options correct", () => {
-				const {options} = jsonFormat;
-				expect(options).toEqual(schemas.options);
+			(["schema", "uiSchema", "options", "validators", "warnings"] as (keyof Schemas)[]).forEach(prop => {
+				it(`converts ${prop} correct`, () => {
+					expect(jsonFormat[prop]).toEqual(schemas[prop]);
+				});
 			});
 		});
 	}
