@@ -77,6 +77,7 @@ export interface SchemaFormat {
 	validators?: any;
 	warnings?: any;
 	excludeFromCopy: string[];
+	extra?: any;
 }
 
 export interface JSONSchemaE extends JSONSchema7 {

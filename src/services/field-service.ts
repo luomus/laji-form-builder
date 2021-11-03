@@ -40,6 +40,7 @@ export default class FieldService {
 				[
 					addValidators("validators"),
 					addValidators("warnings"),
+					addAttributes,
 					(schemaFormat, master) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : master
 				]
 			)
@@ -302,6 +303,11 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 	const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
 	return {...schemaFormat, [type]: validators.properties || {}};
 };
+
+const addAttributes = (schemaFormat: SchemaFormat, master: Master) => ({
+	...schemaFormat,
+	attributes: {id: master.id}
+});
 
 interface DefaultValidatorItem {
 	validator: any;
