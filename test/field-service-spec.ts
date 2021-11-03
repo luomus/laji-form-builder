@@ -4,7 +4,7 @@ import FormService from "../src/services/form-service";
 import ApiClientImplementation from "../playground/ApiClientImplementation";
 import ApiClient from "laji-form/lib/ApiClient";
 import properties from "../properties.json";
-import { Master, Schemas } from "../src/model";
+import { Master, SchemaFormat } from "../src/model";
 
 const LANG = "fi";
 
@@ -29,20 +29,20 @@ describe("Field service", () => {
 	for (const {label, id} of forms) {
 		describe(`${label} (${id})`, () => {
 			let master: Master;
-			let schemas: Schemas;
+			let schemas: SchemaFormat;
 
 			beforeAll(async () => {
 				master = await formService.getMaster(id);
-				schemas = await formService.getSchemas(id);
+				schemas = await formService.getSchemaFormat(id);
 			});
 
-			let jsonFormat: Schemas;
+			let jsonFormat: SchemaFormat;
 
 			it("converts without errors", async () => {
 				jsonFormat = await fieldService.masterToJSONFormat(master);
 			});
 
-			(["schema", "uiSchema", "options", "validators", "warnings", "excludeFromCopy"] as (keyof Schemas)[]).forEach(prop => {
+			(["schema", "uiSchema", "options", "validators", "warnings", "excludeFromCopy"] as (keyof SchemaFormat)[]).forEach(prop => {
 				it(`converts ${prop} correct`, () => {
 					expect(jsonFormat[prop]).toEqual(schemas[prop]);
 				});

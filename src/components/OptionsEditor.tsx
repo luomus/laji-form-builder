@@ -3,7 +3,7 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Classable, Stylable, Clickable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./Builder";
-import { PropertyModel, Schemas, Master, JSONSchemaE, PropertyRange, Lang } from "../model";
+import { PropertyModel, SchemaFormat, Master, JSONSchemaE, PropertyRange, Lang } from "../model";
 import { translate, detectChangePaths, parseJSONPointer, gnmspc, unprefixProp, multiLang } from "../utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
@@ -27,7 +27,7 @@ export const mapRangeToUiSchema = async (property: PropertyModel, metadataServic
 };
 const mapComment = (comment: string | undefined, uiSchema: any) => ({...uiSchema, "ui:help": comment});
 
-export const mapPropertyToUiSchema = async (property: PropertyModel, metadataService: MetadataService, lang: Lang): Promise<Schemas> =>
+export const mapPropertyToUiSchema = async (property: PropertyModel, metadataService: MetadataService, lang: Lang): Promise<SchemaFormat> =>
 	mapComment(multiLang(property.comment, lang), await mapRangeToUiSchema(property, metadataService, lang));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;

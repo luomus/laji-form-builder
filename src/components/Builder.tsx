@@ -8,7 +8,7 @@ import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, Cancellab
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { PropertyModel, PropertyRange, Lang, Translations, Master, Schemas, Field } from "../model";
+import { PropertyModel, PropertyRange, Lang, Translations, Master, SchemaFormat, Field } from "../model";
 import MetadataService from "../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
@@ -30,7 +30,7 @@ export interface BuilderProps {
 export interface BuilderState {
 	id?: string;
 	master?: Master;
-	schemas?: Schemas;
+	schemaFormat?: SchemaFormat;
 	lang: Lang;
 	editorHeight?: number;
 	tmp?: boolean;
@@ -46,7 +46,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		editorHeight: EDITOR_HEIGHT
 	};
 	appTranslations: {[key: string]: {[lang in Lang]: string}};
-	schemasPromise: CancellablePromise<any>;
+	schemaFormatPromise: CancellablePromise<any>;
 	formPromise: CancellablePromise<any>;
 	metadataService: MetadataService;
 	formService: FormService;
@@ -77,7 +77,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	componentWillUnmount() {
 		this.formPromise?.cancel();
-		this.schemasPromise?.cancel();
+		this.schemaFormatPromise?.cancel();
 	}
 
 	componentDidUpdate({lang: prevLang}: BuilderProps) {
@@ -94,25 +94,25 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			return;
 		}
 		this.formPromise?.cancel();
-		this.setState({master: undefined, schemas: undefined, id}, () => {
+		this.setState({master: undefined, schemaFormat: undefined, id}, () => {
 			const formPromise = id
 				? this.formService.getMaster(id)
 				: Promise.resolve(undefined);
 			this.formPromise = makeCancellable(formPromise
 				.then((master) => this.setState({master})));
-			this.updateSchemas();
+			this.updateSchemaFormat();
 		});
 	}
 
-	updateSchemas(): Promise<Schemas | undefined> {
-		this.schemasPromise?.cancel();
+	updateSchemaFormat(): Promise<SchemaFormat | undefined> {
+		this.schemaFormatPromise?.cancel();
 		const {id} = this.state;
-		const schemasPromise = id
-			? this.formService.getSchemas(id) 
+		const schemaFormatPromise = id
+			? this.formService.getSchemaFormat(id)
 			: Promise.resolve(undefined);
-		const promise = new Promise<Schemas | undefined>(resolve => schemasPromise
-			.then((schemas) => this.setState({schemas}, () => resolve(schemas))));
-		this.schemasPromise = makeCancellable(promise);
+		const promise = new Promise<SchemaFormat | undefined>(resolve => schemaFormatPromise
+			.then((schemaFormat) => this.setState({schemaFormat}, () => resolve(schemaFormat))));
+		this.schemaFormatPromise = makeCancellable(promise);
 		return promise;
 	}
 
@@ -120,11 +120,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.setState({lang}, async () => {
 			this.updateLang();
 			if (!this.state.tmp) {
-				await this.updateSchemas();
+				await this.updateSchemaFormat();
 				this.propagateState();
 			} else if (this.state.master) {
-				const schemas = await this.fieldService.masterToJSONFormat(this.state.master);
-				this.setState({schemas}, this.propagateState);
+				const schemaFormat = await this.fieldService.masterToJSONFormat(this.state.master);
+				this.setState({schemaFormat}, this.propagateState);
 			}
 			this.props.onLangChange(this.state.lang);
 		});
@@ -167,11 +167,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {schemas, master, saving} = this.state;
+		const {schemaFormat, master, saving} = this.state;
 		return (
 			<Editor
 				master={master}
-				schemas={schemas}
+				schemaFormat={schemaFormat}
 				onChange={this.onEditorChange}
 				onSave={this.onSave}
 				onLangChange={this.onLangChange}
@@ -189,13 +189,13 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
-		const {master, schemas} = this.state;
-		if (!master || !schemas) {
+		const {master, schemaFormat} = this.state;
+		if (!master || !schemaFormat) {
 			return;
 		}
 
 		const {translations = {fi: {}, sv: {}, en: {}}} = master;
-		const changed: any = {master, schemas};
+		const changed: any = {master, schemaFormat};
 		(events instanceof Array ? events : [events]).forEach(event => {
 			if (isUiSchemaChangeEvent(event)) {
 				changed.master = {
@@ -203,7 +203,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					uiSchema: updateSafelyWithJSONPointer(
 						changed.master.uiSchema,
 						event.value,
-						fieldPointerToUiSchemaPointer(schemas.schema, event.selected)
+						fieldPointerToUiSchemaPointer(schemaFormat.schema, event.selected)
 					)
 				};
 			} else if (isTranslationsAddEvent(event)) {
@@ -281,9 +281,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						...(changed.master || {}),
 						fields: filterFields(changed.master, splitted).fields
 					};
-					changed.schemas = {
-						...changed.schemas,
-						schema: filterSchema(changed.schemas.schema, splitted)
+					changed.schemaFormat = {
+						...changed.schemaFormat,
+						schema: filterSchema(changed.schemaFormat.schema, splitted)
 					};
 				} else if (isFieldAddEvent(event)) {
 					const propertyModel = event.value;
@@ -328,9 +328,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 							...changed.master,
 							fields: addField(changed.master.fields, splitted, event.value.property),
 						};
-						changed.schemas = {
-							...changed.schemas,
-							schema: addSchemaField(changed.schemas.schema, splitted, event.value)
+						changed.schemaFormat = {
+							...changed.schemaFormat,
+							schema: addSchemaField(changed.schemaFormat.schema, splitted, event.value)
 						};
 					}
 				} else if (isFieldUpdateEvent(event)) {
@@ -374,20 +374,20 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					if (event.value.validators) {
 						changed.schema = {
 							...changed.schema,
-							validators: updateValidators({properties: changed.schemas.validators}, changed.schemas.schema, splitted, event.value.validators).properties,
+							validators: updateValidators({properties: changed.schemaFormat.validators}, changed.schemaFormat.schema, splitted, event.value.validators).properties,
 						};
 					}
 					if (event.value.warnings) {
 						changed.schema = {
 							...changed.schema,
-							warnings: updateValidators({properties: changed.schemas.warnings}, changed.schemas.schema, splitted, event.value.warnings).properties,
+							warnings: updateValidators({properties: changed.schemaFormat.warnings}, changed.schemaFormat.schema, splitted, event.value.warnings).properties,
 						};
 					}
 				}
 			} else if (isOptionChangeEvent(event)) {
 				const {path, value} = event;
 				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
-				changed.schemas = updateSafelyWithJSONPointer(changed.schemas, translate(value, changed.master.translations?.[this.state.lang]), path);
+				changed.schemaFormat = updateSafelyWithJSONPointer(changed.schemaFormat, translate(value, changed.master.translations?.[this.state.lang]), path);
 			}
 		});
 		this.setState(changed, () => {
@@ -405,7 +405,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		const {translations, fields, ...toTranslate} = this.state.master; // eslint-disable-line @typescript-eslint/no-unused-vars
 		const translated = translate(toTranslate, this.state.master.translations?.[this.state.lang] || {});
 		const updated = {
-			...this.state.schemas,
+			...this.state.schemaFormat,
 			...translated
 		};
 		this.props.onChange(updated);
@@ -435,8 +435,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onCreate = async (master: Master) => {
 		this.setState({tmp: true}, async () => {
-			const schemas = await this.fieldService.masterToJSONFormat(master);
-			this.setState({master, schemas}, this.propagateState);
+			const schemaFormat = await this.fieldService.masterToJSONFormat(master);
+			this.setState({master, schemaFormat}, this.propagateState);
 		});
 	}
 }

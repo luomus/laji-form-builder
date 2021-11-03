@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, Schemas, Translations } from "../model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 
@@ -30,12 +30,12 @@ export default class FieldService {
 		this.lang = lang;
 	}
 
-	async masterToJSONFormat(master: Master): Promise<Schemas> {
+	async masterToJSONFormat(master: Master): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
 		const {schema, excludeFromCopy} = await this.masterToJSONSchema(master);
 		const {fields, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
 		const {translations, ...schemaFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
-			await applyTransformations({schema, excludeFromCopy, ..._master} as (Schemas & Pick<Master, "translations">),
+			await applyTransformations({schema, excludeFromCopy, ..._master} as (SchemaFormat & Pick<Master, "translations">),
 				master,
 				[
 					addValidators("validators"),
@@ -47,7 +47,7 @@ export default class FieldService {
 		return schemaFormat;
 	}
 
-	private async masterToJSONSchema(master: Master): Promise<Pick<Schemas, "schema" | "excludeFromCopy">> {
+	private async masterToJSONSchema(master: Master): Promise<Pick<SchemaFormat, "schema" | "excludeFromCopy">> {
 		const {fields, translations} = master;
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}, excludeFromCopy: []});
@@ -243,7 +243,7 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema;
 };
 
-const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schemas & Pick<Master, "translations">, master: Master) => {
+const addValidators = (type: "validators" | "warnings") => (schemaFormat: SchemaFormat & Pick<Master, "translations">, master: Master) => {
 	const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
 		let validators: any = {};
 		if (field[type]) {
@@ -272,7 +272,7 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 			: validators;
 	};
 
-	const addDefaultValidators = (validators: Schemas["validators"] | Schemas["warnings"], path: string) => {
+	const addDefaultValidators = (validators: SchemaFormat["validators"] | SchemaFormat["warnings"], path: string) => {
 		const _defaultValidators = defaultValidators[path]?.[type];
 		if (!_defaultValidators) {
 			return validators;

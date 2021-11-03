@@ -8,7 +8,7 @@ import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, Schemas, Field as FieldOptions } from "../model";
+import { Lang, Master, SchemaFormat, Field as FieldOptions } from "../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { findNearestParentSchemaElem, translate as translateKey } from "laji-form/lib/utils";
 
@@ -23,7 +23,7 @@ export type FieldEditorChangeEvent =
 
 export interface EditorProps extends Stylable, Classable {
 	master?: Master;
-	schemas?: Schemas;
+	schemaFormat?: SchemaFormat;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
 	onLangChange: (lang: Lang) => void;
 	height?: number;
@@ -84,8 +84,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		const fieldEditorStyle: React.CSSProperties = {
 			width: "100%"
 		};
-		const {master, schemas} = this.props;
-		if (!master || !schemas) {
+		const {master, schemaFormat} = this.props;
+		if (!master || !schemaFormat) {
 			return <Spinner size={100} />;
 		}
 		const {translations} = this.context;
@@ -126,9 +126,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			height: "100%",
 			width: "100%"
 		};
-		const {master, schemas} = this.props;
+		const {master, schemaFormat} = this.props;
 		const {activeEditorMode} = this.state;
-		if (!master || !schemas) {
+		if (!master || !schemaFormat) {
 			return <Spinner size={100} />;
 		}
 		let content;
@@ -149,7 +149,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{this.state.selected && 
 						<ActiveEditor key={this.state.selected}
 						        active={this.state.activeEditorMode}
-						        {...this.getFieldEditorProps(master, schemas)}
+						        {...this.getFieldEditorProps(master, schemaFormat)}
 						        className={gnmspc("field-editor")}
 						        style={fieldEditorContentStyle}
 						/>
@@ -200,7 +200,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
 	}
 
-	getFieldEditorProps(master: Master, schemas: Schemas): FieldEditorProps {
+	getFieldEditorProps(master: Master, schemaFormat: SchemaFormat): FieldEditorProps {
 		const { editorLang } = this.context;
 		const selected = this.getSelected();
 		const findField = (_field: FieldOptions, path: string): FieldOptions => {
@@ -212,8 +212,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			return findField(child, rest.join("/"));
 		};
 		return {
-			schema: parseJSONPointer(schemas.schema, fieldPointerToSchemaPointer(schemas.schema, selected)),
-			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemas.schema, selected), !!"safely"),
+			schema: parseJSONPointer(schemaFormat.schema, fieldPointerToSchemaPointer(schemaFormat.schema, selected)),
+			uiSchema: parseJSONPointer(master.uiSchema, fieldPointerToUiSchemaPointer(schemaFormat.schema, selected), !!"safely"),
 			field: findField(this.getFields(master.fields)[0], selected),
 			translations: master.translations?.[editorLang as Lang] || {},
 			path: selected,

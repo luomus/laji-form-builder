@@ -70,7 +70,7 @@ export interface Field {
 	fields?: Field[];
 }
 
-export interface Schemas {
+export interface SchemaFormat {
 	options?: any;
 	schema?: any;
 	uiSchema?: any;
