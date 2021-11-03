@@ -32,30 +32,46 @@ export default class FieldService {
 
 	async masterToJSONFormat(master: Master): Promise<Schemas> {
 		master = await this.parseMaster(master);
-		const schema = await this.masterToJSONSchema(master);
+		const {schema, excludeFromCopy} = await this.masterToJSONSchema(master);
 		const {fields, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
-		const {translations, ...jsonFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
-			await applyTransformations({schema, ..._master} as (Schemas & Pick<Master, "translations">),
+		const {translations, ...schemaFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
+			await applyTransformations({schema, excludeFromCopy, ..._master} as (Schemas & Pick<Master, "translations">),
 				master,
 				[
 					addValidators("validators"),
 					addValidators("warnings"),
-					(jsonFormat, master) => jsonFormat.translations ? translate(jsonFormat, jsonFormat.translations[this.lang]) : master
+					(schemaFormat, master) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : master
 				]
 			)
 		);
-		return jsonFormat;
+		return schemaFormat;
 	}
 
-	private async masterToJSONSchema(master: Master): Promise<JSONSchemaE> {
+	private async masterToJSONSchema(master: Master): Promise<Pick<Schemas, "schema" | "excludeFromCopy">> {
 		const {fields, translations} = master;
 		if (!fields) {
-			return Promise.resolve({type: "object", properties: {}});
+			return Promise.resolve({type: "object", properties: {}, excludeFromCopy: []});
 		}
-		return this.fieldToSchema({name: "MY.document", type: "fieldset", fields}, translations?.[this.lang], [{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]);
+		const excludeFromCopy: string[] = [];
+		return {
+			schema: await this.fieldToSchema(
+				{name: "MY.document", type: "fieldset", fields},
+				translations?.[this.lang],
+				[{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel],
+				excludeFromCopy,
+				"$"
+			),
+			excludeFromCopy
+		};
 	}
 
-	private fieldToSchema = async (field: Field, translations: Record<string, string> | undefined, partOfProperties: PropertyModel[]): Promise<JSONSchemaE> => {
+	private async fieldToSchema(
+		field: Field,
+		translations: Record<string, string> | undefined,
+		partOfProperties: PropertyModel[],
+		excludeFromCopy: string[],
+		path: string
+	): Promise<JSONSchemaE> {
 		const {fields = []} = field;
 
 		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
@@ -64,10 +80,14 @@ export default class FieldService {
 		}
 
 		const transformationsForAllTypes = [
-			excludeFromCopy,
+			addExcludeFromCopy(excludeFromCopy, path),
 			optionsToSchema,
 			addTitleAndDefault(property, this.lang, translations)
 		];
+
+		const getExcludeFromCopyPath = (containerProperty: PropertyModel, path: string, field: Field) => {
+			return `${path}${containerProperty.maxOccurs === "unbounded" ? "[*]" : ""}.${unprefixProp(field.name)}`;
+		};
 
 		if (property.isEmbeddable) {
 			const properties = fields
@@ -75,7 +95,7 @@ export default class FieldService {
 				: [];
 
 			const schemaProperties = await Promise.all(
-				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, translations, properties)] as [string, JSONSchemaE])
+				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, translations, properties, excludeFromCopy, getExcludeFromCopyPath(property, path, field))] as [string, JSONSchemaE])
 			);
 			return applyTransformations(
 				mapEmbeddable(
@@ -96,8 +116,7 @@ export default class FieldService {
 				...transformationsForAllTypes
 			]);
 		}
-	};
-
+	}
 
 	private parseMaster(master: Master) {
 		return this.mapBaseForm(master);
@@ -192,9 +211,10 @@ const addValueOptions = (translations: Record<string, string> | undefined) => (s
 	};
 };
 
-const excludeFromCopy = (schema: JSONSchemaE, field: Field) => {
+const addExcludeFromCopy = (excludeFromCopy: string[], path: string) => (schema: JSONSchemaE, field: Field) => {
 	if (field.options?.excludeFromCopy) {
 		(schema as any).excludeFromCopy = true;
+		excludeFromCopy.push(path);
 	}
 	return schema as JSONSchemaE;
 };
@@ -223,7 +243,7 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema;
 };
 
-const addValidators = (type: "validators" | "warnings") => (jsonFormat: Schemas & Pick<Master, "translations">, master: Master) => {
+const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schemas & Pick<Master, "translations">, master: Master) => {
 	const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
 		let validators: any = {};
 		if (field[type]) {
@@ -261,15 +281,15 @@ const addValidators = (type: "validators" | "warnings") => (jsonFormat: Schemas 
 			const defaultValidator = _defaultValidators[validatorName];
 			if (!validators[validatorName]) {
 				if (defaultValidator.translations) {
-					jsonFormat.translations = {
-						...(jsonFormat.translations || {}),
-						fi: (jsonFormat.translations?.fi || {}),
-						sv: (jsonFormat.translations?.sv || {}),
-						en: (jsonFormat.translations?.en || {}),
+					schemaFormat.translations = {
+						...(schemaFormat.translations || {}),
+						fi: (schemaFormat.translations?.fi || {}),
+						sv: (schemaFormat.translations?.sv || {}),
+						en: (schemaFormat.translations?.en || {}),
 					};
 					Object.keys(defaultValidator.translations).forEach(translationKey => {
 						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
-							(jsonFormat.translations as Translations)[lang][translationKey] = defaultValidator.translations[translationKey][lang];
+							(schemaFormat.translations as Translations)[lang][translationKey] = defaultValidator.translations[translationKey][lang];
 						});
 					});
 				}
@@ -279,8 +299,8 @@ const addValidators = (type: "validators" | "warnings") => (jsonFormat: Schemas 
 		}, validators);
 	};
 
-	const validators = recursively({fields: master.fields, name: ""}, jsonFormat.schema, "");
-	return {...jsonFormat, [type]: validators.properties || {}};
+	const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
+	return {...schemaFormat, [type]: validators.properties || {}};
 };
 
 interface DefaultValidatorItem {

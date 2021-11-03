@@ -76,6 +76,7 @@ export interface Schemas {
 	uiSchema?: any;
 	validators?: any;
 	warnings?: any;
+	excludeFromCopy: string[];
 }
 
 export interface JSONSchemaE extends JSONSchema7 {

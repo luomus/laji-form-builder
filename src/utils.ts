@@ -315,13 +315,13 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p.then;
 }
 
-export function applyTransformations<T, P>(schemaOrPromise: T | Promise<T>, property: P, fns: (((schema: T, property: P) => T | Promise<T>)[])) {
+export function applyTransformations<T, P>(startValueOrPromise: T | Promise<T>, fnValue: P, fns: (((value: T, fnValue: P) => T | Promise<T>)[])) {
 	return fns.reduce<Promise<T>>((promise, fn) => promise.then(
-		schema => isPromise(fn)
-			? fn(schema as T, property)
-			: Promise.resolve(fn(schema as T, property))
+		value => isPromise(fn)
+			? fn(value as T, fnValue)
+			: Promise.resolve(fn(value as T, fnValue))
 	)
-	, isPromise(schemaOrPromise) ? schemaOrPromise : Promise.resolve(schemaOrPromise));
+	, isPromise(startValueOrPromise) ? startValueOrPromise : Promise.resolve(startValueOrPromise));
 }
 
 export const getScrollPositionForScrollIntoViewIfNeeded = (elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement): number => {
