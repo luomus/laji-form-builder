@@ -39,7 +39,7 @@ describe("Field service", () => {
 			let jsonFormat: SchemaFormat;
 
 			it("converts without errors", async () => {
-				jsonFormat = await fieldService.masterToJSONFormat(master);
+				jsonFormat = await fieldService.masterToSchemaFormat(master);
 			});
 
 			(["schema", "uiSchema", "options", "validators", "warnings", "excludeFromCopy"] as (keyof SchemaFormat)[]).forEach(prop => {

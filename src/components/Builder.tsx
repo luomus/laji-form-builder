@@ -123,7 +123,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				await this.updateSchemaFormat();
 				this.propagateState();
 			} else if (this.state.master) {
-				const schemaFormat = await this.fieldService.masterToJSONFormat(this.state.master);
+				const schemaFormat = await this.fieldService.masterToSchemaFormat(this.state.master);
 				this.setState({schemaFormat}, this.propagateState);
 			}
 			this.props.onLangChange(this.state.lang);
@@ -435,7 +435,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onCreate = async (master: Master) => {
 		this.setState({tmp: true}, async () => {
-			const schemaFormat = await this.fieldService.masterToJSONFormat(master);
+			const schemaFormat = await this.fieldService.masterToSchemaFormat(master);
 			this.setState({master, schemaFormat}, this.propagateState);
 		});
 	}

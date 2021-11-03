@@ -30,7 +30,7 @@ export default class FieldService {
 		this.lang = lang;
 	}
 
-	async masterToJSONFormat(master: Master): Promise<SchemaFormat> {
+	async masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
 		const {schema, excludeFromCopy} = await this.masterToJSONSchema(master);
 		const {fields, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
