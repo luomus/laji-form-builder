@@ -67,6 +67,7 @@ export interface Field {
 	validators?: any;
 	warnings?: any;
 	label?: string;
+	formID?: string;
 	fields?: Field[];
 }
 

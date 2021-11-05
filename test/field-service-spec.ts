@@ -21,9 +21,11 @@ describe("Field service", () => {
 	const formService = new FormService(apiClient);
 
 	const forms: {id: string, label: string}[] = [
-		{id: "JX.519", label: "trip report"},
-		{id: "MHL.70", label: "Dataset primary base"},
-		{id: "MHL.93", label: "Coll Mikko Heikkinen"}
+		{id: "JX.519", label: "Trip report"},
+		{id: "MHL.70", label: "Dataset primary base"}, // Tests baseFormID
+		{id: "MHL.93", label: "Coll Mikko Heikkinen"}, // Tests baseFormID with exthending options
+		{id: "MHL.1", label: "Line transect"},
+		{id: "MHL.27", label: "Line transect (non-standard)"} // Tests form with patches
 	];
 
 	for (const {label, id} of forms) {

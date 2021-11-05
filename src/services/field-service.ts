@@ -3,6 +3,7 @@ import MetadataService from "./metadata-service";
 import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
+import { applyPatch } from "fast-json-patch";
 
 const requiredHacks: Record<string, boolean> = {
 	"MY.gatherings": false
@@ -53,7 +54,8 @@ export default class FieldService {
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}, excludeFromCopy: []});
 		}
-		const excludeFromCopy: string[] = [];
+
+		const excludeFromCopy: string[] = []; // Constructed mutably by this.fieldToSchema().
 		return {
 			schema: await this.fieldToSchema(
 				{name: "MY.document", type: "fieldset", fields},
@@ -120,10 +122,14 @@ export default class FieldService {
 	}
 
 	private parseMaster(master: Master) {
-		return this.mapBaseForm(master);
+		return applyTransformations(master, undefined, [
+			this.mapBaseForm,
+			this.mapBaseFormFromFields,
+			this.applyPatches,
+		]);
 	}
 
-	private async mapBaseForm(master: Master) {
+	private mapBaseForm = async (master: Master) => {
 		if (!master.baseFormID) {
 			return master;
 		}
@@ -136,6 +142,49 @@ export default class FieldService {
 			uiSchema: merge(baseForm.uiSchema || {}, master.uiSchema || {})
 		};
 		return master;
+	}
+
+	private mapBaseFormFromFields = async  (master: Master) => {
+		if (!master.fields) {
+			return master;
+		}
+
+		for (const idx in master.fields) {
+			const f = master.fields[idx];
+			const {formID} = f;
+			if (!formID) {
+				continue;
+			}
+			master.fields.splice(+idx, 1);
+			const {fields, uiSchema, translations} = await this.formService.getMaster(formID);
+			master.translations = merge(master.translations || {}, translations || {});
+			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
+			if (!fields) {
+				continue;
+			}
+			master.fields = mergeFields(master.fields, fields);
+		}
+		return master;
+
+		function mergeFields(fieldsFrom: Field[], fieldsTo: Field[]): Field[] {
+			fieldsFrom.forEach(f => {
+				const {name} = f;
+				const exists = fieldsTo.find(f => f.name === name);
+				if (exists && f.fields && exists.fields) {
+					mergeFields(f.fields, exists.fields);
+				} else {
+					fieldsTo.push(f);
+				}
+			});
+			return fieldsTo;
+		}
+	}
+
+	private applyPatches(master: Master) {
+		const {patch, ..._master} = master;
+		return patch
+			? (applyPatch(_master, patch).newDocument as Master)
+			: master;
 	}
 }
 
