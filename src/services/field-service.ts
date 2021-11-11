@@ -10,10 +10,10 @@ const requiredHacks: Record<string, boolean> = {
 };
 
 const titleHacks: Record<string, string | undefined> = {
-	"MY.gatherings": undefined,
-	"MY.identifications": undefined,
-	"MY.unitGathering": undefined,
-	"MY.unitFact": undefined
+	"gatherings": undefined,
+	"identifications": undefined,
+	"unitGathering": undefined,
+	"unitFact": undefined
 };
 
 export default class FieldService {
@@ -201,10 +201,10 @@ const mapMaxOccurs = ({maxOccurs}: PropertyModel) => (schema: JSONSchemaE) =>
 
 const addTitleAndDefault = (property: PropertyModel, lang: Lang) => (schema: any, field: Field) => {
 	const _default = field.options?.default;
-	const title = property.property in titleHacks
-		? titleHacks[property.property]
-		: typeof field.label === "string"
-			? field.label
+	const title = typeof field.label === "string"
+		? field.label
+		: unprefixProp(property.property) in titleHacks
+			? titleHacks[unprefixProp(property.property)]
 			: multiLang(property.label, lang);
 	if (title !== undefined) {
 		schema.title = title;
