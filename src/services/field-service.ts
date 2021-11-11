@@ -50,7 +50,7 @@ export default class FieldService {
 	}
 
 	private async masterToJSONSchema(master: Master): Promise<Pick<SchemaFormat, "schema" | "excludeFromCopy">> {
-		const {fields, translations} = master;
+		const {fields} = master;
 		if (!fields) {
 			return Promise.resolve({type: "object", properties: {}, excludeFromCopy: []});
 		}
@@ -59,7 +59,6 @@ export default class FieldService {
 		return {
 			schema: await this.fieldToSchema(
 				{name: "MY.document", type: "fieldset", fields},
-				translations?.[this.lang],
 				[{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel],
 				excludeFromCopy,
 				"$"
@@ -70,7 +69,6 @@ export default class FieldService {
 
 	private async fieldToSchema(
 		field: Field,
-		translations: Record<string, string> | undefined,
 		partOfProperties: PropertyModel[],
 		excludeFromCopy: string[],
 		path: string
@@ -85,7 +83,7 @@ export default class FieldService {
 		const transformationsForAllTypes = [
 			addExcludeFromCopy(excludeFromCopy, path),
 			optionsToSchema,
-			addTitleAndDefault(property, this.lang, translations)
+			addTitleAndDefault(property, this.lang)
 		];
 
 		const getExcludeFromCopyPath = (containerProperty: PropertyModel, path: string, field: Field) => {
@@ -98,7 +96,7 @@ export default class FieldService {
 				: [];
 
 			const schemaProperties = await Promise.all(
-				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, translations, properties, excludeFromCopy, getExcludeFromCopyPath(property, path, field))] as [string, JSONSchemaE])
+				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, properties, excludeFromCopy, getExcludeFromCopyPath(property, path, field))] as [string, JSONSchemaE])
 			);
 			return applyTransformations(
 				mapEmbeddable(
@@ -114,7 +112,7 @@ export default class FieldService {
 			);
 		} else {
 			return applyTransformations<JSONSchemaE, Field>(this.metadataService.getJSONSchemaFromProperty(property), field, [
-				addValueOptions(translations),
+				addValueOptions,
 				filterWhitelist,
 				...transformationsForAllTypes
 			]);
@@ -201,14 +199,12 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 const mapMaxOccurs = ({maxOccurs}: PropertyModel) => (schema: JSONSchemaE) =>
 	maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
 
-const addTitleAndDefault = (property: PropertyModel, lang: Lang, translations?: Record<string, string>) => (schema: any, field: Field) => {
+const addTitleAndDefault = (property: PropertyModel, lang: Lang) => (schema: any, field: Field) => {
 	const _default = field.options?.default;
 	const title = property.property in titleHacks
 		? titleHacks[property.property]
 		: typeof field.label === "string"
-			? translations
-				? translate(field.label, translations)
-				: field.label
+			? field.label
 			: multiLang(property.label, lang);
 	if (title !== undefined) {
 		schema.title = title;
@@ -243,7 +239,7 @@ const filterWhitelist = (schema: JSONSchemaE, field: Field) => {
 		: schema;
 };
 
-const addValueOptions = (translations: Record<string, string> | undefined) => (schema: JSONSchemaE, field: Field) => {
+const addValueOptions = (schema: JSONSchemaE, field: Field) => {
 	const {value_options} = field.options || {};
 	if (!value_options) {
 		return schema;
@@ -251,7 +247,7 @@ const addValueOptions = (translations: Record<string, string> | undefined) => (s
 	const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(([_enum, enumNames], option) => {
 		_enum.push(option);
 		const label = value_options[option];
-		enumNames.push(translations ? translate(label, translations) : label);
+		enumNames.push(label);
 		return [_enum, enumNames];
 	}, [[], []]);
 	return {
