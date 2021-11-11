@@ -83,7 +83,7 @@ export const translate = (obj: any, translations: {[key: string]: string}) => {
 			}
 			// Return the key if it doesn't have the @ prefix
 			if (translations[_any.substr(1)]) {
-				return _any;
+				return translations[_any.substr(1)];
 			}
 		}
 		return _any;
