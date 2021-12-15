@@ -58,20 +58,15 @@ export default class FieldService {
 
 		return this.fieldToSchema(
 			{name: "MY.document", type: "fieldset", fields},
-			[{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]
+			{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel
 		);
 	}
 
 	private async fieldToSchema(
 		field: Field,
-		partOfProperties: PropertyModel[],
+		property: PropertyModel,
 	): Promise<JSONSchemaE> {
 		const {fields = []} = field;
-
-		const property = partOfProperties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
-		if (!property) {
-			throw new Error(`Bad field ${field}`);
-		}
 
 		const transformationsForAllTypes = [
 			addExcludeFromCopyToSchema,
@@ -85,7 +80,16 @@ export default class FieldService {
 				: [];
 
 			const schemaProperties = await Promise.all(
-				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, properties)] as [string, JSONSchemaE])
+				fields.map(async (field: Field) => {
+					const prop = properties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
+					if (!prop) {
+						throw new Error(`Bad field ${field}`);
+					}
+					return [
+						field.name,
+						await this.fieldToSchema(field, prop)
+					] as [string, JSONSchemaE];
+				})
 			);
 			return applyTransformations(
 				mapEmbeddable(
