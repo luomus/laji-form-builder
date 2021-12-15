@@ -33,15 +33,16 @@ export default class FieldService {
 
 	async masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
-		const {schema, excludeFromCopy} = await this.masterToJSONSchema(master);
+		const schema = await this.masterToJSONSchema(master);
 		const {fields, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
 		const {translations, ...schemaFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
-			await applyTransformations({schema, excludeFromCopy, ..._master} as (SchemaFormat & Pick<Master, "translations">),
+			await applyTransformations({schema, excludeFromCopy: [], ..._master} as (SchemaFormat & Pick<Master, "translations">),
 				master,
 				[
 					addValidators("validators"),
 					addValidators("warnings"),
 					addAttributes,
+					addExcludeFromCopy,
 					(schemaFormat, master) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : master
 				]
 			)
@@ -49,29 +50,21 @@ export default class FieldService {
 		return schemaFormat;
 	}
 
-	private async masterToJSONSchema(master: Master): Promise<Pick<SchemaFormat, "schema" | "excludeFromCopy">> {
+	private async masterToJSONSchema(master: Master): Promise<SchemaFormat["schema"]> {
 		const {fields} = master;
 		if (!fields) {
-			return Promise.resolve({type: "object", properties: {}, excludeFromCopy: []});
+			return Promise.resolve({type: "object", properties: {}});
 		}
 
-		const excludeFromCopy: string[] = []; // Constructed mutably by this.fieldToSchema().
-		return {
-			schema: await this.fieldToSchema(
-				{name: "MY.document", type: "fieldset", fields},
-				[{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel],
-				excludeFromCopy,
-				"$"
-			),
-			excludeFromCopy
-		};
+		return this.fieldToSchema(
+			{name: "MY.document", type: "fieldset", fields},
+			[{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel]
+		);
 	}
 
 	private async fieldToSchema(
 		field: Field,
 		partOfProperties: PropertyModel[],
-		excludeFromCopy: string[],
-		path: string
 	): Promise<JSONSchemaE> {
 		const {fields = []} = field;
 
@@ -81,14 +74,10 @@ export default class FieldService {
 		}
 
 		const transformationsForAllTypes = [
-			addExcludeFromCopy(excludeFromCopy, path),
+			addExcludeFromCopyToSchema,
 			optionsToSchema,
 			addTitleAndDefault(property, this.lang)
 		];
-
-		const getExcludeFromCopyPath = (containerProperty: PropertyModel, path: string, field: Field) => {
-			return `${path}${containerProperty.maxOccurs === "unbounded" ? "[*]" : ""}.${unprefixProp(field.name)}`;
-		};
 
 		if (property.isEmbeddable) {
 			const properties = fields
@@ -96,7 +85,7 @@ export default class FieldService {
 				: [];
 
 			const schemaProperties = await Promise.all(
-				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, properties, excludeFromCopy, getExcludeFromCopyPath(property, path, field))] as [string, JSONSchemaE])
+				fields.map(async (field: Field) => [field.name, await this.fieldToSchema(field, properties)] as [string, JSONSchemaE])
 			);
 			return applyTransformations(
 				mapEmbeddable(
@@ -257,10 +246,9 @@ const addValueOptions = (schema: JSONSchemaE, field: Field) => {
 	};
 };
 
-const addExcludeFromCopy = (excludeFromCopy: string[], path: string) => (schema: JSONSchemaE, field: Field) => {
+const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
 	if (field.options?.excludeFromCopy) {
 		(schema as any).excludeFromCopy = true;
-		excludeFromCopy.push(path);
 	}
 	return schema as JSONSchemaE;
 };
@@ -353,6 +341,24 @@ const addAttributes = (schemaFormat: SchemaFormat, master: Master) => ({
 	...schemaFormat,
 	attributes: {id: master.id}
 });
+
+const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
+	const exclude = (schema: any, path: string) => schema.excludeFromCopy ? [path] : [];
+	const excludeRecursively = (schema: SchemaFormat["schema"], path: string): string[] => 
+		[
+			...exclude(schema, path),
+			...(
+				/* eslint-disable indent */
+				schema.type === "array" ? excludeRecursively(schema.items, path + "[*]") :
+				schema.type === "object" ? Object.keys(schema.properties).reduce(
+					(excludeFromCopy, prop) => [...excludeFromCopy, ...excludeRecursively(schema.properties[prop], path + "." + prop)], []) :
+				[]
+				/* eslint-enable indent */
+			)
+		];
+
+	return {...schemaFormat, excludeFromCopy: excludeRecursively(schemaFormat.schema, "$")};
+};
 
 interface DefaultValidatorItem {
 	validator: any;
