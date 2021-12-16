@@ -71,6 +71,17 @@ export interface Field {
 	fields?: Field[];
 }
 
+export interface AltTreeParent {
+	children: Record<string, AltTreeNode>;
+	order: string[];
+}
+export type AltTreeLeaf = {
+	[K in any]: never;
+}
+export type AltTreeNode = AltTreeParent | AltTreeLeaf;
+
+export type AltParentMap = Record<string, string[]>;
+
 export interface SchemaFormat {
 	options?: any;
 	schema?: any;
@@ -78,7 +89,8 @@ export interface SchemaFormat {
 	validators?: any;
 	warnings?: any;
 	excludeFromCopy: string[];
-	extra?: any;
+	extra?: Record<string, {altParent: AltParentMap}>;
+	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
 }
 
 export interface JSONSchemaE extends JSONSchema7 {

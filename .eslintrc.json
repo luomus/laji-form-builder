@@ -58,7 +58,8 @@
 		"prefer-const": "off",
 		"react/no-deprecated": "off",
 		"@typescript-eslint/no-this-alias": "off",
-		"react/no-string-refs": "off"
+		"react/no-string-refs": "off",
+		"@typescript-eslint/no-non-null-assertion": "off"
     },
     "plugins": [
         "react"

@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range } from "../model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent, AltParentMap } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -46,6 +46,7 @@ export default class FieldService {
 					addAttributes,
 					addExcludeFromCopy,
 					this.addExtra(this.documentProp),
+					addUiSchemaContext,
 					(schemaFormat, master) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : master
 				]
 			)
@@ -401,6 +402,39 @@ const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
 		];
 
 	return {...schemaFormat, excludeFromCopy: excludeRecursively(schemaFormat.schema, "$")};
+};
+
+const addUiSchemaContext = (schemaFormat: SchemaFormat) => {
+	if (!schemaFormat.extra) {
+		return schemaFormat;
+	}
+	const uiSchemaContext = Object.keys(schemaFormat.extra).reduce<Record<string, {tree: AltTreeParent}>>(
+		(uiSchemaContext, propName) => {
+			const parentMap = schemaFormat.extra![propName].altParent;
+			const rootNode: AltTreeParent = {children: {}, order: []};
+			const nodes: Record<string, AltTreeNode> = {tree: rootNode};
+			const root: {tree: AltTreeParent} = {tree: rootNode};
+			Object.keys(parentMap).reduce<AltTreeParent>((tree, child) => {
+				const parent = parentMap[child][0] || "tree";
+				if (!nodes[parent]) {
+					nodes[parent] = {children: {}, order: []};
+				}
+				if (!nodes[parent].children) {
+					nodes[parent].children = {};
+					nodes[parent].order = [];
+				}
+				if (!nodes[child]) {
+					nodes[child] = {};
+				}
+				nodes[parent].children[child] = nodes[child];
+				nodes[parent].order.push(child);
+				return tree;
+			}, root.tree);
+
+			uiSchemaContext[propName] = root;
+			return uiSchemaContext;
+		}, {});
+	return {...schemaFormat, uiSchemaContext};
 };
 
 interface DefaultValidatorItem {
