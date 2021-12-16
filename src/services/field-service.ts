@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent, AltParentMap } from "../model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -36,7 +36,7 @@ export default class FieldService {
 	async masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
 		const schema = await this.masterToJSONSchema(master);
-		const {fields, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {fields, "@type": _type, "@context": _context, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
 		const {translations, ...schemaFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
 			await applyTransformations({schema, excludeFromCopy: [], ..._master} as (SchemaFormat & Pick<Master, "translations">),
 				master,
@@ -136,6 +136,7 @@ export default class FieldService {
 			translations: merge(baseForm.translations || {}, master.translations || {}),
 			uiSchema: merge(baseForm.uiSchema || {}, master.uiSchema || {})
 		};
+		delete master.baseFormID;
 		return master;
 	}
 
@@ -152,7 +153,7 @@ export default class FieldService {
 			}
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations} = await this.formService.getMaster(formID);
-			master.translations = merge(master.translations || {}, translations || {});
+			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!fields) {
 				continue;

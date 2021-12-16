@@ -51,6 +51,8 @@ export interface Master extends FormListing {
 	patch?: any[];
 	uiSchema?: any;
 	collectionID?: string;
+	"@type"?: string;
+	"@context"?: string;
 }
 
 export interface Field {

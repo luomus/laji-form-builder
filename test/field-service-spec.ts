@@ -58,6 +58,10 @@ describe("Field service", () => {
 					expect(jsonFormat[prop]).toEqual(schemas[prop]);
 				});
 			});
+
+			it("converts all correct", () => {
+				expect(jsonFormat).toEqual(schemas);
+			});
 		});
 	}
 });
