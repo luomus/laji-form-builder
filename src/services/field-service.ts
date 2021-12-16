@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations } from "../model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -20,6 +20,8 @@ export default class FieldService {
 	private metadataService: MetadataService;
 	private formService: FormService;
 	private lang: Lang;
+
+	private documentProp: PropertyModel = {property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel;
 
 	constructor(metadataService: MetadataService, formService: FormService, lang: Lang) {
 		this.metadataService = metadataService;
@@ -43,6 +45,7 @@ export default class FieldService {
 					addValidators("warnings"),
 					addAttributes,
 					addExcludeFromCopy,
+					this.addExtra(this.documentProp),
 					(schemaFormat, master) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : master
 				]
 			)
@@ -58,7 +61,7 @@ export default class FieldService {
 
 		return this.fieldToSchema(
 			{name: "MY.document", type: "fieldset", fields},
-			{property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel
+			this.documentProp
 		);
 	}
 
@@ -135,7 +138,7 @@ export default class FieldService {
 		return master;
 	}
 
-	private mapBaseFormFromFields = async  (master: Master) => {
+	private mapBaseFormFromFields = async (master: Master) => {
 		if (!master.fields) {
 			return master;
 		}
@@ -176,6 +179,42 @@ export default class FieldService {
 		return patch
 			? (applyPatch(_master, patch).newDocument as Master)
 			: master;
+	}
+
+
+	private addExtra(property: PropertyModel) {
+		return async (schemaFormat: SchemaFormat, master: Master) => {
+			const toParentMap = (range: Range[]) => {
+				return range.reduce((parentMap, item) => {
+					parentMap[item.id] = item.altParent ? [item.altParent] : [];
+					return parentMap;
+				}, {} as Record<string, string[]>);
+			};
+			const recursively = async (field: Field, property: PropertyModel) => {
+				const range = property.range[0];
+				if (await this.metadataService.isAltRange(range)) {
+					const rangeModel = await this.metadataService.getRange(range);
+					if (rangeModel.some(item => item.altParent)) { 
+						return {[unprefixProp(property.property)]: {altParent: toParentMap(rangeModel)}};
+					}
+				} else if (field.fields) {
+					let collectedTrees = {};
+					const properties = await this.metadataService.getProperties(field.name);
+					for (const _field of field.fields) {
+						const prop = properties.find(p => unprefixProp(p.property) === unprefixProp(_field.name));
+						if (!prop) {
+							throw new Error(`Bad field ${_field.name}`);
+						}
+						collectedTrees = {...collectedTrees, ...(await recursively(_field, prop))};
+					}
+					return collectedTrees;
+				}
+				return {};
+			};
+
+			const extra = await recursively({name: "MY.document", type: "fieldset", fields: master.fields}, property);
+			return Object.keys(extra).length ? {...schemaFormat, extra} : schemaFormat;
+		};
 	}
 }
 
@@ -292,7 +331,7 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 				const schemaForField = schema.type === "object"
 					? (schema.properties as any)[unprefixProp(field.name)]
 					: (schema as any).items.properties[unprefixProp(field.name)];
-				const nextPath =  `${path}/${unprefixProp(field.name)}`;
+				const nextPath = `${path}/${unprefixProp(field.name)}`;
 				const fieldValidators = addDefaultValidators(recursively(field, schemaForField, nextPath), nextPath);
 				if (fieldValidators && Object.keys(fieldValidators).length) {
 					let validatorsTarget: any;

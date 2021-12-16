@@ -89,4 +89,5 @@ export interface JSONSchemaE extends JSONSchema7 {
 export interface Range {
 	id: string;
 	value?: Partial<Record<Lang, string>>;
+	altParent?: string;
 }
