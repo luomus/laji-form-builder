@@ -394,7 +394,7 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 						validatorsTarget = validators.properties;
 					} else if (schema.type === "array") {
 						validators.items = validators.items || {properties: {}};
-						validatorsTarget = validators.items.properties;
+						validatorsTarget = validators.items.properties || validators.items;
 					}
 					validatorsTarget[unprefixProp(field.name)] = fieldValidators;
 				}
