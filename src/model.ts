@@ -23,6 +23,7 @@ export interface PropertyModel {
 	multiLanguage: boolean;
 	isEmbeddable: boolean;
 	required: boolean
+	domain: string[];
 }
 
 export interface PropertyContext {
@@ -62,9 +63,11 @@ export interface Field {
 	options?: {
 		excludeFromCopy?: boolean;
 		default?: any;
-		required?: boolean;
 		whitelist?: string[];
 		value_options?: Record<string, string>
+		target_element?: {
+			type: "text";
+		};
 	};
 	validators?: any;
 	warnings?: any;
@@ -104,4 +107,10 @@ export interface Range {
 	id: string;
 	value?: Partial<Record<Lang, string>>;
 	altParent?: string;
+}
+
+export interface Class {
+	class: string;
+	label: Partial<Record<Lang, string>>;
+	shortName: string
 }

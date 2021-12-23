@@ -13,15 +13,14 @@ const titleHacks: Record<string, string | undefined> = {
 	"gatherings": undefined,
 	"identifications": undefined,
 	"unitGathering": undefined,
-	"unitFact": undefined
+	"unitFact": undefined,
+	"geometry": undefined
 };
 
 export default class FieldService {
 	private metadataService: MetadataService;
 	private formService: FormService;
 	private lang: Lang;
-
-	private documentProp: PropertyModel = {property: "MY.document", isEmbeddable: true, range: ["MY.document"]} as PropertyModel;
 
 	constructor(metadataService: MetadataService, formService: FormService, lang: Lang) {
 		this.metadataService = metadataService;
@@ -35,7 +34,9 @@ export default class FieldService {
 
 	async masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
-		const schema = await this.masterToJSONSchema(master);
+		const rootField = await this.getRootField(master.fields as Field[]);
+
+		const schema = await this.masterToJSONSchema(master, rootField);
 		const {fields, "@type": _type, "@context": _context, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
 		const {translations, ...schemaFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
 			await applyTransformations({schema, excludeFromCopy: [], ..._master} as (SchemaFormat & Pick<Master, "translations">),
@@ -45,25 +46,68 @@ export default class FieldService {
 					addValidators("warnings"),
 					addAttributes,
 					addExcludeFromCopy,
-					this.addExtra(this.documentProp),
+					this.addExtra({...rootField, fields: master.fields}),
 					addUiSchemaContext,
-					(schemaFormat, master) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : master
+					(schemaFormat) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : schemaFormat
 				]
 			)
 		);
 		return schemaFormat;
 	}
 
-	private async masterToJSONSchema(master: Master): Promise<SchemaFormat["schema"]> {
+	private async masterToJSONSchema(master: Master, rootField: Field): Promise<SchemaFormat["schema"]> {
 		const {fields} = master;
-		if (!fields) {
+		if (!fields || !fields.length) {
 			return Promise.resolve({type: "object", properties: {}});
 		}
 
 		return this.fieldToSchema(
-			{name: "MY.document", type: "fieldset", fields},
-			this.documentProp
+			{...rootField, fields},
+			this.getRootProperty(rootField)
 		);
+	}
+
+
+	private async getRootField(fields: Field[]): Promise<Field>  {
+		// Try classes first that are known to be used.
+		const order = ["MY.document", "MNP.namedPlace", "MAN.annotation", "MM.image", "MM.audio"];
+		const classes = (await this.metadataService.getClasses()).sort((a, b) => {
+			const indexA = order.indexOf(a.class);
+			const indexB = order.indexOf(b.class);
+			if (indexA >= 0 && indexB < 0) {
+				return -1;
+			}
+			if (indexA < 0 && indexB >= 0) {
+				return 1;
+			}
+			return indexA - indexB;
+		});
+
+		for (const c of classes) {
+			const properties = await this.metadataService.getProperties(c.class);
+			if (properties.some(prop =>
+				(prop.domain.length === 1 || (prop.domain.length === 2 && prop.domain.every(d => d === "MM.image" || d === "MM.audio")))
+				&& fields.some(f => f.name === prop.property)
+			)) {
+				return {name: c.class, type: "fieldset"};
+			}
+		}
+		throw new Error("Couldn't find root class");
+	}
+
+	private getRootProperty(rootField: Field): PropertyModel {
+		return {
+			property: rootField.name,
+			isEmbeddable: true,
+			range: [rootField.name],
+			label: {},
+			shortName: unprefixProp(rootField.name),
+			required: true,
+			minOccurs: "1",
+			maxOccurs: "1",
+			multiLanguage: false,
+			domain: []
+		};
 	}
 
 	private async fieldToSchema(
@@ -80,14 +124,19 @@ export default class FieldService {
 
 		if (property.isEmbeddable) {
 			const properties = fields
-				? (await this.metadataService.getProperties(field.name))
-				: [];
+				? (await this.metadataService.getProperties(field.name)).reduce<Record<string, PropertyModel>>((propMap, prop) => {
+					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
+						propMap[unprefixProp(prop.property)] = prop;
+					}
+					return propMap;
+				}, {})
+				: {};
 
 			const schemaProperties = await Promise.all(
 				fields.map(async (field: Field) => {
-					const prop = properties.find(p => unprefixProp(p.property) === unprefixProp(field.name));
+					const prop = properties[unprefixProp(field.name)];
 					if (!prop) {
-						throw new Error(`Bad field ${field}`);
+						throw new Error(`Bad field ${field.name}`);
 					}
 					return [
 						field.name,
@@ -184,8 +233,8 @@ export default class FieldService {
 	}
 
 
-	private addExtra(property: PropertyModel) {
-		return async (schemaFormat: SchemaFormat, master: Master) => {
+	private addExtra(field: Field) {
+		return async (schemaFormat: SchemaFormat) => {
 			const toParentMap = (range: Range[]) => {
 				return range.reduce((parentMap, item) => {
 					parentMap[item.id] = item.altParent ? [item.altParent] : [];
@@ -214,7 +263,7 @@ export default class FieldService {
 				return {};
 			};
 
-			const extra = await recursively({name: "MY.document", type: "fieldset", fields: master.fields}, property);
+			const extra = await recursively(field, this.getRootProperty(field));
 			return Object.keys(extra).length ? {...schemaFormat, extra} : schemaFormat;
 		};
 	}
@@ -222,7 +271,7 @@ export default class FieldService {
 
 const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 	const required = field.fields?.reduce<string[]>((reqs, f) => {
-		if (f.options?.required) {
+		if (f.required) {
 			reqs.push(unprefixProp(f.name));
 		}
 		return reqs;
@@ -284,11 +333,13 @@ const addValueOptions = (schema: JSONSchemaE, field: Field) => {
 		enumNames.push(label);
 		return [_enum, enumNames];
 	}, [[], []]);
-	return {
-		...schema,
+	const enumData = {
 		enum: _enum,
 		enumNames
 	};
+	return schema.type === "array"
+		? { ...schema, items: {...(schema.items as any), ...enumData}, uniqueItems: true}
+		: {...schema, ...enumData};
 };
 
 const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
@@ -298,7 +349,8 @@ const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema as JSONSchemaE;
 };
 
-const addRequireds = (properties: PropertyModel[]) => (schema: JSONSchemaE) => properties.reduce((schema, property) => {
+const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) => Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
+	const property = properties[unprefixProp(propertyName)];
 	const isRequired =
 		!(property.property in requiredHacks && !requiredHacks[property.property])
 		&& (
@@ -316,7 +368,7 @@ const addRequireds = (properties: PropertyModel[]) => (schema: JSONSchemaE) => p
 
 const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	if (field.options) {
-		const {excludeFromCopy, whitelist, value_options, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {excludeFromCopy, whitelist, value_options, target_element, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
 		return {...schema, ...schemaOptions} as JSONSchemaE;
 	}
 	return schema;
@@ -382,10 +434,13 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 	return {...schemaFormat, [type]: validators.properties || {}};
 };
 
-const addAttributes = (schemaFormat: SchemaFormat, master: Master) => ({
-	...schemaFormat,
-	attributes: {id: master.id}
-});
+const addAttributes = (schemaFormat: SchemaFormat, master: Master) => 
+	typeof master.id === "string"
+		? {
+			...schemaFormat,
+			attributes: {id: master.id}
+		}
+		: schemaFormat;
 
 const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
 	const exclude = (schema: any, path: string) => schema.excludeFromCopy ? [path] : [];

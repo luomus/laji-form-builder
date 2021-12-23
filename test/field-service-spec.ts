@@ -4,7 +4,7 @@ import FormService from "../src/services/form-service";
 import ApiClientImplementation from "../playground/ApiClientImplementation";
 import ApiClient from "laji-form/lib/ApiClient";
 import properties from "../properties.json";
-import { Master, SchemaFormat } from "../src/model";
+import { FormListing, Master, SchemaFormat } from "../src/model";
 
 const LANG = "fi";
 
@@ -20,16 +20,19 @@ describe("Field service", () => {
 	const fieldService = new FieldService(new MetadataService(apiClient, LANG), new FormService(apiClient), LANG);
 	const formService = new FormService(apiClient);
 
-	const forms: {id: string, label: string}[] = [
-		{id: "JX.519", label: "Trip report"},
-		{id: "MHL.70", label: "Dataset primary base"}, // Tests baseFormID
-		{id: "MHL.93", label: "Coll Mikko Heikkinen"}, // Tests baseFormID with exthending options
-		{id: "MHL.1", label: "Line transect"},
-		{id: "MHL.27", label: "Line transect (non-standard)"} // Tests form with patches
+	const forms: {id: string, title: string}[] = [
+		{id: "JX.519", title: "Trip report"},
+		{id: "MHL.70", title: "Dataset primary base"}, // Tests baseFormID
+		{id: "MHL.93", title: "Coll Mikko Heikkinen"}, // Tests baseFormID with extending options
+		{id: "MHL.1", title: "Line transect"},
+		{id: "MHL.27", title: "Line transect (non-standard)"}, // Tests form with patches
+		{id: "JX.111712", title: "Media metadata"}, // Tests form for MM.image/MM.audio
+		{id: "MHL.36", title: "Named place"}, // Tests form for MNP.namedPlace
+		{id: "MHL.15", title: "Annotation"} // Tests form for MAN.annotation
 	];
 
-	for (const {label, id} of forms) {
-		describe(`${label} (${id})`, () => {
+	for (const {title, id} of forms) {
+		describe(`${title} (${id})`, () => {
 			let master: Master;
 			let schemas: SchemaFormat;
 
@@ -57,10 +60,6 @@ describe("Field service", () => {
 				it(`converts ${prop} correct`, () => {
 					expect(jsonFormat[prop]).toEqual(schemas[prop]);
 				});
-			});
-
-			it("converts all correct", () => {
-				expect(jsonFormat).toEqual(schemas);
 			});
 		});
 	}
