@@ -24,7 +24,7 @@ const classFieldNameToPropertyName = (name: string) => {
 		"units": "MY.units",
 	};
 	return map[name] || name;
-}
+};
 
 export default class FieldService {
 	private metadataService: MetadataService;
@@ -178,6 +178,7 @@ export default class FieldService {
 		return applyTransformations(master, undefined, [
 			this.mapBaseForm,
 			this.mapBaseFormFromFields,
+			addDefaultValidators,
 			this.applyPatches,
 		]);
 	}
@@ -395,7 +396,7 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 					? (schema.properties as any)[unprefixProp(field.name)]
 					: (schema as any).items.properties[unprefixProp(field.name)];
 				const nextPath = `${path}/${unprefixProp(field.name)}`;
-				const fieldValidators = addDefaultValidators(recursively(field, schemaForField, nextPath), nextPath);
+				const fieldValidators = recursively(field, schemaForField, nextPath);
 				if (fieldValidators && Object.keys(fieldValidators).length) {
 					let validatorsTarget: any;
 					if (schema.type === "object") {
@@ -410,33 +411,6 @@ const addValidators = (type: "validators" | "warnings") => (schemaFormat: Schema
 				return validators;
 			}, validators)
 			: validators;
-	};
-
-	const addDefaultValidators = (validators: SchemaFormat["validators"] | SchemaFormat["warnings"], path: string) => {
-		const _defaultValidators = defaultValidators[path]?.[type];
-		if (!_defaultValidators) {
-			return validators;
-		}
-		return Object.keys(_defaultValidators).reduce((validators, validatorName) => {
-			const defaultValidator = _defaultValidators[validatorName];
-			if (!validators[validatorName]) {
-				if (defaultValidator.translations) {
-					schemaFormat.translations = {
-						...(schemaFormat.translations || {}),
-						fi: (schemaFormat.translations?.fi || {}),
-						sv: (schemaFormat.translations?.sv || {}),
-						en: (schemaFormat.translations?.en || {}),
-					};
-					Object.keys(defaultValidator.translations).forEach(translationKey => {
-						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
-							(schemaFormat.translations as Translations)[lang][translationKey] = defaultValidator.translations[translationKey][lang];
-						});
-					});
-				}
-				return {...validators, [validatorName]: defaultValidator.validator};
-			}
-			return validators;
-		}, validators);
 	};
 
 	const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
@@ -546,6 +520,42 @@ const defaultGeometryValidator: DefaultValidator = {
 		}
 	}
 };
-const defaultValidators: {[propName: string]: DefaultValidator} = {
+const defaultValidators: Record<string, DefaultValidator> = {
 	"/gatherings/geometry": defaultGeometryValidator
+};
+
+const addDefaultValidators = (master: Master) => {
+	const recursively = (fields: Field[], path: string) => {
+		fields.forEach(field => {
+			const nextPath = `${path}/${unprefixProp(field.name)}`;
+			const _defaultValidators = defaultValidators[nextPath]?.["validators"];
+
+			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
+				if (field.validators?.[validatorName]) {
+					return;
+				}
+				if (!field.validators) {
+					field.validators = {};
+				}
+				const defaultValidator = _defaultValidators[validatorName];
+				field.validators[validatorName] = defaultValidator.validator;
+				if (defaultValidator.translations) {
+					master.translations = {
+						...(master.translations || {}),
+						fi: (master.translations?.fi || {}),
+						sv: (master.translations?.sv || {}),
+						en: (master.translations?.en || {}),
+					};
+					Object.keys(defaultValidator.translations).forEach(translationKey => {
+						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
+							(master.translations as Translations)[lang][translationKey] = defaultValidator.translations[translationKey][lang];
+						});
+					});
+				}
+			});
+			recursively(field.fields || [], nextPath);
+		});
+	};
+	recursively(master.fields || [], "");
+	return master;
 };

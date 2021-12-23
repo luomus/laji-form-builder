@@ -62,6 +62,42 @@ describe("Field service", () => {
 					expect(jsonFormat[prop]).toEqual(schemas[prop]);
 				});
 			});
+			it("converts all correct", () => {
+				expect(jsonFormat).toEqual(schemas);
+			})
 		});
 	}
+
+	describe("converts all correct", () => {
+		let _forms: FormListing[];
+
+		beforeAll(async () => {
+			_forms = await formService.getForms();
+		});
+
+		it("", async () => {
+
+			const skips: Record<string, string> = {
+				"MHL.40": "value_options patch should be removed?"
+			};
+
+			for (const {id} of _forms) {
+				if (forms.some(f => f.id === id)) {
+					continue;
+				}
+				if (skips[id]) {
+					pending(`${id}: ${skips[id]}`);
+					continue;
+				}
+				const master = await formService.getMaster(id);
+				const schemas = await formService.getSchemaFormat(id);
+				try {
+					const jsonFormat = await fieldService.masterToSchemaFormat(master);
+					expect(jsonFormat).toEqual(schemas, `Didn't convert ${id} (${master.name}) correct`);
+				} catch (e) {
+					fail(`Didn't convert ${id} (${master.name}) correct (CRASHED)`);
+				}
+			}
+		});
+	});
 });
