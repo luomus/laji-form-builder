@@ -1,7 +1,7 @@
 import memoize from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
-import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang } from "../model";
-import { applyTransformations, fetchJSON, JSONSchema, multiLang } from "../utils";
+import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang, Class } from "../model";
+import { applyTransformations, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
@@ -53,9 +53,9 @@ export default class MetadataService {
 			result?.["@context"] ? resolve(preparePropertiesContext(result?.["@context"])) : reject();
 		}, reject))
 
-	getProperties = memoize(async (property: PropertyContext | string): Promise<PropertyModel[]> => 
-		(await this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`, {lang: "multi"})).results as PropertyModel[]
-	)
+	getProperties = memoize(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
+		return (await this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`, {lang: "multi"})).results as PropertyModel[]
+	})
 
 	getRange = memoize((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
@@ -109,6 +109,9 @@ export default class MetadataService {
 			case PropertyRange.PositiveInteger:
 				schema = JSONSchema.Integer({exclusiveMinimum: 0});
 				break;
+			case PropertyRange.DateTime:
+				schema = JSONSchema.String({format: "date-time"});
+				break;
 			case PropertyRange.keyValue:
 			case PropertyRange.keyAny:
 				schema = JSONSchema.object();
@@ -116,7 +119,7 @@ export default class MetadataService {
 			default:
 				if (property.property === "MHL.prepopulatedDocument") {
 					schema = JSONSchema.object();
-				} else if (!property.isEmbeddable && property.property !== "MY.geometry") {
+				} else if (!property.isEmbeddable && unprefixProp(property.property) !== "geometry") {
 					schema = JSONSchema.String();
 				} else {
 					return propertiesToSchema(await this.getProperties(range));
@@ -135,6 +138,7 @@ export default class MetadataService {
 				? {...schema, uniqueItems: true}
 				: schema;
 
+
 		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) => ({...schema, title: multiLang(label, this.lang)});
 
 		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
@@ -152,6 +156,8 @@ export default class MetadataService {
 
 		return mapPropertyToJSONSchema(property);
 	}
+
+	getClasses = memoize(async (): Promise<Class[]> => (await this.apiClient.fetch("/metadata/classes")).results)
 }
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({
