@@ -25,7 +25,8 @@ describe("Field service", () => {
 		{id: "MHL.70", title: "Dataset primary base"}, // Tests baseFormID
 		{id: "MHL.93", title: "Coll Mikko Heikkinen"}, // Tests baseFormID with extending options
 		{id: "MHL.1", title: "Line transect"},
-		{id: "MHL.27", title: "Line transect (non-standard)"}, // Tests form with patches
+		{id: "MHL.27", title: "Line transect (non-standard)"}, // Tests form with patches && base form ID in fields
+		{id: "MHL.28", title: "Line transect (non-standard kartoitus)"}, // Tests form with recursive base form ID expansion
 		{id: "JX.111712", title: "Media metadata"}, // Tests form for MM.image/MM.audio
 		{id: "MHL.36", title: "Named place"}, // Tests form for MNP.namedPlace
 		{id: "MHL.15", title: "Annotation"} // Tests form for MAN.annotation

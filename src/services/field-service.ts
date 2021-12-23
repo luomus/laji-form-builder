@@ -201,7 +201,7 @@ export default class FieldService {
 				continue;
 			}
 			master.fields.splice(+idx, 1);
-			const {fields, uiSchema, translations} = await this.formService.getMaster(formID);
+			const {fields, uiSchema, translations} = await this.parseMaster(await this.formService.getMaster(formID));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!fields) {
