@@ -17,6 +17,15 @@ const titleHacks: Record<string, string | undefined> = {
 	"geometry": undefined
 };
 
+const classFieldNameToPropertyName = (name: string) => {
+	const map: Record<string, string> = {
+		"gatherings": "MY.gatherings",
+		"gatheringEvent": "MZ.gatheringEvent",
+		"units": "MY.units",
+	};
+	return map[name] || name;
+}
+
 export default class FieldService {
 	private metadataService: MetadataService;
 	private formService: FormService;
@@ -87,7 +96,7 @@ export default class FieldService {
 			const properties = await this.metadataService.getProperties(c.class);
 			if (properties.some(prop =>
 				(prop.domain.length === 1 || (prop.domain.length === 2 && prop.domain.every(d => d === "MM.image" || d === "MM.audio")))
-				&& fields.some(f => f.name === prop.property)
+				&& fields.some(f => classFieldNameToPropertyName(f.name) === prop.property)
 			)) {
 				return {name: c.class, type: "fieldset"};
 			}
