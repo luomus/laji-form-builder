@@ -76,7 +76,6 @@ export default class FieldService {
 		);
 	}
 
-
 	private async getRootField(fields: Field[]): Promise<Field>  {
 		// Try classes first that are known to be used.
 		const order = ["MY.document", "MNP.namedPlace", "MAN.annotation", "MM.image", "MM.audio"];
@@ -143,9 +142,9 @@ export default class FieldService {
 
 			const schemaProperties = await Promise.all(
 				fields.map(async (field: Field) => {
-					const prop = properties[unprefixProp(field.name)];
+					let prop = properties[unprefixProp(field.name)];
 					if (!prop) {
-						throw new Error(`Bad field ${field.name}`);
+						prop = this.mapUnknownFieldWithTypeToProperty(field);
 					}
 					return [
 						field.name,
@@ -172,6 +171,34 @@ export default class FieldService {
 				...transformationsForAllTypes
 			]);
 		}
+	}
+
+	private mapFieldType(type?: string) {
+		switch (type) {
+		case ("checkbox"):
+			return "xsd:boolean";
+		case ("text"):
+		default:
+			return "xsd:string";
+		}
+	}
+
+	private mapUnknownFieldWithTypeToProperty(field: Field): PropertyModel {
+		if (!field.type) {
+			throw new Error(`Bad field ${field.name}`);
+		}
+		return {
+			property: field.name,
+			range: [this.mapFieldType(field.type)],
+			shortName: field.name,
+			label: {},
+			isEmbeddable: false,
+			maxOccurs: "1",
+			minOccurs: "0",
+			multiLanguage: false,
+			required: false,
+			domain: []
+		};
 	}
 
 	private parseMaster(master: Master) {
@@ -262,9 +289,9 @@ export default class FieldService {
 					let collectedTrees = {};
 					const properties = await this.metadataService.getProperties(field.name);
 					for (const _field of field.fields) {
-						const prop = properties.find(p => unprefixProp(p.property) === unprefixProp(_field.name));
+						let prop = properties.find(p => unprefixProp(p.property) === unprefixProp(_field.name));
 						if (!prop) {
-							throw new Error(`Bad field ${_field.name}`);
+							prop = this.mapUnknownFieldWithTypeToProperty(field);
 						}
 						collectedTrees = {...collectedTrees, ...(await recursively(_field, prop))};
 					}
@@ -361,6 +388,9 @@ const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
 
 const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) => Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
 	const property = properties[unprefixProp(propertyName)];
+	if (!property) {
+		return schema;
+	}
 	const isRequired =
 		!(property.property in requiredHacks && !requiredHacks[property.property])
 		&& (
