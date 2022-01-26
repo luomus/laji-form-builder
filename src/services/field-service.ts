@@ -168,6 +168,7 @@ export default class FieldService {
 			return applyTransformations<JSONSchemaE, Field>(this.metadataService.getJSONSchemaFromProperty(property), field, [
 				addValueOptions,
 				filterWhitelist,
+				filterBlacklist,
 				...transformationsForAllTypes
 			]);
 		}
@@ -335,21 +336,24 @@ const addTitleAndDefault = (property: PropertyModel, lang: Lang) => (schema: any
 	return schema;
 };
 
-const filterWhitelist = (schema: JSONSchemaE, field: Field) => {
-	const {whitelist} = field.options || {};
+const filterList = (listName: string, white = true) => (schema: JSONSchemaE, field: Field) => {
+	const list: string[] = (field.options || {} as any)[listName];
 
-	if (!whitelist) {
+	if (!list) {
 		return schema;
 	}
 
-	const indexedWhitelist = whitelist.reduce<Record<string, number>>((index, e, idx) => {
+	const indexedList = list.reduce<Record<string, number>>((index, e, idx) => {
 		index[e] = idx;
 		return index;
 	}, {});
 
-	return whitelist && schema.enum
+	const _check = (w: string) => indexedList[w] === undefined;
+	const check = white ? _check : (w: string) => !_check(w);
+
+	return list && schema.enum
 		? [...schema.enum].reduce((schema, w: string) => {
-			if (indexedWhitelist[w] === undefined && schema.enum && schema.enumNames) {
+			if (check(w) && schema.enum && schema.enumNames) {
 				const idxInEnum = schema.enum.indexOf(w);
 				schema.enum.splice(idxInEnum, 1);
 				schema.enumNames.splice(idxInEnum, 1);
@@ -358,6 +362,9 @@ const filterWhitelist = (schema: JSONSchemaE, field: Field) => {
 		}, schema)
 		: schema;
 };
+
+const filterWhitelist = filterList("whitelist");
+const filterBlacklist = filterList("blacklist", false);
 
 const addValueOptions = (schema: JSONSchemaE, field: Field) => {
 	const {value_options} = field.options || {};
@@ -408,7 +415,7 @@ const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSO
 
 const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	if (field.options) {
-		const {excludeFromCopy, whitelist, value_options, target_element, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {excludeFromCopy, whitelist, blacklist, value_options, target_element, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
 		return {...schema, ...schemaOptions} as JSONSchemaE;
 	}
 	return schema;

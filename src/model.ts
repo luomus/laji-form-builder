@@ -64,6 +64,7 @@ export interface Field {
 		excludeFromCopy?: boolean;
 		default?: any;
 		whitelist?: string[];
+		blacklist?: string[];
 		value_options?: Record<string, string>
 		target_element?: {
 			type: "text";
