@@ -36,6 +36,8 @@ export default class MetadataService {
 			return "MY.gatheringFactClass";
 		case  "MY.taxonCensus":
 			return "MY.taxonCensusClass";
+		case  "MY.completeList":
+			return "MY.completeListClass";
 		case  "MY.units":
 			return "MY.unit";
 		case  "MY.unitFact":
