@@ -57,20 +57,23 @@ export interface Master extends FormListing {
 	"@context"?: string;
 }
 
+export interface FieldOptions {
+	excludeFromCopy?: boolean;
+	default?: any;
+	whitelist?: string[];
+	blacklist?: string[];
+	uniqueItems?: string;
+	value_options?: Record<string, string>
+		target_element?: {
+			type: "text";
+		};
+}
+
 export interface Field {
 	name: string;
 	type?: "checkbox" | "collection" | "fieldset";
 	required?: boolean;
-	options?: {
-		excludeFromCopy?: boolean;
-		default?: any;
-		whitelist?: string[];
-		blacklist?: string[];
-		value_options?: Record<string, string>
-		target_element?: {
-			type: "text";
-		};
-	};
+	options?: FieldOptions;
 	validators?: any;
 	warnings?: any;
 	label?: string;

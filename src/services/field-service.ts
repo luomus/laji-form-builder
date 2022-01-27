@@ -1,6 +1,6 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent, FieldOptions
 } from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
@@ -431,13 +431,15 @@ const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSO
 		return schema;
 	}, schema);
 
-const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
-	if (field.options) {
-		const {excludeFromCopy, whitelist, blacklist, value_options, target_element, ...schemaOptions} = field.options;
-		return {...schema, ...schemaOptions} as JSONSchemaE;
-	}
-	return schema;
-};
+const optionsToSchema = (schema: JSONSchemaE, field: Field) =>
+	field.options
+		? (["uniqueItems", "minItems", "maxItems"] as (keyof FieldOptions)[]).reduce(
+			(schema, prop) =>
+				prop in (field.options as FieldOptions)
+					? {...schema, [prop]: (field.options as FieldOptions)[prop]}
+					: schema,
+			schema)
+		: schema;
 
 const addValidators = (type: "validators" | "warnings") =>
 	(schemaFormat: SchemaFormat & Pick<Master, "translations">, master: Master) => {
