@@ -22,14 +22,14 @@ describe("Field service", () => {
 
 	const forms: {id: string, title: string}[] = [
 		{id: "JX.519", title: "Trip report"},
-		{id: "MHL.70", title: "Dataset primary base"}, // Tests baseFormID
-		{id: "MHL.93", title: "Coll Mikko Heikkinen"}, // Tests baseFormID with extending options
+		{id: "MHL.70", title: "Dataset primary base"}, // baseFormID
+		{id: "MHL.93", title: "Coll Mikko Heikkinen"}, // baseFormID with extending options
 		{id: "MHL.1", title: "Line transect"},
-		{id: "MHL.27", title: "Line transect (non-standard)"}, // Tests form with patches && base form ID in fields
-		{id: "MHL.28", title: "Line transect (non-standard kartoitus)"}, // Tests form with recursive base form ID expansion
-		{id: "JX.111712", title: "Media metadata"}, // Tests form for MM.image/MM.audio
-		{id: "MHL.36", title: "Named place"}, // Tests form for MNP.namedPlace
-		{id: "MHL.15", title: "Annotation"} // Tests form for MAN.annotation
+		{id: "MHL.27", title: "Line transect (non-standard)"}, // patches && base form ID in fields
+		{id: "MHL.28", title: "Line transect (non-standard kartoitus)"}, // recursive base form ID expansion
+		{id: "JX.111712", title: "Media metadata"},
+		{id: "MHL.36", title: "Named place"},
+		{id: "MHL.15", title: "Annotation"}
 	];
 
 	for (const {title, id} of forms) {
@@ -78,7 +78,8 @@ describe("Field service", () => {
 		it("", async () => {
 
 			const skips: Record<string, string> = {
-				"MHL.40": "value_options patch should be removed?"
+				"MHL.40": "value_options patch should be removed?",
+				"MHL.83": "uses nonexisting HRA.items ?"
 			};
 
 			for (const {id} of _forms) {
