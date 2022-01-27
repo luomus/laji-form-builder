@@ -1,6 +1,7 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
-import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer } from "../utils";
+import { makeCancellable, CancellablePromise, unprefixProp, translate, detectChangePaths, JSONSchema, parseJSONPointer
+} from "../utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "./Context";
@@ -28,15 +29,17 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	} as BasicEditorState;
 
 	componentDidMount() {
-		this.propertyContextPromise = makeCancellable(this.getPropertyContextForPath(this.props.path).then(({"@container": container}) => {
-			if (container === "@set") {
-				this.propertyChildsPromise = makeCancellable(this.getProperties(this.props.path).then(properties => {
-					this.setState({childProps: properties});
-				}));
-			} else {
-				this.setState({childProps: false});
-			}
-		}));
+		this.propertyContextPromise = makeCancellable(
+			this.getPropertyContextForPath(this.props.path).then(({"@container": container}) => {
+				if (container === "@set") {
+					this.propertyChildsPromise = makeCancellable(
+						this.getProperties(this.props.path).then(properties => {
+							this.setState({childProps: properties});
+						}));
+				} else {
+					this.setState({childProps: false});
+				}
+			}));
 	}
 
 	componentWillUnmount() {
@@ -83,7 +86,8 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		if (!property) {
 			return;
 		}
-		const propertyModel = (this.state.childProps as PropertyModel[]).find(childProp => childProp.property === property);
+		const propertyModel = (this.state.childProps as PropertyModel[])
+			.find(childProp => childProp.property === property);
 		if ((propertyModel as PropertyModel).range.includes(PropertyRange.String)) {
 			this.setState({lajiFormToucher: this.state.lajiFormToucher + 1});
 			this.props.onChange([{type: "field", op: "add", value: propertyModel as PropertyModel}]);

@@ -18,7 +18,9 @@ export const mapRangeToUiSchema = async (property: PropertyModel, metadataServic
 	}
 	if (property.isEmbeddable) {
 		const properties = await metadataService.getProperties(range);
-		const propertiesUiSchemas = await Promise.all((properties).map(p => mapPropertyToUiSchema(p, metadataService, lang)));
+		const propertiesUiSchemas = await Promise.all(
+			properties.map(p => mapPropertyToUiSchema(p, metadataService, lang))
+		);
 		return propertiesUiSchemas.reduce(
 			(ps, p, i) => ({...ps, [unprefixProp(properties[i].property)]: p}), {}
 		);
@@ -27,8 +29,10 @@ export const mapRangeToUiSchema = async (property: PropertyModel, metadataServic
 };
 const mapComment = (comment: string | undefined, uiSchema: any) => ({...uiSchema, "ui:help": comment});
 
-export const mapPropertyToUiSchema = async (property: PropertyModel, metadataService: MetadataService, lang: Lang): Promise<SchemaFormat> =>
-	mapComment(multiLang(property.comment, lang), await mapRangeToUiSchema(property, metadataService, lang));
+export const mapPropertyToUiSchema =
+	async (property: PropertyModel, metadataService: MetadataService, lang: Lang)
+	: Promise<SchemaFormat> =>
+		mapComment(multiLang(property.comment, lang), await mapRangeToUiSchema(property, metadataService, lang));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
 interface FormOptionsEditorProps extends Classable, Stylable {
@@ -41,7 +45,18 @@ interface FormOptionsEditorProps extends Classable, Stylable {
 	clearFilters: () => void;
 }
 
-const formProperty = {range: ["MHL.form"], property: "MHL.form", isEmbeddable: true, label: {}, maxOccurs: "1", minOccurs: "1", multiLanguage: false, shortName: "form", required: false, domain: []};
+const formProperty = {
+	range: ["MHL.form"],
+	property: "MHL.form",
+	isEmbeddable: true,
+	label: {},
+	maxOccurs: "1",
+	minOccurs: "1",
+	multiLanguage: false,
+	shortName: "form",
+	required: false,
+	domain: []
+};
 
 const prepareSchema = (schema: any) => {
 	delete schema.properties.fields;
@@ -116,11 +131,13 @@ const prepareUiSchema = (schema: any, uiSchema: any, filter?: string[]) => {
 };
 
 const prepareMaster = (master: Master) => {
-	const {fields, uiSchema: _uiSchema, translations, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
+	const {fields, uiSchema: _uiSchema, translations, ..._master} = master;
 	return _master;
 };
 
-export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor({master, onChange, translations, className, style, lajiFormRef, onLoaded, filter, clearFilters}: FormOptionsEditorProps, ref) {
+export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor(
+	{master, onChange, translations, className, style, lajiFormRef, onLoaded, filter, clearFilters}
+	: FormOptionsEditorProps, ref) {
 	const { metadataService, translations: appTranslations, editorLang } = React.useContext(Context);
 	const [schema, setModelSchema] = React.useState<null>();
 	const [uiSchema, setModelUiSchema] = React.useState<null>();
@@ -128,7 +145,11 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		(async () => {
 			const schema = await metadataService.getJSONSchemaFromProperty(formProperty);
 			setModelSchema(prepareSchema(schema));
-			setModelUiSchema(prepareUiSchema(schema, await mapPropertyToUiSchema(formProperty, metadataService, editorLang), filter));
+			setModelUiSchema(prepareUiSchema(
+				schema,
+				await mapPropertyToUiSchema(formProperty, metadataService, editorLang),
+				filter
+			));
 		})();
 	}, [metadataService, filter, editorLang]);
 	const _master = prepareMaster(master);
@@ -178,7 +199,10 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			: <LajiForm {...props} />
 	);
 	return <div className={className} style={style} ref={ref}>
-		{filter?.length && <Clickable className={gnmspc("options-editor-clear")} onClick={clearFilters} tag="div">{appTranslations["Editor.options.clear"]}</Clickable>}
+		{filter?.length && <Clickable className={gnmspc("options-editor-clear")}
+		                              onClick={clearFilters}
+		                              tag="div"
+		>{appTranslations["Editor.options.clear"]}</Clickable>}
 		{content}
 	</div>;
 }));

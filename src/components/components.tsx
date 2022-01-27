@@ -66,7 +66,13 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 			</div>
 		);
 		const content = this.props.dragWidth ? (
-			<div style={{display: "flex", flexDirection: "row", width: this.state.width, height: "100%", overflow: "hidden"}}>
+			<div style={{
+				display: "flex",
+				flexDirection: "row",
+				width: this.state.width,
+				height: "100%",
+				overflow: "hidden"
+			}}>
 				<div style={{width: "100%"}}>
 					{children}
 					{this.getWidthDragLine()}
@@ -84,8 +90,11 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 				zIndex: 1040,
 			} as React.CSSProperties
 			: {};
+		const containerStyle = this.props.dragHeight
+			? {...heightContainerStyle, height: this.state.height || 0, width: "100%"}
+			: {};
 		return (
-			<div style={this.props.dragHeight && {...heightContainerStyle, height: this.state.height || 0, width: "100%"} || {}}
+			<div style={containerStyle}
 			     className={containerClassName}>
 				{this.getHeightDragLine()}
 				{content}
@@ -186,11 +195,13 @@ class DraggableWidthHeight extends React.Component<DraggableWidthHeightProps, Dr
 	}
 }
 
-export const DraggableHeight = React.memo(function DraggableHeight(props: DraggableHeightProps & Stylable & Classable & HasChildren) {
+export const DraggableHeight = React.memo(function DraggableHeight(
+	props: DraggableHeightProps & Stylable & Classable & HasChildren) {
 	return <DraggableWidthHeight {...props} dragHeight={true} />;
 });
 
-export const DraggableWidth = React.forwardRef((props: DraggableWidthProps & Stylable & Classable & HasChildren, ref: React.Ref<HTMLDivElement>) => {
+export const DraggableWidth = React.forwardRef((
+	props: DraggableWidthProps & Stylable & Classable & HasChildren, ref: React.Ref<HTMLDivElement>) => {
 	return <DraggableWidthHeight {...props} dragWidth={true} containerRef={ref} />;
 });
 
@@ -226,7 +237,8 @@ export const Button = React.memo(function Button({children, active, className, .
 	return <Button className={classNames(className, active && "active")} {...props}>{children}</Button>;
 });
 
-export const Spinner = React.memo(function Spinner({color = "black", size = 32}: {color?: "white" | "black", size?: number}) {
+export const Spinner = React.memo(function Spinner(
+	{color = "black", size = 32} : {color?: "white" | "black", size?: number}) {
 	return (
 		<_Spinner
 			style={size ? {width: size, height: size} : {}}

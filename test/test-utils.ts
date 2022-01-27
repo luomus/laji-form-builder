@@ -81,9 +81,13 @@ export class BuilderPO {
 	getFieldSelector = ($field: ElementFinder): FieldSelectorPO => ({
 		$field,
 		label: $field.$(`:scope > span > ${gcnmspc("field-label")}`).getText() as Promise<string>,
-		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then($es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))))
+		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then(
+			$es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))
+		))
 	});
-	getActiveField = () => this.getFieldSelector(this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`) as ElementFinder);
+	getActiveField = () => this.getFieldSelector(
+		this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`) as ElementFinder
+	);
 	getFieldByPointer = (pointer: string) => $(gcnmspc(`field-document-${pointer.replace(/\./g, "-")}`))
 	activateFieldByPointer = async (pointer: string) => {
 		let splittedCumulated = "";

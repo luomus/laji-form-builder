@@ -50,9 +50,28 @@ formPromise.then((form: any) => {
 		return (
 			<React.Fragment>
 				<div className="laji-form-option-simple laji-form-option-description">{_form?.description}</div>
-				<div className="laji-form-option-options-namedPlaceOptions-createDescription">{form?.options?.namedPlaceOptions?.createDescription || "create descip"}</div>
-				<LajiForm {..._form} lang={_lang} formData={formData} apiClient={apiClient} theme={lajiFormBs3} uiSchemaContext={{}} className={_lang} />
-				<LajiFormBuilder id={id} lang={lang} {..._query} {...properties} onChange={onChange} onLangChange={onLangChange} apiClient={apiClient} theme={lajiFormBs3} primaryDataBankFormID="MHL.70" secondaryDataBankFormID="MHL.68"/>
+				<div className="laji-form-option-options-namedPlaceOptions-createDescription">
+					{form?.options?.namedPlaceOptions?.createDescription || "create descip"}
+				</div>
+				<LajiForm {..._form}
+				          lang={_lang}
+				          formData={formData}
+				          apiClient={apiClient}
+				          theme={lajiFormBs3}
+				          uiSchemaContext={{}}
+				          className={_lang}
+				/>
+				<LajiFormBuilder id={id}
+				                 lang={lang}
+				                 {..._query}
+				                 {...properties}
+				                 onChange={onChange}
+				                 onLangChange={onLangChange}
+				                 apiClient={apiClient}
+				                 theme={lajiFormBs3}
+				                 primaryDataBankFormID="MHL.70"
+				                 secondaryDataBankFormID="MHL.68"
+				/>
 			</React.Fragment>
 		);
 	};

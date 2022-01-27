@@ -28,7 +28,8 @@ describe("Editor", () => {
 			});
 
 			it("changes preview form lang", async () => {
-				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText()).toBe("Observatörernas namn är offentliga");
+				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText())
+					.toBe("Observatörernas namn är offentliga");
 			});
 
 			it("doesn't change editor UI lang", async () => {

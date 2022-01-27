@@ -47,25 +47,26 @@ export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	}
 };
 
-export const getTranslatedUiSchema = memoize((uiSchema: any, translations: {[key: string]: string}, prefix?: string, schemaForUiSchema?: any): any => {
-	function translate(obj: any, schemaForUiSchema?: any): any {
-		if (isObject(obj)) {
-			return Object.keys(obj).reduce<any>((translated, key) => {
-				const propSchemaForUiSchema = schemaForUiSchema?.properties?.[key];
-				const _key = propSchemaForUiSchema && prefix ? `${prefix}${key}` : key;
-				translated[_key] = translate(obj[key], propSchemaForUiSchema);
-				return translated;
-			}, {});
-		} else if (Array.isArray(obj)) {
-			return obj.map(item => translate(item, schemaForUiSchema?.items));
+export const getTranslatedUiSchema = memoize(
+	(uiSchema: any, translations: {[key: string]: string}, prefix?: string, schemaForUiSchema?: any): any => {
+		function translate(obj: any, schemaForUiSchema?: any): any {
+			if (isObject(obj)) {
+				return Object.keys(obj).reduce<any>((translated, key) => {
+					const propSchemaForUiSchema = schemaForUiSchema?.properties?.[key];
+					const _key = propSchemaForUiSchema && prefix ? `${prefix}${key}` : key;
+					translated[_key] = translate(obj[key], propSchemaForUiSchema);
+					return translated;
+				}, {});
+			} else if (Array.isArray(obj)) {
+				return obj.map(item => translate(item, schemaForUiSchema?.items));
+			}
+			if (typeof obj === "string" && obj[0] === "@") {
+				return translations[obj];
+			}
+			return obj;
 		}
-		if (typeof obj === "string" && obj[0] === "@") {
-			return translations[obj];
-		}
-		return obj;
-	}
-	return translate(uiSchema, schemaForUiSchema);
-});
+		return translate(uiSchema, schemaForUiSchema);
+	});
 
 export const translate = (obj: any, translations: {[key: string]: string}) => {
 	function translate(_any: any): any {
@@ -213,9 +214,15 @@ export const alterUiSchemaKeys = (uiSchema: any, schema: any, replace: (key: str
 	}
 	return uiSchema;
 };
+
 export const unprefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix: string): any => {
-	return alterUiSchemaKeys(uiSchema, schema, (key => key.startsWith(prefix) ? key.substr(prefix.length, key.length) : key));
+	return alterUiSchemaKeys(
+		uiSchema,
+		schema,
+		(key => key.startsWith(prefix) ? key.substr(prefix.length, key.length) : key)
+	);
 };
+
 export const prefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix?: string): any => {
 	if (prefix === undefined) {
 		return uiSchema;
@@ -315,7 +322,11 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p.then;
 }
 
-export function applyTransformations<T, P>(startValueOrPromise: T | Promise<T>, fnValue: P, fns: (((value: T, fnValue: P) => T | Promise<T>)[])) {
+export function applyTransformations<T, P>(
+	startValueOrPromise: T | Promise<T>,
+	fnValue: P,
+	fns: (((value: T, fnValue: P) => T | Promise<T>)[])
+) {
 	return fns.reduce<Promise<T>>((promise, fn) => promise.then(
 		value => isPromise(fn)
 			? fn(value as T, fnValue)
@@ -324,7 +335,12 @@ export function applyTransformations<T, P>(startValueOrPromise: T | Promise<T>, 
 	, isPromise(startValueOrPromise) ? startValueOrPromise : Promise.resolve(startValueOrPromise));
 }
 
-export const getScrollPositionForScrollIntoViewIfNeeded = (elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement): number => {
+export const getScrollPositionForScrollIntoViewIfNeeded = (
+	elem: HTMLElement,
+	topOffset = 0,
+	bottomOffset = 0,
+	container = document.documentElement
+): number => {
 	if (!elem) return container.scrollTop;
 	const elemTop = elem.offsetTop;
 	const elemBottom = elemTop + elem.clientHeight;
@@ -345,8 +361,13 @@ export const getScrollPositionForScrollIntoViewIfNeeded = (elem: HTMLElement, to
 	return container.scrollTop;
 };
 
-export const scrollIntoViewIfNeeded = (elem: HTMLElement, topOffset = 0, bottomOffset = 0, container = document.documentElement) => {
+export const scrollIntoViewIfNeeded = (
+	elem: HTMLElement,
+	topOffset = 0,
+	bottomOffset = 0,
+	container = document.documentElement
+) =>
 	container.scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
-};
 
-export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) => !obj ? undefined : (obj[lang] ?? obj["en"]);
+export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>
+	!obj ? undefined : (obj[lang] ?? obj["en"]);

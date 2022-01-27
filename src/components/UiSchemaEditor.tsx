@@ -3,11 +3,13 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
 import LajiFormInterface from "../LajiFormInterface";
-import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply, unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, parseJSONPointer } from "../utils";
+import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
+	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, parseJSONPointer } from "../utils";
 import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
-import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions, isEmptyString, immutableDelete } from "laji-form/lib/utils";
+import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions,
+	isEmptyString, immutableDelete } from "laji-form/lib/utils";
 import { JSONEditor } from "./components";
 import { Context } from "./Context";
 import { FieldProps } from "@rjsf/core";
@@ -57,8 +59,13 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 				return {["ui:field"]: "TextareaEditorField"};
 			}
 		};
-		const _uiSchema = (componentPropTypes || {}).uiSchema ? propTypesForUiSchema((componentPropTypes || {}).uiSchema) : {};
-		return customizeUiSchema(schemaForUiSchema, prefixUiSchemaDeeply(_uiSchema, unprefixSchemaDeeply(schemaForUiSchema, PREFIX), PREFIX));
+		const _uiSchema = (componentPropTypes || {}).uiSchema
+			? propTypesForUiSchema((componentPropTypes || {}).uiSchema)
+			: {};
+		return customizeUiSchema(
+			schemaForUiSchema,
+			prefixUiSchemaDeeply(_uiSchema, unprefixSchemaDeeply(schemaForUiSchema, PREFIX), PREFIX)
+		);
 	});
 
 	normalizeUiSchema(uiSchema: any, prefix = ""): any {
@@ -87,7 +94,12 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 
 		const schema = this.getEditorSchema(this.props.uiSchema, this.props.schema, PREFIX);
 		const uiSchema = this.getEditorUiSchema(this.props.uiSchema, schema);
-		const formData = getTranslatedUiSchema(this.normalizeUiSchema(this.props.uiSchema, PREFIX), this.props.translations, PREFIX, this.getEditorSchema(this.props.uiSchema, this.props.schema));
+		const formData = getTranslatedUiSchema(
+			this.normalizeUiSchema(this.props.uiSchema, PREFIX),
+			this.props.translations,
+			PREFIX,
+			this.getEditorSchema(this.props.uiSchema, this.props.schema)
+		);
 		const formContext = {
 			path: this.props.path,
 			rootSchema: this.props.schema,
@@ -106,13 +118,18 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 
 	onEditorLajiFormChange = (eventUiSchema: any) => {
 		eventUiSchema = unprefixDeeply(eventUiSchema, PREFIX);
-		const viewUiSchema = this.normalizeUiSchema(getTranslatedUiSchema(this.props.uiSchema, this.props.translations));
+		const viewUiSchema = this.normalizeUiSchema(
+			getTranslatedUiSchema(this.props.uiSchema, this.props.translations)
+		);
 		const { schema, uiSchema } = this.props;
 		const changedPaths = detectChangePaths(eventUiSchema, viewUiSchema);
 		const events: FieldEditorChangeEvent[] = [];
 		let newUiSchema = this.normalizeUiSchema(uiSchema);
 		changedPaths.forEach(changedPath => {
-			const schemaForUiSchema = parseSchemaFromFormDataPointer(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX), changedPath);
+			const schemaForUiSchema = parseSchemaFromFormDataPointer(
+				unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX),
+				changedPath
+			);
 			const currentValue = parseJSONPointer(newUiSchema, changedPath);
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
 
@@ -182,7 +199,14 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 	const addWidgetOrField = ((schemaForUiSchema: any, _schema: any) =>
 		(_schema.type === "object" || _schema.type === "array")
 			? {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth}}
-			: {...schemaForUiSchema, properties: {...schemaForUiSchema.properties, ...forBoth, [prependPrefix("ui:widget")]: {type: "string"}}}
+			: {
+				...schemaForUiSchema,
+				properties: {
+					...schemaForUiSchema.properties,
+					...forBoth,
+					[prependPrefix("ui:widget")]: {type: "string"}
+				}
+			}
 	);
 	const defaultProps = addWidgetOrField({
 		type: "object",
@@ -260,14 +284,17 @@ const customPropTypeSchemaMappings: {
 const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): any => {
 	const rmPrefix = unprefixer(prefix);
 	if (schemaForUiSchema.properties) {
-		return {...schemaForUiSchema, properties: Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
-			let propSchema = schemaForUiSchema.properties[prop];
-			const {schema: replace} = customPropTypeSchemaMappings[rmPrefix(prop)] || {};
-			if (replace) {
-				propSchema = prefixSchemaDeeply(replace(schemaForUiSchema.properties[prop], rootSchema), prefix);
-			}
-			return {...properties, [prop]: customize(propSchema, rootSchema, prefix)};
-		}, {})};
+		return {
+			...schemaForUiSchema,
+			properties: Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
+				let propSchema = schemaForUiSchema.properties[prop];
+				const {schema: replace} = customPropTypeSchemaMappings[rmPrefix(prop)] || {};
+				if (replace) {
+					propSchema = prefixSchemaDeeply(replace(schemaForUiSchema.properties[prop], rootSchema), prefix);
+				}
+				return {...properties, [prop]: customize(propSchema, rootSchema, prefix)};
+			}, {})
+		};
 	} else if (schemaForUiSchema.type === "array" && schemaForUiSchema.items.properties) {
 		return {
 			...schemaForUiSchema,
@@ -286,25 +313,29 @@ const customize = (schemaForUiSchema: any, rootSchema: any, prefix?: string): an
 const customizeUiSchema = (schemaForUiSchema: any, uiSchema: any, prefix = PREFIX): any => {
 	const rmPrefix = unprefixer(prefix);
 	if (schemaForUiSchema.properties) {
-		const propertiesUiSchema = Object.keys(schemaForUiSchema.properties).reduce((properties: any, prop: string): any => {
-			const propSchema = schemaForUiSchema.properties[prop];
-			const {uiSchema: replace} = customPropTypeSchemaMappings[rmPrefix(prop)] || {};
-			let propUiSchema = properties[prop];
-			if (replace) {
-				propUiSchema = replace(schemaForUiSchema.properties[prop]);
-			}
-			propUiSchema = customizeUiSchema(propSchema, propUiSchema);
-			if (Object.keys(propUiSchema || {}).length) {
-				return {...properties, [prop]: propUiSchema};
-			}
-			return properties;
-		}, uiSchema || {});
+		const propertiesUiSchema = Object.keys(schemaForUiSchema.properties).reduce(
+			(properties: any, prop: string): any => {
+				const propSchema = schemaForUiSchema.properties[prop];
+				const {uiSchema: replace} = customPropTypeSchemaMappings[rmPrefix(prop)] || {};
+				let propUiSchema = properties[prop];
+				if (replace) {
+					propUiSchema = replace(schemaForUiSchema.properties[prop]);
+				}
+				propUiSchema = customizeUiSchema(propSchema, propUiSchema);
+				if (Object.keys(propUiSchema || {}).length) {
+					return {...properties, [prop]: propUiSchema};
+				}
+				return properties;
+			}, uiSchema || {});
 		if (Object.keys(propertiesUiSchema).length) {
 			return propertiesUiSchema;
 		}
 	} else if (schemaForUiSchema.type === "array" && schemaForUiSchema.items.properties) {
 		const itemsUiSchema = Object.keys(schemaForUiSchema.items.properties).reduce((properties, prop) => {
-			const propUiSchema = customizeUiSchema(schemaForUiSchema.items.properties[prop], (((uiSchema || {}).items || {}).items || {})[prop]);
+			const propUiSchema = customizeUiSchema(
+				schemaForUiSchema.items.properties[prop],
+				uiSchema?.items?.items?.[prop]
+			);
 			if (Object.keys(propUiSchema || {}).length) {
 				return {...properties, [prop]: propUiSchema};
 			}

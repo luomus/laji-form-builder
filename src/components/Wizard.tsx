@@ -45,7 +45,9 @@ export const FormCreatorWizard = ({onCreate, ...config}: FormCreatorProps) => {
 	const onHide = React.useCallback(() => {}, []);
 	const [stepsTaken, setStepsTaken] = React.useState<string[]>(["create"]);
 	const takeStep = React.useCallback(step => setStepsTaken([...stepsTaken, step]), [stepsTaken]);
-	const wizardStep = stepsTaken.reduce<WizardStep>((step: WizardStepChildrenGuaranteed, child) => step.children[child], {children: wizardSteps} as WizardStep);
+	const wizardStep = stepsTaken.reduce<WizardStep>(
+		(step: WizardStepChildrenGuaranteed, child) => step.children[child],
+		{children: wizardSteps} as WizardStep);
 	const Step = wizardStep.component;
 	return (
 		<Modal onHide={onHide} show={true}>
@@ -63,7 +65,9 @@ export const FormCreatorWizard = ({onCreate, ...config}: FormCreatorProps) => {
 	);
 };
 
-function BreadcrumbItem({setStepsTaken, steps}: {setStepsTaken: React.Dispatch<React.SetStateAction<string[]>>, steps: string[]}) {
+function BreadcrumbItem(
+	{setStepsTaken, steps}:
+	{setStepsTaken: React.Dispatch<React.SetStateAction<string[]>>, steps: string[]}) {
 	const {theme, translations} = React.useContext(Context);
 	const {Breadcrumb} = theme;
 	const onClick = React.useCallback(() => setStepsTaken(steps), [setStepsTaken, steps]);
@@ -161,13 +165,17 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 	const onSubmit = React.useCallback(() => {
 		submitRef.current?.submit();
 	}, [submitRef]);
-	const onLajiFormSubmit = React.useCallback(({formData: {name, collectionID, primary}}: {formData: {name: string, collectionID: string, primary: boolean}}) => onCreate({
-		name,
-		collectionID,
-		baseFormID: primary
-			? primaryDataBankFormID
-			: secondaryDataBankFormID
-	}), [onCreate, primaryDataBankFormID, secondaryDataBankFormID]);
+	const onLajiFormSubmit = React.useCallback(
+		({formData: {name, collectionID, primary}}:
+		{formData: {name: string, collectionID: string, primary: boolean}}) => onCreate({
+			name,
+			collectionID,
+			baseFormID: primary
+				? primaryDataBankFormID
+				: secondaryDataBankFormID
+		}),
+		[onCreate, primaryDataBankFormID, secondaryDataBankFormID]
+	);
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
 			<SubmitButton onClick={onSubmit} />

@@ -1,6 +1,7 @@
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent } from "../model";
+import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent
+} from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -46,9 +47,10 @@ export default class FieldService {
 		const rootField = await this.getRootField(master.fields as Field[]);
 
 		const schema = await this.masterToJSONSchema(master, rootField);
-		const {fields, "@type": _type, "@context": _context, ..._master} = master; // eslint-disable-line @typescript-eslint/no-unused-vars
-		const {translations, ...schemaFormat} = ( // eslint-disable-line @typescript-eslint/no-unused-vars
-			await applyTransformations({schema, excludeFromCopy: [], ..._master} as (SchemaFormat & Pick<Master, "translations">),
+		const {fields, "@type": _type, "@context": _context, ..._master} = master;
+		const {translations, ...schemaFormat} = (
+			await applyTransformations(
+				{schema, excludeFromCopy: [], ..._master} as (SchemaFormat & Pick<Master, "translations">),
 				master,
 				[
 					addValidators("validators"),
@@ -57,7 +59,9 @@ export default class FieldService {
 					addExcludeFromCopy,
 					this.addExtra({...rootField, fields: master.fields}),
 					addUiSchemaContext,
-					(schemaFormat) => schemaFormat.translations ? translate(schemaFormat, schemaFormat.translations[this.lang]) : schemaFormat
+					(schemaFormat) => schemaFormat.translations
+						? translate(schemaFormat, schemaFormat.translations[this.lang])
+						: schemaFormat
 				]
 			)
 		);
@@ -94,7 +98,10 @@ export default class FieldService {
 		for (const c of classes) {
 			const properties = await this.metadataService.getProperties(c.class);
 			if (properties.some(prop =>
-				(prop.domain.length === 1 || (prop.domain.length === 2 && prop.domain.every(d => d === "MM.image" || d === "MM.audio")))
+				(
+					prop.domain.length === 1
+					|| (prop.domain.length === 2 && prop.domain.every(d => d === "MM.image" || d === "MM.audio"))
+				)
 				&& fields.some(f => classFieldNameToPropertyName(f.name) === prop.property)
 			)) {
 				return {name: c.class, type: "fieldset"};
@@ -132,12 +139,13 @@ export default class FieldService {
 
 		if (property.isEmbeddable) {
 			const properties = fields
-				? (await this.metadataService.getProperties(field.name)).reduce<Record<string, PropertyModel>>((propMap, prop) => {
-					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
-						propMap[unprefixProp(prop.property)] = prop;
-					}
-					return propMap;
-				}, {})
+				? (await this.metadataService.getProperties(field.name))
+					.reduce<Record<string, PropertyModel>>((propMap, prop) => {
+						if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
+							propMap[unprefixProp(prop.property)] = prop;
+						}
+						return propMap;
+					}, {})
 				: {};
 
 			const schemaProperties = await Promise.all(
@@ -165,12 +173,16 @@ export default class FieldService {
 				]
 			);
 		} else {
-			return applyTransformations<JSONSchemaE, Field>(this.metadataService.getJSONSchemaFromProperty(property), field, [
-				addValueOptions,
-				filterWhitelist,
-				filterBlacklist,
-				...transformationsForAllTypes
-			]);
+			return applyTransformations<JSONSchemaE, Field>(
+				this.metadataService.getJSONSchemaFromProperty(property),
+				field,
+				[
+					addValueOptions,
+					filterWhitelist,
+					filterBlacklist,
+					...transformationsForAllTypes
+				]
+			);
 		}
 	}
 
@@ -393,66 +405,68 @@ const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema as JSONSchemaE;
 };
 
-const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) => Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
-	const property = properties[unprefixProp(propertyName)];
-	if (!property) {
-		return schema;
-	}
-	const isRequired =
-		!(property.property in requiredHacks && !requiredHacks[property.property])
-		&& (
-			requiredHacks[property.property]
-			|| property.required && !schema.required?.includes(property.shortName)
-		);
-	if (isRequired) {
-		if (!schema.required) {
-			schema.required = [];
+const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) =>
+	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
+		const property = properties[unprefixProp(propertyName)];
+		if (!property) {
+			return schema;
 		}
-		schema.required.push(property.shortName);
-	}
-	return schema;
-}, schema);
+		const isRequired =
+			!(property.property in requiredHacks && !requiredHacks[property.property])
+			&& (
+				requiredHacks[property.property]
+				|| property.required && !schema.required?.includes(property.shortName)
+			);
+		if (isRequired) {
+			if (!schema.required) {
+				schema.required = [];
+			}
+			schema.required.push(property.shortName);
+		}
+		return schema;
+	}, schema);
 
 const optionsToSchema = (schema: JSONSchemaE, field: Field) => {
 	if (field.options) {
-		const {excludeFromCopy, whitelist, blacklist, value_options, target_element, ...schemaOptions} = field.options; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {excludeFromCopy, whitelist, blacklist, value_options, target_element, ...schemaOptions} = field.options;
 		return {...schema, ...schemaOptions} as JSONSchemaE;
 	}
 	return schema;
 };
 
-const addValidators = (type: "validators" | "warnings") => (schemaFormat: SchemaFormat & Pick<Master, "translations">, master: Master) => {
-	const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
-		let validators: any = {};
-		if (field[type]) {
-			validators = field[type];
-		}
-		return field.fields
-			? field.fields.reduce<any>((validators, field) => {
-				const schemaForField = schema.type === "object"
-					? (schema.properties as any)[unprefixProp(field.name)]
-					: (schema as any).items.properties[unprefixProp(field.name)];
-				const nextPath = `${path}/${unprefixProp(field.name)}`;
-				const fieldValidators = recursively(field, schemaForField, nextPath);
-				if (fieldValidators && Object.keys(fieldValidators).length) {
-					let validatorsTarget: any;
-					if (schema.type === "object") {
-						validators.properties = validators.properties || {};
-						validatorsTarget = validators.properties;
-					} else if (schema.type === "array") {
-						validators.items = validators.items || {properties: {}};
-						validatorsTarget = validators.items.properties || validators.items;
+const addValidators = (type: "validators" | "warnings") =>
+	(schemaFormat: SchemaFormat & Pick<Master, "translations">, master: Master) => {
+		const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
+			let validators: any = {};
+			if (field[type]) {
+				validators = field[type];
+			}
+			return field.fields
+				? field.fields.reduce<any>((validators, field) => {
+					const schemaForField = schema.type === "object"
+						? (schema.properties as any)[unprefixProp(field.name)]
+						: (schema as any).items.properties[unprefixProp(field.name)];
+					const nextPath = `${path}/${unprefixProp(field.name)}`;
+					const fieldValidators = recursively(field, schemaForField, nextPath);
+					if (fieldValidators && Object.keys(fieldValidators).length) {
+						let validatorsTarget: any;
+						if (schema.type === "object") {
+							validators.properties = validators.properties || {};
+							validatorsTarget = validators.properties;
+						} else if (schema.type === "array") {
+							validators.items = validators.items || {properties: {}};
+							validatorsTarget = validators.items.properties || validators.items;
+						}
+						validatorsTarget[unprefixProp(field.name)] = fieldValidators;
 					}
-					validatorsTarget[unprefixProp(field.name)] = fieldValidators;
-				}
-				return validators;
-			}, validators)
-			: validators;
-	};
+					return validators;
+				}, validators)
+				: validators;
+		};
 
-	const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
-	return {...schemaFormat, [type]: validators.properties || {}};
-};
+		const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
+		return {...schemaFormat, [type]: validators.properties || {}};
+	};
 
 const addAttributes = (schemaFormat: SchemaFormat, master: Master) => 
 	typeof master.id === "string"
@@ -471,7 +485,10 @@ const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
 				/* eslint-disable indent */
 				schema.type === "array" ? excludeRecursively(schema.items, path + "[*]") :
 				schema.type === "object" ? Object.keys(schema.properties).reduce(
-					(excludeFromCopy, prop) => [...excludeFromCopy, ...excludeRecursively(schema.properties[prop], path + "." + prop)], []) :
+					(excludeFromCopy, prop) => [
+						...excludeFromCopy,
+						...excludeRecursively(schema.properties[prop], path + "." + prop)
+					], []) :
 				[]
 				/* eslint-enable indent */
 			)
@@ -585,7 +602,8 @@ const addDefaultValidators = (master: Master) => {
 					};
 					Object.keys(defaultValidator.translations).forEach(translationKey => {
 						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
-							(master.translations as Translations)[lang][translationKey] = defaultValidator.translations[translationKey][lang];
+							(master.translations as Translations)[lang][translationKey] =
+								defaultValidator.translations[translationKey][lang];
 						});
 					});
 				}

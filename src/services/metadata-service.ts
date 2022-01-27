@@ -56,18 +56,27 @@ export default class MetadataService {
 		}, reject))
 
 	getProperties = memoize(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
-		return (await this.apiClient.fetch(`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`, {lang: "multi"})).results as PropertyModel[]
+		return (await this.apiClient.fetch(
+			`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`,
+			{lang: "multi"})
+		).results as PropertyModel[];
 	})
 
 	getRange = memoize((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
-		|| this.apiClient.fetch(`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`, {lang: "multi"}))
+		|| this.apiClient.fetch(
+			`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`,
+			{lang: "multi"}
+		)
+	)
 
 	getAllRanges = async () => {
 		if (this.allRanges) {
 			return this.allRanges;
 		}
-		const ranges = await (this.apiClient.fetch("/metadata/ranges", {lang: "multi"}) as Promise<Record<string, Range[]>>);
+		const ranges = await (
+			this.apiClient.fetch("/metadata/ranges", {lang: "multi"}) as Promise<Record<string, Range[]>>
+		);
 		this.allRanges = ranges;
 		return ranges;
 	}
@@ -92,7 +101,9 @@ export default class MetadataService {
 				return ({type: "string", enum: enums, enumNames});
 			}
 			if (property.multiLanguage) {
-				return JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) => ({...props, [lang]: {type: "string"}}), {}));
+				return JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) =>
+					({...props, [lang]: {type: "string"}}),
+				{}));
 			}
 			let schema;
 			switch (range) {
@@ -141,7 +152,8 @@ export default class MetadataService {
 				: schema;
 
 
-		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) => ({...schema, title: multiLang(label, this.lang)});
+		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) =>
+			({...schema, title: multiLang(label, this.lang)});
 
 		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
 			applyTransformations<JSONSchema, PropertyModel>(mapRangeToSchema(property), property, [
@@ -151,10 +163,11 @@ export default class MetadataService {
 			]);
 
 		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<JSONSchemaE> =>
-			JSONSchema.object(
-				(await Promise.all(modelProperties.map(async m => ({property: m.shortName, schema: (await mapPropertyToJSONSchema(m))}))))
-					.reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {})
-			);
+			JSONSchema.object((
+				await Promise.all(modelProperties.map(
+					async m => ({property: m.shortName, schema: (await mapPropertyToJSONSchema(m))})
+				))
+			).reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {}));
 
 		return mapPropertyToJSONSchema(property);
 	}

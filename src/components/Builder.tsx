@@ -4,7 +4,8 @@ import lajiFormTranslations from "laji-form/lib/translations.json";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
-import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate, gnmspc } from "../utils";
+import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate,
+	gnmspc } from "../utils";
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
@@ -60,15 +61,21 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	constructor(props: BuilderProps) {
 		super(props);
-		this.apiClient = new ApiClient(props.apiClient, props.lang || "fi", constructTranslations(lajiFormTranslations) as unknown as Translations);
+		this.apiClient = new ApiClient(
+			props.apiClient,
+			props.lang || "fi",
+			constructTranslations(lajiFormTranslations) as unknown as Translations
+		);
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
 		this.formService = new FormService(this.apiClient);
 		this.fieldService = new FieldService(this.metadataService, this.formService, props.lang);
-		this.notifier = props.notifier || (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
-			notifier[method] = msg => console.log(`Builder notification ${method}: ${msg}`); // eslint-disable-line no-console
-			return notifier;
-		}, {} as Notifier);
+		this.notifier = props.notifier
+			|| (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
+				notifier[method] = msg =>
+					console.log(`Builder notification ${method}: ${msg}`); // eslint-disable-line no-console
+				return notifier;
+			}, {} as Notifier);
 	}
 
 	componentDidMount() {
@@ -249,7 +256,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						return {
 							...field,
 							fields: remaining.length
-								? (field.fields as Field[]).map((f: Field) => f.name === p ? filterFields(f, remaining) : f)
+								? (field.fields as Field[]).map(
+									(f: Field) => f.name === p ? filterFields(f, remaining) : f)
 								: (field.fields as Field[]).filter((f: Field) => f.name !== p)
 						};
 					};
@@ -257,7 +265,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						const [p, ...remaining] = pointer;
 						if (remaining.length) {
 							if (schema.properties) {
-								return {...schema, properties: {...schema.properties, [p]: filterSchema(schema.properties[p], remaining)}};
+								return {
+									...schema,
+									properties: {
+										...schema.properties, [p]: filterSchema(schema.properties[p], remaining)
+									}
+								};
 							} else {
 								return {
 									...schema,
@@ -274,7 +287,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						if (schema.properties) {
 							return {...schema, properties: immutableDelete(schema.properties, p)};
 						} else {
-							return {...schema, items: {...schema.items, properties: immutableDelete(schema.items.properties, p)}};
+							return {
+								...schema,
+								items: {...schema.items, properties: immutableDelete(schema.items.properties, p)}
+							};
 						}
 					};
 					changed.master = {
@@ -319,10 +335,16 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 							const propName = next || unprefixProp(property.property);
 							const schemaForNext = !next
 								? getSchemaForProperty(property)
-								: addSchemaField(schema.items?.properties[next] || schema.properties[next], remaining, property);
+								: addSchemaField(schema.items?.properties[next]
+									|| schema.properties[next], remaining, property);
 							return schema.type === "object"
 								? {...schema, properties: {...schema.properties, [propName]: schemaForNext}}
-								: {...schema, items: {...schema.items, properties: {...schema.items.properties, [propName]: schemaForNext}}};
+								: {...schema,
+									items: {
+										...schema.items,
+										properties: {...schema.items.properties, [propName]: schemaForNext}
+									}
+								};
 						};
 						changed.master = {
 							...changed.master,
@@ -344,28 +366,40 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 							: field
 						);
 					};
-					const updateValidators = (currentValidators: any, schema: any, path: string[], newValidators: any): any | undefined => {
-						const [next, ...remaining] = path;
-						if (next) {
-							let nextCurrentValidators, nextSchema, nextPath, nextValidators;
-							if (schema.items && schema.items.properties) {
-								nextCurrentValidators = currentValidators?.items?.properties?.[next];
-								nextSchema = schema.items.properties[next];
-								nextPath =  `/items/properties/${next}`;
-								nextValidators = updateValidators(nextCurrentValidators, nextSchema, remaining, newValidators);
-							} else {
-								nextCurrentValidators = currentValidators?.properties?.[next];
-								nextSchema = schema.properties[next];
-								nextPath = `/properties/${next}`;
-								nextValidators = updateValidators(nextCurrentValidators, nextSchema, remaining, newValidators);
-								if (nextCurrentValidators?.items) {
-									nextValidators = {items: nextCurrentValidators.items, ...nextValidators};
+					const updateValidators =
+						(currentValidators: any, schema: any, path: string[], newValidators: any)
+						: any | undefined => {
+							const [next, ...remaining] = path;
+							if (next) {
+								let nextCurrentValidators, nextSchema, nextPath, nextValidators;
+								if (schema.items && schema.items.properties) {
+									nextCurrentValidators = currentValidators?.items?.properties?.[next];
+									nextSchema = schema.items.properties[next];
+									nextPath =  `/items/properties/${next}`;
+									nextValidators = updateValidators(
+										nextCurrentValidators,
+										nextSchema,
+										remaining,
+										newValidators
+									);
+								} else {
+									nextCurrentValidators = currentValidators?.properties?.[next];
+									nextSchema = schema.properties[next];
+									nextPath = `/properties/${next}`;
+									nextValidators = updateValidators(
+										nextCurrentValidators,
+										nextSchema,
+										remaining,
+										newValidators
+									);
+									if (nextCurrentValidators?.items) {
+										nextValidators = {items: nextCurrentValidators.items, ...nextValidators};
+									}
 								}
+								return updateSafelyWithJSONPointer(currentValidators, nextValidators, nextPath);
 							}
-							return updateSafelyWithJSONPointer(currentValidators, nextValidators, nextPath);
-						}
-						return newValidators;
-					};
+							return newValidators;
+						};
 
 					changed.master = {
 						...changed.master,
@@ -374,20 +408,34 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					if (event.value.validators) {
 						changed.schema = {
 							...changed.schema,
-							validators: updateValidators({properties: changed.schemaFormat.validators}, changed.schemaFormat.schema, splitted, event.value.validators).properties,
+							validators: updateValidators(
+								{properties: changed.schemaFormat.validators},
+								changed.schemaFormat.schema,
+								splitted,
+								event.value.validators
+							).properties,
 						};
 					}
 					if (event.value.warnings) {
 						changed.schema = {
 							...changed.schema,
-							warnings: updateValidators({properties: changed.schemaFormat.warnings}, changed.schemaFormat.schema, splitted, event.value.warnings).properties,
+							warnings: updateValidators(
+								{properties: changed.schemaFormat.warnings},
+								changed.schemaFormat.schema,
+								splitted,
+								event.value.warnings
+							).properties,
 						};
 					}
 				}
 			} else if (isOptionChangeEvent(event)) {
 				const {path, value} = event;
 				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
-				changed.schemaFormat = updateSafelyWithJSONPointer(changed.schemaFormat, translate(value, changed.master.translations?.[this.state.lang]), path);
+				changed.schemaFormat = updateSafelyWithJSONPointer(
+					changed.schemaFormat,
+					translate(value, changed.master.translations?.[this.state.lang]),
+					path
+				);
 			}
 		});
 		this.setState(changed, () => {
@@ -402,7 +450,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		if (!this.state.master) {
 			return;
 		}
-		const {translations, fields, ...toTranslate} = this.state.master; // eslint-disable-line @typescript-eslint/no-unused-vars
+		const {translations, fields, ...toTranslate} = this.state.master;
 		const translated = translate(toTranslate, this.state.master.translations?.[this.state.lang] || {});
 		const updated = {
 			...this.state.schemaFormat,

@@ -59,7 +59,19 @@
 		"react/no-deprecated": "off",
 		"@typescript-eslint/no-this-alias": "off",
 		"react/no-string-refs": "off",
-		"@typescript-eslint/no-non-null-assertion": "off"
+		"@typescript-eslint/no-non-null-assertion": "off",
+		"max-len": [
+			"error",
+			{
+				"code": 120
+			}
+		],
+		"@typescript-eslint/no-unused-vars": [
+			"error",
+			{
+				"ignoreRestSiblings": true
+			}
+		]
     },
     "plugins": [
         "react"
