@@ -9,7 +9,8 @@ export enum PropertyRange {
 	DateTime = "xsd:dateTime",
 	NonNegativeInteger = "xsd:nonNegativeInteger",
 	keyValue = "MZ.keyValue",
-	keyAny = "MZ.keyAny"
+	keyAny = "MZ.keyAny",
+	Decimal = "xsd:decimal"
 }
 
 export interface PropertyModel {

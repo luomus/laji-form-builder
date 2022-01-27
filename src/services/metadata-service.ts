@@ -122,6 +122,9 @@ export default class MetadataService {
 			case PropertyRange.PositiveInteger:
 				schema = JSONSchema.Integer({exclusiveMinimum: 0});
 				break;
+			case PropertyRange.Decimal:
+				schema = JSONSchema.Number();
+				break;
 			case PropertyRange.DateTime:
 				schema = JSONSchema.String({format: "date-time"});
 				break;
