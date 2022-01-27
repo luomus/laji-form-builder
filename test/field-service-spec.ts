@@ -5,6 +5,7 @@ import ApiClientImplementation from "../playground/ApiClientImplementation";
 import ApiClient from "laji-form/lib/ApiClient";
 import properties from "../properties.json";
 import { FormListing, Master, SchemaFormat } from "../src/model";
+import deepEqual from "deep-equal";
 
 const LANG = "fi";
 
@@ -87,14 +88,18 @@ describe("Field service", () => {
 					continue;
 				}
 				if (skips[id]) {
-					pending(`${id}: ${skips[id]}`);
+					console.log(` Skipping ${id}: ${skips[id]}`);
 					continue;
 				}
 				const master = await formService.getMaster(id);
 				const schemas = await formService.getSchemaFormat(id);
 				try {
 					const jsonFormat = await fieldService.masterToSchemaFormat(master);
-					expect(jsonFormat).toEqual(schemas, `Didn't convert ${id} (${master.name}) correct`);
+					// toEqual can't carry message so log the form manually.
+					if (!deepEqual(jsonFormat, schemas)) {
+						console.log(`Didn't convert ${id} (${master.name}) correct`);
+					}
+					expect(jsonFormat).toEqual(schemas);
 				} catch (e) {
 					fail(`Didn't convert ${id} (${master.name}) correct (CRASHED)`);
 				}

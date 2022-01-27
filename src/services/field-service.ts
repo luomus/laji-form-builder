@@ -50,7 +50,12 @@ export default class FieldService {
 		const {fields, "@type": _type, "@context": _context, ..._master} = master;
 		const {translations, ...schemaFormat} = (
 			await applyTransformations(
-				{schema, excludeFromCopy: [], ..._master} as (SchemaFormat & Pick<Master, "translations">),
+				{
+					schema,
+					uiSchema: {},
+					excludeFromCopy: [],
+					..._master
+				} as (SchemaFormat & Pick<Master, "translations">),
 				master,
 				[
 					addValidators("validators"),
