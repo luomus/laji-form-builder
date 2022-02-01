@@ -368,16 +368,23 @@ const filterList = (listName: string, white = true) => (schema: JSONSchemaE, fie
 	const _check = (w: string) => indexedList[w] === undefined;
 	const check = white ? _check : (w: string) => !_check(w);
 
-	return list && schema.enum
-		? [...schema.enum].reduce((schema, w: string) => {
-			if (check(w) && schema.enum && schema.enumNames) {
-				const idxInEnum = schema.enum.indexOf(w);
-				schema.enum.splice(idxInEnum, 1);
-				schema.enumNames.splice(idxInEnum, 1);
+	const schemaForEnum: any = schema.type === "string"
+		? schema
+		: schema.type === "array"
+			? schema.items
+			: undefined;
+
+	if (schemaForEnum.enum) {
+		[...schemaForEnum.enum].forEach((w: string) => {
+			if (check(w) && schemaForEnum.enum && schemaForEnum.enumNames) {
+				const idxInEnum = schemaForEnum.enum.indexOf(w);
+				schemaForEnum.enum.splice(idxInEnum, 1);
+				schemaForEnum.enumNames.splice(idxInEnum, 1);
 			}
-			return schema;
-		}, schema)
-		: schema;
+		});
+	}
+
+	return schema;
 };
 
 const filterWhitelist = filterList("whitelist");
