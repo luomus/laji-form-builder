@@ -63,7 +63,7 @@ export interface FieldOptions {
 	whitelist?: string[];
 	blacklist?: string[];
 	uniqueItems?: string;
-	value_options?: Record<string, string>
+	value_options?: Record<string, string>;
 		target_element?: {
 			type: "text";
 		};
@@ -111,6 +111,7 @@ export interface JSONSchemaE extends JSONSchema7 {
 export interface Range {
 	id: string;
 	value?: Partial<Record<Lang, string>>;
+	vernacularName?: Partial<Record<Lang, string>>;
 	altParent?: string;
 }
 

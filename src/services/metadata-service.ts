@@ -93,9 +93,12 @@ export default class MetadataService {
 				let enums = [...empty], enumNames = [...empty];
 				for (const e of _enums) {
 					enums.push(e.id);
-					enumNames.push(e.value
-						? (e.value[this.lang] ?? e.value["en"] ?? e.id)
-						: e.id
+					enumNames.push(
+						e.vernacularName?.[this.lang] !== undefined
+							? e.vernacularName[this.lang] as string
+							: e.value?.[this.lang] !== undefined
+								? e.value[this.lang] as string
+								: e.id
 					);
 				}
 				return ({type: "string", enum: enums, enumNames});
