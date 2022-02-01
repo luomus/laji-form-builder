@@ -484,7 +484,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	onCreate = async (master: Master) => {
 		this.setState({tmp: true}, async () => {
 			const schemaFormat = await this.fieldService.masterToSchemaFormat(master);
-			console.log("AHA", schemaFormat);
 			this.setState({master, schemaFormat}, this.propagateState);
 		});
 	}
