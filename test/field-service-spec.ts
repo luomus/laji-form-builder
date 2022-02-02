@@ -18,7 +18,10 @@ const apiClient = new ApiClient(new ApiClientImplementation(
 
 describe("Field service", () => {
 
-	const fieldService = new FieldService(new MetadataService(apiClient, LANG), new FormService(apiClient), LANG);
+	const fieldService = new FieldService(
+		apiClient,
+		new MetadataService(apiClient, LANG), new FormService(apiClient),
+		LANG);
 	const formService = new FormService(apiClient);
 
 	const forms: {id: string, title: string}[] = [
@@ -78,30 +81,37 @@ describe("Field service", () => {
 
 		it("", async () => {
 
+			/* eslint-disable max-len */
 			const skips: Record<string, string> = {
 				"MHL.40": "value_options patch should be removed?",
-				"MHL.83": "uses nonexisting HRA.items ?"
+				"MHL.83": "uses nonexisting HRA.items?",
+				"MHL.78": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
+				"MHL.77": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?"
 			};
+			/* eslint-enable max-len */
 
 			for (const {id} of _forms) {
 				if (forms.some(f => f.id === id)) {
 					continue;
 				}
 				if (skips[id]) {
-					console.log(` Skipping ${id}: ${skips[id]}`);
+					console.log(`Skipping ${id}: ${skips[id]}`);
 					continue;
 				}
 				const master = await formService.getMaster(id);
 				const schemas = await formService.getSchemaFormat(id);
 				try {
+					console.log(id);
 					const jsonFormat = await fieldService.masterToSchemaFormat(master);
 					// toEqual can't carry message so log the form manually.
 					if (!deepEqual(jsonFormat, schemas)) {
 						console.log(`Didn't convert ${id} (${master.name}) correct`);
+						break;
 					}
 					expect(jsonFormat).toEqual(schemas);
 				} catch (e) {
 					fail(`Didn't convert ${id} (${master.name}) correct (CRASHED)`);
+					break;
 				}
 			}
 		});

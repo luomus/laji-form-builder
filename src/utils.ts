@@ -2,7 +2,7 @@ import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import fetch from "isomorphic-fetch";
-import { isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
+import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
 import { JSONSchemaE, Lang } from "./model";
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
@@ -371,3 +371,5 @@ export const scrollIntoViewIfNeeded = (
 
 export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>
 	!obj ? undefined : (obj[lang] ?? obj["en"]);
+
+export const isObject = _isObject;

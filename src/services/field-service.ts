@@ -1,8 +1,9 @@
+import ApiClient from "laji-form/lib/ApiClient";
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
 import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent,
 	FieldOptions } from "../model";
-import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp } from "../utils";
+import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 
@@ -28,14 +29,18 @@ const classFieldNameToPropertyName = (name: string) => {
 };
 
 export default class FieldService {
+	private apiClient: ApiClient;
 	private metadataService: MetadataService;
 	private formService: FormService;
 	private lang: Lang;
 
-	constructor(metadataService: MetadataService, formService: FormService, lang: Lang) {
+	constructor(apiClient: ApiClient, metadataService: MetadataService, formService: FormService, lang: Lang) {
+		this.apiClient = apiClient;
 		this.metadataService = metadataService;
 		this.formService = formService;
 		this.lang = lang;
+
+		this.addTaxonSets = this.addTaxonSets.bind(this);
 	}
 
 	setLang(lang: Lang) {
@@ -225,6 +230,7 @@ export default class FieldService {
 			this.mapBaseFormFromFields,
 			addDefaultValidators,
 			this.applyPatches,
+			this.addTaxonSets
 		]);
 	}
 
@@ -321,6 +327,28 @@ export default class FieldService {
 			const extra = await recursively(field, this.getRootProperty(field));
 			return Object.keys(extra).length ? {...schemaFormat, extra} : schemaFormat;
 		};
+	}
+
+	private addTaxonSets<T>(master: T): Promise<T> {
+		const recursively = async (any: any) => {
+			if (isObject(any)) {
+				for (const key of Object.keys(any)) {
+					any[key] = await recursively(any[key]);
+				}
+			} else if (Array.isArray(any)) {
+				for (const key in any) {
+					any[key] = await recursively(any[key]);
+				}
+			} else if (typeof any === "string" && any.startsWith("...taxonSet:")) {
+				const taxonSet = await this.apiClient.fetch(
+					"/taxa",
+					{pageSize: 1000, taxonSets: any.split(":")[1], selectedFields: "id"}
+				);
+				return taxonSet.results?.map(({id}: any) => id) || [];
+			}
+			return any;
+		};
+		return recursively(master);
 	}
 }
 
