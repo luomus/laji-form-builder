@@ -16,7 +16,8 @@ const titleHacks: Record<string, string | undefined> = {
 	"identifications": undefined,
 	"unitGathering": undefined,
 	"unitFact": undefined,
-	"geometry": undefined
+	"geometry": undefined,
+	"units": undefined
 };
 
 const classFieldNameToPropertyName = (name: string) => {
