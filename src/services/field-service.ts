@@ -154,7 +154,7 @@ export default class FieldService {
 				: {};
 
 			const schemaProperties = await Promise.all(
-				fields.map(async (field: Field) => {
+				fields.map(async field => {
 					let prop = properties[unprefixProp(field.name)];
 					if (!prop) {
 						prop = this.mapUnknownFieldWithTypeToProperty(field);
@@ -468,8 +468,13 @@ const addValidators = (type: "validators" | "warnings") =>
 							validators.properties = validators.properties || {};
 							validatorsTarget = validators.properties;
 						} else if (schema.type === "array") {
-							validators.items = validators.items || {properties: {}};
-							validatorsTarget = validators.items.properties || validators.items;
+							if (!validators.items) {
+								validators.items = {};
+							}
+							if (!validators.items.properties) {
+								validators.items.properties = {};
+							}
+							validatorsTarget = validators.items.properties;
 						}
 						validatorsTarget[unprefixProp(field.name)] = fieldValidators;
 					}
