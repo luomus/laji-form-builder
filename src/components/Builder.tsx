@@ -68,7 +68,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		);
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
-		this.formService = new FormService(this.apiClient);
+		this.formService = new FormService(this.apiClient, props.lang);
 		this.fieldService = new FieldService(this.apiClient, this.metadataService, this.formService, props.lang);
 		this.notifier = props.notifier
 			|| (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {

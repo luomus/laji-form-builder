@@ -29,7 +29,7 @@ export default class ApiClient implements ApiClientImplementation {
 		return fetch(`${this.BASE_URL}${path}?${queryString.stringify(queryObject)}`, options);
 	}
 
-	fetchJSON(path: string, query?: any, options?: any) {
-		return this.fetch(path, query, options).then(r => r.json());
+	async fetchJSON(path: string, query?: any, options?: any) {
+		return (await this.fetch(path, query, options)).json();
 	}
 }

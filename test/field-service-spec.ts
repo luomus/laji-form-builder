@@ -18,11 +18,8 @@ const apiClient = new ApiClient(new ApiClientImplementation(
 
 describe("Field service", () => {
 
-	const fieldService = new FieldService(
-		apiClient,
-		new MetadataService(apiClient, LANG), new FormService(apiClient),
-		LANG);
-	const formService = new FormService(apiClient);
+	const formService = new FormService(apiClient, LANG);
+	const fieldService = new FieldService(apiClient, new MetadataService(apiClient, LANG), formService, LANG);
 
 	const forms: {id: string, title: string}[] = [
 		{id: "JX.519", title: "Trip report"},
@@ -104,7 +101,7 @@ describe("Field service", () => {
 				const schemas = await formService.getSchemaFormat(id);
 				try {
 					console.log(id);
-					const jsonFormat = await fieldService.masterToSchemaFormat(master);
+					const jsonFormat = await fieldService.masterToSchemaFormat(master, LANG);
 					// toEqual can't carry message so log the form manually.
 					if (!deepEqual(jsonFormat, schemas)) {
 						console.log(`Didn't convert ${id} (${master.name}) correct`);

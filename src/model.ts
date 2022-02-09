@@ -101,6 +101,7 @@ export interface SchemaFormat {
 	excludeFromCopy: string[];
 	extra?: Record<string, {altParent: AltParentMap}>;
 	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
+	language?: Lang;
 }
 
 export interface JSONSchemaE extends JSONSchema7 {

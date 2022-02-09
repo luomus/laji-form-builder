@@ -48,7 +48,7 @@ export default class FieldService {
 		this.lang = lang;
 	}
 
-	async masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
+	async masterToSchemaFormat(master: Master, lang?: Lang): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
 		const rootField = master.fields
 			? await this.getRootField(master.fields)
@@ -73,6 +73,7 @@ export default class FieldService {
 				addExcludeFromCopy,
 				rootField ? this.addExtra({...rootField || {}, fields: master.fields}) : undefined,
 				addUiSchemaContext,
+				addLang(lang),
 				(schemaFormat) => schemaFormat.translations
 					? translate(schemaFormat, schemaFormat.translations[this.lang])
 					: schemaFormat
@@ -579,6 +580,11 @@ const addUiSchemaContext = (schemaFormat: SchemaFormat) => {
 		}, {});
 	return {...schemaFormat, uiSchemaContext};
 };
+
+const addLang = (language?: Lang) => (schemaFormat: SchemaFormat) =>
+	language
+		? {...schemaFormat, language}
+		: schemaFormat;
 
 interface DefaultValidatorItem {
 	validator: any;
