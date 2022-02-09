@@ -17,7 +17,8 @@ const titleHacks: Record<string, string | undefined> = {
 	"unitGathering": undefined,
 	"unitFact": undefined,
 	"geometry": undefined,
-	"units": undefined
+	"units": undefined,
+	"gatheringFact": undefined
 };
 
 const classFieldNameToPropertyName = (name: string) => {
@@ -79,6 +80,7 @@ export default class FieldService {
 					: schemaFormat
 			]
 		);
+		console.log(JSON.parse(JSON.stringify(schemaFormat)));
 		return schemaFormat;
 	}
 
@@ -375,7 +377,8 @@ const addTitleAndDefault = (property: PropertyModel, lang: Lang) => (schema: any
 		? field.label
 		: unprefixProp(property.property) in titleHacks
 			? titleHacks[unprefixProp(property.property)]
-			: multiLang(property.label, lang);
+			: multiLang(property.label, lang)
+				?? property.property;
 	if (title !== undefined) {
 		schema.title = title;
 	}
