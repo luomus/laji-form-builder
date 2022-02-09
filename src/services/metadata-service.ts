@@ -27,26 +27,6 @@ export default class MetadataService {
 		if (!propertyName.match(/[^.]+\./)) {
 			propertyName = `MY.${propertyName}`;
 		}
-		switch (propertyName) {
-		case  "MY.gatherings":
-			return "MY.gathering";
-		case  "MY.gatheringEvent":
-			return "MZ.gatheringEvent";
-		case  "MY.gatheringFact":
-			return "MY.gatheringFactClass";
-		case  "MY.taxonCensus":
-			return "MY.taxonCensusClass";
-		case  "MY.completeList":
-			return "MY.completeListClass";
-		case  "MY.units":
-			return "MY.unit";
-		case  "MY.unitFact":
-			return "MY.unitFactClass";
-		case  "MY.unitGathering":
-			return "MZ.unitGathering";
-		case  "MY.identifications":
-			return "MY.identification";
-		}
 		return propertyName;
 	}
 

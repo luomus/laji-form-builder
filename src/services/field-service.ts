@@ -150,7 +150,7 @@ export default class FieldService {
 
 		if (property.isEmbeddable) {
 			const properties = fields
-				? (await this.metadataService.getProperties(field.name))
+				? (await this.metadataService.getProperties(property.range[0]))
 					.reduce<Record<string, PropertyModel>>((propMap, prop) => {
 						if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
 							propMap[unprefixProp(prop.property)] = prop;
@@ -312,7 +312,7 @@ export default class FieldService {
 					}
 				} else if (field.fields) {
 					let collectedTrees = {};
-					const properties = await this.metadataService.getProperties(field.name);
+					const properties = await this.metadataService.getProperties(property.range[0]);
 					for (const _field of field.fields) {
 						let prop = properties.find(p => unprefixProp(p.property) === unprefixProp(_field.name));
 						if (!prop) {
