@@ -650,8 +650,10 @@ const addDefaultValidators = (master: Master) => {
 					};
 					Object.keys(defaultValidator.translations).forEach(translationKey => {
 						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
-							(master.translations as Translations)[lang][translationKey] =
-								defaultValidator.translations[translationKey][lang];
+							if (!(translationKey in (master.translations as Translations)[lang])) {
+								(master.translations as Translations)[lang][translationKey] =
+									defaultValidator.translations[translationKey][lang];
+							}
 						});
 					});
 				}
