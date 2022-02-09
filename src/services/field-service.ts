@@ -50,31 +50,33 @@ export default class FieldService {
 
 	async masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
-		const rootField = await this.getRootField(master.fields as Field[]);
+		const rootField = master.fields
+			? await this.getRootField(master.fields)
+			: undefined;
 
-		const schema = await this.masterToJSONSchema(master, rootField);
+		const schema = rootField
+			? await this.masterToJSONSchema(master, rootField)
+			: {};
 		const {fields, "@type": _type, "@context": _context, ..._master} = master;
-		const {translations, ...schemaFormat} = (
-			await applyTransformations(
-				{
-					schema,
-					uiSchema: {},
-					excludeFromCopy: [],
-					..._master
-				} as (SchemaFormat & Pick<Master, "translations">),
-				master,
-				[
-					addValidators("validators"),
-					addValidators("warnings"),
-					addAttributes,
-					addExcludeFromCopy,
-					this.addExtra({...rootField, fields: master.fields}),
-					addUiSchemaContext,
-					(schemaFormat) => schemaFormat.translations
-						? translate(schemaFormat, schemaFormat.translations[this.lang])
-						: schemaFormat
-				]
-			)
+		const {translations, ...schemaFormat} = await applyTransformations(
+			{
+				schema,
+				uiSchema: {},
+				excludeFromCopy: [],
+				..._master
+			} as (SchemaFormat & Pick<Master, "translations">),
+			master,
+			[
+				addValidators("validators"),
+				addValidators("warnings"),
+				addAttributes,
+				addExcludeFromCopy,
+				rootField ? this.addExtra({...rootField || {}, fields: master.fields}) : undefined,
+				addUiSchemaContext,
+				(schemaFormat) => schemaFormat.translations
+					? translate(schemaFormat, schemaFormat.translations[this.lang])
+					: schemaFormat
+			]
 		);
 		return schemaFormat;
 	}

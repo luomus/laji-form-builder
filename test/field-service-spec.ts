@@ -86,7 +86,9 @@ describe("Field service", () => {
 				"MHL.40": "value_options patch should be removed?",
 				"MHL.83": "uses nonexisting HRA.items?",
 				"MHL.78": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
-				"MHL.77": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?"
+				"MHL.77": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
+				"MHL.23": "enum with altParent not expanded to extra & uiSchemaContext in old form backend correctly",
+				"MHL.19": "old form backend incorrectly return empty schema as []"
 			};
 			/* eslint-enable max-len */
 

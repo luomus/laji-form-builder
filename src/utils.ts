@@ -319,18 +319,20 @@ export const parseJSONPointer = (obj: any, path: string, safeMode?: true | "crea
 };
 
 function isPromise<T>(p: any): p is Promise<T> {
-	return !!p.then;
+	return !!p?.then;
 }
 
 export function applyTransformations<T, P>(
 	startValueOrPromise: T | Promise<T>,
 	fnValue: P,
-	fns: (((value: T, fnValue: P) => T | Promise<T>)[])
+	fns: (((value: T, fnValue: P) => T | Promise<T>) | undefined)[]
 ) {
 	return fns.reduce<Promise<T>>((promise, fn) => promise.then(
 		value => isPromise(fn)
 			? fn(value as T, fnValue)
-			: Promise.resolve(fn(value as T, fnValue))
+			: Promise.resolve(fn
+				? fn(value as T, fnValue)
+				: value)
 	)
 	, isPromise(startValueOrPromise) ? startValueOrPromise : Promise.resolve(startValueOrPromise));
 }
