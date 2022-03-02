@@ -11,15 +11,6 @@ const requiredHacks: Record<string, boolean> = {
 	"MY.gatherings": false
 };
 
-const classFieldNameToPropertyName = (name: string) => {
-	const map: Record<string, string> = {
-		"gatherings": "MY.gatherings",
-		"gatheringEvent": "MZ.gatheringEvent",
-		"units": "MY.units",
-	};
-	return map[name] || name;
-};
-
 interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
 }
@@ -46,7 +37,7 @@ export default class FieldService {
 	async masterToSchemaFormat(master: Master, lang?: Lang): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
 		const rootField = master.fields
-			? await this.getRootField(master.fields)
+			? this.getRootField(master)
 			: undefined;
 
 		const schema = rootField
@@ -90,34 +81,8 @@ export default class FieldService {
 		);
 	}
 
-	private async getRootField(fields: Field[]): Promise<Field>  {
-		// Try classes first that are known to be used.
-		const order = ["MY.document", "MNP.namedPlace", "MAN.annotation", "MM.image", "MM.audio"];
-		const classes = (await this.metadataService.getClasses()).sort((a, b) => {
-			const indexA = order.indexOf(a.class);
-			const indexB = order.indexOf(b.class);
-			if (indexA >= 0 && indexB < 0) {
-				return -1;
-			}
-			if (indexA < 0 && indexB >= 0) {
-				return 1;
-			}
-			return indexA - indexB;
-		});
-
-		for (const c of classes) {
-			const properties = await this.metadataService.getProperties(c.class);
-			if (properties.some(prop =>
-				(
-					prop.domain.length === 1
-					|| (prop.domain.length === 2 && prop.domain.every(d => d === "MM.image" || d === "MM.audio"))
-				)
-				&& fields.some(f => classFieldNameToPropertyName(f.name) === prop.property)
-			)) {
-				return {name: c.class, type: "fieldset"};
-			}
-		}
-		throw new Error("Couldn't find root class");
+	private getRootField(master: Master): Field  {
+		return {type: "fieldset", name: master.context || "MY.document"};
 	}
 
 	private getRootProperty(rootField: Field): InternalProperty {
@@ -264,11 +229,15 @@ export default class FieldService {
 				continue;
 			}
 			master.fields.splice(+idx, 1);
-			const {fields, uiSchema, translations} = await this.parseMaster(await this.formService.getMaster(formID));
+			const {fields, uiSchema, translations, context} =
+				await this.parseMaster(await this.formService.getMaster(formID));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!fields) {
 				continue;
+			}
+			if (context) {
+				master.context = context;
 			}
 			master.fields = mergeFields(master.fields, fields);
 		}

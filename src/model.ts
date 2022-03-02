@@ -55,6 +55,7 @@ export interface Master extends FormListing {
 	collectionID?: string;
 	"@type"?: string;
 	"@context"?: string;
+	context?: string;
 }
 
 export interface FieldOptions {
