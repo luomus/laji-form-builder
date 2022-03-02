@@ -11,16 +11,6 @@ const requiredHacks: Record<string, boolean> = {
 	"MY.gatherings": false
 };
 
-const titleHacks: Record<string, string | undefined> = {
-	"gatherings": undefined,
-	"identifications": undefined,
-	"unitGathering": undefined,
-	"unitFact": undefined,
-	"geometry": undefined,
-	"units": undefined,
-	"gatheringFact": undefined
-};
-
 const classFieldNameToPropertyName = (name: string) => {
 	const map: Record<string, string> = {
 		"gatherings": "MY.gatherings",
@@ -29,6 +19,10 @@ const classFieldNameToPropertyName = (name: string) => {
 	};
 	return map[name] || name;
 };
+
+interface InternalProperty extends PropertyModel {
+	_rootProp?: boolean
+}
 
 export default class FieldService {
 	private apiClient: ApiClient;
@@ -126,7 +120,7 @@ export default class FieldService {
 		throw new Error("Couldn't find root class");
 	}
 
-	private getRootProperty(rootField: Field): PropertyModel {
+	private getRootProperty(rootField: Field): InternalProperty {
 		return {
 			property: rootField.name,
 			isEmbeddable: true,
@@ -137,26 +131,28 @@ export default class FieldService {
 			minOccurs: "1",
 			maxOccurs: "1",
 			multiLanguage: false,
-			domain: []
+			domain: [],
+			_rootProp: true
 		};
 	}
 
 	private async fieldToSchema(
 		field: Field,
-		property: PropertyModel,
+		property: InternalProperty,
 	): Promise<JSONSchemaE> {
 		const {fields = []} = field;
 
 		const transformationsForAllTypes = [
 			addExcludeFromCopyToSchema,
 			optionsToSchema,
-			addTitleAndDefault(property, this.lang)
+			addTitle(property, this.lang),
+			addDefault
 		];
 
 		if (property.isEmbeddable) {
 			const properties = fields
 				? (await this.metadataService.getProperties(property.range[0]))
-					.reduce<Record<string, PropertyModel>>((propMap, prop) => {
+					.reduce<Record<string, InternalProperty>>((propMap, prop) => {
 						if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
 							propMap[unprefixProp(prop.property)] = prop;
 						}
@@ -212,7 +208,7 @@ export default class FieldService {
 		}
 	}
 
-	private mapUnknownFieldWithTypeToProperty(field: Field): PropertyModel {
+	private mapUnknownFieldWithTypeToProperty(field: Field): InternalProperty {
 		if (!field.type) {
 			throw new Error(`Bad field ${field.name}`);
 		}
@@ -308,7 +304,7 @@ export default class FieldService {
 					return parentMap;
 				}, {} as Record<string, string[]>);
 			};
-			const recursively = async (field: Field, property: PropertyModel) => {
+			const recursively = async (field: Field, property: InternalProperty) => {
 				const range = property.range[0];
 				if (await this.metadataService.isAltRange(range)) {
 					const rangeModel = await this.metadataService.getRange(range);
@@ -368,20 +364,24 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 	return JSONSchema.object(properties, {required});
 };
 
-const mapMaxOccurs = ({maxOccurs}: PropertyModel) => (schema: JSONSchemaE) =>
+const mapMaxOccurs = ({maxOccurs}: InternalProperty) => (schema: JSONSchemaE) =>
 	maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
 
-const addTitleAndDefault = (property: PropertyModel, lang: Lang) => (schema: any, field: Field) => {
-	const _default = field.options?.default;
-	const title = typeof field.label === "string"
-		? field.label
-		: unprefixProp(property.property) in titleHacks
-			? titleHacks[unprefixProp(property.property)]
-			: multiLang(property.label, lang)
-				?? property.property;
+const addTitle = (property: InternalProperty, lang: Lang) => (schema: any, field: Field) => {
+	const title = property._rootProp
+		? undefined
+		: (field.label
+			?? multiLang(property.label, lang)
+			?? property.property
+		);
 	if (title !== undefined) {
 		schema.title = title;
 	}
+	return schema;
+};
+
+const addDefault = (schema: any, field: Field) => {
+	const _default = field.options?.default;
 	if (_default !== undefined) {
 		schema.default = _default;
 	}
@@ -452,7 +452,7 @@ const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema as JSONSchemaE;
 };
 
-const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) =>
+const addRequireds = (properties: Record<string, InternalProperty>) => (schema: JSONSchemaE) =>
 	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
 		const property = properties[unprefixProp(propertyName)];
 		if (!property) {
