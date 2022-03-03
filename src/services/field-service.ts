@@ -7,10 +7,6 @@ import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, i
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 
-const requiredHacks: Record<string, boolean> = {
-	"MY.gatherings": false
-};
-
 interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
 }
@@ -421,18 +417,17 @@ const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
 	return schema as JSONSchemaE;
 };
 
+const stringNumberLargerThan = (value: string, largerThan: number) =>
+	!isNaN(parseInt(value)) && parseInt(value) > largerThan;
+
 const addRequireds = (properties: Record<string, InternalProperty>) => (schema: JSONSchemaE) =>
 	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
 		const property = properties[unprefixProp(propertyName)];
 		if (!property) {
 			return schema;
 		}
-		const isRequired =
-			!(property.property in requiredHacks && !requiredHacks[property.property])
-			&& (
-				requiredHacks[property.property]
-				|| property.required && !schema.required?.includes(property.shortName)
-			);
+		const isRequired = (stringNumberLargerThan(property.minOccurs, 0) || property.required)
+			&& !schema.required?.includes(property.shortName);
 		if (isRequired) {
 			if (!schema.required) {
 				schema.required = [];
