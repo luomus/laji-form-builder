@@ -141,6 +141,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.apiClient.setLang(this.state.lang);
 		this.fieldService.setLang(this.state.lang);
 		this.metadataService.setLang(this.state.lang);
+		this.formService.setLang(this.state.lang);
 	}
 
 	getContext = memoize((lang: Lang, editorLang: Lang): ContextProps => ({

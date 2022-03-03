@@ -29,4 +29,8 @@ export default class FormService {
 	async getForms(): Promise<FormListing[]> {
 		return (await this.apiClient.fetch("/forms", undefined)).results;
 	}
+
+	setLang(lang: Lang) {
+		this.lang = lang;
+	}
 }
