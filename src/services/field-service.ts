@@ -456,10 +456,11 @@ const addValidators = (type: "validators" | "warnings") =>
 			}
 			return field.fields
 				? field.fields.reduce<any>((validators, field) => {
+					const name = unprefixProp(field.name);
 					const schemaForField = schema.type === "object"
-						? (schema.properties as any)[unprefixProp(field.name)]
-						: (schema as any).items.properties[unprefixProp(field.name)];
-					const nextPath = `${path}/${unprefixProp(field.name)}`;
+						? (schema.properties as any)[name]
+						: (schema as any).items.properties[name];
+					const nextPath = `${path}/${name}`;
 					const fieldValidators = recursively(field, schemaForField, nextPath);
 					if (fieldValidators && Object.keys(fieldValidators).length) {
 						let validatorsTarget: any;
@@ -475,7 +476,7 @@ const addValidators = (type: "validators" | "warnings") =>
 							}
 							validatorsTarget = validators.items.properties;
 						}
-						validatorsTarget[unprefixProp(field.name)] = fieldValidators;
+						validatorsTarget[name] = fieldValidators;
 					}
 					return validators;
 				}, validators)
