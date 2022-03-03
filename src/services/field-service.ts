@@ -78,7 +78,7 @@ export default class FieldService {
 	}
 
 	private getRootField(master: Master): Field  {
-		return {type: "fieldset", name: master.context || "MY.document"};
+		return {name: master.context || "MY.document"};
 	}
 
 	private getRootProperty(rootField: Field): InternalProperty {

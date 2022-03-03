@@ -72,7 +72,7 @@ export interface FieldOptions {
 
 export interface Field {
 	name: string;
-	type?: "checkbox" | "collection" | "fieldset";
+	type?: "checkbox";
 	required?: boolean;
 	options?: FieldOptions;
 	validators?: any;
