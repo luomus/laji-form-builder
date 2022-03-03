@@ -24,9 +24,6 @@ export default class MetadataService {
 		let propertyName = typeof property === "string"
 			? property
 			: property["@id"].replace("http://tun.fi/", "");
-		if (!propertyName.match(/[^.]+\./)) {
-			propertyName = `MY.${propertyName}`;
-		}
 		return propertyName;
 	}
 
