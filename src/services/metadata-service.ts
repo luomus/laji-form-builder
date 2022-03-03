@@ -113,9 +113,7 @@ export default class MetadataService {
 				schema = JSONSchema.object();
 				break;
 			default:
-				if (property.property === "MHL.prepopulatedDocument") {
-					schema = JSONSchema.object();
-				} else if (!property.isEmbeddable && unprefixProp(property.property) !== "geometry") {
+				if (!property.isEmbeddable && unprefixProp(property.property) !== "geometry") {
 					schema = JSONSchema.String();
 				} else {
 					return propertiesToSchema(await this.getProperties(range));
