@@ -78,7 +78,7 @@ export default class MetadataService {
 								: e.id
 					);
 				}
-				return ({type: "string", enum: enums, enumNames});
+				return JSONSchema.enu({enum: enums, enumNames});
 			}
 			if (property.multiLanguage) {
 				return JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) =>

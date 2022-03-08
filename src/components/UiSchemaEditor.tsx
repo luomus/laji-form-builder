@@ -4,7 +4,7 @@ import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
 import LajiFormInterface from "../LajiFormInterface";
 import { propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
-	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, parseJSONPointer } from "../utils";
+	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, parseJSONPointer, JSONSchema } from "../utils";
 import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
@@ -184,17 +184,13 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 	const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
 	const componentPropTypes = getComponentPropTypes(component);
 	const forBoth = {
-		[prependPrefix("ui:field")]: {type: "string"},
-		[prependPrefix("ui:functions")]: {
-			type: "array",
-			items: {
-				type: "object",
-				properties: {
-					[prependPrefix("ui:field")]: {type: "string"},
-					[prependPrefix("ui:options")]: {type: "object", properties: {}}
-				}
-			}
-		}
+		[prependPrefix("ui:field")]: JSONSchema.String(),
+		[prependPrefix("ui:functions")]: JSONSchema.array(
+			JSONSchema.object({
+				[prependPrefix("ui:field")]: JSONSchema.String(),
+				[prependPrefix("ui:options")]: JSONSchema.object()
+			})
+		)
 	};
 	const addWidgetOrField = ((schemaForUiSchema: any, _schema: any) =>
 		(_schema.type === "object" || _schema.type === "array")
@@ -204,17 +200,17 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 				properties: {
 					...schemaForUiSchema.properties,
 					...forBoth,
-					[prependPrefix("ui:widget")]: {type: "string"}
+					[prependPrefix("ui:widget")]: JSONSchema.String()
 				}
 			}
 	);
 	const defaultProps = addWidgetOrField({
 		type: "object",
 		properties: {
-			[prependPrefix("ui:title")]: { type: "string", },
-			[prependPrefix("ui:description")]: { type: "string", },
-			[prependPrefix("ui:help")]: { type: "string", },
-			[prependPrefix("className")]: { type: "string", }
+			[prependPrefix("ui:title")]: JSONSchema.String(),
+			[prependPrefix("ui:description")]: JSONSchema.String(),
+			[prependPrefix("ui:help")]: JSONSchema.String(),
+			[prependPrefix("className")]: JSONSchema.String()
 		}
 	}, schema);
 	let editorSchema;
@@ -255,25 +251,24 @@ const customPropTypeSchemaMappings: {
 		schema: (_schema, rootSchema: any): any => {
 			const {type: _type} = rootSchema;
 			const _enum = ["", ...Object.keys(LajiFormInterface.getWidgetTypes()[_type])];
-			return {type: "string", enum: _enum, enumNames: _enum};
+			return JSONSchema.enu({enum: _enum, enumNames: _enum});
 		}
 	},
 	"ui:field": {
 		schema: (): any => {
 			const {object, array, string} = LajiFormInterface.getFieldTypes();
 			const _enum = ["", ...Object.keys({...object, ...array, ...string})];
-			return {type: "string", enum: _enum, enumNames: _enum};
+			return JSONSchema.enu({enum: _enum, enumNames: _enum});
 		}
 	},
 	"ui:functions": {
 		schema: (): any => {
-			return {type: "array", items: {
-				type: "object",
-				properties: {
-					"ui:field": {type: "string"},
-					"ui:options": {type: "object", properties: {}}
-				}
-			}};
+			return JSONSchema.array(
+				JSONSchema.object({
+					"ui:field": JSONSchema.String(),
+					"ui:options": JSONSchema.object()
+				})
+			)
 		},
 		uiSchema: (): any => {
 			return {items: {"ui:field": "UiFieldEditor"}};

@@ -71,7 +71,7 @@ export default class FieldService {
 	private async masterToJSONSchema(master: Omit<Master, "id">, rootField: Field): Promise<SchemaFormat["schema"]> {
 		const {fields} = master;
 		if (!fields || !fields.length) {
-			return Promise.resolve({type: "object", properties: {}});
+			return Promise.resolve(JSONSchema.object());
 		}
 
 		return this.fieldToSchema(
