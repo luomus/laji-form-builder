@@ -85,9 +85,20 @@ describe("Field service", () => {
 				"MHL.78": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
 				"MHL.77": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
 				"MHL.23": "enum with altParent not expanded to extra & uiSchemaContext in old form backend correctly",
-				"MHL.19": "old form backend incorrectly return empty schema as []"
+				"MHL.19": "old form backend incorrectly return empty schema as []",
+				"MHL.6": "prepopulatedDocument backward compatibility broken",
 			};
 			/* eslint-enable max-len */
+
+			const skipContext: Record<string, true> = {
+				"MHL.103": true,
+				"MHL.73": true,
+				"MHL.55": true,
+				"MHL.47": true,
+				"MHL.39": true,
+				"MHL.37": true,
+				"MHL.32": true,
+			};
 
 			for (const {id} of _forms) {
 				if (forms.some(f => f.id === id)) {
@@ -102,6 +113,9 @@ describe("Field service", () => {
 				try {
 					console.log(id);
 					const jsonFormat = await fieldService.masterToSchemaFormat(master, LANG);
+					if (skipContext[id]) {
+						delete jsonFormat.context;
+					}
 					// toEqual can't carry message so log the form manually.
 					if (!deepEqual(jsonFormat, schemas)) {
 						console.log(`Didn't convert ${id} (${master.name}) correct`);
@@ -113,6 +127,69 @@ describe("Field service", () => {
 					break;
 				}
 			}
+		});
+	});
+
+	describe("prepopulatedDocument population", () => {
+		let jsonFormat: SchemaFormat;
+
+		beforeAll(async () => {
+			const fields = [
+				{name: "MY.gatherings",
+					fields: [
+						{name: "MY.units",
+							fields: [
+								{name: "MY.identifications",
+									fields: [
+										{name: "MY.taxon"},
+										{name: "MY.taxonVerbatim"},
+										{name: "MY.taxonID"},
+									]},
+								{name: "MY.recordBasis",
+									options: {
+										default: "MY.recordBasisHumanObservation"
+									}
+								}
+							]
+						}
+					]
+				}
+			];
+			const form = {
+				fields,
+				options: {
+					prepopulateWithInformalTaxonGroups: ["MVL.181"],
+					prepopulatedDocument: {
+						gatherings: [{
+							units: [{
+								notes: "foo"
+							}]
+						}]
+					}
+				}
+			};
+			jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		});
+
+		it("merges prepopulatedDocument and prepopulateWithInformalTaxonGroups", async () => {
+			expect(jsonFormat.options.prepopulatedDocument.gatherings.length).toBe(1);
+			const gathering = jsonFormat.options.prepopulatedDocument.gatherings[0];
+			expect(gathering.units[0].notes).toBe("foo");
+			expect(gathering.units[0].identifications[0].taxon).toBeTruthy();
+		});
+
+		it("populates with defaults", async () => {
+			expect(jsonFormat.options.prepopulatedDocument.gatherings[0].units[0].recordBasis)
+				.toBe("MY.recordBasisHumanObservation");
+		});
+
+
+		it("prepopulateWithInformalTaxonGroups fills taxon data", async () => {
+			expect(jsonFormat.options.prepopulatedDocument.gatherings[0].units.length).toBeGreaterThan(1);
+			const identification = jsonFormat.options.prepopulatedDocument.gatherings[0].units[0].identifications[0];
+			expect(identification.taxon).toBe("Parnassius apollo");
+			expect(identification.taxonID).toBe("MX.60724");
+			expect(identification.taxonVerbatim).toBe("isoapollo");
 		});
 	});
 });

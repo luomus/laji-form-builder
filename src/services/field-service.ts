@@ -6,6 +6,7 @@ import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translat
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
+import * as rjsf from "@rjsf/core";
 
 interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
@@ -24,13 +25,14 @@ export default class FieldService {
 		this.lang = lang;
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
+		this.prepopulate = this.prepopulate.bind(this);
 	}
 
 	setLang(lang: Lang) {
 		this.lang = lang;
 	}
 
-	async masterToSchemaFormat(master: Master, lang?: Lang): Promise<SchemaFormat> {
+	async masterToSchemaFormat(master: Omit<Master, "id">, lang?: Lang): Promise<SchemaFormat> {
 		master = await this.parseMaster(master);
 		const rootField = master.fields
 			? this.getRootField(master)
@@ -56,6 +58,7 @@ export default class FieldService {
 				rootField ? this.addExtra({...rootField || {}, fields: master.fields}) : undefined,
 				addUiSchemaContext,
 				addLang(lang),
+				this.prepopulate,
 				(schemaFormat) => schemaFormat.translations
 					? translate(schemaFormat, schemaFormat.translations[this.lang])
 					: schemaFormat
@@ -65,7 +68,7 @@ export default class FieldService {
 		return schemaFormat;
 	}
 
-	private async masterToJSONSchema(master: Master, rootField: Field): Promise<SchemaFormat["schema"]> {
+	private async masterToJSONSchema(master: Omit<Master, "id">, rootField: Field): Promise<SchemaFormat["schema"]> {
 		const {fields} = master;
 		if (!fields || !fields.length) {
 			return Promise.resolve({type: "object", properties: {}});
@@ -77,7 +80,7 @@ export default class FieldService {
 		);
 	}
 
-	private getRootField(master: Master): Field  {
+	private getRootField(master: Pick<Master, "context">): Field  {
 		return {name: master.context || "MY.document"};
 	}
 
@@ -153,6 +156,7 @@ export default class FieldService {
 					addValueOptions,
 					filterWhitelist,
 					filterBlacklist,
+					hide,
 					...transformationsForAllTypes
 				]
 			);
@@ -187,7 +191,7 @@ export default class FieldService {
 		};
 	}
 
-	private parseMaster(master: Master) {
+	private parseMaster(master: Omit<Master, "id">) {
 		return applyTransformations(master, undefined, [
 			this.mapBaseForm,
 			this.mapBaseFormFromFields,
@@ -232,7 +236,7 @@ export default class FieldService {
 			if (!fields) {
 				continue;
 			}
-			if (context) {
+			if (!master.context && context) {
 				master.context = context;
 			}
 			master.fields = mergeFields(master.fields, fields);
@@ -282,7 +286,7 @@ export default class FieldService {
 					for (const _field of field.fields) {
 						let prop = properties.find(p => unprefixProp(p.property) === unprefixProp(_field.name));
 						if (!prop) {
-							prop = this.mapUnknownFieldWithTypeToProperty(field);
+							prop = this.mapUnknownFieldWithTypeToProperty(_field);
 						}
 						collectedTrees = {...collectedTrees, ...(await recursively(_field, prop))};
 					}
@@ -317,7 +321,61 @@ export default class FieldService {
 		};
 		return recursively(master);
 	}
+
+
+	private async prepopulate(schemaFormat: SchemaFormat) {
+		const {prepopulatedDocument, prepopulateWithInformalTaxonGroups} = schemaFormat.options || {};
+		if (!prepopulateWithInformalTaxonGroups) {
+			return schemaFormat;
+		}
+		const species = (await this.apiClient.fetch("/taxa/MX.37600/species", {
+			informalGroupFilters: prepopulateWithInformalTaxonGroups,
+			selectedFields: "id,scientificName,vernacularName",
+			lang: "fi",
+			taxonRanks: "MX.species",
+			onlyFinnish: true,
+			pageSize: 1000
+		})).results;
+		return {
+			...schemaFormat,
+			options: {
+				...schemaFormat.options,
+				prepopulatedDocument: rjsf.utils.getDefaultFormState(
+					schemaFormat.schema,
+					merge((prepopulatedDocument || {}), {
+						gatherings: [{
+							units: species.map((s: any) => ({
+								identifications: [{
+									taxonID: s.id,
+									taxonVerbatim: s.vernacularName || "",
+									taxon: s.scientificName || ""
+								}]
+							}))
+						}]
+					},
+					{arrayMerge: combineMerge}
+					),
+				)
+			}
+		};
+	}
 }
+
+// From https://www.npmjs.com/package/deepmerge README
+const combineMerge = (target: any, source: any, options: any) => {
+	const destination = target.slice();
+
+	source.forEach((item: any, index: number) => {
+		if (typeof destination[index] === "undefined") {
+			destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
+		} else if (options.isMergeableObject(item)) {
+			destination[index] = merge(target[index], item, options);
+		} else if (target.indexOf(item) === -1) {
+			destination.push(item);
+		}
+	});
+	return destination;
+};
 
 const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 	const required = field.fields?.reduce<string[]>((reqs, f) => {
@@ -389,6 +447,14 @@ const filterList = (listName: string, white = true) => (schema: JSONSchemaE, fie
 
 const filterWhitelist = filterList("whitelist");
 const filterBlacklist = filterList("blacklist", false);
+
+const hide = (schema: JSONSchemaE, field: Field) => {
+	if (field.type === "hidden") {
+		delete schema.enum;
+		delete schema.enumNames;
+	}
+	return schema;
+};
 
 const addValueOptions = (schema: JSONSchemaE, field: Field) => {
 	const {value_options} = field.options || {};
@@ -609,7 +675,10 @@ const addDefaultValidators = (master: Master) => {
 			const _defaultValidators = defaultValidators[nextPath]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
-				if (field.validators?.[validatorName]) {
+				if (validatorName in (field.validators || {})) {
+					if (field.validators[validatorName] === false) {
+						delete field.validators[validatorName];
+					}
 					return;
 				}
 				if (!field.validators) {

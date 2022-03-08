@@ -72,7 +72,7 @@ export interface FieldOptions {
 
 export interface Field {
 	name: string;
-	type?: "checkbox";
+	type?: "checkbox" | "hidden";
 	required?: boolean;
 	options?: FieldOptions;
 	validators?: any;
@@ -103,6 +103,7 @@ export interface SchemaFormat {
 	extra?: Record<string, {altParent: AltParentMap}>;
 	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
 	language?: Lang;
+	context?: string;
 }
 
 export interface JSONSchemaE extends JSONSchema7 {
