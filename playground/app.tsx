@@ -1,12 +1,12 @@
-import LajiFormBuilder from "../src/components/Builder";
+import LajiFormBuilder from "../src/client/components/Builder";
 import properties from "../properties.json";
 import * as React from "react";
 import { render } from "react-dom";
 import LajiForm from "laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "../src/themes/bs3";
+import lajiFormBs3 from "../src/client/themes/bs3";
 import ApiClientImplementation from "./ApiClientImplementation";
 
-import "../src/styles";
+import "../src/client/styles";
 
 function getJsonFromUrl() {
 	const type = (value: any | string): any => {

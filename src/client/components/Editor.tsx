@@ -3,14 +3,14 @@ import { createPortal } from "react-dom";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer,
-	scrollIntoViewIfNeeded } from "../utils";
+	scrollIntoViewIfNeeded } from "../../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./Builder";
 import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, Field as FieldOptions } from "../model";
+import { Lang, Master, SchemaFormat, Field as FieldOptions } from "../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { findNearestParentSchemaElem, translate as translateKey } from "laji-form/lib/utils";
 

@@ -65,7 +65,7 @@ describe("Field service", () => {
 			});
 			it("converts all correct", () => {
 				expect(jsonFormat).toEqual(schemas);
-			})
+			});
 		});
 	}
 
@@ -204,11 +204,9 @@ describe("Field service", () => {
 	describe("Extending form with field with formID", () => {
 		const extendedID =  "JX.519";
 		const form = { fields: [{formID: extendedID}] };
-		let extendedMaster: Master;
 		let extendedSchemaFormat: SchemaFormat;
 
 		beforeAll(async () => {
-			extendedMaster = await formService.getMaster(extendedID);
 			extendedSchemaFormat = await formService.getSchemaFormat(extendedID);
 		});
 

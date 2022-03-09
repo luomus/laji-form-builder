@@ -3,12 +3,12 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Classable, Stylable, Clickable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./Builder";
-import { PropertyModel, SchemaFormat, Master, JSONSchemaE, PropertyRange, Lang } from "../model";
-import { translate, detectChangePaths, parseJSONPointer, gnmspc, unprefixProp, multiLang } from "../utils";
+import { PropertyModel, SchemaFormat, Master, JSONSchemaE, PropertyRange, Lang } from "../../model";
+import { translate, detectChangePaths, parseJSONPointer, gnmspc, unprefixProp, multiLang } from "../../utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
 import { updateSafelyWithJSONPointer } from "laji-form/lib/utils";
-import MetadataService from "../services/metadata-service";
+import MetadataService from "../../services/metadata-service";
 
 export const mapRangeToUiSchema = async (property: PropertyModel, metadataService: MetadataService, lang: Lang) => {
 	const range = property.range[0];

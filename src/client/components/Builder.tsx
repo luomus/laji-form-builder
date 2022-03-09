@@ -5,16 +5,16 @@ import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
 import { fieldPointerToUiSchemaPointer, unprefixProp, makeCancellable, CancellablePromise, JSONSchema, translate,
-	gnmspc } from "../utils";
+	gnmspc } from "../../utils";
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { PropertyModel, PropertyRange, Lang, Translations, Master, SchemaFormat, Field } from "../model";
-import MetadataService from "../services/metadata-service";
-import FormService from "../services/form-service";
+import { PropertyModel, PropertyRange, Lang, Translations, Master, SchemaFormat, Field } from "../../model";
+import MetadataService from "../../services/metadata-service";
+import FormService from "../../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import FieldService from "../services/field-service";
+import FieldService from "../../services/field-service";
 
 export interface BuilderProps {
 	id: string;

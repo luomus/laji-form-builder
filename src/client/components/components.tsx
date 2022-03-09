@@ -1,7 +1,7 @@
 import * as React from "react";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
-import { classNames, nmspc, gnmspc } from "../utils";
+import { classNames, nmspc, gnmspc } from "../../utils";
 
 export interface Stylable {
 	style?: React.CSSProperties;

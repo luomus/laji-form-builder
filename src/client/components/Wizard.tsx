@@ -4,8 +4,8 @@ import _LajiForm from "laji-form/lib/components/LajiForm";
 import { ButtonProps } from "laji-form/lib/themes/theme";
 import { HasChildren, JSONEditor } from "./components";
 import { Context } from "./Context";
-import { Master } from "../model";
-import { JSONSchema, nmspc } from "../utils";
+import { Master } from "../../model";
+import { JSONSchema, nmspc } from "../../utils";
 
 interface WizardStep {
 	label: string;

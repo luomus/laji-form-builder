@@ -1,7 +1,7 @@
 import memoize from "memoizee";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import RJSF, { Field, Widget } from "@rjsf/core";
-import { getComponentPropTypes, propTypesToSchema } from "./utils";
+import { getComponentPropTypes, propTypesToSchema } from "../utils";
 
 class _LajiFormInterface {
 	getRegistry = memoize((): ({

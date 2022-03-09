@@ -1,2 +1,2 @@
 import "laji-form/dist/styles.css";
-import "../src/styles.scss";
+import "./styles.scss";
