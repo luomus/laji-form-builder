@@ -80,13 +80,13 @@ describe("Field service", () => {
 
 			/* eslint-disable max-len */
 			const skips: Record<string, string> = {
-				"MHL.40": "value_options patch should be removed?",
-				"MHL.83": "uses nonexisting HRA.items?",
-				"MHL.78": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
-				"MHL.77": "fieldset field should have prefix & no need to tell that its a fieldset, root domain should be explicit?",
+				"MHL.40": "value_options discontinued",
+				"MHL.83": "uses nonexisting HRA.items. Not used but saved for future reference",
+				"MHL.78": "old backend doesn't like it cause gatheringEvent has a fieldset without fields. New backend will accept.",
+				"MHL.77": "old backend doesn't like it cause gatheringEvent has a fieldset without fields. New backend will accept.",
 				"MHL.23": "enum with altParent not expanded to extra & uiSchemaContext in old form backend correctly",
 				"MHL.19": "old form backend incorrectly return empty schema as []",
-				"MHL.6": "prepopulatedDocument backward compatibility broken",
+				// "MHL.6": "prepopulatedDocument backward compatibility broken",
 			};
 			/* eslint-enable max-len */
 
@@ -110,6 +110,14 @@ describe("Field service", () => {
 				}
 				const master = await formService.getMaster(id);
 				const schemas = await formService.getSchemaFormat(id);
+
+				if (id === "MHL.6") {
+					delete master.options.prepopulatedDocument;
+					delete master.options.prepopulateWithInformalTaxonGroups;
+					delete schemas.options.prepopulatedDocument;
+					delete schemas.options.prepopulateWithInformalTaxonGroups;
+				}
+
 				try {
 					console.log(id);
 					const jsonFormat = await fieldService.masterToSchemaFormat(master, LANG);
@@ -190,6 +198,43 @@ describe("Field service", () => {
 			expect(identification.taxon).toBe("Parnassius apollo");
 			expect(identification.taxonID).toBe("MX.60724");
 			expect(identification.taxonVerbatim).toBe("isoapollo");
+		});
+	});
+
+	describe("Extending form with field with formID", () => {
+		const extendedID =  "JX.519";
+		const form = { fields: [{formID: extendedID}] };
+		let extendedMaster: Master;
+		let extendedSchemaFormat: SchemaFormat;
+
+		beforeAll(async () => {
+			extendedMaster = await formService.getMaster(extendedID);
+			extendedSchemaFormat = await formService.getSchemaFormat(extendedID);
+		});
+
+		it("return fields and nothing else from extended form", async () => {
+			const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			expect(jsonFormat.schema).toEqual(extendedSchemaFormat.schema);
+			(["options", "id", "title", "shortDescription",
+				"translations", "uiSchema"] as (keyof SchemaFormat)[]).forEach(prop => {
+				expect(jsonFormat).not.toContain(prop);
+			});
+		});
+
+		it("can be patched", async () => {
+			const _form = {
+				...form,
+				patch: [
+					{
+						op: "add",
+						path: "/fields/1/options/whitelist/-",
+						value: "MX.secureLevelKM100"
+					},
+				]
+			};
+			const jsonFormat = await fieldService.masterToSchemaFormat(_form, LANG);
+			const { enum: _enum } = jsonFormat.schema.properties.secureLevel;
+			expect(_enum[_enum.length - 1]).toEqual( "MX.secureLevelKM100");
 		});
 	});
 });

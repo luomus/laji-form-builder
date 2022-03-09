@@ -2,7 +2,10 @@ import ApiClient from "laji-form/lib/ApiClient";
 import FormService from "./form-service";
 import MetadataService from "./metadata-service";
 import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent,
-	FieldOptions } from "../model";
+	FieldOptions, 
+	ExtendedMaster,
+	isFormExtensionField,
+	FormExtensionField} from "../model";
 import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -32,8 +35,8 @@ export default class FieldService {
 		this.lang = lang;
 	}
 
-	async masterToSchemaFormat(master: Omit<Master, "id">, lang?: Lang): Promise<SchemaFormat> {
-		master = await this.parseMaster(master);
+	async masterToSchemaFormat(rawMaster: Master, lang?: Lang): Promise<SchemaFormat> {
+		const master = await this.parseMaster(rawMaster);
 		const rootField = master.fields
 			? this.getRootField(master)
 			: undefined;
@@ -68,7 +71,7 @@ export default class FieldService {
 		return schemaFormat;
 	}
 
-	private async masterToJSONSchema(master: Omit<Master, "id">, rootField: Field): Promise<SchemaFormat["schema"]> {
+	private async masterToJSONSchema(master: ExtendedMaster, rootField: Field): Promise<SchemaFormat["schema"]> {
 		const {fields} = master;
 		if (!fields || !fields.length) {
 			return Promise.resolve(JSONSchema.object());
@@ -191,14 +194,14 @@ export default class FieldService {
 		};
 	}
 
-	private parseMaster(master: Omit<Master, "id">) {
+	private parseMaster(master: Master): Promise<ExtendedMaster> {
 		return applyTransformations(master, undefined, [
 			this.mapBaseForm,
 			this.mapBaseFormFromFields,
 			addDefaultValidators,
 			this.applyPatches,
 			this.addTaxonSets
-		]);
+		]) as Promise<ExtendedMaster>;
 	}
 
 	private mapBaseForm = async (master: Master) => {
@@ -224,10 +227,10 @@ export default class FieldService {
 
 		for (const idx in master.fields) {
 			const f = master.fields[idx];
-			const {formID} = f;
-			if (!formID) {
+			if (!isFormExtensionField(f)) {
 				continue;
 			}
+			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
 				await this.parseMaster(await this.formService.getMaster(formID));
@@ -243,10 +246,14 @@ export default class FieldService {
 		}
 		return master;
 
-		function mergeFields(fieldsFrom: Field[], fieldsTo: Field[]): Field[] {
+		function mergeFields(fieldsFrom: (Field | FormExtensionField)[], fieldsTo: (Field | FormExtensionField)[])
+			: (Field | FormExtensionField)[] {
 			fieldsFrom.forEach(f => {
+				if (isFormExtensionField(f)) {
+					return;
+				}
 				const {name} = f;
-				const exists = fieldsTo.find(f => f.name === name);
+				const exists = fieldsTo.find(f => !isFormExtensionField(f) && f.name === name) as Field;
 				if (exists && f.fields && exists.fields) {
 					mergeFields(f.fields, exists.fields);
 				} else {
@@ -514,7 +521,7 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) =>
 		: schema;
 
 const addValidators = (type: "validators" | "warnings") =>
-	(schemaFormat: SchemaFormat & Pick<Master, "translations">, master: Master) => {
+	(schemaFormat: SchemaFormat & Pick<Master, "translations">, master: ExtendedMaster) => {
 		const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
 			let validators: any = {};
 			if (field[type]) {
@@ -668,7 +675,7 @@ const defaultValidators: Record<string, DefaultValidator> = {
 	"/gatherings/geometry": defaultGeometryValidator
 };
 
-const addDefaultValidators = (master: Master) => {
+const addDefaultValidators = (master: ExtendedMaster) => {
 	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
 			const nextPath = `${path}/${unprefixProp(field.name)}`;

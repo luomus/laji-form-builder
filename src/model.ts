@@ -43,12 +43,13 @@ export interface FormListing {
 	title?: string;
 }
 
-export interface Master extends FormListing {
+export interface Master extends Omit<FormListing, "id"> {
+	id?: string;
 	language?: Lang;
 	name?: string;
 	shortDescription?: string;
 	translations?: Translations;
-	fields?: Field[];
+	fields?: (Field | FormExtensionField)[];
 	baseFormID?: string;
 	patch?: any[];
 	uiSchema?: any;
@@ -56,6 +57,14 @@ export interface Master extends FormListing {
 	"@type"?: string;
 	"@context"?: string;
 	context?: string;
+}
+
+export interface ExtendedMaster extends Master {
+	fields?: Field[];
+}
+
+export function isFormExtensionField(field: Field | FormExtensionField): field is FormExtensionField {
+	return !!(field as any).formID;
 }
 
 export interface FieldOptions {
@@ -78,8 +87,11 @@ export interface Field {
 	validators?: any;
 	warnings?: any;
 	label?: string;
-	formID?: string;
 	fields?: Field[];
+}
+
+export interface FormExtensionField {
+	formID: string;
 }
 
 export interface AltTreeParent {
