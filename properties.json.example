@@ -2,5 +2,7 @@
 	"accessToken": "",
 	"userToken": ""
 	"userId": ""
-	"googleApiKey": ""
+	"googleApiKey": "",
+	"lajiStoreAuth": "",
+	"lajiStoreBaseUrl": "",
 }

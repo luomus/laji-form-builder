@@ -5,8 +5,9 @@ import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
 import LajiFormInterface from "../LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
-	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, parseJSONPointer, JSONSchema
-} from "../../utils";
+	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, 
+} from "../utils";
+import { parseJSONPointer, JSONSchema } from "../../utils";
 import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
@@ -270,7 +271,7 @@ const customPropTypeSchemaMappings: {
 					"ui:field": JSONSchema.String(),
 					"ui:options": JSONSchema.object()
 				})
-			)
+			);
 		},
 		uiSchema: (): any => {
 			return {items: {"ui:field": "UiFieldEditor"}};

@@ -34,26 +34,32 @@ export interface PropertyContext {
 }
 
 export type Lang = "fi" | "sv" | "en";
-export type Translations = Record<Lang, {[key: string]: string}>;
 
+export const isLang = (lang: any): lang is Lang => typeof lang === "string" && ["fi", "sv", "en"].includes(lang);
+
+export type Translations = Record<Lang, {[key: string]: string}>;
 
 export interface FormListing {
 	id: string;
 	options?: any;
 	title?: string;
+	logo?: string;
+	description?: string;
+	shortDescription?: string;
+	supportedLanguage?: Lang[];
+	category?: string;
+	collectionID?: string;
 }
 
 export interface Master extends Omit<FormListing, "id"> {
 	id?: string;
 	language?: Lang;
 	name?: string;
-	shortDescription?: string;
 	translations?: Translations;
 	fields?: (Field | FormExtensionField)[];
 	baseFormID?: string;
 	patch?: any[];
 	uiSchema?: any;
-	collectionID?: string;
 	"@type"?: string;
 	"@context"?: string;
 	context?: string;

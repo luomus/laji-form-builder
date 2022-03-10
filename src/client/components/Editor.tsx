@@ -2,8 +2,10 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, parseJSONPointer,
-	scrollIntoViewIfNeeded } from "../../utils";
+import {
+	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
+} from "../utils";
+import { parseJSONPointer } from "../../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./Builder";
 import { Context } from "./Context";
