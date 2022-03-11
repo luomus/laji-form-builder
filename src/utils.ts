@@ -51,10 +51,10 @@ function isPromise<T>(p: any): p is Promise<T> {
 export function applyTransformations<T, P>(
 	startValueOrPromise: T | Promise<T>,
 	fnValue: P,
-	fns: (((value: T, fnValue: P) => T | Promise<T>) | undefined)[]
+	fns: (((value: T, fnValue: P) => T | Promise<T>) | undefined | false)[]
 ) {
 	return fns.reduce<Promise<T>>((promise, fn) => promise.then(
-		value => isPromise(fn)
+		value => fn !== false && isPromise<T>(fn)
 			? fn(value as T, fnValue)
 			: Promise.resolve(fn
 				? fn(value as T, fnValue)

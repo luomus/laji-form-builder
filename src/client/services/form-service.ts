@@ -1,5 +1,5 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import { FormListing, Lang, Master, SchemaFormat } from "../model";
+import { FormListing, Lang, Master, SchemaFormat } from "../../model";
 
 export default class FormService {
 	private apiClient: ApiClient;
@@ -28,6 +28,10 @@ export default class FormService {
 
 	async getForms(): Promise<FormListing[]> {
 		return (await this.apiClient.fetch("/forms", undefined)).results;
+	}
+
+	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
+		return this.apiClient.fetch("/forms/transform", {method: "POST", body: JSON.stringify(master)});
 	}
 
 	setLang(lang: Lang) {

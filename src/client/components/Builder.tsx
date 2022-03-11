@@ -11,10 +11,9 @@ import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
 import { PropertyModel, PropertyRange, Lang, Translations, Master, SchemaFormat, Field } from "../../model";
 import MetadataService from "../../services/metadata-service";
-import FormService from "../../services/form-service";
+import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import FieldService from "../../services/field-service";
 
 export interface BuilderProps {
 	id: string;
@@ -51,7 +50,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	formPromise: CancellablePromise<any>;
 	metadataService: MetadataService;
 	formService: FormService;
-	fieldService: FieldService;
 	notifier: Notifier;
 
 	static defaultProps = {
@@ -69,7 +67,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
 		this.formService = new FormService(this.apiClient, props.lang);
-		this.fieldService = new FieldService(this.apiClient, this.metadataService, this.formService, props.lang);
 		this.notifier = props.notifier
 			|| (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
 				notifier[method] = msg =>
@@ -130,7 +127,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				await this.updateSchemaFormat();
 				this.propagateState();
 			} else if (this.state.master) {
-				const schemaFormat = await this.fieldService.masterToSchemaFormat(this.state.master);
+				const schemaFormat = await this.formService.masterToSchemaFormat(this.state.master);
 				this.setState({schemaFormat}, this.propagateState);
 			}
 			this.props.onLangChange(this.state.lang);
@@ -139,7 +136,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	private updateLang() {
 		this.apiClient.setLang(this.state.lang);
-		this.fieldService.setLang(this.state.lang);
 		this.metadataService.setLang(this.state.lang);
 		this.formService.setLang(this.state.lang);
 	}
@@ -484,7 +480,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onCreate = async (master: Master) => {
 		this.setState({tmp: true}, async () => {
-			const schemaFormat = await this.fieldService.masterToSchemaFormat(master);
+			const schemaFormat = await this.formService.masterToSchemaFormat(master);
 			this.setState({master, schemaFormat}, this.propagateState);
 		});
 	}

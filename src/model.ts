@@ -122,6 +122,7 @@ export interface SchemaFormat {
 	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
 	language?: Lang;
 	context?: string;
+	translations?: Translations;
 }
 
 export interface JSONSchemaE extends JSONSchema7 {

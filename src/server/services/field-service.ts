@@ -1,15 +1,15 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import FormService from "./form-service";
-import MetadataService from "./metadata-service";
+import MetadataService from "../../services/metadata-service";
 import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent,
 	FieldOptions, 
 	ExtendedMaster,
 	isFormExtensionField,
-	FormExtensionField} from "../model";
-import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../utils";
+	FormExtensionField} from "../../model";
+import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import * as rjsf from "@rjsf/core";
+import { formFetch } from "../server";
 
 interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
@@ -18,13 +18,11 @@ interface InternalProperty extends PropertyModel {
 export default class FieldService {
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
-	private formService: FormService;
 	private lang: Lang;
 
-	constructor(apiClient: ApiClient, metadataService: MetadataService, formService: FormService, lang: Lang) {
+	constructor(apiClient: ApiClient, metadataService: MetadataService, lang: Lang) {
 		this.apiClient = apiClient;
 		this.metadataService = metadataService;
-		this.formService = formService;
 		this.lang = lang;
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
@@ -33,6 +31,8 @@ export default class FieldService {
 
 	setLang(lang: Lang) {
 		this.lang = lang;
+		this.metadataService.setLang(lang);
+		this.apiClient.setLang(lang);
 	}
 
 	async masterToSchemaFormat(rawMaster: Master, lang?: Lang): Promise<SchemaFormat> {
@@ -45,7 +45,7 @@ export default class FieldService {
 			? await this.masterToJSONSchema(master, rootField)
 			: {};
 		const {fields, "@type": _type, "@context": _context, ..._master} = master;
-		const {translations, ...schemaFormat} = await applyTransformations(
+		return applyTransformations(
 			{
 				schema,
 				uiSchema: {},
@@ -62,13 +62,12 @@ export default class FieldService {
 				addUiSchemaContext,
 				addLang(lang),
 				this.prepopulate,
-				(schemaFormat) => schemaFormat.translations
-					? translate(schemaFormat, schemaFormat.translations[this.lang])
-					: schemaFormat
+				(schemaFormat) => lang && schemaFormat.translations
+					? translate(schemaFormat, schemaFormat.translations[lang])
+					: schemaFormat,
+				removeTranslations(lang)
 			]
 		);
-		console.log(JSON.parse(JSON.stringify(schemaFormat)));
-		return schemaFormat;
 	}
 
 	private async masterToJSONSchema(master: ExtendedMaster, rootField: Field): Promise<SchemaFormat["schema"]> {
@@ -208,7 +207,7 @@ export default class FieldService {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm = await this.mapBaseForm(await this.formService.getMaster(master.baseFormID));
+		const baseForm = await this.mapBaseForm(await formFetch(master.baseFormID));
 		delete (baseForm as any).id;
 		master = {
 			...baseForm,
@@ -233,7 +232,7 @@ export default class FieldService {
 			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
-				await this.parseMaster(await this.formService.getMaster(formID));
+				await this.parseMaster(await formFetch(formID));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!fields) {
@@ -626,6 +625,14 @@ const addLang = (language?: Lang) => (schemaFormat: SchemaFormat) =>
 	language
 		? {...schemaFormat, language}
 		: schemaFormat;
+
+export const removeTranslations = (language?: Lang) => (schemaFormat: SchemaFormat | Master) => {
+	if (language) {
+		const {translations, ..._schemaFormat} = schemaFormat;
+		return _schemaFormat;
+	}
+	return schemaFormat;
+};
 
 interface DefaultValidatorItem {
 	validator: any;

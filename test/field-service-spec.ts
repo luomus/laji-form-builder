@@ -1,6 +1,6 @@
 import MetadataService from "../src/services/metadata-service";
-import FieldService from "../src/services/field-service";
-import FormService from "../src/services/form-service";
+import FieldService from "../src/server/services/field-service";
+import FormService from "../src/client/services/form-service";
 import ApiClientImplementation from "../playground/ApiClientImplementation";
 import ApiClient from "laji-form/lib/ApiClient";
 import properties from "../properties.json";
@@ -19,7 +19,7 @@ const apiClient = new ApiClient(new ApiClientImplementation(
 describe("Field service", () => {
 
 	const formService = new FormService(apiClient, LANG);
-	const fieldService = new FieldService(apiClient, new MetadataService(apiClient, LANG), formService, LANG);
+	const fieldService = new FieldService(apiClient, new MetadataService(apiClient, LANG), LANG);
 
 	const forms: {id: string, title: string}[] = [
 		{id: "JX.519", title: "Trip report"},
