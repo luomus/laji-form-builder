@@ -17,6 +17,17 @@ const schemaFormatProps = [
 	"excludeFromCopy", "uiSchemaContext", "extra"
 ];
 
+const expectOnlyProps = (obj: Record<string, unknown>, props: string[]) => {
+	props.forEach(prop => {
+		expect(obj[prop]).toBeTruthy(`Expected ${prop} to be defined`);
+	});
+	Object.keys(obj).forEach(prop => {
+		if (!props.includes(prop)) {
+			fail(`Expected ${prop} not to be defined`);
+		}
+	});
+};
+
 let testForm: Master;
 
 describe("", () => {
@@ -122,9 +133,7 @@ describe("", () => {
 				.expect((response: any) => {
 					const form = response.body;
 					expect(form).toBeDefined();
-					[...masterProps, "translations"].forEach(prop => {
-						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
-					});
+					expectOnlyProps(form, [...masterProps, "translations"]);
 					expect(form.title[0]).toBe("@", "Form title wasn't in untranslated format");
 				})
 				.end(finish(done));
@@ -150,9 +159,7 @@ describe("", () => {
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
 					const form = response.body;
-					[...schemaFormatProps, "translations"].forEach(prop => {
-						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
-					});
+					expectOnlyProps(form, [...schemaFormatProps, "translations"]);
 					expect(form.title[0]).toBe("@");
 				})
 				.end(finish(done));
@@ -166,10 +173,7 @@ describe("", () => {
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
 					const form = response.body;
-					[...schemaFormatProps].forEach(prop => {
-						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
-					});
-					expect(response.body.translations).toBe(undefined);
+					expectOnlyProps(form, schemaFormatProps);
 					expect(form.title)
 						.toBe((testForm.translations as any).fi[(testForm.title as string)]);
 				})
@@ -195,9 +199,7 @@ describe("", () => {
 				.expect((response: any) => {
 					const form = response.body;
 					expect(form).toBeDefined();
-					[...schemaFormatProps, "translations"].forEach(prop => {
-						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
-					});
+					expectOnlyProps(form, [...schemaFormatProps, "translations"]);
 					expect(form.title[0]).toBe("@", "Form title wasn't in untranslated format");
 				})
 				.end(finish(done));
