@@ -7,9 +7,19 @@ const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) :
 
 const TEST_FORM_ID = "MHL.119";
 
-describe("", () => {
+const commonProps = [
+	"name", "description", "language", "title", "shortDescription",
+	"uiSchema", "options", "id",
+];
+const masterProps = [...commonProps, "@type", "@context", "fields"];
+const schemaFormatProps = [
+	...commonProps, "attributes", "schema", "validators", "warnings",
+	"excludeFromCopy", "uiSchemaContext", "extra"
+];
 
-	let testForm: Master;
+let testForm: Master;
+
+describe("", () => {
 
 	beforeAll(async done => {
 		testForm = await formFetch(`/${TEST_FORM_ID}`);
@@ -18,6 +28,14 @@ describe("", () => {
 
 	describe("/ (form listing)", () => {
 		let forms: any[];
+
+		it("returns 422 for bad lang", async (done) => {
+			request(app)
+				.get("/?lang=badlang")
+				.expect(422)
+				.end(finish(done));
+		});
+
 		it("returns list of forms", async (done) => {
 			request(app)
 				.get("/")
@@ -89,15 +107,12 @@ describe("", () => {
 	});
 
 	describe("/:id (get form)", () => {
-		const commonProps = [
-			"name", "description", "language", "title", "shortDescription",
-			"uiSchema", "options", "id",
-		];
-		const masterProps = [...commonProps, "@type", "@context", "fields"];
-		const schemaFormatProps = [
-			...commonProps, "attributes", "schema", "validators", "warnings",
-			"excludeFromCopy", "uiSchemaContext", "extra"
-		];
+		it("returns 422 for bad lang", async (done) => {
+			request(app)
+				.get(`/${TEST_FORM_ID}?lang=badlang`)
+				.expect(422)
+				.end(finish(done));
+		});
 
 		it("returns in master format by default", async (done) => {
 			request(app)
@@ -157,6 +172,49 @@ describe("", () => {
 					expect(response.body.translations).toBe(undefined);
 					expect(form.title)
 						.toBe((testForm.translations as any).fi[(testForm.title as string)]);
+				})
+				.end(finish(done));
+		});
+	});
+
+	describe("/transform", () => {
+		it("returns 422 for bad lang", async (done) => {
+			request(app)
+				.post("/transform?lang=badlang")
+				.send(testForm)
+				.expect(422)
+				.end(finish(done));
+		});
+
+		it("transforms master format to schema format untranslated without lang param", async (done) => {
+			request(app)
+				.post("/transform")
+				.send(testForm)
+				.expect(200)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					const form = response.body;
+					expect(form).toBeDefined();
+					[...schemaFormatProps, "translations"].forEach(prop => {
+						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
+					});
+					expect(form.title[0]).toBe("@", "Form title wasn't in untranslated format");
+				})
+				.end(finish(done));
+		});
+
+		it("transforms master format to schema format translated when query param lang present", async (done) => {
+			request(app)
+				.post("/transform")
+				.send(testForm)
+				.expect(200)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					const form = response.body;
+					[...schemaFormatProps].forEach(prop => {
+						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
+					});
+					expect(form.title[0]).toBe("@");
 				})
 				.end(finish(done));
 		});

@@ -1,4 +1,5 @@
-import express from "express";
+import express, { RequestHandler } from "express";
+import bodyParser from "body-parser";
 import queryString from "querystring";
 import { lajiStoreBaseUrl, lajiStoreAuth } from "../../properties.json";
 import { FormListing, isLang, Master } from "../model";
@@ -11,7 +12,6 @@ import MetadataService from "../services/metadata-service";
 
 const DEFAULT_LANG = "en";
 
-const app = express();
 
 const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, options?: any) => 
 	 fetchJSON(`${lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
@@ -52,12 +52,20 @@ const exposeFormListing = (form: Master) =>
 		return copy;
 	}, {} as FormListing);
 
-app.get("/", async (req, res) => {
+const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 	const {lang} = req.query;
-
 	if (typeof lang === "string" && !isLang(lang)) {
-		return res.sendStatus(422);
+		res.sendStatus(422);
+		return next("route");
 	}
+	next();
+};
+
+const app = express();
+app.use(bodyParser.json());
+
+app.get("/", langCheckMiddleWare, async (req, res) => {
+	const {lang} = req.query;
 
 	const remoteForms: Master[] = (await formFetch("/", {page_size: 10000})).member;
 	const forms = await Promise.all(remoteForms.map(form =>  {
@@ -79,13 +87,9 @@ interface IdQueryParams {
 	lang?: string;
 	format?: string;
 }
-app.get<IdPathParams, unknown, unknown, IdQueryParams>("/:id", async (req, res) => {
+app.get<IdPathParams, unknown, unknown, IdQueryParams>("/:id", langCheckMiddleWare, async (req, res) => {
 	const {id} = req.params;
 	const {lang, format} = req.query;
-
-	if (typeof lang === "string" && !isLang(lang)) {
-		return res.sendStatus(422);
-	}
 
 	let form;
 	try {
@@ -94,15 +98,21 @@ app.get<IdPathParams, unknown, unknown, IdQueryParams>("/:id", async (req, res) 
 		return res.sendStatus(404);
 	}
 
-	const _form = await applyTransformations(form, lang, [
+	return res.json(await applyTransformations(form, lang, [
 		format === "schema" && fieldService.masterToSchemaFormat.bind(fieldService),
 		(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
 			? translate(form, form.translations[lang])
 			: form,
-		format !== "schema" && removeTranslations(lang)
-	]);
+		format !== "schema" && isLang(lang) && removeTranslations(lang)
+	]));
+});
 
-	return res.json(_form);
+app.post("/transform", langCheckMiddleWare, async (req, res) => {
+	const {lang} = req.query;
+	return res.json(await applyTransformations(req.body, lang, [
+		fieldService.masterToSchemaFormat.bind(fieldService),
+		isLang(lang) && removeTranslations(lang)
+	]));
 });
 
 export default app;
