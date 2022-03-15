@@ -222,4 +222,60 @@ describe("", () => {
 				.end(finish(done));
 		});
 	});
+
+	let createdForm: Master;
+
+	describe("/ POST (form creation)", () => {
+		it("returns 422 if form has id", async (done) => {
+			request(app)
+				.post("/")
+				.send(testForm)
+				.set("Content-Type", "application/json")
+				.expect(422)
+				.end(finish(done));
+		});
+
+		it("creates form and returns in master format", async (done) => {
+			const {id, ..._testForm} = testForm;
+			request(app)
+				.post("/")
+				.send(_testForm)
+				.set("Content-Type", "application/json")
+				.expect(200)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					createdForm = response.body as Master;
+					expectOnlyProps(createdForm as any, [...masterProps, "translations"]);
+					expect((createdForm.title as string)[0]).toBe("@");
+				})
+				.end(finish(done));
+		});
+	});
+
+	describe("/:id PUT (form update)", () => {
+		it("updates form and returns in master format", async (done) => {
+			const title = "test title";
+			request(app)
+				.put(`/${createdForm.id}`)
+				.send({...createdForm, title})
+				.set("Content-Type", "application/json")
+				.expect(200)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					const form = response.body;
+					expectOnlyProps(form, [...masterProps, "translations"]);
+					expect(form.title).toBe(title);
+				})
+				.end(finish(done));
+		});
+	});
+
+	describe("/:id DELETE (form delete)", () => {
+		it("updates form and returns in master format", async (done) => {
+			request(app)
+				.delete(`/${createdForm.id}`)
+				.expect(200)
+				.end(finish(done));
+		});
+	});
 });

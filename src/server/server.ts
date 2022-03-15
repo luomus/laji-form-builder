@@ -1,9 +1,9 @@
-import express, { RequestHandler } from "express";
+import express, { RequestHandler, Response } from "express";
 import bodyParser from "body-parser";
 import queryString from "querystring";
 import { lajiStoreBaseUrl, lajiStoreAuth } from "../../properties.json";
 import { FormListing, isLang, Master } from "../model";
-import { applyTransformations, fetchJSON, translate } from "../utils";
+import { applyTransformations, fetchJSON, isObject, translate } from "../utils";
 import FieldService, {removeTranslations} from "./services/field-service";
 import ApiClient from "laji-form/lib/ApiClient";
 import ApiClientImplementation from "../../playground/ApiClientImplementation";
@@ -15,8 +15,8 @@ const DEFAULT_LANG = "en";
 
 const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, options?: any) => 
 	 fetchJSON(`${lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
-		headers: { Authorization: lajiStoreAuth },
-		...(options || {})
+		...(options || {}),
+		headers: { Authorization: lajiStoreAuth, ...(options?.headers || {}) },
 	});
 
 export const formFetch = lajiStoreFetch("/form");
@@ -52,13 +52,17 @@ const exposeFormListing = (form: Master) =>
 		return copy;
 	}, {} as FormListing);
 
+const error = (res: Response, status: number, detail: string) => res.status(status).json({
+	status,
+	detail
+});
+
 const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 	const {lang} = req.query;
 	if (typeof lang === "string" && !isLang(lang)) {
-		res.sendStatus(422);
-		return next("route");
+		return error(res, 422, "Query param lang should be one of 'fi', 'sv' or 'en'");
 	}
-	next();
+	return next();
 };
 
 const app = express();
@@ -88,7 +92,7 @@ app.get("/:id", langCheckMiddleWare, async (req, res) => {
 	try {
 		form = await formFetch(`/${id}`);
 	} catch (e) {
-		return res.sendStatus(404);
+		return error(res, 404, `Form not found by id ${id}`);
 	}
 
 	return res.json(await applyTransformations(form, lang, [
@@ -98,6 +102,29 @@ app.get("/:id", langCheckMiddleWare, async (req, res) => {
 			: form,
 		format !== "schema" && isLang(lang) && removeTranslations(lang)
 	]));
+});
+
+app.post("/", async (req, res) => {
+	if (req.body.id) {
+		return error(res, 422, "Shouldn't specify id when creating a new form entry");
+	}
+	return res.json(await formFetch("/", undefined, {
+		method: "POST",
+		body: JSON.stringify(req.body),
+		headers: {"Content-Type": "application/json"}
+	}))
+});
+
+app.put("/:id", async (req, res) => {
+	res.json(await formFetch(`/${req.query.id}`, undefined, {
+		method: "PUT",
+		body: JSON.stringify(req.body),
+		headers: {"Content-Type": "application/json"}
+	}));
+});
+
+app.delete("/:id", async (req, res) => {
+	return res.json(await formFetch(`/${req.query.id}`, undefined, {method: "DELETE"}));
 });
 
 app.post("/transform", langCheckMiddleWare, async (req, res) => {
