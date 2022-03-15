@@ -40,13 +40,13 @@ export const exposedProps: Record<keyof FormListing, true> = dictionarify([
 	"supportedLanguage", "category", "collectionID", "options"
 ]);
 
-function isExposableFormProperty(key: string): key is (keyof FormListing) {
+function isExposableFormListingProperty(key: string): key is (keyof FormListing) {
 	return !!(exposedProps as any)[key];
 }
 
 const exposeFormListing = (form: Master) =>
 	Object.keys(form).reduce<FormListing>((copy: FormListing, key) => {
-		if (isExposableFormProperty(key)) {
+		if (isExposableFormListingProperty(key)) {
 			copy[key] = form[key];
 		}
 		return copy;
@@ -62,7 +62,7 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 };
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json({limit: "1MB"}));
 
 app.get("/", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
@@ -80,14 +80,7 @@ app.get("/", langCheckMiddleWare, async (req, res) => {
 	return res.json({forms});
 });
 
-interface IdPathParams {
-	id?: string;
-}
-interface IdQueryParams {
-	lang?: string;
-	format?: string;
-}
-app.get<IdPathParams, unknown, unknown, IdQueryParams>("/:id", langCheckMiddleWare, async (req, res) => {
+app.get("/:id", langCheckMiddleWare, async (req, res) => {
 	const {id} = req.params;
 	const {lang, format} = req.query;
 
@@ -99,7 +92,7 @@ app.get<IdPathParams, unknown, unknown, IdQueryParams>("/:id", langCheckMiddleWa
 	}
 
 	return res.json(await applyTransformations(form, lang, [
-		format === "schema" && fieldService.masterToSchemaFormat.bind(fieldService),
+		format === "schema" && fieldService.masterToSchemaFormat,
 		(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
 			? translate(form, form.translations[lang])
 			: form,
@@ -110,7 +103,7 @@ app.get<IdPathParams, unknown, unknown, IdQueryParams>("/:id", langCheckMiddleWa
 app.post("/transform", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
 	return res.json(await applyTransformations(req.body, lang, [
-		fieldService.masterToSchemaFormat.bind(fieldService),
+		fieldService.masterToSchemaFormat,
 		isLang(lang) && removeTranslations(lang)
 	]));
 });

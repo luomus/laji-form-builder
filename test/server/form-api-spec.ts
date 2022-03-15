@@ -194,6 +194,7 @@ describe("", () => {
 			request(app)
 				.post("/transform")
 				.send(testForm)
+				.set("Content-Type", "application/json")
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
@@ -207,16 +208,16 @@ describe("", () => {
 
 		it("transforms master format to schema format translated when query param lang present", async (done) => {
 			request(app)
-				.post("/transform")
+				.post("/transform?lang=fi")
 				.send(testForm)
+				.set("Content-Type", "application/json")
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
 					const form = response.body;
-					[...schemaFormatProps].forEach(prop => {
-						expect(form[prop]).toBeTruthy(`Expected ${prop} to be defined`);
-					});
-					expect(form.title[0]).toBe("@");
+					expectOnlyProps(form, schemaFormatProps);
+					expect(form.title)
+						.toBe((testForm.translations as any).fi[(testForm.title as string)]);
 				})
 				.end(finish(done));
 		});

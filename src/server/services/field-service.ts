@@ -27,6 +27,7 @@ export default class FieldService {
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
 		this.prepopulate = this.prepopulate.bind(this);
+		this.masterToSchemaFormat = this.masterToSchemaFormat.bind(this);
 	}
 
 	setLang(lang: Lang) {
