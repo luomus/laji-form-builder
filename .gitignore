@@ -7,4 +7,4 @@ properties.json
 .tern-project
 dist
 lib
-build
+static

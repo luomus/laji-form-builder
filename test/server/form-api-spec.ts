@@ -30,6 +30,16 @@ const expectOnlyProps = (obj: Record<string, unknown>, props: string[]) => {
 
 let testForm: Master;
 
+describe("/ (form client)", () => {
+	it("serves form client HTML", async (done) => {
+		request(app)
+			.get("/")
+			.expect(200)
+			.expect("Content-Type", "text/html; charset=UTF-8")
+			.end(finish(done));
+	});
+});
+
 describe("/api", () => {
 
 	beforeAll(async done => {

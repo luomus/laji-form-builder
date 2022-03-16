@@ -7,7 +7,7 @@ import { FormListing, isLang, Master } from "../model";
 import { applyTransformations, fetchJSON, isObject, translate } from "../utils";
 import FieldService, {removeTranslations} from "./services/field-service";
 import ApiClient from "laji-form/lib/ApiClient";
-import ApiClientImplementation from "../../playground/ApiClientImplementation";
+import ApiClientImplementation from "./app/ApiClientImplementation";
 import properties from "../../properties.json";
 import MetadataService from "../services/metadata-service";
 
@@ -67,7 +67,8 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 };
 
 const app = express();
-app.use(bodyParser.json({limit: "1MB"}));
+
+app.use("/api(/*)?", bodyParser.json({limit: "1MB"}));
 
 app.get("/api", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
@@ -134,6 +135,12 @@ app.post("/api/transform", langCheckMiddleWare, async (req, res) => {
 		fieldService.masterToSchemaFormat,
 		isLang(lang) && removeTranslations(lang)
 	]));
+});
+
+app.use("/static", express.static("static"));
+
+app.get("/*", async (req, res) => {
+	res.sendFile(path.join(__dirname, "app", "index.html"));
 });
 
 export default app;

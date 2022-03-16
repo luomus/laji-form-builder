@@ -2,26 +2,17 @@ const path = require("path");
 const webpack = require("webpack");
 
 module.exports = {
-	mode: "development",
-	devtool: "eval",
+	mode: "production",
 	entry: [
-		path.join(path.resolve(), "playground", "app")
+		path.join(path.resolve(), "src", "server", "app", "app")
 	],
 	output: {
-		publicPath: "/build/",
+		path: path.join(__dirname, "static"),
 		filename: "main.js"
 	},
 	plugins: [
-		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"development\""})
+		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"production\""})
 	],
-	devServer: {
-		static: {
-			directory: path.join(path.resolve(), "playground"),
-		},
-		host: "0.0.0.0",
-		port: 8082,
-		hot: true
-	},
 	module: {
 		rules: [
 			{
@@ -30,8 +21,7 @@ module.exports = {
 					loader: "ts-loader"
 				}],
 				include: [
-					path.join(path.resolve(), "src"),
-					path.join(path.resolve(), "playground")
+					path.join(path.resolve(), "src")
 				],
 				exclude: /node_modules|.d.ts$/
 			},
