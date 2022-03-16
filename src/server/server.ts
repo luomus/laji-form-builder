@@ -1,6 +1,7 @@
 import express, { RequestHandler, Response } from "express";
 import bodyParser from "body-parser";
 import queryString from "querystring";
+import path from "path";
 import { lajiStoreBaseUrl, lajiStoreAuth } from "../../properties.json";
 import { FormListing, isLang, Master } from "../model";
 import { applyTransformations, fetchJSON, isObject, translate } from "../utils";
@@ -68,7 +69,7 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 const app = express();
 app.use(bodyParser.json({limit: "1MB"}));
 
-app.get("/", langCheckMiddleWare, async (req, res) => {
+app.get("/api", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
 
 	const remoteForms: Master[] = (await formFetch("/", {page_size: 10000})).member;
@@ -84,7 +85,7 @@ app.get("/", langCheckMiddleWare, async (req, res) => {
 	return res.json({forms});
 });
 
-app.get("/:id", langCheckMiddleWare, async (req, res) => {
+app.get("/api/:id", langCheckMiddleWare, async (req, res) => {
 	const {id} = req.params;
 	const {lang, format} = req.query;
 
@@ -104,7 +105,7 @@ app.get("/:id", langCheckMiddleWare, async (req, res) => {
 	]));
 });
 
-app.post("/", async (req, res) => {
+app.post("/api", async (req, res) => {
 	if (req.body.id) {
 		return error(res, 422, "Shouldn't specify id when creating a new form entry");
 	}
@@ -115,7 +116,7 @@ app.post("/", async (req, res) => {
 	}))
 });
 
-app.put("/:id", async (req, res) => {
+app.put("/api/:id", async (req, res) => {
 	res.json(await formFetch(`/${req.query.id}`, undefined, {
 		method: "PUT",
 		body: JSON.stringify(req.body),
@@ -123,11 +124,11 @@ app.put("/:id", async (req, res) => {
 	}));
 });
 
-app.delete("/:id", async (req, res) => {
+app.delete("/api/:id", async (req, res) => {
 	return res.json(await formFetch(`/${req.query.id}`, undefined, {method: "DELETE"}));
 });
 
-app.post("/transform", langCheckMiddleWare, async (req, res) => {
+app.post("/api/transform", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
 	return res.json(await applyTransformations(req.body, lang, [
 		fieldService.masterToSchemaFormat,

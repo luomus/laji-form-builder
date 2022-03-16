@@ -30,7 +30,7 @@ const expectOnlyProps = (obj: Record<string, unknown>, props: string[]) => {
 
 let testForm: Master;
 
-describe("", () => {
+describe("/api", () => {
 
 	beforeAll(async done => {
 		testForm = await formFetch(`/${TEST_FORM_ID}`);
@@ -42,14 +42,14 @@ describe("", () => {
 
 		it("returns 422 for bad lang", async (done) => {
 			request(app)
-				.get("/?lang=badlang")
+				.get("/api?lang=badlang")
 				.expect(422)
 				.end(finish(done));
 		});
 
 		it("returns list of forms", async (done) => {
 			request(app)
-				.get("/")
+				.get("/api")
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect(response => {
@@ -105,7 +105,7 @@ describe("", () => {
 
 		it("returns translated when query param lang present", async (done) => {
 			request(app)
-				.get("/?lang=fi")
+				.get("/api?lang=fi")
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect(response => {
@@ -120,14 +120,14 @@ describe("", () => {
 	describe("/:id (get form)", () => {
 		it("returns 422 for bad lang", async (done) => {
 			request(app)
-				.get(`/${TEST_FORM_ID}?lang=badlang`)
+				.get(`/api/${TEST_FORM_ID}?lang=badlang`)
 				.expect(422)
 				.end(finish(done));
 		});
 
 		it("returns in master format by default", async (done) => {
 			request(app)
-				.get(`/${TEST_FORM_ID}`)
+				.get(`/api/${TEST_FORM_ID}`)
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
@@ -141,7 +141,7 @@ describe("", () => {
 
 		it("returns translated and without translations when query param lang present", async (done) => {
 			request(app)
-				.get(`/${TEST_FORM_ID}?lang=fi`)
+				.get(`/api/${TEST_FORM_ID}?lang=fi`)
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response) => {
@@ -154,7 +154,7 @@ describe("", () => {
 
 		it("returns in schema format when query param format=schema", async (done) => {
 			request(app)
-				.get(`/${TEST_FORM_ID}?format=schema`)
+				.get(`/api/${TEST_FORM_ID}?format=schema`)
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
@@ -168,7 +168,7 @@ describe("", () => {
 		// eslint-disable-next-line max-len
 		it("returns in schema format and translated and without translations when format=schema and query param lang present", async (done) => {
 			request(app)
-				.get(`/${TEST_FORM_ID}?format=schema&lang=fi`)
+				.get(`/api/${TEST_FORM_ID}?format=schema&lang=fi`)
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect((response: any) => {
@@ -184,7 +184,7 @@ describe("", () => {
 	describe("/transform", () => {
 		it("returns 422 for bad lang", async (done) => {
 			request(app)
-				.post("/transform?lang=badlang")
+				.post("/api/transform?lang=badlang")
 				.send(testForm)
 				.expect(422)
 				.end(finish(done));
@@ -192,7 +192,7 @@ describe("", () => {
 
 		it("transforms master format to schema format untranslated without lang param", async (done) => {
 			request(app)
-				.post("/transform")
+				.post("/api/transform")
 				.send(testForm)
 				.set("Content-Type", "application/json")
 				.expect(200)
@@ -208,7 +208,7 @@ describe("", () => {
 
 		it("transforms master format to schema format translated when query param lang present", async (done) => {
 			request(app)
-				.post("/transform?lang=fi")
+				.post("/api/transform?lang=fi")
 				.send(testForm)
 				.set("Content-Type", "application/json")
 				.expect(200)
@@ -228,7 +228,7 @@ describe("", () => {
 	describe("/ POST (form creation)", () => {
 		it("returns 422 if form has id", async (done) => {
 			request(app)
-				.post("/")
+				.post("/api")
 				.send(testForm)
 				.set("Content-Type", "application/json")
 				.expect(422)
@@ -238,7 +238,7 @@ describe("", () => {
 		it("creates form and returns in master format", async (done) => {
 			const {id, ..._testForm} = testForm;
 			request(app)
-				.post("/")
+				.post("/api")
 				.send(_testForm)
 				.set("Content-Type", "application/json")
 				.expect(200)
@@ -256,7 +256,7 @@ describe("", () => {
 		it("updates form and returns in master format", async (done) => {
 			const title = "test title";
 			request(app)
-				.put(`/${createdForm.id}`)
+				.put(`/api/${createdForm.id}`)
 				.send({...createdForm, title})
 				.set("Content-Type", "application/json")
 				.expect(200)
@@ -273,7 +273,7 @@ describe("", () => {
 	describe("/:id DELETE (form delete)", () => {
 		it("updates form and returns in master format", async (done) => {
 			request(app)
-				.delete(`/${createdForm.id}`)
+				.delete(`/api/${createdForm.id}`)
 				.expect(200)
 				.end(finish(done));
 		});
