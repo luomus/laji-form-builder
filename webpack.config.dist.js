@@ -5,8 +5,8 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = {
 	mode: "production",
 	entry: {
-		"laji-form-builder": "./src/app",
-		styles: "./src/styles"
+		"laji-form-builder": "./src/client/app",
+		styles: "./src/client/styles"
 	},
 	output: {
 		path: path.join(__dirname, "dist"),
@@ -28,7 +28,10 @@ module.exports = {
 				include: [
 					path.join(path.resolve(), "src"),
 				],
-				exclude: /.d.ts$/
+				exclude: [
+					/.d.ts$/,
+					path.join(path.resolve(), "src", "server"),
+				]
 			},
 			{
 				test: /.d.ts$/,

@@ -2,7 +2,7 @@
   "name": "laji-form-builder",
   "version": "0.1.20",
   "description": "UI for building laji.fi forms",
-  "main": "lib/app.js",
+  "main": "lib/client/app.js",
   "scripts": {
     "start": "npx webpack serve",
     "start:server": "nodemon src/server/start.ts",
