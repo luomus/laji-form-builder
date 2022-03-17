@@ -38,7 +38,7 @@ const apiClient = new ApiClientImplementation(
 	lang
 );
 
-async function main() {
+(async () => {
 	const form = await apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json());
 	const formData = form?.options?.prepopulatedDocument || {};
 
@@ -74,9 +74,7 @@ async function main() {
 		React.createElement(LajiFormApp),
 		document.querySelector("#app")
 	);
-}
-
-main();
+})();
 
 // For dev server hot reload
 if ((module as any).hot) {
