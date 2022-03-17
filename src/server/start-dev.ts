@@ -26,4 +26,4 @@ server.use(require("webpack-dev-middleware")(compiler, {
 }));
 server.use(require("webpack-hot-middleware")(compiler));
 
-server.listen(8084);
+server.listen(process.env.PORT || 8082);
