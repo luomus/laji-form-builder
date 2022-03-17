@@ -39,6 +39,7 @@ export interface BuilderState {
 
 const EDITOR_HEIGHT = 400;
 
+console.log(4);
 export default class Builder extends React.PureComponent<BuilderProps, BuilderState> {
 	apiClient: ApiClient;
 	state: BuilderState = {

@@ -77,3 +77,8 @@ async function main() {
 }
 
 main();
+
+// For dev server hot reload
+if ((module as any).hot) {
+	  (module as any).hot.accept();
+}

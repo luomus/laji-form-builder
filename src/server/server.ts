@@ -13,7 +13,6 @@ import MetadataService from "../services/metadata-service";
 
 const DEFAULT_LANG = "en";
 
-
 const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, options?: any) => 
 	 fetchJSON(`${lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
 		...(options || {}),
@@ -137,9 +136,12 @@ app.post("/api/transform", langCheckMiddleWare, async (req, res) => {
 	]));
 });
 
-app.use("/static", express.static("static"));
-
-app.get("/*", async (req, res) => {
+app.get("/*", async (req, res, next) => {
+	// /static must be manually ignored here becayse it can't be routed before this route,
+	// since dev/prod setups need to handle the routes after the main server.ts
+	if (req.url.startsWith("/static") || req.url.startsWith("/__webpack")) {
+		return next();
+	}
 	res.sendFile(path.join(__dirname, "app", "index.html"));
 });
 

@@ -1,3 +1,6 @@
+import express from "express";
 import server from "./server";
 
-server.listen(8084);
+server.use("/static", express.static("static"));
+
+server.listen(process.env.PORT || 8082);
