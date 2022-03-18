@@ -7,4 +7,6 @@
 	"googleApiKey": "",
 	"lajiStoreAuth": "",
 	"lajiStoreBaseUrl": "",
+	"primaryDataBankFormID": "MHL.70",
+	"secondaryDataBankFormID": "MHL.68"
 }

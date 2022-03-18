@@ -71,8 +71,8 @@ const formApiClient = new ApiClientImplementation(
 					               apiClient={apiClient}
 					               formApiClient={formApiClient}
 					               theme={lajiFormBs3}
-					               primaryDataBankFormID="MHL.70"
-					               secondaryDataBankFormID="MHL.68"
+					               primaryDataBankFormID={properties.primaryDataBankFormID}
+					               secondaryDataBankFormID={properties.secondaryDataBankFormID}
 				/>
 			</React.Fragment>
 		);
