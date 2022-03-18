@@ -1,7 +1,7 @@
 node_modules
 .idea
 *.log
-properties.json
+config.json
 .vim*
 *.swp
 .tern-project

@@ -2,29 +2,28 @@ import express, { RequestHandler, Response } from "express";
 import bodyParser from "body-parser";
 import queryString from "querystring";
 import path from "path";
-import { lajiStoreBaseUrl, lajiStoreAuth } from "../../properties.json";
 import { FormListing, isLang, Master } from "../model";
-import { applyTransformations, fetchJSON, isObject, translate } from "../utils";
+import { applyTransformations, fetchJSON, translate } from "../utils";
 import FieldService, {removeTranslations} from "./services/field-service";
 import ApiClient from "laji-form/lib/ApiClient";
 import ApiClientImplementation from "./app/ApiClientImplementation";
-import properties from "../../properties.json";
+import config from "../../config.json";
 import MetadataService from "../services/metadata-service";
 
 const DEFAULT_LANG = "en";
 
 const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, options?: any) => 
-	 fetchJSON(`${lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
+	 fetchJSON(`${config.lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
 		...(options || {}),
-		headers: { Authorization: lajiStoreAuth, ...(options?.headers || {}) },
+		headers: { Authorization: config.lajiStoreAuth, ...(options?.headers || {}) },
 	});
 
 export const formFetch = lajiStoreFetch("/form");
 
 const apiClient = new ApiClient(new ApiClientImplementation(
-	"https://apitest.laji.fi/v0",
-	properties.accessToken,
-	properties.userToken,
+	config.apiBase,
+	config.accessToken,
+	config.userToken,
 	DEFAULT_LANG
 ), DEFAULT_LANG, {fi: {}, sv: {}, en: {}});
 const metadataService = new MetadataService(apiClient, DEFAULT_LANG);

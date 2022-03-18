@@ -1,5 +1,5 @@
 import LajiFormBuilder from "../../client/components/Builder";
-import properties from "../../../properties.json";
+import config from "../../../config.json";
 import * as React from "react";
 import { render } from "react-dom";
 import LajiForm from "laji-form/lib/components/LajiForm";
@@ -32,16 +32,16 @@ const {lang = "fi", ..._query} = query;
 const id = location.pathname.substr(1);
 
 const apiClient = new ApiClientImplementation(
-	properties.apiBase,
-	properties.accessToken,
-	properties.userToken,
+	config.apiBase,
+	config.accessToken,
+	config.userToken,
 	lang
 );
 
 const formApiClient = new ApiClientImplementation(
-	properties.formApiBase,
-	properties.accessToken,
-	properties.userToken,
+	config.formApiBase,
+	config.accessToken,
+	config.userToken,
 	lang
 );
 
@@ -65,14 +65,12 @@ const formApiClient = new ApiClientImplementation(
 				<LajiFormBuilder id={id}
 					               lang={lang}
 					               {..._query}
-					               {...properties}
+					               {...config}
 					               onChange={onChange}
 					               onLangChange={onLangChange}
 					               apiClient={apiClient}
 					               formApiClient={formApiClient}
 					               theme={lajiFormBs3}
-					               primaryDataBankFormID={properties.primaryDataBankFormID}
-					               secondaryDataBankFormID={properties.secondaryDataBankFormID}
 				/>
 			</React.Fragment>
 		);
