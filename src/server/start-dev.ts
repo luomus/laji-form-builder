@@ -26,4 +26,7 @@ server.use(require("webpack-dev-middleware")(compiler, {
 }));
 server.use(require("webpack-hot-middleware")(compiler));
 
-server.listen(process.env.PORT || 8082);
+const port = process.env.PORT || 8082;
+server.listen(port, () => {
+	console.log(`Server up on port ${port}`);
+});

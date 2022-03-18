@@ -32,14 +32,21 @@ const {lang = "fi", ..._query} = query;
 const id = location.pathname.substr(1);
 
 const apiClient = new ApiClientImplementation(
-	"https://apitest.laji.fi/v0",
+	properties.apiBase,
+	properties.accessToken,
+	properties.userToken,
+	lang
+);
+
+const formApiClient = new ApiClientImplementation(
+	properties.formApiBase,
 	properties.accessToken,
 	properties.userToken,
 	lang
 );
 
 (async () => {
-	const form = await apiClient.fetch(`/forms/${id}`, {lang, format: "schema"}).then(response => response.json());
+	const form = await formApiClient.fetch(`/${id}`, {lang, format: "schema"}).then(response => response.json());
 	const formData = form?.options?.prepopulatedDocument || {};
 
 	const LajiFormApp = () => {
@@ -48,23 +55,24 @@ const apiClient = new ApiClientImplementation(
 		return (
 			<React.Fragment>
 				<LajiForm {..._form}
-					lang={_lang}
-					formData={formData}
-					apiClient={apiClient}
-					theme={lajiFormBs3}
-					uiSchemaContext={{}}
-					className={_lang}
+					        lang={_lang}
+					        formData={formData}
+					        apiClient={apiClient}
+					        theme={lajiFormBs3}
+					        uiSchemaContext={{}}
+					        className={_lang}
 				/>
 				<LajiFormBuilder id={id}
-					lang={lang}
-					{..._query}
-					{...properties}
-					onChange={onChange}
-					onLangChange={onLangChange}
-					apiClient={apiClient}
-					theme={lajiFormBs3}
-					primaryDataBankFormID="MHL.70"
-					secondaryDataBankFormID="MHL.68"
+					               lang={lang}
+					               {..._query}
+					               {...properties}
+					               onChange={onChange}
+					               onLangChange={onLangChange}
+					               apiClient={apiClient}
+					               formApiClient={formApiClient}
+					               theme={lajiFormBs3}
+					               primaryDataBankFormID="MHL.70"
+					               secondaryDataBankFormID="MHL.68"
 				/>
 			</React.Fragment>
 		);

@@ -211,6 +211,7 @@ describe("/api", () => {
 					const form = response.body;
 					expect(form).toBeDefined();
 					expectOnlyProps(form, [...schemaFormatProps, "translations"]);
+					expect(Object.keys(form.schema).length).not.toBe(0);
 					expect(form.title[0]).toBe("@", "Form title wasn't in untranslated format");
 				})
 				.end(finish(done));
@@ -274,6 +275,7 @@ describe("/api", () => {
 				.expect((response: any) => {
 					const form = response.body;
 					expectOnlyProps(form, [...masterProps, "translations"]);
+					expect(form.fields.length).not.toBe(0);
 					expect(form.title).toBe(title);
 				})
 				.end(finish(done));
@@ -285,6 +287,9 @@ describe("/api", () => {
 			request(app)
 				.delete(`/api/${createdForm.id}`)
 				.expect(200)
+				.expect((response: any) => {
+					expect(response.body.affected).toBe(1);
+				})
 				.end(finish(done));
 		});
 	});

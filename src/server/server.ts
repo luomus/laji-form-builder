@@ -67,7 +67,7 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 
 const app = express();
 
-app.use("/api(/*)?", bodyParser.json({limit: "1MB"}));
+app.use("/api", bodyParser.json({limit: "1MB"}));
 
 app.get("/api", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
@@ -117,7 +117,7 @@ app.post("/api", async (req, res) => {
 });
 
 app.put("/api/:id", async (req, res) => {
-	res.json(await formFetch(`/${req.query.id}`, undefined, {
+	res.json(await formFetch(`/${req.params.id}`, undefined, {
 		method: "PUT",
 		body: JSON.stringify(req.body),
 		headers: {"Content-Type": "application/json"}
@@ -125,7 +125,7 @@ app.put("/api/:id", async (req, res) => {
 });
 
 app.delete("/api/:id", async (req, res) => {
-	return res.json(await formFetch(`/${req.query.id}`, undefined, {method: "DELETE"}));
+	return res.json(await formFetch(`/${req.params.id}`, undefined, {method: "DELETE"}));
 });
 
 app.post("/api/transform", langCheckMiddleWare, async (req, res) => {
@@ -137,8 +137,8 @@ app.post("/api/transform", langCheckMiddleWare, async (req, res) => {
 });
 
 app.get("/*", async (req, res, next) => {
-	// /static must be manually ignored here becayse it can't be routed before this route,
-	// since dev/prod setups need to handle the routes after the main server.ts
+	// '/static' and webpack must be manually ignored here becayse it can't be routed before
+	// this route, since dev/prod setups need to handle the routes after the main server.ts
 	if (req.url.startsWith("/static") || req.url.startsWith("/__webpack")) {
 		return next();
 	}
