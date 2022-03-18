@@ -1,4 +1,4 @@
-import memoize from "memoizee";
+import memoize, { Memoized } from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
 import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang, Class } from "../model";
 import { applyTransformations, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
@@ -8,12 +8,24 @@ type PropertyContextDict = Record<string, PropertyContext>;
 export default class MetadataService {
 	private apiClient: ApiClient;
 	private lang: Lang;
-
 	private allRanges: Record<string, Range[]>;
+	private cacheStore: (Memoized<any>)[] = [];
 
 	constructor(apiClient: ApiClient, lang: Lang) {
 		this.apiClient = apiClient;
 		this.lang = lang;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	private cache<F extends Function>(fn: F) {
+		const cached = memoize(fn, { promise: true, primitive: true });
+		this.cacheStore.push(cached);
+		return cached;
+	}
+
+	flush() {
+		this.cacheStore.forEach(c => c.clear());
+		this.cacheStore = [];
 	}
 
 	setLang(lang: Lang) {
@@ -32,14 +44,14 @@ export default class MetadataService {
 			result?.["@context"] ? resolve(preparePropertiesContext(result?.["@context"])) : reject();
 		}, reject))
 
-	getProperties = memoize(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
+	getProperties = this.cache(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
 		return (await this.apiClient.fetch(
 			`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`,
 			{lang: "multi"})
 		).results as PropertyModel[];
 	})
 
-	getRange = memoize((property: PropertyContext | string): Promise<Range[]> => 
+	getRange = this.cache((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
 		|| this.apiClient.fetch(
 			`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`,
@@ -153,7 +165,7 @@ export default class MetadataService {
 		return mapPropertyToJSONSchema(property);
 	}
 
-	getClasses = memoize(async (): Promise<Class[]> => (await this.apiClient.fetch("/metadata/classes")).results)
+	getClasses = this.cache(async (): Promise<Class[]> => (await this.apiClient.fetch("/metadata/classes")).results)
 }
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({

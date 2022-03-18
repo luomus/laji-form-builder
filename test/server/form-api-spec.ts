@@ -293,4 +293,16 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 	});
+
+	describe("/flush", () => {
+		it("works", async (done) => {
+			request(app)
+				.get("/api/flush")
+				.expect(200)
+				.expect((response: any) => {
+					expect(response.body.flush).toBe("ok");
+				})
+				.end(finish(done));
+		});
+	});
 });
