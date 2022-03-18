@@ -16,7 +16,6 @@ import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
 
 export interface BuilderProps {
-	id: string;
 	lang: Lang;
 	onChange: (form: any) => void;
 	onLangChange: (lang: Lang) => void;
@@ -24,8 +23,10 @@ export interface BuilderProps {
 	theme: Theme;
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
+	id?: string;
 	notifier?: Notifier;
 	documentFormVisible?: boolean;
+	formApiClient?: ApiClientImplementation;
 }
 export interface BuilderState {
 	id?: string;
@@ -41,6 +42,7 @@ const EDITOR_HEIGHT = 400;
 
 export default class Builder extends React.PureComponent<BuilderProps, BuilderState> {
 	apiClient: ApiClient;
+	formApiClient?: ApiClient;
 	state: BuilderState = {
 		lang: this.props.lang,
 		editorHeight: EDITOR_HEIGHT
@@ -64,9 +66,16 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			props.lang || "fi",
 			constructTranslations(lajiFormTranslations) as unknown as Translations
 		);
+		this.formApiClient = props.formApiClient 
+			? new ApiClient(
+				props.formApiClient,
+				props.lang || "fi",
+				constructTranslations(lajiFormTranslations) as unknown as Translations)
+			: undefined;
+
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
-		this.formService = new FormService(this.apiClient, props.lang);
+		this.formService = new FormService(this.apiClient, props.lang, this.formApiClient);
 		this.notifier = props.notifier
 			|| (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
 				notifier[method] = msg =>
@@ -136,6 +145,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	private updateLang() {
 		this.apiClient.setLang(this.state.lang);
+		this.formApiClient?.setLang(this.state.lang);
 		this.metadataService.setLang(this.state.lang);
 		this.formService.setLang(this.state.lang);
 	}

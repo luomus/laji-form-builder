@@ -1,4 +1,6 @@
 {
+	"apiBase": "https://apitest.laji.fi/v0",
+	"formBase": "localhost:8082/api",
 	"accessToken": "",
 	"userToken": ""
 	"userId": ""
