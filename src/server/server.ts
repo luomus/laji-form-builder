@@ -66,7 +66,7 @@ server.get("/*", async (req, res, next) => {
 	if (req.url.startsWith("/static/") || req.url.startsWith("/__webpack")) {
 		return next();
 	}
-	res.sendFile(path.join(__dirname, "app", "index.html"));
+	res.sendFile(path.join(__dirname, "view", "index.html"));
 });
 
 export default server;

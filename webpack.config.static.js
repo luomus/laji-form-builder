@@ -4,7 +4,7 @@ const webpack = require("webpack");
 module.exports = {
 	mode: "production",
 	entry: [
-		path.join(path.resolve(), "src", "server", "app", "app")
+		path.join(path.resolve(), "src", "server", "view", "app")
 	],
 	output: {
 		path: path.join(__dirname, "static"),
