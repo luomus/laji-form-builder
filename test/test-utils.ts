@@ -1,5 +1,5 @@
 import { $, protractor, browser, ElementFinder as _ElementFinder, by, element } from "protractor";
-import { gnmspc, nmspc } from "../src/utils";
+import { gnmspc, nmspc } from "../src/client/utils";
 import { navigateToForm, emptyForm, lajiFormLocate, getLocatorForContextId } from "laji-form/test-export/test-utils";
 import { Lang } from "../src/model";
 

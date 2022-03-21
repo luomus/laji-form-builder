@@ -6,7 +6,7 @@ export default class FormService {
 	private formApiClient?: ApiClient;
 	private lang: Lang
 
-	constructor(apiClient: ApiClient,lang: Lang, formApiClient?: ApiClient, ) {
+	constructor(apiClient: ApiClient,lang: Lang, formApiClient?: ApiClient) {
 		this.apiClient = apiClient;
 		this.formApiClient = formApiClient;
 		this.lang = lang;
@@ -44,7 +44,9 @@ export default class FormService {
 	}
 
 	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
-		return this.fetch("/transform", undefined, {method: "POST", body: JSON.stringify(master)});
+		return this.fetch("/transform", undefined, {method: "POST", body: JSON.stringify(master), headers: {
+			"Content-Type": "application/json"
+		}});
 	}
 
 	setLang(lang: Lang) {
