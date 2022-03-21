@@ -18,21 +18,21 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 };
 
 const main = new MainService();
-const server = express();
+const api = express();
 
-server.use("/api", bodyParser.json({limit: "1MB"}));
+api.use("/", bodyParser.json({limit: "1MB"}));
 
-server.get("/api/flush", async (req, res) => {
+api.get("/flush", async (req, res) => {
 	main.flush();
 	return res.json({flush: "ok"});
 });
 
-server.get("/api", langCheckMiddleWare, async (req, res) => {
+api.get("/", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
 	return res.json({forms: await main.getForms(lang as (Lang | undefined))});
 });
 
-server.get("/api/:id", langCheckMiddleWare, async (req, res) => {
+api.get("/:id", langCheckMiddleWare, async (req, res) => {
 	const {id} = req.params;
 	const {lang, format = "json"} = req.query;
 	if (format !== "schema" && format !== "json") {
@@ -41,32 +41,43 @@ server.get("/api/:id", langCheckMiddleWare, async (req, res) => {
 	return res.json(await main.getForm(id, lang as (Lang | undefined), format));
 });
 
-server.post("/api", async (req, res) => {
+api.post("/", async (req, res) => {
 	if (req.body.id) {
 		return error(res, 422, "Shouldn't specify id when creating a new form entry");
 	}
 	return res.json(await main.saveForm(req.body));
 });
 
-server.put("/api/:id", async (req, res) => {
+api.put("/:id", async (req, res) => {
 	res.json(await main.updateForm(req.params.id, req.body));
 });
 
-server.delete("/api/:id", async (req, res) => {
+api.delete("/:id", async (req, res) => {
 	return res.json(await main.deleteForm(req.params.id));
 });
 
-server.post("/api/transform", langCheckMiddleWare, async (req, res) => {
+api.post("/transform", langCheckMiddleWare, async (req, res) => {
 	return res.json(await main.transform(req.body, req.query.lang as (Lang | undefined)));
 });
 
-server.get("/*", async (req, res, next) => {
+const view: RequestHandler = async (req, res, next) => {
 	// '/static' and webpack must be manually ignored here because it can't be routed before
 	// this route, since dev/prod setups need to handle the routes after the main server.ts
 	if (req.url.startsWith("/static/") || req.url.startsWith("/__webpack")) {
 		return next();
 	}
 	res.sendFile(path.join(__dirname, "view", "index.html"));
+}
+
+const server = express();
+
+// Backward compatibility for old server's URI signature.
+server.get("/lajiform/admin/demo", (req, res) => {
+	res.redirect("/");
 });
+server.use("/lajiform", api);
+
+server.use("/api", api);
+server.get("/*", view);
 
 export default server;
