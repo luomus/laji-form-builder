@@ -1,7 +1,7 @@
 import { BuilderPO, createBuilder, isDisplayed } from "./test-utils";
 import { browser, ElementFinder } from "protractor";
 
-let formJSON = JSON.stringify(JSON.stringify(require("../forms/test.json")));
+let formJSON = JSON.stringify(JSON.stringify(require("./test-form.json")));
 formJSON = formJSON.substring(1, formJSON.length - 1);
 
 const enterLongTextToInput = async ($input: ElementFinder, text: string) => {

@@ -38,7 +38,7 @@ if (process.env.HEADLESS && process.env.HEADLESS !== "true") multiCapabilities.f
 });
 
 exports.config = {
-	specs: ["test/*-spec.ts"],
+	specs: ["test/client/*-spec.ts"],
 	multiCapabilities,
 	maxSessions: 4,
 	SELENIUM_PROMISE_MANAGER: false,

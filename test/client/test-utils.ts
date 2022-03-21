@@ -1,7 +1,9 @@
 import { $, protractor, browser, ElementFinder as _ElementFinder, by, element } from "protractor";
-import { gnmspc, nmspc } from "../src/client/utils";
-import { navigateToForm, emptyForm, lajiFormLocate, getLocatorForContextId } from "laji-form/test-export/test-utils";
-import { Lang } from "../src/model";
+import { gnmspc, nmspc } from "../../src/client/utils";
+import { lajiFormLocate, getLocatorForContextId } from "laji-form/test-export/test-utils";
+import { Lang } from "../../src/model";
+
+const { HOST, PORT } = process.env;
 
 const EC = protractor.ExpectedConditions;
 
@@ -23,15 +25,11 @@ export class BuilderPO {
 		this.props = props;
 	}
 	async initialize() {
-		const query = (params: any) => Object.keys(params).reduce((q, key) =>
-			`${q}&${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`
-		, "");
 		if (this.props.id) {
-			const {id, ..._props} = this.props;
-			await navigateToForm(id, query(_props));
+			await browser.get(`http://${HOST}:${PORT}/${this.props.id}`);
 			await this.waitUntilLoaded();
 		} else {
-			await emptyForm();
+			await browser.get(`http://${HOST}:${PORT}`);
 		}
 	}
 

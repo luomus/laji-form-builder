@@ -46,12 +46,13 @@ const formApiClient = new ApiClientImplementation(
 );
 
 (async () => {
-	const form = await formApiClient.fetch(`/${id}`, {lang, format: "schema"}).then(response => response.json());
+	const form = await formApiClient.fetchJSON(`/${id}`, {lang, format: "schema"});
 	const formData = form?.options?.prepopulatedDocument || {};
 
 	const LajiFormApp = () => {
 		const [_form, onChange] = React.useState(form);
 		const [_lang, onLangChange] = React.useState(lang);
+		console.log(id, _form);
 		return (
 			<React.Fragment>
 				<LajiForm {..._form}
