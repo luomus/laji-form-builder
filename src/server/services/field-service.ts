@@ -9,7 +9,7 @@ import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, i
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import * as rjsf from "@rjsf/core";
-import { formFetch } from "../server";
+import { formFetch } from "./main-service";
 
 interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean

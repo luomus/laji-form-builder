@@ -1,6 +1,7 @@
 import request from "supertest";
-import app, { formFetch, exposedProps } from "../../src/server/server";
+import app from "../../src/server/server";
 import { Master } from "../../src/model";
+import { exposedProps, formFetch } from "../../src/server/services/main-service";
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
