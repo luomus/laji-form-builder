@@ -1,5 +1,5 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import ApiClientImplementation from "../../src/server/app/ApiClientImplementation";
+import ApiClientImplementation from "../../src/server/view/ApiClientImplementation";
 import config from "../../config.json";
 import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
