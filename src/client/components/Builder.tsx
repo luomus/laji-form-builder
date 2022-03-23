@@ -1,5 +1,5 @@
 import * as React from "react";
-import ApiClient from "laji-form/lib/ApiClient";
+import ApiClient, {ApiClientImplementation} from "laji-form/lib/ApiClient";
 import lajiFormTranslations from "laji-form/lib/translations.json";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
@@ -14,7 +14,6 @@ import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import ApiClientImplementation from "../../server/view/ApiClientImplementation";
 
 export interface BuilderProps {
 	lang: Lang;
