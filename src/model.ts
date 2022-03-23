@@ -49,12 +49,12 @@ export interface FormListing {
 	supportedLanguage?: Lang[];
 	category?: string;
 	collectionID?: string;
+	name?: string;
 }
 
 export interface Master extends Omit<FormListing, "id"> {
 	id?: string;
 	language?: Lang;
-	name?: string;
 	translations?: Translations;
 	fields?: (Field | FormExtensionField)[];
 	baseFormID?: string;
@@ -141,4 +141,8 @@ export interface Class {
 	class: string;
 	label: Partial<Record<Lang, string>>;
 	shortName: string
+}
+
+export interface FormDeleteResult {
+	affected: number;
 }

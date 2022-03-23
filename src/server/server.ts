@@ -63,7 +63,7 @@ api.post("/transform", langCheckMiddleWare, async (req, res) => {
 const view: RequestHandler = async (req, res, next) => {
 	// '/static' and webpack must be manually ignored here because it can't be routed before
 	// this route, since dev/prod setups need to handle the routes after the main server.ts
-	if (req.url.startsWith("/static/") || req.url.startsWith("/__webpack")) {
+	if (req.url.match("/static") || req.url.startsWith("/__webpack")) {
 		return next();
 	}
 	res.sendFile(path.join(__dirname, "view", "index.html"));

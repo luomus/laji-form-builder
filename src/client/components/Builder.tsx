@@ -1,5 +1,5 @@
 import * as React from "react";
-import ApiClient, { ApiClientImplementation } from "laji-form/lib/ApiClient";
+import ApiClient from "laji-form/lib/ApiClient";
 import lajiFormTranslations from "laji-form/lib/translations.json";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
@@ -14,6 +14,7 @@ import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
+import ApiClientImplementation from "../../server/view/ApiClientImplementation";
 
 export interface BuilderProps {
 	lang: Lang;
@@ -27,6 +28,8 @@ export interface BuilderProps {
 	notifier?: Notifier;
 	documentFormVisible?: boolean;
 	formApiClient?: ApiClientImplementation;
+	allowList?: boolean;
+	onSelected?: (id: string) => void;
 }
 export interface BuilderState {
 	id?: string;
@@ -82,6 +85,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					console.log(`Builder notification ${method}: ${msg}`); // eslint-disable-line no-console
 				return notifier;
 			}, {} as Notifier);
+
+		this.onSelected = this.onSelected.bind(this);
 	}
 
 	componentDidMount() {
@@ -115,6 +120,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				.then((master) => this.setState({master})));
 			this.updateSchemaFormat();
 		});
+	}
+
+	onSelected(id: string) {
+		this.updateFromId(id);
+		this.props.onSelected?.(id);
 	}
 
 	updateSchemaFormat(): Promise<SchemaFormat | undefined> {
@@ -157,7 +167,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		translations: this.appTranslations[lang],
 		metadataService: this.metadataService,
 		formService: this.formService,
-		theme: this.props.theme
+		theme: this.props.theme,
+		notifier: this.notifier
 	}))
 
 	render() {
@@ -165,15 +176,17 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		return (
 			<Context.Provider value={context}>
 				{
-					this.props.id || this.state.tmp ? (
+					this.props.id || this.state.master ? (
 						<React.Fragment>
 							{this.renderEditor()}
 							<div style={{height: this.state.editorHeight}} />
 						</React.Fragment>
 					) : (
 						<FormCreatorWizard onCreate={this.onCreate}
+						                   onChoose={this.onSelected}
 						                   primaryDataBankFormID={this.props.primaryDataBankFormID}
-						                   secondaryDataBankFormID={this.props.secondaryDataBankFormID} />
+						                   secondaryDataBankFormID={this.props.secondaryDataBankFormID}
+						                   allowList={this.props.allowList} />
 					)
 				}
 			</Context.Provider>

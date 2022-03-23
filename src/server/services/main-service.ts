@@ -32,7 +32,8 @@ const dictionarify = (arr: string[]): Record<string, true> => arr.reduce((dict, 
 
 export const exposedProps: Record<keyof FormListing, true> = dictionarify([
 	"id", "logo", "title", "description", "shortDescription",
-	"supportedLanguage", "category", "collectionID", "options"
+	"supportedLanguage", "category", "collectionID", "options",
+	"name"
 ]);
 
 export default class MainService {
@@ -50,6 +51,11 @@ export default class MainService {
 		this.exposeFormListing = this.exposeFormListing.bind(this);
 	}
 
+	setLang(lang: Lang) {
+		this.metadataService.setLang(lang);
+		this.fieldService.setLang(lang);
+	}
+
 	isExposableFormListingProperty(key: string): key is (keyof FormListing) {
 		return !!(exposedProps as any)[key];
 	}
@@ -65,6 +71,7 @@ export default class MainService {
 
 	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
 		const remoteForms: Master[] = (await formFetch("/", {page_size: 10000})).member;
+		lang && this.setLang(lang);
 		return Promise.all(remoteForms.map(form => {
 			const {translations} = form;
 			return applyTransformations<Master, undefined, FormListing>(form, undefined, [
@@ -80,6 +87,7 @@ export default class MainService {
 
 	getForm = this.cache(async (id: string, lang?: Lang, format: "json" | "schema" = "json") => {
 		const form = await this.getRemoteForm(id);
+		lang && this.setLang(lang);
 		return applyTransformations(form, lang, [
 			format === "schema" && this.fieldService.masterToSchemaFormat,
 			(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
@@ -119,10 +127,11 @@ export default class MainService {
 	}
 
 	transform(form: Master, lang?: Lang) {
-		 return applyTransformations(form, lang, [
+		lang && this.setLang(lang);
+		return applyTransformations(form, lang, [
 			this.fieldService.masterToSchemaFormat,
 			isLang(lang) && removeTranslations(lang)
-		 ]);
+		]);
 	}
 
 	flush() {

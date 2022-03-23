@@ -1,4 +1,9 @@
-import { Theme as LajiFormTheme, ButtonGroupProps } from "laji-form/lib/themes/theme";
+import {
+	Theme as LajiFormTheme,
+	ButtonGroupProps as LajiFormButtonGroupProps,
+	ListGroupProps as LajiFormListGroupProps
+} from "laji-form/lib/themes/theme";
+export * from "laji-form/lib/themes/theme";
 
 interface HasMaybeClassName {
 	className?: string;
@@ -8,11 +13,15 @@ interface HasMaybeStyle {
 	style?: React.CSSProperties;
 }
 
-interface BuilderButtonGroupProps extends ButtonGroupProps, HasMaybeClassName, HasMaybeStyle {
+export interface ButtonGroupProps extends LajiFormButtonGroupProps, HasMaybeClassName, HasMaybeStyle {
 	small?: true;
 	vertical?: true;
+	block?: true;
 }
 
+export type ListGroupProps = LajiFormListGroupProps & HasMaybeClassName;
+
 export interface Theme extends LajiFormTheme {
-	ButtonGroup: React.ComponentType<BuilderButtonGroupProps>;
+	ButtonGroup: React.ComponentType<ButtonGroupProps>;
+	ListGroup: React.ComponentType<ListGroupProps>
 }

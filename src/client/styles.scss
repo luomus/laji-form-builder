@@ -234,4 +234,49 @@ $bRadius: 2px;
 		background: $accent;
 		opacity: 0.3;
 	}
+
+	&-creator-wizard-create-create {
+			margin-bottom: $padding;
+	}
+
+	&-form-select {
+		&-input {
+			position: relative;
+			.glyphicon {
+				position: absolute;
+				right: 10px;
+				top: 10px;
+			}
+		}
+
+		&-list {
+			max-height: 50vh;
+			overflow: auto;
+
+			&-item {
+				&-delete {
+					color: $danger;
+					float: right;
+					padding: 5px 10px;
+					margin: -5px;
+					border-radius: 15px;
+
+					&:before {
+						content: "✖";
+					}
+
+					&:hover {
+						color: $danger-7;
+						background: $danger-1;
+					}
+				}
+
+				#{$root}-spinner-container {
+					float: right;
+					left: initial;
+					top: 10px;
+				}
+			}
+		}
+	}
 }

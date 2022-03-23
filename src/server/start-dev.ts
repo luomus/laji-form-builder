@@ -22,9 +22,11 @@ const config = {
 const compiler = webpack(config);
 
 server.use(require("webpack-dev-middleware")(compiler, {
-	 publicPath: "/static"
+	publicPath: "/static"
 }));
-server.use(require("webpack-hot-middleware")(compiler));
+server.use(require("webpack-hot-middleware")(compiler, {
+	noInfo: true
+}));
 
 const port = process.env.PORT || 8082;
 server.listen(port, () => {

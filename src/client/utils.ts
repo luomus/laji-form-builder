@@ -7,11 +7,12 @@ export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string"
 
 const CSS_NAMESPACE = "ljb";
 
-export const nmspc = (_nmspc?: string) => (s?: any) => s === undefined
-	? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}`
-	: s
-		? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}-${s}`
-		: CSS_NAMESPACE;
+export const nmspc = (_nmspc?: string) => (s?: string) =>
+	s === undefined
+		? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}`
+		: s
+			? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}-${s}`
+			: CSS_NAMESPACE;
 
 export const gnmspc  = nmspc();
 
@@ -304,4 +305,3 @@ export const scrollIntoViewIfNeeded = (
 	container = document.documentElement
 ) =>
 	container.scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
-

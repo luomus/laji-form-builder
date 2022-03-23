@@ -39,6 +39,16 @@
 		"sv": "Inspelningen misslyckades",
 		"en": "Save failed"
 	},
+	"wizard.createOrList": {
+		"fi": "Tee uusi tai valitse",
+		"sv": "gör en ny eller välj",
+		"en": "Create a new form or choose"
+	},
+	"wizard.option.list": {
+		"fi": "Valitse",
+		"sv": "Välj",
+		"en": "List"
+	},
 	"wizard.header": {
 		"fi": "Luo uusi lomake",
 		"sv": "Skapa en ny form",
@@ -88,5 +98,30 @@
 		"fi": "Lomake perii lomakkeen %{baseFormID} ('$.baseFormID'), eli sen muokkaus rajoittuu ko. lomakkeen yliajamiseen",
 		"sv": "Form ärver %{baseFormID}, ('$.baseFormID') redigering är begränsad till att åsidosätta det formuläret",
 		"en": "Form inherits %{baseFormID}, ('$.baseFormID') editing is limited to overriding that form"
+	},
+	"wizard.list.delete.confirm": {
+		"fi": "Haluatko varmasti tuhota lomakkeen \"%{name} (%{id})?\"",
+		"sv": "Är du säker på att du vill ta bort fo \"%{name} (%{id})?\"",
+		"en": "Are you sure you want to delete form \"%{name} (%{id})\"?"
+	},
+	"delete.success": {
+		"fi": "Poisto onnistui",
+		"sv": "Raderingen lyckades",
+		"en": "Deleted successfully"
+	},
+	"delete.error": {
+		"fi": "Poisto epäonnistui",
+		"sv": "Raderingen misslyckades",
+		"en": "Delete failed"
+	},
+	"wizard.list.search.placeholder": {
+		"fi": "Etsi...",
+		"sv": "Sök...",
+		"en": "Search..."
+	},
+	"wizard.list.header": {
+		"fi": "Valitse lomake",
+		"sv": "Välja en form",
+		"en": "Select a form"
 	}
 }

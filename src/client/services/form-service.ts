@@ -1,5 +1,5 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import { FormListing, Lang, Master, SchemaFormat } from "../../model";
+import { FormDeleteResult, FormListing, Lang, Master, SchemaFormat } from "../../model";
 
 export default class FormService {
 	private apiClient: ApiClient;
@@ -39,8 +39,13 @@ export default class FormService {
 		return this.fetch("", undefined, {method: "POST", body: JSON.stringify(form)});
 	}
 
+	delete(id: string): Promise<FormDeleteResult> {
+		return this.fetch(`/${id}`, undefined, {method: "DELETE"});
+	}
+
 	async getForms(): Promise<FormListing[]> {
-		return (await this.fetch("", undefined)).results;
+		const response = (await this.fetch("", undefined));
+		return this.formApiClient ? response.forms : response.results;
 	}
 
 	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {

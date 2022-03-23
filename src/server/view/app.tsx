@@ -5,8 +5,13 @@ import { render } from "react-dom";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "../../client/themes/bs3";
 import ApiClientImplementation from "./ApiClientImplementation";
-
+import lajiFormTranslations from "laji-form/lib/translations.json";
+import FormService from "../../client/services/form-service";
+import { constructTranslations } from "laji-form/lib/utils";
+import ApiClient from "laji-form/lib/ApiClient";
 import "../../client/styles";
+import { Lang, SchemaFormat, Translations } from "../../model";
+import queryString from "querystring";
 
 function getJsonFromUrl() {
 	const type = (value: any | string): any => {
@@ -31,13 +36,13 @@ const {lang = "fi", ..._query} = query;
 
 const id = location.pathname.substr(1);
 
+const _lajiFormTranslations = constructTranslations(lajiFormTranslations) as unknown as Translations;
 const apiClient = new ApiClientImplementation(
 	config.apiBase,
 	config.accessToken,
 	config.userToken,
 	lang
 );
-
 const formApiClient = new ApiClientImplementation(
 	config.formApiBase,
 	config.accessToken,
@@ -45,23 +50,60 @@ const formApiClient = new ApiClientImplementation(
 	lang
 );
 
-(async () => {
-	const form = await formApiClient.fetchJSON(`/${id}`, {lang, format: "schema"});
-	const formData = form?.options?.prepopulatedDocument || {};
+const formService = new FormService(
+	new ApiClient(
+		apiClient,
+		lang,
+		_lajiFormTranslations
+	),
+	lang,
+	new ApiClient(
+		formApiClient,
+		lang,
+		_lajiFormTranslations
+	)
+);
 
+(async () => {
 	const LajiFormApp = () => {
-		const [_form, onChange] = React.useState(form);
-		const [_lang, onLangChange] = React.useState(lang);
-		console.log(id, _form);
+		const [form, onChange] = React.useState<SchemaFormat | undefined>(undefined);
+		const [_lang, setLang] = React.useState(lang);
+		const [formData, setFormData] =React.useState<any>(undefined);
+
+		const onSelected = React.useCallback(async (id: string) => {
+			const queryObject: any = {};
+			if (query.lang) {
+				queryObject.lang = query.lang;
+			}
+			const queryParams = Object.keys(queryObject).length
+				? queryString.stringify(queryObject)
+				: undefined;
+			const uri = id + (queryParams
+				? "?" + queryParams
+				: "");
+			history.pushState(undefined, "", uri);
+			const form = await formService.getSchemaFormat(id);
+			onChange(form);
+			setFormData(form?.options?.prepopulatedDocument || {});
+		}, []);
+
+		const onLangChange = React.useCallback((lang: Lang) => {
+			setLang(lang);
+			formService.setLang(lang);
+		}, []);
+
+		React.useEffect(() => {
+			id && onSelected(id);
+		}, [onSelected]);
+
 		return (
 			<React.Fragment>
-				<LajiForm {..._form}
+				<LajiForm {...form}
 					        lang={_lang}
 					        formData={formData}
 					        apiClient={apiClient}
 					        theme={lajiFormBs3}
 					        uiSchemaContext={{}}
-					        className={_lang}
 				/>
 				<LajiFormBuilder id={id}
 					               lang={lang}
@@ -72,6 +114,8 @@ const formApiClient = new ApiClientImplementation(
 					               apiClient={apiClient}
 					               formApiClient={formApiClient}
 					               theme={lajiFormBs3}
+												 allowList={true}
+				                 onSelected={onSelected}
 				/>
 			</React.Fragment>
 		);
