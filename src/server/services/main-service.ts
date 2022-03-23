@@ -108,6 +108,9 @@ export default class MainService {
 			const {translations} = form;
 			return applyTransformations<Master, undefined, FormListing>(form, undefined, [
 				this.exposeFormListing,
+				f => f.supportedLanguage
+					? f
+					: {...f, supportedLanguage: ["en", "fi", "sv"]},
 				f => (isLang(lang) && translations && lang in translations)
 					? translate(f, translations[lang])
 					: f

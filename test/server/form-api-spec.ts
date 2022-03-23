@@ -143,6 +143,12 @@ describe("/api", () => {
 				})
 				.end(finish(done));
 		});
+
+		it("returns supportedLanguage all if none specified", async (done) => {
+			const testForm = forms.find(f => f.id === TEST_FORM_ID);
+			expect(testForm.supportedLanguage).toEqual(["en", "fi", "sv"]);
+			done();
+		});
 	});
 
 	describe("/:id (get form)", () => {
