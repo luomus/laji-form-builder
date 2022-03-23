@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../src/server/server";
 import { Master } from "../../src/model";
-import { exposedProps, formFetch } from "../../src/server/services/main-service";
+import { exposedProps, exposedOptions, formFetch } from "../../src/server/services/main-service";
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
@@ -86,17 +86,13 @@ describe("/api", () => {
 			if (!forms) {
 				return;
 			}
-
 			const gatheredProperties: Record<string, boolean> = {};
-
 			forms.forEach(f => {
 				Object.keys(f).forEach(key => {
 					gatheredProperties[key] = true;
 				});
 			});
-
 			expect(gatheredProperties).toEqual(exposedProps);
-
 			done();
 		});
 
@@ -104,13 +100,34 @@ describe("/api", () => {
 			if (!forms) {
 				return;
 			}
-
 			forms.forEach(f => {
 				Object.keys(f).forEach(key => {
 					expect((exposedProps as any)[key]).toBe(true);
 				});
 			});
+			done();
+		});
 
+		it("returns only certain options", async (done) => {
+			const gatheredOptions: Record<string, boolean> = {};
+			forms.forEach(f => {
+				f.options && Object.keys(f.options).forEach(key => {
+					gatheredOptions[key] = true;
+				});
+			});
+			expect(gatheredOptions).toEqual(exposedOptions);
+			done();
+		});
+
+		it("doesn't return any other options", async (done) => {
+			if (!forms) {
+				return;
+			}
+			forms.forEach(f => {
+				f.options && Object.keys(f.options).forEach(key => {
+					expect((exposedOptions as any)[key]).toBe(true);
+				});
+			});
 			done();
 		});
 

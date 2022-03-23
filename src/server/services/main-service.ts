@@ -36,6 +36,36 @@ export const exposedProps: Record<keyof FormListing, true> = dictionarify([
 	"name"
 ]);
 
+export const exposedOptions: Record<keyof FormListing["options"], true> = dictionarify([
+	"allowExcel",
+	"allowTemplate",
+	"dataset",
+	"emptyOnNoCount",
+	"forms",
+	"excludeFromGlobalExcel",
+	"hasAdmins",
+	"prepopulateWithInformalTaxonGroups",
+	"restrictAccess",
+	"secondaryCopy",
+	"sidebarFormLabel",
+	"useNamedPlaces",
+	"viewerType",
+	"disabled",
+	"shortTitleFromCollectionName"
+]);
+
+const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
+	const isExposableProperty = (key: string | number | symbol): key is (keyof T) => {
+		return !!(whitelistDict as any)[key];
+	};
+	return Object.keys(obj).reduce<T>((copy: T, key) => {
+		if (isExposableProperty(key)) {
+			copy[key] = obj[key];
+		}
+		return copy;
+	}, {} as T);
+};
+
 export default class MainService {
 	cacheStore: (Memoized<any>)[] = [];
 	// eslint-disable-next-line @typescript-eslint/ban-types
@@ -61,12 +91,14 @@ export default class MainService {
 	}
 
 	private exposeFormListing(form: Master) {
-		return Object.keys(form).reduce<FormListing>((copy: FormListing, key) => {
-			if (this.isExposableFormListingProperty(key)) {
-				copy[key] = form[key];
+		const exposed = copyWithWhitelist(form as FormListing, exposedProps);
+		if (exposed.options) {
+			exposed.options = copyWithWhitelist(exposed.options, exposedOptions);
+			if (!Object.keys(exposed.options).length) {
+				delete exposed.options;
 			}
-			return copy;
-		}, {} as FormListing);
+		}
+		return  exposed;
 	}
 
 	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
