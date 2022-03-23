@@ -3,6 +3,6 @@ playground
 forms
 webpack*
 .*
-properties*
+config.json*
 tsconfig*
 *.log
