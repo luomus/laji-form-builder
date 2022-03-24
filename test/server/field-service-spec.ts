@@ -64,8 +64,10 @@ describe("prepopulatedDocument population", () => {
 	});
 
 	it("populates with defaults", async () => {
-		expect(jsonFormat.options.prepopulatedDocument.gatherings[0].units[0].recordBasis)
-			.toBe("MY.recordBasisHumanObservation");
+		jsonFormat.options.prepopulatedDocument.gatherings[0].units.forEach((unit: any,idx: number) => {
+			console.log(unit.recordBasis, idx);
+			expect(unit.recordBasis).toBe("MY.recordBasisHumanObservation");
+		});
 	});
 
 
