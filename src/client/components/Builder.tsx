@@ -106,6 +106,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.updateFromId(this.state.id);
 	}
 
+	componentWillReceiveProps(props: BuilderProps) {
+		if (props.id !== this.state.id) {
+			this.updateFromId(props.id);
+		}
+	}
+
 	updateFromId(id?: string) {
 		if (id === this.state.id) {
 			return;

@@ -10,107 +10,140 @@ import FormService from "../../client/services/form-service";
 import { constructTranslations } from "laji-form/lib/utils";
 import ApiClient from "laji-form/lib/ApiClient";
 import "../../client/styles";
-import { Lang, SchemaFormat, Translations } from "../../model";
-import queryString from "querystring";
+import { isLang, Lang, SchemaFormat, Translations } from "../../model";
 
-function getJsonFromUrl() {
-	const type = (value: any | string): any => {
-		try {
-			return JSON.parse(value);
-		} catch (e) {
-			return value;
-		}
-	};
+const DEFAULT_LANG = "fi";
 
-	const query = location.search.substr(1);
-	const result = {} as any;
-	query.split("&").forEach(function(part) {
-		const item = part.split("=");
-		result[item[0]] = type(decodeURIComponent(item[1]));
-	});
-	return result;
+interface RouteState {
+	id?: string;
+	lang?: Lang;
 }
 
-const query = getJsonFromUrl();
-const {lang = "fi", ..._query} = query;
+const uriToState = (uri: string) => {
+	const uriObj = new URL(uri);
+	const idMatch = uriObj.pathname.match(/\/(.+)/);
+	const id = idMatch?.[1];
+	const langMatch = uriObj.searchParams.get("lang");
+	const lang = typeof langMatch !== "string"
+		? undefined
+		: isLang(langMatch)
+			? langMatch
+			: DEFAULT_LANG;
+	const route: RouteState = {id};
+	if (lang) route.lang = lang;
+	return route;
+};
 
-const id = location.pathname.substr(1);
+const initialUri = window.location.href;
+const initialRoute = uriToState(initialUri);
 
-const _lajiFormTranslations = constructTranslations(lajiFormTranslations) as unknown as Translations;
 const apiClient = new ApiClientImplementation(
 	config.apiBase,
 	config.accessToken,
 	config.userToken,
-	lang
+	initialRoute.lang
 );
 const formApiClient = new ApiClientImplementation(
 	config.formApiBase,
 	config.accessToken,
 	config.userToken,
-	lang
+	initialRoute.lang
 );
 
+const _lajiFormTranslations = constructTranslations(lajiFormTranslations) as unknown as Translations;
+const initialLang = initialRoute.lang || DEFAULT_LANG;
 const formService = new FormService(
 	new ApiClient(
 		apiClient,
-		lang,
+		initialLang,
 		_lajiFormTranslations
 	),
-	lang,
+	initialLang,
 	new ApiClient(
 		formApiClient,
-		lang,
+		initialLang,
 		_lajiFormTranslations
 	)
 );
 
 (async () => {
+	// State is stored in "route" object, which is purely reduces from the browser URI.
 	const LajiFormApp = () => {
+		const [uri, setUri] = React.useState<string>(initialUri);
+		const [route, setRoute] = React.useState<RouteState>(initialRoute);
 		const [form, onChange] = React.useState<SchemaFormat | undefined>(undefined);
-		const [_lang, setLang] = React.useState(lang);
-		const [formData, setFormData] =React.useState<any>(undefined);
+		const [formData, setFormData] = React.useState<any>(undefined);
+		const [lang, setLang] = React.useState<Lang>(initialLang);
+
+		const {id} = route;
+
+		// Reflect given route to URI.
+		const updateRoute = React.useCallback((route: RouteState) => {
+			let uri = "";
+			if (route.id) {
+				uri = route.id;
+			}
+			if (route.lang) {
+				uri += `?lang=${route.lang}`;
+			}
+			history.pushState(undefined, "", uri);
+			setUri(`${window.location.host}/${uri}`);
+		}, [setUri]);
+
+		// Update our state uri when user navigates in browser uri history.
+		React.useEffect(() => {
+			const listener = () => {
+				setUri(window.location.href);
+			};
+			window.addEventListener("popstate", listener);
+			return () => window.removeEventListener("popstate", listener);
+		}, []);
+
+		// When our state uri changes, update our route state.
+		React.useEffect(() => {
+			setRoute(uriToState(uri));
+		}, [uri, setRoute]);
+
+		// Update form & formData on id change.
+		React.useEffect(() => {
+			const updateForm = async (id: string) => {
+				const form = await formService.getSchemaFormat(id);
+				onChange(form);
+				setFormData(form?.options?.prepopulatedDocument || {});
+			};
+			if (id) {
+				updateForm(id);
+			} else {
+				onChange({} as any);
+				setFormData({});
+			}
+		}, [id, onChange, setFormData]);
+
+		// Update lang for instances out of React scope.
+		React.useEffect(() => {
+			apiClient.setLang(lang);
+			formApiClient.setLang(lang);
+			formService.setLang(lang);
+		}, [lang]);
 
 		const onSelected = React.useCallback(async (id: string) => {
-			const queryObject: any = {};
-			if (query.lang) {
-				queryObject.lang = query.lang;
-			}
-			const queryParams = Object.keys(queryObject).length
-				? queryString.stringify(queryObject)
-				: undefined;
-			const uri = id + (queryParams
-				? "?" + queryParams
-				: "");
-			history.pushState(undefined, "", uri);
-			const form = await formService.getSchemaFormat(id);
-			onChange(form);
-			setFormData(form?.options?.prepopulatedDocument || {});
-		}, []);
-
-		const onLangChange = React.useCallback((lang: Lang) => {
-			setLang(lang);
-			formService.setLang(lang);
-		}, []);
-
-		React.useEffect(() => {
-			id && onSelected(id);
-		}, [onSelected]);
+			updateRoute({...route, id});
+		}, [route, updateRoute]);
 
 		return (
 			<React.Fragment>
 				<LajiForm {...form}
-					        lang={_lang}
+					        lang={lang}
 					        formData={formData}
 					        apiClient={apiClient}
 					        theme={lajiFormBs3}
 					        uiSchemaContext={{}}
 				/>
 				<LajiFormBuilder id={id}
-					               lang={lang}
-					               {..._query}
+					               lang={route.lang}
 					               {...config}
 					               onChange={onChange}
-					               onLangChange={onLangChange}
+					               onLangChange={setLang}
 					               apiClient={apiClient}
 					               formApiClient={formApiClient}
 					               theme={lajiFormBs3}
