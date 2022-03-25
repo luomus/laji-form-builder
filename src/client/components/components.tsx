@@ -2,6 +2,7 @@ import * as React from "react";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
 import { classNames, nmspc, gnmspc } from "../utils";
+import { ButtonProps } from "../themes/theme";
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -329,3 +330,37 @@ export const JSONEditor = React.forwardRef((
 		/>
 	);
 });
+
+export const SubmitButton = (props: ButtonProps) => {
+	const {theme} = React.useContext(Context);
+	const {Button} = theme;
+	return <Button variant={"success"} {...props}>{props.children}</Button>;
+};
+
+interface FormJSONEditorProps<T> extends Classable {
+	onSubmit: (value: T) => void;
+	value?: T;
+	submitLabel?: string;
+}
+
+export function FormJSONEditor<T>({value, onSubmit, submitLabel, className}: FormJSONEditorProps<T>) {
+	const {translations} = React.useContext(Context);
+	const [json, setJSON] = React.useState(value);
+	const [valid, setValid] = React.useState(false);
+	const onClick = React.useCallback(() => onSubmit(json as unknown as T), [json, onSubmit]);
+
+	// Focus on mount.
+	const ref = React.useRef<HTMLTextAreaElement>(null);
+	React.useEffect(() => ref.current?.focus(), []);
+
+	return (
+		<div className={className}>
+			<JSONEditor value={json} onChange={setJSON} rows={20} onValidChange={setValid} live={true} ref={ref} />
+			<SubmitButton onClick={onClick}
+			              disabled={!json || !valid}
+			>{submitLabel || translations["Wizard.option.json.import"]}
+			</SubmitButton>
+		</div>
+	);
+}
+

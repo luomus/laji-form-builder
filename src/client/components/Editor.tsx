@@ -1,7 +1,9 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
 import memoize from "memoizee";
-import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner } from "./components";
+import { 
+	DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, FormJSONEditor
+} from "./components";
 import {
 	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
 } from "../utils";
@@ -43,6 +45,7 @@ export interface EditorState {
 	selected?: string;
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
+	jsonEditorOpen?: boolean;
 }
 
 const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
@@ -75,9 +78,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		return (
 			<DraggableHeight style={containerStyle}
 			                 fixed="bottom"
-				             height={this.props.height}
-				             className={gnmspc("editor")}
-							 containerClassName={gnmspc("")}
+				               height={this.props.height}
+				               className={gnmspc("editor")}
+			                 containerClassName={gnmspc("")}
 			                 onChange={this.onHeightChange}>
 				{this.renderEditor()}
 			</DraggableHeight>
@@ -102,13 +105,14 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				)}
 				{master.patch && <div className={gnmspc("warning")}>{translations["Editor.warning.patch"]}</div>}
 				<EditorToolbar active={this.state.activeEditorMode}
-							   onEditorChange={this.onActiveEditorChange}
-							   onLangChange={this.props.onLangChange}
-							   onSave={this.onSave} 
-							   onSelectedField={this.onPickerSelectedField}
+				               onEditorChange={this.onActiveEditorChange}
+				               onLangChange={this.props.onLangChange}
+				               onSave={this.onSave} 
+				               onSelectedField={this.onPickerSelectedField}
 				               onSelectedOptions={this.onPickerSelectedOptions}
-							   containerRef={this.containerRef}
-							   saving={this.props.saving}
+				               containerRef={this.containerRef}
+				               saving={this.props.saving}
+											 openJSONEditor={this.openJSONEditor}
 				               documentFormVisible={this.props.documentFormVisible} />
 				{this.renderActiveEditor()}
 			</div>
@@ -156,10 +160,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					</DraggableWidth>
 					{this.state.selected && 
 						<ActiveEditor key={this.state.selected}
-						        active={this.state.activeEditorMode}
-						        {...this.getFieldEditorProps(master, schemaFormat)}
-						        className={gnmspc("field-editor")}
-						        style={fieldEditorContentStyle}
+						              active={this.state.activeEditorMode}
+						              {...this.getFieldEditorProps(master, schemaFormat)}
+						              className={gnmspc("field-editor")}
+						              style={fieldEditorContentStyle}
 						/>
 					}
 				</React.Fragment>
@@ -174,13 +178,16 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			                         ref={this.optionsEditorRef}
 			                         onLoaded={this.state.optionsEditorLoadedCallback}
 			                         filter={this.state.optionsEditorFilter}
-									 clearFilters={this.clearOptionsEditorFilters}
+								               clearFilters={this.clearOptionsEditorFilters}
 			/>;
 		}
 		return content
 			? (
 				<div style={containerStyle} ref={this.containerRef}>
 					{content}
+					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
+					                                                   onHide={this.hideJSONEditor}
+					                                                   onChange={this.props.onChange} />}
 				</div>
 			) : null;
 	}
@@ -273,6 +280,14 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	}
 
 	clearOptionsEditorFilters = () => this.setState({optionsEditorFilter: undefined});
+
+	openJSONEditor = () => {
+		this.setState({jsonEditorOpen: true});
+	}
+
+	hideJSONEditor = () => {
+		this.setState({jsonEditorOpen: false});
+	}
 }
 
 export interface FieldEditorProps extends Classable {
@@ -477,7 +492,8 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
 	saving?: boolean;
-	containerRef: React.RefObject<HTMLDivElement>
+	containerRef: React.RefObject<HTMLDivElement>;
+	openJSONEditor: () => void;
 }
 
 const toolbarNmspc = nmspc("editor-toolbar");
@@ -495,7 +511,8 @@ const EditorToolbar = ({
 	onSelectedOptions,
 	saving,
 	containerRef,
-	documentFormVisible
+	documentFormVisible,
+	openJSONEditor
 }: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
 	return (
@@ -505,6 +522,7 @@ const EditorToolbar = ({
 			            onSelectedField={onSelectedField}
 			            onSelectedOptions={onSelectedOptions}
 			            containerRef={containerRef} />
+			<Button onClick={openJSONEditor} small>JSON</Button>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} documentFormVisible={documentFormVisible} />
 			<div style={{marginLeft: "auto"}}>
@@ -737,3 +755,31 @@ const ActiveEditor = React.memo(function ActiveEditor(
 	);
 });
 
+interface FormJSONEditorProps {
+	master: Master;
+	onHide: () => void;
+	onChange: EditorProps["onChange"];
+}
+
+const FormJSONEditorModal = React.memo(function FormJSONEditorModal ({master, onHide, onChange}: FormJSONEditorProps) {
+	const {theme} = React.useContext(Context);
+	const {Modal} = theme;
+
+	// Focus on mount.
+	const ref = React.useRef<HTMLTextAreaElement>(null);
+	React.useEffect(() => ref.current?.focus(), []);
+
+	const onSubmit = React.useCallback((value: Master) => {
+		onChange({type: "master", value});
+	}, [onChange]);
+
+	return (
+		<Modal show={true} onHide={onHide}>
+			<Modal.Header closeButton={true}>
+			</Modal.Header>
+			<Modal.Body>
+				<FormJSONEditor value={master} onSubmit={onSubmit} submitLabel={"OK"} />
+			</Modal.Body>
+		</Modal>
+	);
+});

@@ -220,7 +220,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.setState({editorHeight});
 	}
 
-	onEditorChange = (events: ChangeEvent | ChangeEvent[]) => {
+	onEditorChange = async (events: ChangeEvent | ChangeEvent[]) => {
 		const {master, schemaFormat} = this.state;
 		if (!master || !schemaFormat) {
 			return;
@@ -228,8 +228,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 		const {translations = {fi: {}, sv: {}, en: {}}} = master;
 		const changed: any = {master, schemaFormat};
-		(events instanceof Array ? events : [events]).forEach(event => {
-			if (isUiSchemaChangeEvent(event)) {
+		for (const event of (events instanceof Array ? events : [events])) {
+			if (isMasterChangeEvent(event)) {
+				changed.master = event.value;
+				changed.schemaFormat = await this.formService.masterToSchemaFormat(changed.master);
+			} else if (isUiSchemaChangeEvent(event)) {
 				changed.master = {
 					...(changed.master || {}),
 					uiSchema: updateSafelyWithJSONPointer(
@@ -462,7 +465,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					path
 				);
 			}
-		});
+		}
 		this.setState(changed, () => {
 			if (!this.state.master) {
 				return;
@@ -581,6 +584,14 @@ function isOptionChangeEvent(event: ChangeEvent): event is OptionChangeEvent {
 	return event.type === "options";
 }
 
+export interface MasterChangeEvent {
+	type: "master";
+	value: Master;
+}
+function isMasterChangeEvent(event: ChangeEvent): event is MasterChangeEvent {
+	return event.type === "master";
+}
+
 export type ChangeEvent = UiSchemaChangeEvent
 	| TranslationsAddEvent
 	| TranslationsChangeEvent
@@ -588,4 +599,5 @@ export type ChangeEvent = UiSchemaChangeEvent
 	| FieldDeleteEvent
 	| FieldAddEvent
 	| FieldUpdateEvent
-	| OptionChangeEvent;
+	| OptionChangeEvent
+	| MasterChangeEvent;

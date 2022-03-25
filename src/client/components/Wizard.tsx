@@ -1,7 +1,7 @@
 import React from "react";
 import LajiForm from "./LajiForm";
 import _LajiForm from "laji-form/lib/components/LajiForm";
-import { HasChildren, JSONEditor, Spinner, Stylable } from "./components";
+import { FormJSONEditor, HasChildren, Spinner, Stylable, SubmitButton } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult } from "../../model";
 import { JSONSchema } from "../../utils";
@@ -163,27 +163,9 @@ const prepareImportedJSON = (json: any) => {
 	return _json;
 };
 
-const SubmitButton = (props: ButtonProps) => {
-	const {theme, translations} = React.useContext(Context);
-	const {Button} = theme;
-	return <Button variant={"success"} {...props}>{translations["Wizard.option.json.import"]}</Button>;
-};
-
 function FormCreatorJSON({onCreate}: WizardStepProps) {
-	const [json, setJSON] = React.useState();
-	const [valid, setValid] = React.useState(false);
-	const onClick = React.useCallback(() => onCreate(prepareImportedJSON(json) as unknown as Master), [json, onCreate]);
-
-	// Focus on mount.
-	const ref = React.useRef<HTMLTextAreaElement>(null);
-	React.useEffect(() => ref.current?.focus(), []);
-
-	return (
-		<div className={wizardNmspc("json")}>
-			<JSONEditor value={json} onChange={setJSON} rows={20} onValidChange={setValid} live={true} ref={ref} />
-			<SubmitButton onClick={onClick} disabled={!json || !valid} />
-		</div>
-	);
+	const onSubmit = React.useCallback((json: Master) => onCreate(prepareImportedJSON(json)), [onCreate]);
+	return <FormJSONEditor onSubmit={onSubmit} className={wizardNmspc("json")} />;
 }
 
 interface FormCreatorDatabankProps extends WizardStepProps {
