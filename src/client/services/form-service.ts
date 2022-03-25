@@ -32,11 +32,15 @@ export default class FormService {
 	}
 
 	update(form: any): Promise<void> {
-		return this.fetch(`/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form)});
+		return this.fetch(`/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form), headers: {
+			"Content-Type": "application/json"
+		}});
 	}
 
 	create(form: any): Promise<Master> {
-		return this.fetch("", undefined, {method: "POST", body: JSON.stringify(form)});
+		return this.fetch("", undefined, {method: "POST", body: JSON.stringify(form), headers: {
+			"Content-Type": "application/json"
+		}});
 	}
 
 	delete(id: string): Promise<FormDeleteResult> {
