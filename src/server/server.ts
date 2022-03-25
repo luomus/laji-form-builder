@@ -75,7 +75,14 @@ const server = express();
 server.get("/lajiform/admin/demo", (req, res) => {
 	res.redirect("/");
 });
-server.use("/lajiform", api);
+server.use("/lajiform/admin/flush", (req, res) => {
+	res.redirect("/api/flush");
+});
+server.use("/lajiform/*", (req, res) => {
+	const redirectPath = "/api" + req.originalUrl.split("lajiform")[1]
+	console.log(redirectPath);
+	res.redirect(redirectPath);
+});
 
 server.use("/api", api);
 server.get("/*", view);
