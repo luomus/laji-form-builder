@@ -65,6 +65,7 @@
     "ignore-loader": "^0.1.2",
     "node-sass": "^6.0.1",
     "nodemon": "^2.0.15",
+    "notus": "^0.3.2",
     "protractor": "^7.0.0",
     "protractor-console-plugin": "^0.1.1",
     "sass-loader": "^12.6.0",

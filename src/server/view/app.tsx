@@ -2,7 +2,7 @@ import LajiFormBuilder from "../../client/components/Builder";
 import * as config from "../../../config.json";
 import * as React from "react";
 import { render } from "react-dom";
-import LajiForm from "laji-form/lib/components/LajiForm";
+import LajiForm, { Notifier } from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "../../client/themes/bs3";
 import ApiClientImplementation from "./ApiClientImplementation";
 import lajiFormTranslations from "laji-form/lib/translations.json";
@@ -10,7 +10,21 @@ import FormService from "../../client/services/form-service";
 import { constructTranslations } from "laji-form/lib/utils";
 import ApiClient from "laji-form/lib/ApiClient";
 import "../../client/styles";
+import "notus/src/notus.css";
+import  _notus from "notus";
 import { isLang, Lang, SchemaFormat, Translations } from "../../model";
+
+const notus = _notus();
+
+const notifier: Notifier = [
+	["warning", "warning"],
+	["success", "success"],
+	["info", undefined],
+	["error", "failure"]
+].reduce((notifier, [method, notusType]: [keyof Notifier, string | undefined]) => {
+	notifier[method] = message => notus.send({message, alertType: notusType, title: ""});
+	return notifier;
+}, {} as Notifier);
 
 const DEFAULT_LANG = "fi";
 
@@ -133,11 +147,12 @@ const formService = new FormService(
 		return (
 			<React.Fragment>
 				<LajiForm {...form}
-					        lang={lang}
-					        formData={formData}
-					        apiClient={apiClient}
-					        theme={lajiFormBs3}
-					        uiSchemaContext={{}}
+				          lang={lang}
+				          formData={formData}
+				          apiClient={apiClient}
+				          theme={lajiFormBs3}
+				          uiSchemaContext={{}}
+				          notifier={notifier}
 				/>
 				<LajiFormBuilder id={id}
 					               lang={route.lang}
@@ -149,6 +164,7 @@ const formService = new FormService(
 					               theme={lajiFormBs3}
 												 allowList={true}
 				                 onSelected={onSelected}
+				                 notifier={notifier}
 				/>
 			</React.Fragment>
 		);
