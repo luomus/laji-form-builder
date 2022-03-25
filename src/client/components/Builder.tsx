@@ -103,21 +103,15 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				this.updateLang();
 			});
 		}
-		this.updateFromId(this.state.id);
-	}
-
-	componentWillReceiveProps(props: BuilderProps) {
-		if (props.id !== this.state.id) {
-			this.updateFromId(props.id);
-		}
+		this.updateFromId(this.props.id);
 	}
 
 	updateFromId(id?: string) {
 		if (id === this.state.id) {
 			return;
 		}
-		this.formPromise?.cancel();
 		this.setState({master: undefined, schemaFormat: undefined, id}, () => {
+			this.formPromise?.cancel();
 			const formPromise = id
 				? this.formService.getMaster(id)
 				: Promise.resolve(undefined);
@@ -128,7 +122,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	onSelected(id: string) {
-		this.updateFromId(id);
+		// this.updateFromId(id);
 		this.props.onSelected?.(id);
 	}
 
