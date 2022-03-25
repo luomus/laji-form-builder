@@ -13,7 +13,7 @@
     "test:server": "ts-node node_modules/.bin/jasmine --conf=jasmine.json \"test/server/*-spec.ts\"",
     "lint": "eslint -c .eslintrc.prod.json src playground",
     "build:client": "rimraf lib && NODE_ENV=production tsc -p tsconfig.client.json",
-    "build:server": "ts-node src/server/start.ts",
+    "build:server": "rimraf build && NODE_ENV=production tsc -p tsconfig.server.json",
     "build:static": "rimraf static && NODE_ENV=production webpack --config webpack.config.static.js",
     "preversion": "npm run lint && npm test",
     "postversion": "npm run build && npm publish && git push"
