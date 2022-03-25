@@ -1,8 +1,9 @@
 src
 playground
-forms
 webpack*
 .*
 config.json*
 tsconfig*
 *.log
+build
+static
