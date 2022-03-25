@@ -153,7 +153,8 @@ const formService = new FormService(
 				          theme={lajiFormBs3}
 				          uiSchemaContext={{}}
 				          notifier={notifier}
-				          renderSubmit={false} />
+				          renderSubmit={false}
+				          showShortcutButton={false} />
 				<LajiFormBuilder id={id}
 					               lang={route.lang}
 					               {...config}
