@@ -1,5 +1,6 @@
 const path = require("path");
 const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
 	mode: "production",
@@ -11,7 +12,11 @@ module.exports = {
 		filename: "main.js"
 	},
 	plugins: [
-		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"production\""})
+		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"production\""}),
+		new HtmlWebpackPlugin({
+			template: path.join(path.resolve(), "src", "server", "view", "index.html"),
+			favicon: path.join(path.resolve(), "src", "server", "view", "favicon.ico")
+		}),
 	],
 	module: {
 		rules: [

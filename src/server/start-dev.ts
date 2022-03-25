@@ -1,6 +1,8 @@
 import server from "./server";
 import webpack from "webpack";
+import path from "path";
 const webpackConfig = require("../../webpack.config.static.js");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const config = {
 	...webpackConfig,
@@ -8,7 +10,11 @@ const config = {
 	devtool: "inline-source-map",
 	plugins: [
 		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"development\""}),
-		new webpack.HotModuleReplacementPlugin(),
+		new HtmlWebpackPlugin({
+			template: path.join(path.resolve(), "src", "server", "view", "index.html"),
+			favicon: path.join(path.resolve(), "src", "server", "view", "favicon.ico")
+		}),
+		new webpack.HotModuleReplacementPlugin()
 	],
 	output: {
 		publicPath: "/static",
