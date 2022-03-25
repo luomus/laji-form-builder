@@ -19,7 +19,7 @@ export default class FormService {
 	}
 
 	getMaster(id: string): Promise<Master> {
-		const query: any = {format: "json"};
+		const query: any = {format: "json", lang: undefined};
 		if (!this.formApiClient) {
 			query.lang = "multi";
 			query.expand = false;
