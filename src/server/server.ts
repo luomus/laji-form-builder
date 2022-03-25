@@ -80,7 +80,6 @@ server.use("/lajiform/admin/flush", (req, res) => {
 });
 server.use("/lajiform/*", (req, res) => {
 	const redirectPath = "/api" + req.originalUrl.split("lajiform")[1]
-	console.log(redirectPath);
 	res.redirect(redirectPath);
 });
 
