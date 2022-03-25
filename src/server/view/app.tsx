@@ -1,5 +1,5 @@
 import LajiFormBuilder from "../../client/components/Builder";
-import config from "../../../config.json";
+import * as config from "../../../config.json";
 import * as React from "react";
 import { render } from "react-dom";
 import LajiForm from "laji-form/lib/components/LajiForm";

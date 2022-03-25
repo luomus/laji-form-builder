@@ -5,7 +5,7 @@ import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translat
 	ExtendedMaster,
 	isFormExtensionField,
 	FormExtensionField} from "../../model";
-import { applyTransformations, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../../utils";
+import { reduceWith, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import * as rjsf from "@rjsf/core";
@@ -46,7 +46,7 @@ export default class FieldService {
 			? await this.masterToJSONSchema(master, rootField)
 			: {};
 		const {fields, "@type": _type, "@context": _context, ..._master} = master;
-		return applyTransformations(
+		return reduceWith(
 			{
 				schema,
 				uiSchema: {},
@@ -139,7 +139,7 @@ export default class FieldService {
 					] as [string, JSONSchemaE];
 				})
 			);
-			return applyTransformations(
+			return reduceWith(
 				mapEmbeddable(
 					field,
 					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
@@ -152,7 +152,7 @@ export default class FieldService {
 				]
 			);
 		} else {
-			return applyTransformations<JSONSchemaE, Field>(
+			return reduceWith<JSONSchemaE, Field>(
 				this.metadataService.getJSONSchemaFromProperty(property),
 				field,
 				[
@@ -195,7 +195,7 @@ export default class FieldService {
 	}
 
 	private parseMaster(master: Master): Promise<ExtendedMaster> {
-		return applyTransformations(master, undefined, [
+		return reduceWith(master, undefined, [
 			this.mapBaseForm,
 			this.mapBaseFormFromFields,
 			addDefaultValidators,

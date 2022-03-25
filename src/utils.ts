@@ -48,19 +48,19 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p?.then;
 }
 
-export function applyTransformations<T, P, R = T>(
-	startValueOrPromise: T | Promise<T>,
-	fnValue: P,
-	fns: (((value: T, fnValue: P) => unknown) | undefined | false)[]
+export function reduceWith<T, P, R = T>(
+	startValue: T | Promise<T>,
+	reduceWith: P,
+	fns: (((value: T, reduceWith: P) => unknown) | undefined | false)[]
 ): Promise<R> {
 	return fns.reduce((promise, fn) => promise.then(
 		value => fn !== false && isPromise<T>(fn)
-			? fn(value as T, fnValue)
+			? fn(value as T, reduceWith)
 			: Promise.resolve(fn
-				? fn(value as T, fnValue)
+				? fn(value as T, reduceWith)
 				: value)
 	)
-	, isPromise(startValueOrPromise) ? startValueOrPromise : Promise.resolve(startValueOrPromise)) as Promise<R>;
+	, isPromise(startValue) ? startValue : Promise.resolve(startValue)) as Promise<R>;
 }
 
 export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>

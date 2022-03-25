@@ -1,7 +1,7 @@
 import ApiClient from "laji-form/lib/ApiClient";
 import ApiClientImplementation from "../view/ApiClientImplementation";
-import config from "../../../config.json";
-import { applyTransformations, fetchJSON, translate } from "../../utils";
+import * as config from "../../../config.json";
+import { reduceWith, fetchJSON, translate } from "../../utils";
 import queryString from "querystring";
 import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
@@ -102,7 +102,7 @@ export default class MainService {
 		lang && this.setLang(lang);
 		return Promise.all(remoteForms.map(form => {
 			const {translations} = form;
-			return applyTransformations<Master, undefined, FormListing>(form, undefined, [
+			return reduceWith<Master, undefined, FormListing>(form, undefined, [
 				this.exposeFormListing,
 				f => f.supportedLanguage
 					? f
@@ -120,7 +120,7 @@ export default class MainService {
 		this.cache(async (lang?: Lang, format: "json" | "schema" = "json") => {
 			const form = await this.getRemoteForm(id);
 			lang && this.setLang(lang);
-			return applyTransformations(form, lang, [
+			return reduceWith(form, lang, [
 				format === "schema" && this.fieldService.masterToSchemaFormat,
 				(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
 					? translate(form, form.translations[lang])
@@ -164,7 +164,7 @@ export default class MainService {
 
 	transform(form: Master, lang?: Lang) {
 		lang && this.setLang(lang);
-		return applyTransformations(form, lang, [
+		return reduceWith(form, lang, [
 			this.fieldService.masterToSchemaFormat,
 			isLang(lang) && removeTranslations(lang)
 		]);

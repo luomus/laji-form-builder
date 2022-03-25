@@ -1,7 +1,7 @@
 import memoize, { Memoized } from "memoizee";
 import ApiClient from "laji-form/lib/ApiClient";
 import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang, Class } from "../model";
-import { applyTransformations, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
+import { reduceWith, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
 
 type PropertyContextDict = Record<string, PropertyContext>;
 
@@ -149,7 +149,7 @@ export default class MetadataService {
 			({...schema, title: multiLang(label, this.lang)});
 
 		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
-			applyTransformations<JSONSchema, PropertyModel>(mapRangeToSchema(property), property, [
+			reduceWith<JSONSchema, PropertyModel>(mapRangeToSchema(property), property, [
 				mapMaxOccurs,
 				mapUniqueItemsForUnboundedAlt,
 				mapLabel
