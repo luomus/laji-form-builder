@@ -81,7 +81,7 @@ const formService = new FormService(
 );
 
 (async () => {
-	// State is stored in "route" object, which is purely reduces from the browser URI.
+	// State is stored in "route" object, which is purely reduced from the browser URI.
 	const LajiFormApp = () => {
 		const [uri, setUri] = React.useState<string>(initialUri);
 		const [route, setRoute] = React.useState<RouteState>(initialRoute);
@@ -101,7 +101,7 @@ const formService = new FormService(
 				uri += `?lang=${route.lang}`;
 			}
 			history.pushState(undefined, "", uri);
-			setUri(`${window.location.host}/${uri}`);
+			setUri(`${window.location.origin}/${uri}`);
 		}, [setUri]);
 
 		// Update our state uri when user navigates in browser uri history.
