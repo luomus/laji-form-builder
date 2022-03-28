@@ -208,7 +208,7 @@ export default class FieldService {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm = await this.mapBaseForm(await formFetch(master.baseFormID));
+		const baseForm = await this.mapBaseForm(await formFetch(`/${master.baseFormID}`));
 		delete (baseForm as any).id;
 		master = {
 			...baseForm,
@@ -233,14 +233,14 @@ export default class FieldService {
 			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
-				await this.parseMaster(await formFetch(formID));
+				await this.parseMaster(await formFetch(`/${formID}`));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
-			if (!fields) {
-				continue;
-			}
 			if (!master.context && context) {
 				master.context = context;
+			}
+			if (!fields) {
+				continue;
 			}
 			master.fields = mergeFields(master.fields, fields);
 		}
