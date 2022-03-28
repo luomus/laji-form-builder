@@ -67,7 +67,7 @@ const view: RequestHandler = async (req, res, next) => {
 		return next();
 	}
 	res.sendFile(path.join(__dirname, "view", "index.html"));
-}
+};
 
 const server = express();
 
@@ -78,8 +78,8 @@ server.get("/lajiform/admin/demo", (req, res) => {
 server.use("/lajiform/admin/flush", (req, res) => {
 	res.redirect("/api/flush");
 });
-server.use("/lajiform/*", (req, res) => {
-	const redirectPath = "/api" + req.originalUrl.split("lajiform")[1]
+server.use("/lajiform", (req, res) => {
+	const redirectPath = "/api" + req.originalUrl.split("lajiform")[1];
 	res.redirect(redirectPath);
 });
 
