@@ -116,21 +116,16 @@ export default class MainService {
 
 	private getRemoteForm = this.cache((id: string) => formFetch(`/${id}`));
 
-	private getFormCache = this.cache((id: string) =>
-		this.cache(async (lang?: Lang, format: "json" | "schema" = "json") => {
-			const form = await this.getRemoteForm(id);
-			lang && this.setLang(lang);
-			return reduceWith(form, lang, [
-				format === "schema" && this.fieldService.masterToSchemaFormat,
-				(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
-					? translate(form, form.translations[lang])
-					: form,
-				format !== "schema" && isLang(lang) && removeTranslations(lang)
-			]);
-		}, {length: 2}), {promise: false});
-
-	getForm(id: string, lang?: Lang, format: "json" | "schema" = "json") {
-		return this.getFormCache(id)(lang, format);
+	async getForm(id: string, lang?: Lang, format: "json" | "schema" = "json") {
+		const form = await this.getRemoteForm(id);
+		lang && this.setLang(lang);
+		return reduceWith(form, lang, [
+			format === "schema" && this.fieldService.masterToSchemaFormat,
+			(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
+				? translate(form, form.translations[lang])
+				: form,
+			format !== "schema" && isLang(lang) && removeTranslations(lang)
+		]);
 	}
 
 	async saveForm(form: Master) {
@@ -149,14 +144,12 @@ export default class MainService {
 			body: JSON.stringify(form),
 			headers: {"Content-Type": "application/json"}
 		});
-		this.getFormCache(id).clear();
 		this.getRemoteForm.delete(id);
 		this.getForms.clear();
 		return remoteForm;
 	}
 
 	async deleteForm(id: string) {
-		this.getFormCache(id).clear();
 		this.getRemoteForm.delete(id);
 		this.getForms.clear();
 		return formFetch(`/${id}`, undefined, {method: "DELETE"});
