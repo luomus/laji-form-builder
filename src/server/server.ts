@@ -29,7 +29,7 @@ api.get("/flush", async (req, res) => {
 
 api.get("/", langCheckMiddleWare, async (req, res) => {
 	const {lang} = req.query;
-	return res.json({forms: await main.getForms(lang as (Lang | undefined))});
+	return res.status(200).json({forms: await main.getForms(lang as (Lang | undefined))});
 });
 
 api.get("/:id", langCheckMiddleWare, async (req, res) => {
@@ -38,26 +38,26 @@ api.get("/:id", langCheckMiddleWare, async (req, res) => {
 	if (format !== "schema" && format !== "json") {
 		return error(res, 422, "Query param format should be one of 'json', 'schema'");
 	}
-	return res.json(await main.getForm(id, lang as (Lang | undefined), format));
+	return res.status(200).json(await main.getForm(id, lang as (Lang | undefined), format));
 });
 
 api.post("/", async (req, res) => {
 	if (req.body.id) {
 		return error(res, 422, "Shouldn't specify id when creating a new form entry");
 	}
-	return res.json(await main.saveForm(req.body));
+	return res.status(200).json(await main.saveForm(req.body));
 });
 
 api.put("/:id", async (req, res) => {
-	res.json(await main.updateForm(req.params.id, req.body));
+	res.status(200).json(await main.updateForm(req.params.id, req.body));
 });
 
 api.delete("/:id", async (req, res) => {
-	return res.json(await main.deleteForm(req.params.id));
+	return res.status(200).json(await main.deleteForm(req.params.id));
 });
 
 api.post("/transform", langCheckMiddleWare, async (req, res) => {
-	return res.json(await main.transform(req.body, req.query.lang as (Lang | undefined)));
+	return res.status(200).json(await main.transform(req.body, req.query.lang as (Lang | undefined)));
 });
 
 const view: RequestHandler = async (req, res, next) => {
@@ -84,6 +84,6 @@ server.use("/lajiform", (req, res) => {
 });
 
 server.use("/api", api);
-server.get("/*", view);
+server.use("/", view);
 
 export default server;

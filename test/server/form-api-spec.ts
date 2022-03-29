@@ -36,7 +36,7 @@ describe("/ (form client)", () => {
 		request(app)
 			.get("/")
 			.expect(200)
-			.expect("Content-Type", "text/html; charset=UTF-8")
+			.expect("Content-Type", "text/html; charset=utf-8")
 			.end(finish(done));
 	});
 });
