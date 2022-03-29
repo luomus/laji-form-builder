@@ -123,5 +123,10 @@
 		"fi": "Valitse lomake",
 		"sv": "Välja en form",
 		"en": "Select a form"
+	},
+	"editor.error.ui": {
+		"fi": "Jotain meni pieleen editorin käyttöliittymän rakennuksessa. JSON muokkauksen pitäisi toimia.",
+		"sv": "Något gick fel när redigeringsgränssnittet byggdes. JSON-redigering bör vara säker att använda.",
+		"en": "Something went wrong when building the editor UI. JSON editing should be safe to use."
 	}
 }

@@ -2,7 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import memoize from "memoizee";
 import { 
-	DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, FormJSONEditor
+	DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, FormJSONEditor, HasChildren
 } from "./components";
 import {
 	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
@@ -49,6 +49,19 @@ export interface EditorState {
 }
 
 const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
+
+class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
+	static contextType = Context;
+	state = {hasError: false}
+	static getDerivedStateFromError() {
+		return {hasError: true};
+	}
+	render() {
+		return this.state.hasError
+			? <div className={gnmspc("warning")}>{this.context.translations["Editor.error.ui"]}</div>
+			: this.props.children;
+	}
+}
 
 export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	static contextType = Context;
@@ -146,7 +159,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		let content;
 		if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
 			content =  (
-				<React.Fragment>
+				<ActiveEditorErrorBoundary>
 					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} ref={this.fieldsRef}>
 						<Fields className={gnmspc("field-chooser")}
 						        fields={this.getFields(master.fields)}
@@ -166,7 +179,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 						              style={fieldEditorContentStyle}
 						/>
 					}
-				</React.Fragment>
+				</ActiveEditorErrorBoundary>
 			);
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={master}
