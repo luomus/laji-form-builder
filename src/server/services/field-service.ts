@@ -195,7 +195,7 @@ export default class FieldService {
 	}
 
 	private parseMaster(master: Master): Promise<ExtendedMaster> {
-		return reduceWith(master, undefined, [
+		return reduceWith(JSON.parse(JSON.stringify(master)), undefined, [
 			this.mapBaseForm,
 			this.mapBaseFormFromFields,
 			addDefaultValidators,
