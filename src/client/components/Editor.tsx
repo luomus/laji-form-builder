@@ -9,7 +9,7 @@ import {
 } from "../utils";
 import { parseJSONPointer } from "../../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
-	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent } from "./Builder";
+	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MaybeError, isValid } from "./Builder";
 import { Context } from "./Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
@@ -29,7 +29,7 @@ export type FieldEditorChangeEvent =
 
 export interface EditorProps extends Stylable, Classable {
 	master?: Master;
-	schemaFormat?: SchemaFormat;
+	schemaFormat?: MaybeError<SchemaFormat>;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
 	onLangChange: (lang: Lang) => void;
 	height?: number;
@@ -171,7 +171,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 						        fieldsContainerElem={this.fieldsRef.current}
 						/>
 					</DraggableWidth>
-					{this.state.selected && 
+					{this.state.selected && isValid(schemaFormat) && 
 						<ActiveEditor key={this.state.selected}
 						              active={this.state.activeEditorMode}
 						              {...this.getFieldEditorProps(master, schemaFormat)}

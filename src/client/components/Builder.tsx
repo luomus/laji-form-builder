@@ -33,11 +33,17 @@ export interface BuilderProps {
 export interface BuilderState {
 	id?: string;
 	master?: Master;
-	schemaFormat?: SchemaFormat;
+	schemaFormat?: MaybeError<SchemaFormat>;
 	lang: Lang;
 	editorHeight?: number;
 	tmp?: boolean;
 	saving?: boolean
+}
+
+export type MaybeError<T> = T | "error";
+
+export function isValid<T>(maybeError: MaybeError<T>): maybeError is T {
+	return maybeError !== "error";
 }
 
 const EDITOR_HEIGHT = 400;
@@ -126,14 +132,17 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.props.onSelected?.(id);
 	}
 
-	updateSchemaFormat(): Promise<SchemaFormat | undefined> {
+	updateSchemaFormat(): Promise<MaybeError<SchemaFormat> | undefined> {
 		this.schemaFormatPromise?.cancel();
 		const {id} = this.state;
 		const schemaFormatPromise = id
 			? this.formService.getSchemaFormat(id)
 			: Promise.resolve(undefined);
-		const promise = new Promise<SchemaFormat | undefined>(resolve => schemaFormatPromise
-			.then((schemaFormat) => this.setState({schemaFormat}, () => resolve(schemaFormat))));
+		const promise = new Promise<MaybeError<SchemaFormat> | undefined>(resolve =>
+			schemaFormatPromise
+				.then((schemaFormat) => this.setState({schemaFormat}, () => resolve(schemaFormat)))
+				.catch(e => this.setState({schemaFormat: "error"}, () => resolve("error")))
+		);
 		this.schemaFormatPromise = makeCancellable(promise);
 		return promise;
 	}
@@ -216,7 +225,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onEditorChange = async (events: ChangeEvent | ChangeEvent[]) => {
 		const {master, schemaFormat} = this.state;
-		if (!master || !schemaFormat) {
+		if (!master || !schemaFormat || !isValid(schemaFormat)) {
 			return;
 		}
 
@@ -469,7 +478,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	propagateState = () => {
-		if (!this.state.master) {
+		if (!this.state.master || !isValid(this.state.schemaFormat)) {
 			return;
 		}
 		const {translations, fields, ...toTranslate} = this.state.master;
