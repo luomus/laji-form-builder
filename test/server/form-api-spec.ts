@@ -54,7 +54,10 @@ describe("/api", () => {
 		it("returns 422 for bad lang", async (done) => {
 			request(app)
 				.get("/api?lang=badlang")
-				.expect(422)
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
 				.end(finish(done));
 		});
 
@@ -155,7 +158,10 @@ describe("/api", () => {
 		it("returns 422 for bad lang", async (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}?lang=badlang`)
-				.expect(422)
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
 				.end(finish(done));
 		});
 
@@ -220,7 +226,32 @@ describe("/api", () => {
 			request(app)
 				.post("/api/transform?lang=badlang")
 				.send(testForm)
-				.expect(422)
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
+				.end(finish(done));
+		});
+
+		it("returns 500 for unexpected error", async (done) => {
+			request(app)
+				.post("/api/transform")
+				.send({patch: "foo"})
+				.expect((response: any) => {
+					expect(response.status).toBe(500);
+					expect(response.error).toBeTruthy();
+				})
+				.end(finish(done));
+		});
+
+		it("returns 422 for known error", async (done) => {
+			request(app)
+				.post("/api/transform")
+				.send({fields: [{name: "foo"}]})
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
 				.end(finish(done));
 		});
 
@@ -267,6 +298,25 @@ describe("/api", () => {
 				.send(testForm)
 				.set("Content-Type", "application/json")
 				.expect(422)
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
+				.end(finish(done));
+		});
+
+		it("returns JSON error for store error", async (done) => {
+			const {id, ..._testForm} = testForm;
+			request(app)
+				.post("/api")
+				.send({..._testForm, "badprop": "bad!"})
+				.set("Content-Type", "application/json")
+				.expect(422)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
 				.end(finish(done));
 		});
 
@@ -288,6 +338,20 @@ describe("/api", () => {
 	});
 
 	describe("/:id PUT (form update)", () => {
+		it("returns JSON error for store error", async (done) => {
+			request(app)
+				.post("/api")
+				.send({...testForm, "badprop": "bad!"})
+				.set("Content-Type", "application/json")
+				.expect(422)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					expect(response.status).toBe(422);
+					expect(response.error).toBeTruthy();
+				})
+				.end(finish(done));
+		});
+
 		it("updates form and returns in master format", async (done) => {
 			const title = "test title";
 			request(app)

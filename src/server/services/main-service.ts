@@ -8,6 +8,30 @@ import MetadataService from "../../services/metadata-service";
 import FieldService, { removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master } from "../../model";
 
+export class StoreError extends Error {
+	status: number;
+	storeError: string;
+	constructor(code: number, storeError: any) {
+		super("Store error");
+		// eslint-disable-next-line max-len
+		// Explanation https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+		Object.setPrototypeOf(this, StoreError.prototype);
+
+		this.status = code;
+		this.storeError = storeError;
+	}
+}
+
+// Intended to be used for checked errors, which the controller should return with 422.
+export class UnprocessableError extends Error {
+	constructor(message: string) {
+		super(message);
+		// eslint-disable-next-line max-len
+		// Explanation https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
+		Object.setPrototypeOf(this, UnprocessableError.prototype);
+	}
+}
+
 const DEFAULT_LANG = "en";
 
 const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, options?: any) => 
@@ -139,6 +163,9 @@ export default class MainService {
 			body: JSON.stringify(form),
 			headers: {"Content-Type": "application/json"}
 		});
+		if (remoteForm.status > 400) {
+			throw new StoreError(remoteForm.status, remoteForm.error);
+		}
 		this.getForms.clear();
 		return remoteForm;
 	}

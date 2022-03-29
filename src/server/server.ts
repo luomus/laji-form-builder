@@ -1,13 +1,19 @@
-import express, { RequestHandler, Response } from "express";
+import express, { ErrorRequestHandler, RequestHandler, Response } from "express";
 import bodyParser from "body-parser";
 import path from "path";
 import { isLang, Lang } from "../model";
-import MainService from "./services/main-service";
+import MainService, { StoreError, UnprocessableError } from "./services/main-service";
 
-const error = (res: Response, status: number, detail: string) => res.status(status).json({
-	status,
-	detail
-});
+const error = (res: Response, status: number, error: any, stack?: any) => {
+	const err: any = {
+		status,
+		error
+	};
+	if (stack) {
+		err.stack = stack;
+	}
+	return res.status(status).json(err);
+};
 
 const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 	const {lang} = req.query;
@@ -15,6 +21,14 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 		return error(res, 422, "Query param lang should be one of 'fi', 'sv' or 'en'");
 	}
 	return next();
+};
+
+const errorHandlerMiddleWare: ErrorRequestHandler = (err, req, res, next) => {
+	if (err instanceof UnprocessableError) {
+		error(res, 422, err.message);
+	} else {
+		error(res, 500, err.message, err.stack);
+	}
 };
 
 const main = new MainService();
@@ -45,11 +59,29 @@ api.post("/", async (req, res) => {
 	if (req.body.id) {
 		return error(res, 422, "Shouldn't specify id when creating a new form entry");
 	}
-	return res.status(200).json(await main.saveForm(req.body));
+	let result: any;
+	try {
+		result = await main.saveForm(req.body);
+	} catch (e) {
+		if (e instanceof StoreError) {
+			return error(res, e.status, e.storeError);
+		}
+		throw e;
+	}
+	return res.status(200).json(result);
 });
 
 api.put("/:id", async (req, res) => {
-	res.status(200).json(await main.updateForm(req.params.id, req.body));
+	let result: any;
+	try {
+		result = await main.updateForm(req.params.id, req.body);
+	} catch (e) {
+		if (e instanceof StoreError) {
+			return error(res, e.status, e.storeError);
+		}
+		throw e;
+	}
+	return res.status(200).json(result);
 });
 
 api.delete("/:id", async (req, res) => {
@@ -59,6 +91,8 @@ api.delete("/:id", async (req, res) => {
 api.post("/transform", langCheckMiddleWare, async (req, res) => {
 	return res.status(200).json(await main.transform(req.body, req.query.lang as (Lang | undefined)));
 });
+
+api.use(errorHandlerMiddleWare);
 
 const view: RequestHandler = async (req, res, next) => {
 	// '/static' and webpack must be manually ignored here because it can't be routed before

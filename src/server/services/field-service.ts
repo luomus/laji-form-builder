@@ -9,7 +9,7 @@ import { reduceWith, JSONSchema, multiLang, translate, unprefixProp, isObject } 
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import * as rjsf from "@rjsf/core";
-import { formFetch } from "./main-service";
+import { formFetch, UnprocessableError } from "./main-service";
 
 interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
@@ -178,7 +178,7 @@ export default class FieldService {
 
 	private mapUnknownFieldWithTypeToProperty(field: Field): InternalProperty {
 		if (!field.type) {
-			throw new Error(`Bad field ${field.name}`);
+			throw new UnprocessableError(`Bad field ${field.name}`);
 		}
 		return {
 			property: field.name,
