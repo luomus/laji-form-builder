@@ -339,13 +339,20 @@ export const SubmitButton = (props: ButtonProps) => {
 
 interface FormJSONEditorProps<T> extends Classable {
 	onSubmit: (value: T) => void;
+	onChange?: (value: T) => void;
 	value?: T;
 	submitLabel?: string;
 }
 
-export function FormJSONEditor<T>({value, onSubmit, submitLabel, className}: FormJSONEditorProps<T>) {
+export function FormJSONEditor<T>({value, onSubmit, onChange, submitLabel, className}: FormJSONEditorProps<T>) {
 	const {translations} = React.useContext(Context);
-	const [json, setJSON] = React.useState(value);
+	const [json, _setJSON] = React.useState(value);
+	const setJSON = React.useCallback((json) => {
+		onChange?.(json);
+		_setJSON(json);
+	}, [onChange, _setJSON]);
+
+
 	const [valid, setValid] = React.useState(false);
 	const onClick = React.useCallback(() => onSubmit(json as unknown as T), [json, onSubmit]);
 

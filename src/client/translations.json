@@ -128,5 +128,10 @@
 		"fi": "Jotain meni pieleen editorin käyttöliittymän rakennuksessa. JSON muokkauksen pitäisi toimia.",
 		"sv": "Något gick fel när redigeringsgränssnittet byggdes. JSON-redigering bör vara säker att använda.",
 		"en": "Something went wrong when building the editor UI. JSON editing should be safe to use."
+	},
+	"editor.json.confirmApply": {
+		"fi": "Tehdäänkö muutokset lomakkeelle? (ei tallennu vielä)",
+		"sv": "Ska vi tillämpa ändringarna i formuläret? (kommer inte att sparas ännu)",
+		"en": "Shall we apply the changes to the form? (won't be saved yet"
 	}
 }

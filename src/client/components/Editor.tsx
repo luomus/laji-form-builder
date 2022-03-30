@@ -775,23 +775,33 @@ interface FormJSONEditorProps {
 }
 
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal ({master, onHide, onChange}: FormJSONEditorProps) {
-	const {theme} = React.useContext(Context);
+	const {theme, translations} = React.useContext(Context);
 	const {Modal} = theme;
 
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
 	React.useEffect(() => ref.current?.focus(), []);
 
+	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(undefined);
+
 	const onSubmit = React.useCallback((value: Master) => {
 		onChange({type: "master", value});
-	}, [onChange]);
+		setTmpValue(undefined);
+	}, [onChange, setTmpValue]);
+
+	const onHideCheckForChanges = React.useCallback(() => {
+		tmpValue
+			&& confirm(translations["editor.json.confirmApply"])
+			&& onSubmit(tmpValue);
+		onHide();
+	}, [tmpValue, translations, onSubmit, onHide]);
 
 	return (
-		<Modal show={true} onHide={onHide}>
+		<Modal show={true} onHide={onHideCheckForChanges}>
 			<Modal.Header closeButton={true}>
 			</Modal.Header>
 			<Modal.Body>
-				<FormJSONEditor value={master} onSubmit={onSubmit} submitLabel={"OK"} />
+				<FormJSONEditor value={master} onSubmit={onSubmit} onChange={setTmpValue} submitLabel={"OK"} />
 			</Modal.Body>
 		</Modal>
 	);
