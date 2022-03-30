@@ -204,7 +204,7 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 	);
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
-			<SubmitButton onClick={onSubmit} />
+			<SubmitButton onClick={onSubmit}>{translations["Wizard.option.json.import"]}</SubmitButton>
 		</LajiForm>
 	);
 }
