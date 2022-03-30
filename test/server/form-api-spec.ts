@@ -1,12 +1,14 @@
 import request from "supertest";
 import app from "../../src/server/server";
-import { Master } from "../../src/model";
+import { FormListing, Master } from "../../src/model";
 import { exposedProps, exposedOptions, formFetch } from "../../src/server/services/main-service";
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
 
 const TEST_FORM_ID = "MHL.119";
+const TEST_FORM_WITH_BASE_ID = "MHL.70";
+const TEST_FORM_WITH_BASE_ID_BASE = "MHL.70";
 
 const commonProps = [
 	"name", "description", "language", "title", "shortDescription",
@@ -134,13 +136,27 @@ describe("/api", () => {
 			done();
 		});
 
+		it("extends base form", async (done) => {
+			request(app)
+				.get("/api")
+				.expect(200)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect(response => {
+					forms = response.body.forms;
+					const form = response.body.forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_ID);
+					const baseForm = response.body.forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_ID_BASE);
+					expect(form.options).toEqual(baseForm.options);
+				})
+				.end(finish(done));
+		});
+
 		it("returns translated when query param lang present", async (done) => {
 			request(app)
 				.get("/api?lang=fi")
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect(response => {
-					const testFormResponse = response.body.forms.find((f: any) => f.id === TEST_FORM_ID);
+					const testFormResponse = response.body.forms.find((f: FormListing) => f.id === TEST_FORM_ID);
 					expect(testFormResponse.title)
 						.toBe((testForm.translations as any).fi[(testForm.title as string)]);
 				})

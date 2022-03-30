@@ -204,20 +204,24 @@ export default class FieldService {
 		]) as Promise<ExtendedMaster>;
 	}
 
+	mapBaseFormFrom(form: Master, baseForm: Master) {
+		const {id, ..._baseForm} = baseForm;
+		form = {
+			..._baseForm,
+			...form,
+			translations: merge(_baseForm.translations || {}, form.translations || {}),
+			uiSchema: merge(_baseForm.uiSchema || {}, form.uiSchema || {})
+		};
+		delete form.baseFormID;
+		return form;
+	}
+
 	private mapBaseForm = async (master: Master) => {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm = await this.mapBaseForm(await formFetch(`/${master.baseFormID}`));
-		delete (baseForm as any).id;
-		master = {
-			...baseForm,
-			...master,
-			translations: merge(baseForm.translations || {}, master.translations || {}),
-			uiSchema: merge(baseForm.uiSchema || {}, master.uiSchema || {})
-		};
-		delete master.baseFormID;
-		return master;
+		const baseForm: Master = await this.mapBaseForm(await formFetch(`/${master.baseFormID}`));
+		return this.mapBaseFormFrom(master, baseForm);
 	}
 
 	private mapBaseFormFromFields = async (master: Master) => {

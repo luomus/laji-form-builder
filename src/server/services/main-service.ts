@@ -103,11 +103,23 @@ export default class MainService {
 
 	constructor() {
 		this.exposeFormListing = this.exposeFormListing.bind(this);
+		this.extendBaseForm = this.extendBaseForm.bind(this);
 	}
 
 	setLang(lang: Lang) {
 		this.metadataService.setLang(lang);
 		this.fieldService.setLang(lang);
+	}
+
+	private extendBaseForm(form: Master, forms: Master[]) {
+		if (!form.baseFormID) {
+			return form;
+		}
+
+		const baseForm = forms.find(f => f.id === form.baseFormID);
+		return baseForm
+			? this.fieldService.mapBaseFormFrom(form, baseForm)
+			: form;
 	}
 
 	private exposeFormListing(form: Master) {
@@ -126,7 +138,8 @@ export default class MainService {
 		lang && this.setLang(lang);
 		return Promise.all(remoteForms.map(form => {
 			const {translations} = form;
-			return reduceWith<Master, undefined, FormListing>(form, undefined, [
+			return reduceWith<Master, Master[], FormListing>(form, remoteForms, [
+				this.extendBaseForm,
 				this.exposeFormListing,
 				f => f.supportedLanguage
 					? f
