@@ -225,7 +225,18 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onEditorChange = async (events: ChangeEvent | ChangeEvent[]) => {
 		const {master, schemaFormat} = this.state;
-		if (!master || !schemaFormat || !isValid(schemaFormat)) {
+		if (!master) {
+			return;
+		}
+
+		if (!schemaFormat || !isValid(schemaFormat)) {
+			const schemaFormat = await this.formService.masterToSchemaFormat(master);
+			this.setState({master, schemaFormat}, () => {
+				if (!this.state.master) {
+					return;
+				}
+				this.propagateState();
+			});
 			return;
 		}
 
