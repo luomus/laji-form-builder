@@ -666,7 +666,7 @@ const defaultGeometryValidator: DefaultValidator = {
 					invalidGeometries: "@geometryValidation",
 					noOverlap: "@geometryValidation"
 				},
-				boundingBoxMaxHectares: 1000000
+				boundingBoxMaxHectares: 5000000
 			},
 			translations: {
 				"@geometryValidation": {
