@@ -318,9 +318,11 @@ export const JSONEditor = React.forwardRef((
 		maxRows
 	);
 
+	const editorNmspc = nmspc("json-editor");
+
 	return (
 		<textarea
-			className={classNames("form-control", !valid && gnmspc("json-editor-invalid"), className)}
+			className={classNames("form-control", editorNmspc(), !valid && editorNmspc("invalid"), className)}
 			onBlur={onBlur}
 			rows={_rows}
 			style={{width: "100%", resize: resizable ? "vertical" : "none"}}

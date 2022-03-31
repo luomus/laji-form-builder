@@ -275,7 +275,6 @@ export default class FieldService {
 			: master;
 	}
 
-
 	private addExtra(field: Field) {
 		return async (schemaFormat: SchemaFormat) => {
 			const toParentMap = (range: Range[]) => {
@@ -683,6 +682,7 @@ const defaultGeometryValidator: DefaultValidator = {
 		}
 	}
 };
+
 const defaultValidators: Record<string, DefaultValidator> = {
 	"/gatherings/geometry": defaultGeometryValidator
 };
