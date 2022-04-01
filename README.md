@@ -32,7 +32,7 @@ For documentation, see how the server uses the `Builder` component: https://gith
 * protractor (e2e tests)
 * supertest (express tests)
 
-Development is done against node `v14`. Might work on other versions of might not.
+Development is done against node `v14`. Might work on other versions or might not.
 
 ### Install dependencies
 ```
