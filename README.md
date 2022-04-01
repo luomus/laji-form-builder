@@ -5,7 +5,8 @@ This repo is responsible for two things:
 
 ## Server API
 
-* `/:id?{lang:fi | en | sv = fi}` for the UI
+* `/?{lang:fi | en | sv = fi}` UI for selecting/deleting a form
+* `/:id?{lang:fi | en | sv = fi}` UI for editing a form
 
 REST JSON API `/api`:
 * `/api?{lang?: fi | en | sv}` list forms as JSON
