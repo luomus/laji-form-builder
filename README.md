@@ -5,9 +5,15 @@ This repo is responsible for two things:
 
 ## Server API
 
-* `/:id?{lang:fi| en |sv}` for the UI
-* `/api?{lang: fi| en |sv}` list forms as JSON
-* `/api/:id?{lang: fi| en |sv, format: json | schema = json}` list forms as JSON
+* `/:id?{lang:fi | en | sv = fi}` for the UI
+
+REST JSON API `/api`:
+* `/api?{lang?: fi | en | sv}` list forms as JSON
+* `/api/:id?{lang?: fi | en | sv, format: json | schema = json}` list forms as JSON
+* `/api` (`POST`) Create new form entry
+* `/api/:id` (`PUT`) Update form entry
+* `/api/:id` (`DELETE`) Delete form entry
+* `/api/transform?{lang?: fi | en | sv}` (`POST`) Transform BODY from `json` format to `schema` format
 * `/api/flush` flushes cache
 
 ## Client API
