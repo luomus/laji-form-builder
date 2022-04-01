@@ -14,9 +14,16 @@ This repo is responsible for two things:
 
 For documentation, see how the server uses the `Builder` component: https://github.com/luomus/laji-form-builder/blob/master/src/server/view/app.tsx
 
-## Stack
-
 ## Development
+
+### Stack
+
+* node@14
+* TypeScript
+* express
+* React
+* protractor (e2e tests)
+* supertest (express tests)
 
 Development is done against node `v14`. Might work on other versions of might not.
 
