@@ -1,7 +1,7 @@
 import ApiClient from "laji-form/lib/ApiClient";
 import ApiClientImplementation from "../view/ApiClientImplementation";
 import * as config from "../../../config.json";
-import { reduceWith, fetchJSON, translate } from "../../utils";
+import { reduceWith, fetchJSON, translate, dictionarify } from "../../utils";
 import queryString from "querystring";
 import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
@@ -48,11 +48,6 @@ const apiClient = new ApiClient(new ApiClientImplementation(
 	config.userToken,
 	DEFAULT_LANG
 ), DEFAULT_LANG, {fi: {}, sv: {}, en: {}});
-
-const dictionarify = (arr: string[]): Record<string, true> => arr.reduce((dict, key) => {
-	dict[key] = true;
-	return dict;
-}, {} as Record<string, true>);
 
 export const exposedProps: Record<keyof FormListing, true> = dictionarify([
 	"id", "logo", "title", "description", "shortDescription",

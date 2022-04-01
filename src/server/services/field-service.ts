@@ -5,7 +5,7 @@ import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translat
 	ExtendedMaster,
 	isFormExtensionField,
 	FormExtensionField} from "../../model";
-import { reduceWith, JSONSchema, multiLang, translate, unprefixProp, isObject } from "../../utils";
+import { reduceWith, JSONSchema, multiLang, translate, unprefixProp, isObject, dictionarify } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import * as rjsf from "@rjsf/core";
@@ -428,12 +428,8 @@ const filterList = (listName: string, white = true) => (schema: JSONSchemaE, fie
 		return schema;
 	}
 
-	const indexedList = list.reduce<Record<string, number>>((index, e, idx) => {
-		index[e] = idx;
-		return index;
-	}, {});
-
-	const _check = (w: string) => indexedList[w] === undefined;
+	const dict = dictionarify(list);
+	const _check = (w: string) => !dict[w];
 	const check = white ? _check : (w: string) => !_check(w);
 
 	const schemaForEnum: any = schema.type === "string"

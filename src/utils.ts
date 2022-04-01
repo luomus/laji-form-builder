@@ -71,3 +71,8 @@ export const isObject = _isObject;
 export const unprefixProp = (s: string) => s.replace(/^.+\./, "");
 
 export const fetchJSON = (path: string, options?: any) => fetch(path, options).then(r => r.json());
+
+export const dictionarify = (arr: string[]): Record<string, true> => arr.reduce((dict, key) => {
+	dict[key] = true;
+	return dict;
+}, {} as Record<string, true>);

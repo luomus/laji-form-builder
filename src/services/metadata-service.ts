@@ -54,7 +54,8 @@ export default class MetadataService {
 	getRange = this.cache((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
 		|| this.apiClient.fetch(
-			`/metadata/ranges/${typeof property === "string" ? property : this.getPropertyNameFromContext(property)}`,
+			// eslint-disable-next-line max-len
+			`/metadata/ranges/${unprefixProp(typeof property === "string" ? property : this.getPropertyNameFromContext(property))}`,
 			{lang: "multi"}
 		)
 	)
