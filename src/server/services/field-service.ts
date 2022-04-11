@@ -63,8 +63,8 @@ export default class FieldService {
 				addUiSchemaContext,
 				addLang(lang),
 				this.prepopulate,
-				(schemaFormat) => lang && schemaFormat.translations
-					? translate(schemaFormat, schemaFormat.translations[lang])
+				(schemaFormat) => lang && schemaFormat.translations && (lang in schemaFormat.translations)
+					? translate(schemaFormat, schemaFormat.translations[lang]!)
 					: schemaFormat,
 				removeTranslations(lang)
 			]
@@ -139,6 +139,7 @@ export default class FieldService {
 					] as [string, JSONSchemaE];
 				})
 			);
+
 			return reduceWith(
 				mapEmbeddable(
 					field,
@@ -644,7 +645,7 @@ interface DefaultValidator {
 	warnings?: {[validatorName: string]: DefaultValidatorItem};
 }
 
-const defaultGeometryValidator: DefaultValidator = {
+export const defaultGeometryValidator: DefaultValidator = {
 	validators: {
 		geometry: {
 			validator: {
@@ -710,8 +711,8 @@ const addDefaultValidators = (master: ExtendedMaster) => {
 					};
 					Object.keys(defaultValidator.translations).forEach(translationKey => {
 						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
-							if (!(translationKey in (master.translations as Translations)[lang])) {
-								(master.translations as Translations)[lang][translationKey] =
+							if (!(translationKey in (master.translations as Translations)[lang]!)) {
+								(master.translations as Translations)[lang]![translationKey] =
 									defaultValidator.translations[translationKey][lang];
 							}
 						});

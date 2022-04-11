@@ -9,7 +9,7 @@ import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnm
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { PropertyModel, PropertyRange, Lang, Translations, Master, SchemaFormat, Field } from "../../model";
+import { PropertyModel, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
@@ -72,13 +72,13 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.apiClient = new ApiClient(
 			props.apiClient,
 			props.lang || "fi",
-			constructTranslations(lajiFormTranslations) as unknown as Translations
+			constructTranslations(lajiFormTranslations) as unknown as CompleteTranslations
 		);
 		this.formApiClient = props.formApiClient 
 			? new ApiClient(
 				props.formApiClient,
 				props.lang || "fi",
-				constructTranslations(lajiFormTranslations) as unknown as Translations)
+				constructTranslations(lajiFormTranslations) as unknown as CompleteTranslations)
 			: undefined;
 
 		this.appTranslations = constructTranslations(appTranslations) as any;

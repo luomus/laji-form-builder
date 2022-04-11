@@ -1,12 +1,12 @@
 import ApiClient from "laji-form/lib/ApiClient";
 import ApiClientImplementation from "../../src/server/view/ApiClientImplementation";
 import config from "../../config.json";
-import FieldService from "../../src/server/services/field-service";
+import FieldService, {defaultGeometryValidator} from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
-import { SchemaFormat } from "../../src/model";
+import { SchemaFormat, Field } from "../../src/model";
 
 const LANG = "fi";
-const mock = !(process.env.MOCK === "false")
+const mock = !(process.env.MOCK === "false");
 
 class MockApiClientImplementation extends ApiClientImplementation {
 	mock(path: string, query?: any, options?: any): Response | undefined {
@@ -288,6 +288,208 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings" }, { name: "secureLevel" } ] };
 			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 			expect(schemaFormat.schema.required).toEqual(["gatherings"]);
+		});
+
+		it("default populated", async () => {
+			const form = { fields: [ { name: "secureLevel", options: { default: "secureLevelKM5" }} ]};
+			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			expect(schemaFormat.schema.properties.secureLevel.default).toBe("secureLevelKM5");
+		});
+
+		it("option excludeFromCopy populated", async () => {
+			const form = { fields: [
+				{ name: "gatherings", options: { excludeFromCopy: true },
+					fields: [ { name: "units", options: { excludeFromCopy: true } } ] }
+			]};
+			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			expect(schemaFormat.schema.properties.gatherings.excludeFromCopy).toBe(true);
+			expect(schemaFormat.schema.properties.gatherings.items.properties.units.excludeFromCopy).toBe(true);
+		});
+
+		describe("option", () => {
+			it("value_options are used", async () => {
+				const form = { fields: [
+					{ name: "gatherings",
+						fields: [ { name: "coordinateSource", options: { value_options: {a: "aLabel", b: "bLabel"} }} ]
+					}
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const coordinateSource = schemaFormat.schema.properties.gatherings.items.properties.coordinateSource;
+				expect(coordinateSource.enum).toEqual(["a", "b"]);
+				expect(coordinateSource.enumNames).toEqual(["aLabel", "bLabel"]);
+			});
+
+			it("value_options add uniqueItems if array", async () => {
+				const form = { fields: [
+					{ name: "gatherings",
+						fields: [ { name: "batHabitat", options: { value_options: {a: "aLabel", b: "bLabel"} }} ]
+					}
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const batHabitat = schemaFormat.schema.properties.gatherings.items.properties.batHabitat;
+				expect(batHabitat.items.enum).toEqual(["a", "b"]);
+				expect(batHabitat.items.enumNames).toEqual(["aLabel", "bLabel"]);
+				expect(batHabitat.uniqueItems).toEqual(true);
+			});
+
+			it("whitelist works", async () => {
+				const form = { fields: [
+					{ name: "secureLevel", options: { whitelist: ["", "MX.secureLevelKM5"] } },
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.secureLevel.enum).toEqual(["", "MX.secureLevelKM5"]);
+				expect(schemaFormat.schema.properties.secureLevel.enumNames).toEqual(["", "5 km"]);
+			});
+
+			it("whitelist doesn't care about nonexisting value", async () => {
+				const form = { fields: [
+					{ name: "secureLevel", options: { whitelist: ["", "foo"] } },
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.secureLevel.enum).toEqual([""]);
+				expect(schemaFormat.schema.properties.secureLevel.enumNames).toEqual([""]);
+			});
+
+			it("blacklist works", async () => {
+				const form = { fields: [
+					{ name: "secureLevel", options: { blacklist: [
+						"", "MX.secureLevelNone", "MX.secureLevelKM5", "MX.secureLevelKM10", "MX.secureLevelKM50",
+						"MX.secureLevelKM100", "MX.secureLevelKM500", "MX.secureLevelHighest", "MX.secureLevelNoShow"
+					] }},
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const {secureLevel} = schemaFormat.schema.properties;
+				expect(secureLevel.enum).toEqual(["MX.secureLevelKM1", "MX.secureLevelKM25"]);
+				expect(secureLevel.enumNames).toEqual(["1 km", "25 km"]);
+			});
+
+			it("blacklist doesn't care about nonexisting value", async () => {
+				const form = { fields: [
+					{ name: "secureLevel", options: {blacklist: ["", "foo"]} },
+				]};
+				expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
+			});
+
+			it("uniqueItems works", async () => {
+				const form = { fields: [
+					{ name: "secureLevel", options: { uniqueItems: true } },
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.secureLevel.uniqueItems).toEqual(true);
+			});
+
+			it("maxItems works", async () => {
+				const form = { fields: [
+					{ name: "gatherings", options: { maxItems: 3 } },
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.gatherings.maxItems).toEqual(3);
+			});
+
+			it("minItems works", async () => {
+				const form = { fields: [
+					{ name: "gatherings", options: { minItems: 3 } },
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.gatherings.minItems).toEqual(3);
+			});
+		});
+
+		it("hidden works", async () => {
+			const form = { fields: [
+				{ name: "secureLevel", type: "hidden" as Field["type"]},
+			]};
+			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			const {secureLevel} = schemaFormat.schema.properties;
+			expect(secureLevel.enum).toBe(undefined);
+			expect(secureLevel.enumNames).toBe(undefined);
+		});
+
+		describe("label", () => {
+			it("not populated for root", async () => {
+				const form = { fields: [ { name: "gatherings" } ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.title).toBe(undefined);
+			});
+
+			it("populated from property metadata", async () => {
+				const form = { fields: [ { name: "gatherings" } ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.gatherings.title).toBe("Keruutapahtumat");
+			});
+
+			it("can be overridden", async () => {
+				const form = { fields: [ { name: "gatherings", label: "foo" } ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.gatherings.title).toBe("foo");
+			});
+
+			it("can be overridden with empty", async () => {
+				const form = { fields: [ { name: "gatherings", label: "" } ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.schema.properties.gatherings.title).toBe("");
+			});
+		});
+	});
+
+	describe("validators", () => {
+		it("empty object for undefined", async () => {
+			const form = {};
+			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			expect(schemaFormat.validators).toEqual({});
+			expect(schemaFormat.warnings).toEqual({});
+		});
+
+		it("populates validator and warnings", async () => {
+			const form = { fields: [ { name: "gatherings", validators: { presence: true }, fields: [
+				{ name: "units", validators: { presence: true }, warnings: { presence: true } }
+			]} ]};
+			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			expect(schemaFormat.validators.gatherings.presence).toBe(true);
+			expect(schemaFormat.validators.gatherings.items.properties.units.presence).toBe(true);
+			expect(schemaFormat.warnings.gatherings.items.properties.units.presence).toBe(true);
+		});
+		
+		describe("default geometry validator", () => {
+			it("is added", async () => {
+				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.requireShape).toBe(true);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
+					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
+			});
+
+			it("messages can be overridden", async () => {
+				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ],
+					translations: {
+						fi: {
+							"@geometryValidation": "foo"
+						}
+					}
+				};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.requireShape).toBe(true);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
+					.toBe("foo");
+			});
+
+			it("overriding overrides completely", async () => {
+				const form = { fields: [ { name: "gatherings", fields: [
+					{ name: "geometry", validators: { geometry: { foo: "bar" }} }
+				]}]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const {geometry} = schemaFormat.validators.gatherings.items.properties;
+				expect(geometry.geometry.requireShape).toBe(undefined);
+				expect(geometry.geometry.foo).toBe("bar");
+			});
+
+			it("can be removed with false", async () => {
+				const form = { fields: [ { name: "gatherings", fields: [
+					{ name: "geometry", validators: { geometry: false } }
+				]} ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators).toEqual({});
+			});
 		});
 	});
 });

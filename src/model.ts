@@ -37,7 +37,8 @@ export type Lang = "fi" | "sv" | "en";
 
 export const isLang = (lang: any): lang is Lang => typeof lang === "string" && ["fi", "sv", "en"].includes(lang);
 
-export type Translations = Record<Lang, {[key: string]: string}>;
+export type CompleteTranslations = Record<Lang, {[key: string]: string}>;
+export type Translations = Partial<Record<Lang, {[key: string]: string}>>;
 
 export interface FormListing {
 	id: string;
@@ -78,11 +79,13 @@ export interface FieldOptions {
 	default?: any;
 	whitelist?: string[];
 	blacklist?: string[];
-	uniqueItems?: string;
+	uniqueItems?: boolean;
 	value_options?: Record<string, string>;
-		target_element?: {
-			type: "text";
-		};
+	target_element?: {
+		type: "text";
+	};
+	maxItems?: number;
+	minItems?: number;
 }
 
 export interface Field {

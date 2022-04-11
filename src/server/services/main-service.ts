@@ -140,7 +140,7 @@ export default class MainService {
 					? f
 					: {...f, supportedLanguage: ["en", "fi", "sv"]},
 				f => (isLang(lang) && translations && lang in translations)
-					? translate(f, translations[lang])
+					? translate(f, (translations[lang] as {[key: string]: string}))
 					: f
 			]);
 		}));

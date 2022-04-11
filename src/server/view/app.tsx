@@ -12,7 +12,7 @@ import ApiClient from "laji-form/lib/ApiClient";
 import "../../client/styles";
 import "notus/src/notus.css";
 import  _notus from "notus";
-import { isLang, Lang, SchemaFormat, Translations } from "../../model";
+import { CompleteTranslations, isLang, Lang, SchemaFormat } from "../../model";
 
 const notus = _notus();
 
@@ -64,7 +64,7 @@ const formApiClient = new ApiClientImplementation(
 	initialRoute.lang
 );
 
-const _lajiFormTranslations = constructTranslations(lajiFormTranslations) as unknown as Translations;
+const _lajiFormTranslations = constructTranslations(lajiFormTranslations) as unknown as CompleteTranslations;
 const initialLang = initialRoute.lang || DEFAULT_LANG;
 const formService = new FormService(
 	new ApiClient(
