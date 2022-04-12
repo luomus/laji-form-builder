@@ -61,7 +61,7 @@ export default class FieldService {
 				addExcludeFromCopy,
 				rootField ? this.addExtra({...rootField || {}, fields: master.fields}) : undefined,
 				addUiSchemaContext,
-				addLang(lang),
+				addLanguage(lang),
 				this.prepopulate,
 				(schemaFormat) => lang && schemaFormat.translations && (lang in schemaFormat.translations)
 					? translate(schemaFormat, schemaFormat.translations[lang]!)
@@ -622,7 +622,7 @@ const addUiSchemaContext = (schemaFormat: SchemaFormat) => {
 	return {...schemaFormat, uiSchemaContext};
 };
 
-const addLang = (language?: Lang) => (schemaFormat: SchemaFormat) =>
+const addLanguage = (language?: Lang) => (schemaFormat: SchemaFormat) =>
 	language
 		? {...schemaFormat, language}
 		: schemaFormat;
