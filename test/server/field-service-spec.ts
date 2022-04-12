@@ -108,22 +108,22 @@ describe("fields", () => {
 		it("changes the root field and doesn't allow fields outside that context", async () => {
 			const form = {
 				context: "namedPlace",
-				fields: [{ name: "MY.gatherings" }]
+				fields: [{ name: "gatherings" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 		});
 
-		it("works with prefix", async () => {
+		it("doesn't work with prefix", async () => {
 			const form = {
 				context: "MNP.namedPlace",
 				fields: [{ name: "privateNotes" }]
 			};
-			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
+			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 		});
 
-		it("allows only classes", async () => {
+		it("doesn't allow properties", async () => {
 			const form = {
-				context: "MY.gatherings", // Not a class but property. "MY.gathering" would be fine.
+				context: "gatherings", // Not a class but property. "MY.gathering" would be fine.
 				fields: [{ name: "locality" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
@@ -131,7 +131,7 @@ describe("fields", () => {
 
 		it("works with embeddable range property even though it's not a class", async () => {
 			const form = {
-				context: "MY.gathering",
+				context: "gathering",
 				fields: [{ name: "locality" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
@@ -146,18 +146,18 @@ describe("fields", () => {
 		expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 	});
 
-	it("works with prefix", async () => {
+	it("doesn't work with prefix", async () => {
 		const form = {
 			fields: [{name: "MY.gatherings"}]
 		};
-		expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
+		expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 	});
 
-	it("works with prefix deeply", async () => {
+	it("doesn't work with prefix deeply", async () => {
 		const form = {
 			fields: [{ name: "MY.gatherings", fields: [{ name: "MY.locality" }]}]
 		};
-		expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
+		expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 	});
 
 	describe("schema", () => {
@@ -190,7 +190,7 @@ describe("fields", () => {
 		});
 
 		it("xsd:string ->  string", async () => {
-			const form = { fields: [{ name: "MY.editor" }] };
+			const form = { fields: [{ name: "editor" }] };
 			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 			expect(schemaFormat.schema.properties.editor.type).toBe("string");
 		});
@@ -654,7 +654,7 @@ describe("patching", () => {
 			op: "add",
 			path: "/fields/0/fields/-",
 			value: {
-				name: "MY.municipality",
+				name: "municipality",
 				label: "foo"
 			}
 		},
@@ -662,7 +662,7 @@ describe("patching", () => {
 			op: "add",
 			path: "/fields/0/fields/-",
 			value: {
-				"name": "MY.locality",
+				"name": "locality",
 				label: "bar"
 			}
 		}
@@ -700,7 +700,7 @@ describe("patching", () => {
 					op: "add",
 					path: "/fields/0/fields/-",
 					value: {
-						name: "MY.municipality",
+						name: "municipality",
 						label: "foo"
 					}
 				},

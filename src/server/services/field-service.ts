@@ -84,7 +84,10 @@ export default class FieldService {
 	}
 
 	private getRootField(master: Pick<Master, "context">): Field  {
-		return {name: master.context || "MY.document"};
+		if (master.context && master.context.match(/[^.]+\..+/)) {
+			throw new UnprocessableError("Don't use namespace prefix for context");
+		}
+		return {name: master.context ? unprefixProp(master.context) : "document"};
 	}
 
 	private getRootProperty(rootField: Field): InternalProperty {
@@ -129,7 +132,7 @@ export default class FieldService {
 
 			const schemaProperties = await Promise.all(
 				fields.map(async field => {
-					let prop = properties[unprefixProp(field.name)];
+					let prop = properties[field.name];
 					if (!prop) {
 						prop = this.mapUnknownFieldWithTypeToProperty(field);
 					}
@@ -143,7 +146,7 @@ export default class FieldService {
 			return reduceWith(
 				mapEmbeddable(
 					field,
-					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [unprefixProp(name)]: schema}), {}),
+					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [name]: schema}), {}),
 				),
 				field,
 				[
@@ -295,7 +298,7 @@ export default class FieldService {
 					let collectedTrees = {};
 					const properties = await this.metadataService.getProperties(property.range[0]);
 					for (const _field of field.fields) {
-						let prop = properties.find(p => unprefixProp(p.property) === unprefixProp(_field.name));
+						let prop = properties.find(p => unprefixProp(p.property) === _field.name);
 						if (!prop) {
 							prop = this.mapUnknownFieldWithTypeToProperty(_field);
 						}
@@ -391,7 +394,7 @@ const combineMerge = (target: any, source: any, options: any) => {
 const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 	const required = field.fields?.reduce<string[]>((reqs, f) => {
 		if (f.required) {
-			reqs.push(unprefixProp(f.name));
+			reqs.push(f.name);
 		}
 		return reqs;
 	}, []);
@@ -529,7 +532,7 @@ const addValidators = (type: "validators" | "warnings") =>
 			}
 			return field.fields
 				? field.fields.reduce<any>((validators, field) => {
-					const name = unprefixProp(field.name);
+					const {name} = field;
 					const schemaForField = schema.type === "object"
 						? (schema.properties as any)[name]
 						: (schema as any).items.properties[name];
@@ -687,7 +690,7 @@ const defaultValidators: Record<string, DefaultValidator> = {
 const addDefaultValidators = (master: ExtendedMaster) => {
 	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
-			const nextPath = `${path}/${unprefixProp(field.name)}`;
+			const nextPath = `${path}/${field.name}`;
 			const _defaultValidators = defaultValidators[nextPath]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
