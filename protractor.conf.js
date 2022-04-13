@@ -1,9 +1,12 @@
-// Firefox isn't run default since it has a bug with mousemove (See https://github.com/angular/protractor/issues/4715 )
+const { SpecReporter } = require("jasmine-spec-reporter");
+const { JUnitXmlReporter } = require("jasmine-reporters");
 
+// Firefox isn't run default since it has a bug with mousemove (See https://github.com/angular/protractor/issues/4715 )
 const [width, height] = [800, 1000];
+const threads = process.env.HEADLESS === "false" ? 1 : parseInt(process.env.THREADS || 4);
 const common = {
-	shardTestFiles: parseInt(process.env.THREADS) !== 1,
-	maxInstances: process.env.THREADS ? parseInt(process.env.THREADS) :  4
+	shardTestFiles: threads !== 1,
+	maxInstances: threads
 };
 const chrome = {
 	...common,
@@ -37,15 +40,31 @@ if (process.env.HEADLESS && process.env.HEADLESS !== "true") multiCapabilities.f
 	});
 });
 
+const standalone = process.env.STANDALONE === "true";
+
 exports.config = {
 	specs: ["test/client/*-spec.ts"],
 	multiCapabilities,
 	maxSessions: 4,
 	SELENIUM_PROMISE_MANAGER: false,
+	beforeLaunch: standalone ? () => {
+		require("ts-node").register({
+			project: require("path").join(__dirname, "./tsconfig.json")
+		});
+		require("./src/server/start").default;
+	} : undefined,
 	onPrepare: async () => {
 		require("ts-node").register({
 			project: require("path").join(__dirname, "./tsconfig.json")
 		});
+
+		jasmine.getEnv().addReporter(new SpecReporter({ spec: { displayStacktrace: true } }));
+
+		const junitReporter = new JUnitXmlReporter({
+			savePath: "test-results/client",
+			consolidateAll: false
+		});
+		jasmine.getEnv().addReporter(junitReporter);
 
 		browser.waitForAngularEnabled(false);
 

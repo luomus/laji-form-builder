@@ -7,6 +7,7 @@ export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string"
 
 const CSS_NAMESPACE = "ljb";
 
+// Namespace
 export const nmspc = (_nmspc?: string) => (s?: string) =>
 	s === undefined
 		? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}`
@@ -14,6 +15,7 @@ export const nmspc = (_nmspc?: string) => (s?: string) =>
 			? `${CSS_NAMESPACE}${_nmspc ? `-${_nmspc}` : ""}-${s}`
 			: CSS_NAMESPACE;
 
+// Global namespace 
 export const gnmspc  = nmspc();
 
 export const getComponentPropTypes = <T = React.Component>(field: T) => field && parsePropTypes(field);
