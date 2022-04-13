@@ -5,7 +5,7 @@
   "main": "lib/client/app.js",
   "scripts": {
     "start": "npm run start:dev",
-    "start:dev": "nodemon src/server/start-dev.ts",
+    "start:dev": "nodemon src/server/start-dev.ts --ignore test",
     "start:prod": "node build/src/server/start.js",
     "test": "npm run test:server && npm run test:client",
     "test:client": "HOST=localhost PORT=8082 protractor protractor.conf.js",
