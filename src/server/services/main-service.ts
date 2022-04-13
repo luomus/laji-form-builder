@@ -45,7 +45,7 @@ export const formFetch = lajiStoreFetch("/form");
 const apiClient = new ApiClient(new ApiClientImplementation(
 	config.apiBase,
 	config.accessToken,
-	config.userToken,
+	undefined,
 	DEFAULT_LANG
 ), DEFAULT_LANG, {fi: {}, sv: {}, en: {}});
 

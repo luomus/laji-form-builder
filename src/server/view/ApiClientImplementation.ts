@@ -7,8 +7,8 @@ export default class ApiClient implements ApiClientImplementation {
 	BASE_URL: string;
 	lang: string;
 	accessToken: string;
-	personToken: string;
-	constructor(baseUrl: string, accessToken: string, personToken: string, lang = "en") {
+	personToken?: string;
+	constructor(baseUrl: string, accessToken: string, personToken?: string, lang = "en") {
 		this.BASE_URL =  baseUrl;
 		this.lang = lang;
 		this.accessToken = accessToken;
