@@ -1,5 +1,5 @@
 import { $, protractor, browser, ElementFinder as _ElementFinder, by, element } from "protractor";
-import { gnmspc, nmspc } from "../../src/client/utils";
+import { classNames, gnmspc, nmspc } from "../../src/client/utils";
 import { lajiFormLocate, getLocatorForContextId } from "laji-form/test-export/test-utils";
 import { Lang } from "../../src/model";
 
@@ -13,6 +13,7 @@ export declare class ElementFinder extends _ElementFinder {
 
 // Class namespace
 const cnmspc = (fn: (str: string) => string) => (str: string) => `.${(fn(str))}`;
+// Global namespace
 const gcnmspc = (str: string): string => cnmspc(gnmspc)(str);
 
 interface BuilderPOProps {
@@ -46,9 +47,9 @@ export class BuilderPO {
 		$en: this.$$langs.get(2),
 		$active: this.$langsContainer.$(".active"),
 		changeTo: async (lang: Lang) => {
-			function waitForCssClass(elementFinder: ElementFinder, desiredClass: string) {
+			function waitForCssClass(elem$: ElementFinder, desiredClass: string) {
 				return async function () {
-					const className = await elementFinder.getAttribute("class");
+					const className = await elem$.getAttribute("class");
 					return className && className.indexOf(desiredClass) >= 0;
 				};
 			}
@@ -133,10 +134,13 @@ export class BuilderPO {
 
 	wizardNmspc = cnmspc(nmspc("creator-wizard"));
 	$creator = $(this.wizardNmspc(""));
+
 	create = {
+		$createButton: $(this.wizardNmspc("create-create")) as ElementFinder,
 		$jsonButton: $(this.wizardNmspc("create-json")) as ElementFinder,
 		$DatabankButton: $(this.wizardNmspc("create-databank")) as ElementFinder,
 		json: {
+			inputSelector: classNames(this.wizardNmspc("json"), gcnmspc("json-editor")),
 			$input: $(this.wizardNmspc("json")).$("textarea") as ElementFinder,
 			$submit: $(this.wizardNmspc("json")).$("button") as ElementFinder
 		}

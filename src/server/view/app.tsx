@@ -54,13 +54,13 @@ const initialRoute = uriToState(initialUri);
 const apiClient = new ApiClientImplementation(
 	config.apiBase,
 	config.accessToken,
-	config.userToken,
+	undefined,
 	initialRoute.lang
 );
 const formApiClient = new ApiClientImplementation(
 	config.formApiBase,
 	config.accessToken,
-	config.userToken,
+	undefined,
 	initialRoute.lang
 );
 
@@ -144,9 +144,15 @@ const formService = new FormService(
 			updateRoute({...route, id});
 		}, [route, updateRoute]);
 
+		// Needed for e2e tests detecting when form previewer gets new schema with new lang.
+		const propsForTestEnv = {
+			className: lang
+		};
+
 		return (
 			<React.Fragment>
 				<LajiForm {...form}
+				          {...propsForTestEnv}
 				          lang={lang}
 				          formData={formData}
 				          apiClient={apiClient}

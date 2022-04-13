@@ -7,11 +7,11 @@
   "shortDescription": "@shortDescription",
   "fields": [
     {
-      "name": "MZ.editors",
+      "name": "editors",
       "label": "@editorsLabel"
     },
     {
-      "name": "MX.secureLevel",
+      "name": "secureLevel",
       "label": "@secureLevelLabel",
       "options": {
         "default": "MX.secureLevelNone",
@@ -24,7 +24,6 @@
     {
       "name": "gatheringEvent",
       "label": "",
-      "type": "fieldset",
       "validators": {
         "presence": {
           "allowEmpty": false
@@ -32,7 +31,7 @@
       },
       "fields": [
         {
-          "name": "MY.leg",
+          "name": "leg",
           "label": "@legLabel",
           "validators": {
             "presence": {
@@ -41,7 +40,7 @@
           }
         },
         {
-          "name": "MY.legPublic",
+          "name": "legPublic",
           "label": "@legPublicLabel",
           "type": "checkbox",
           "options": {
@@ -49,7 +48,7 @@
           }
         },
         {
-          "name": "MY.dateBegin",
+          "name": "dateBegin",
           "options": {
             "excludeFromCopy": true
           },
@@ -73,7 +72,7 @@
           }
         },
         {
-          "name": "MY.dateEnd",
+          "name": "dateEnd",
           "options": {
             "excludeFromCopy": true
           },
@@ -92,11 +91,11 @@
       ]
     },
     {
-      "name": "MY.keywords"
+      "name": "keywords"
     },
     {
       "name": "gatherings",
-      "type": "collection",
+      "required": true,
       "validators": {
         "presence": {
           "message": "@gatheringsPresenceValidation",
@@ -105,7 +104,7 @@
       },
       "fields": [
         {
-          "name": "MY.dateBegin",
+          "name": "dateBegin",
           "options": {
             "excludeFromCopy": true
           },
@@ -122,7 +121,10 @@
           }
         },
         {
-          "name": "MY.dateEnd",
+          "name": "dateEnd",
+          "options": {
+            "excludeFromCopy": true
+          },
           "validators": {
             "datetime": {
               "latest": "now",
@@ -136,93 +138,91 @@
           }
         },
         {
-          "name": "MY.namedPlaceID"
+          "name": "namedPlaceID"
         },
         {
-          "name": "MY.geometry"
+          "name": "geometry"
         },
         {
-          "name": "MY.coordinateRadius",
+          "name": "coordinateRadius",
           "label": "@coordinateRadiusLabel"
         },
         {
-          "name": "MY.alt"
+          "name": "alt"
         },
         {
-          "name": "MY.country"
+          "name": "country"
         },
         {
-          "name": "MY.administrativeProvince"
+          "name": "administrativeProvince"
         },
         {
-          "name": "MY.biologicalProvince"
+          "name": "biologicalProvince"
         },
         {
-          "name": "MY.municipality"
+          "name": "municipality"
         },
         {
-          "name": "MY.locality"
+          "name": "locality"
         },
         {
-          "name": "MY.localityDescription"
+          "name": "localityDescription"
         },
         {
-          "name": "MZ.images",
+          "name": "images",
           "options": {
             "excludeFromCopy": true
           },
           "label": "@gatheringsImagesLabel"
         },
         {
-          "name": "MY.habitat",
+          "name": "habitat",
           "label": "@biotooppiLabel"
         },
         {
-          "name": "MY.habitatDescription"
+          "name": "habitatDescription"
         },
         {
-          "name": "MY.weather",
+          "name": "weather",
           "options": {
             "excludeFromCopy": true
           }
         },
         {
-          "name": "MY.notes",
+          "name": "notes",
           "options": {
             "excludeFromCopy": false
           }
         },
         {
-          "name": "MY.samplingMethod"
+          "name": "samplingMethod"
         },
         {
-          "name": "MY.samplingMethodNotes"
+          "name": "samplingMethodNotes"
         },
         {
-          "name": "MY.observationDays"
+          "name": "observationDays"
         },
         {
-          "name": "MY.observationMinutes"
+          "name": "observationMinutes"
         },
         {
-          "name": "MY.trapCount"
+          "name": "trapCount"
         },
         {
-          "name": "MY.taxonCensus",
-          "type": "fieldset",
+          "name": "taxonCensus",
           "fields": [
             {
-              "name": "MY.censusTaxonID"
+              "name": "censusTaxonID"
             },
             {
-              "name": "MY.taxonCensusType"
+              "name": "taxonCensusType"
             }
           ]
         },
         {
           "name": "units",
           "label": "@unitsLabel",
-          "type": "collection",
           "options": {
             "minItems": 1,
             "uniqueItems": false,
@@ -236,28 +236,28 @@
           },
           "fields": [
             {
-              "name": "MY.count"
+              "name": "count"
             },
             {
-              "name": "MY.maleIndividualCount"
+              "name": "maleIndividualCount"
             },
             {
-              "name": "MY.femaleIndividualCount"
+              "name": "femaleIndividualCount"
             },
             {
-              "name": "MY.sex"
+              "name": "sex"
             },
             {
-              "name": "MY.notes"
+              "name": "notes"
             },
             {
-              "name": "MY.taxonConfidence",
+              "name": "taxonConfidence",
               "options": {
                 "default": "MY.taxonConfidenceSure"
               }
             },
             {
-              "name": "MY.recordBasis",
+              "name": "recordBasis",
               "options": {
                 "default": "MY.recordBasisHumanObservation",
                 "whitelist": [
@@ -272,26 +272,26 @@
               }
             },
             {
-              "name": "MY.samplingMethod"
+              "name": "samplingMethod"
             },
             {
-              "name": "MY.samplingMethodNotes"
+              "name": "samplingMethodNotes"
             },
             {
-              "name": "MY.preservation"
+              "name": "preservation"
             },
             {
-              "name": "MY.wild"
+              "name": "wild"
             },
             {
-              "name": "MY.breeding"
+              "name": "breeding"
             },
             {
-              "name": "MY.hostID",
+              "name": "hostID",
               "label": "@hostID"
             },
             {
-              "name": "MY.checklistID",
+              "name": "checklistID",
               "options": {
                 "default": "",
                 "value_options": {
@@ -302,74 +302,73 @@
               "type": "select"
             },
             {
-              "name": "MY.atlasCode"
+              "name": "atlasCode"
             },
             {
-              "name": "MY.twitched"
+              "name": "twitched"
             },
             {
-              "name": "MY.plantLifeStage"
+              "name": "plantLifeStage"
             },
             {
-              "name": "MY.plantStatusCode"
+              "name": "plantStatusCode"
             },
             {
-              "name": "MY.lifeStage"
+              "name": "lifeStage"
             },
             {
-              "name": "MY.hostInformalNameString"
+              "name": "hostInformalNameString"
             },
             {
-              "name": "MY.substrateSpecies"
+              "name": "substrateSpecies"
             },
             {
-              "name": "MY.smell"
+              "name": "smell"
             },
             {
-              "name": "MY.smellNotes"
+              "name": "smellNotes"
             },
             {
-              "name": "MY.taste"
+              "name": "taste"
             },
             {
-              "name": "MY.tasteNotes"
+              "name": "tasteNotes"
             },
             {
-              "name": "MY.informalTaxonGroups"
+              "name": "informalTaxonGroups"
             },
             {
-              "name": "MZ.images"
+              "name": "images"
             },
             {
               "name": "identifications",
               "options": {
                 "minItems": 1
               },
-              "type": "collection",
               "fields": [
                 {
-                  "name": "MY.taxon"
+                  "name": "taxon"
                 },
                 {
-                  "name": "MY.det"
+                  "name": "det"
                 },
                 {
-                  "name": "MY.detDate"
+                  "name": "detDate"
                 },
                 {
-                  "name": "MY.identificationBasis"
+                  "name": "identificationBasis"
                 }
-              ]
+              ],
+              "label": ""
             },
             {
               "name": "unitGathering",
-              "type": "fieldset",
               "fields": [
                 {
-                  "name": "MY.geometry"
+                  "name": "geometry"
                 },
                 {
-                  "name": "MY.dateBegin",
+                  "name": "dateBegin",
                   "validators": {
                     "datetime": {
                       "latest": "now",
@@ -383,7 +382,10 @@
                   }
                 },
                 {
-                  "name": "MY.dateEnd",
+                  "name": "dateEnd",
+                  "options": {
+                    "excludeFromCopy": true
+                  },
                   "validators": {
                     "datetime": {
                       "latest": "now",
@@ -397,60 +399,62 @@
                   }
                 },
                 {
-                  "name": "MY.habitatIUCN"
+                  "name": "habitatIUCN"
                 },
                 {
-                  "name": "MY.habitatDescription"
+                  "name": "habitatDescription"
                 },
                 {
-                  "name": "MY.substrate",
+                  "name": "substrate",
                   "label": "@substrateLabel"
                 }
-              ]
+              ],
+              "label": ""
             },
             {
               "name": "unitFact",
-              "type": "fieldset",
               "fields": [
                 {
-                  "name": "MY.autocompleteSelectedTaxonID"
+                  "name": "autocompleteSelectedTaxonID"
                 }
-              ]
+              ],
+              "label": ""
             },
             {
-              "name": "MY.birdPlumage"
+              "name": "birdPlumage"
             },
             {
-              "name": "MY.birdAge"
+              "name": "birdAge"
             },
             {
-              "name": "MY.movingStatus"
+              "name": "movingStatus"
             },
             {
-              "name": "MY.distance"
+              "name": "distance"
             },
             {
-              "name": "MY.movingDirection"
+              "name": "movingDirection"
             },
             {
-              "name": "MY.batBehavior"
+              "name": "batBehavior"
             },
             {
-              "name": "MY.keywords",
+              "name": "keywords",
               "label": "@unitKeywordLabel"
             },
             {
-              "name": "MY.additionalIDs"
+              "name": "additionalIDs"
             },
             {
-              "name": "MY.areaInSquareMeters"
+              "name": "areaInSquareMeters"
             },
             {
-              "name": "MZ.audio"
+              "name": "audio"
             }
           ]
         }
-      ]
+      ],
+      "label": ""
     }
   ],
   "translations": {
@@ -508,7 +512,9 @@
       "@taxonValidation": "Taxon name must be reported",
       "@unitKeywordLabel": "Collection/Keywords",
       "@addAudioGlyphLabel": "Add a recording",
-      "@addObserver": "Add an observer"
+      "@addObserver": "Add an observer",
+      "@documentKeywordsHelp": "You can give your own keywords for the submission, to make it easier to search the observations. E.g. \"field-route\" or \"backyard-forest\".",
+      "@geometryHectaresMaxValidation": "Too big area. Maximum is %{max} hectares"
     },
     "sv": {
       "@hostID": "Värdens artidentifierare",
@@ -565,7 +571,9 @@
       "@taxonValidation": "Taxonamn måste rapporteras",
       "@unitKeywordLabel": "Samling/Nyckelord",
       "@addAudioGlyphLabel": "Lägg till en inspelningen",
-      "@addObserver": "Lägg till en obvservatör"
+      "@addObserver": "Lägg till en obvservatör",
+      "@documentKeywordsHelp": "Du kan ange dina egna nyckelord för inlämningen för att göra det lättare att söka i observationerna. T.ex. \"field-route\" eller \"backyard-forest\".",
+      "@geometryHectaresMaxValidation": "För stort område. Maximalt är %{max} hektar"
     },
     "fi": {
       "@hostID": "Isäntälajin tunniste",
@@ -622,7 +630,9 @@
       "@taxonValidation": "Lajinimi täytyy ilmoittaa.",
       "@unitKeywordLabel": "Kokoelma/Avainsanat",
       "@addAudioGlyphLabel": "Lisää äänite",
-      "@addObserver": "Lisää havainnoitsija"
+      "@addObserver": "Lisää havainnoija",
+      "documentKeywordsHelp": "Voit antaa havaintoerälle omia avainsanoja, jotka helpottavat havaintojen etsimistä ja tilastointia. Esim. \"peltoreitti\" tai \"takametsä\".",
+      "@geometryHectaresMaxValidation": "Liian iso alue. Maksimi on %{max} hehtaaria"
     }
   },
   "uiSchema": {
@@ -920,7 +930,8 @@
       }
     },
     "keywords": {
-      "ui:field": "TagArrayField"
+      "ui:field": "TagArrayField",
+      "ui:help": "@documentKeywordsHelp"
     },
     "gatherings": {
       "ui:functions": [
@@ -1810,6 +1821,7 @@
       "sv": "https://laji.fi/about/1107"
     },
     "allowExcel": true,
+    "allowTemplate": true,
     "simple": true
   }
 }

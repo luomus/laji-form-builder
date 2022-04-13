@@ -1,22 +1,35 @@
 import { BuilderPO, createBuilder, isDisplayed } from "./test-utils";
-import { browser, ElementFinder } from "protractor";
+import { browser, $ } from "protractor";
 
 let formJSON = JSON.stringify(JSON.stringify(require("./test-form.json")));
 formJSON = formJSON.substring(1, formJSON.length - 1);
 
-const enterLongTextToInput = async ($input: ElementFinder, text: string) => {
-	await browser.executeScript(`document.querySelector(".${await $input.getAttribute("className")}").value = \`${text}\``);
+const enterLongTextToInput = async (selector: string, text: string) => {
+	const $input = $(selector);
+	// eslint-disable-next-line max-len
+	await browser.executeScript(`document.querySelector("${selector}").value = \`${text}\``);
 	await $input.sendKeys(" ");
 };
 
 describe("Builder", () => {
 	let builder: BuilderPO;
 
-	describe("JSON", () => {
-		beforeAll(async() => {
-			builder = await createBuilder();
+	beforeAll(async() => {
+		builder = await createBuilder();
+	});
+
+	describe("Create or list", () => {
+		it("Create option is displayed",  async () => {
+			expect(await isDisplayed(builder.create.$createButton)).toBe(true);
 		});
 
+		it("can be selected",  async () => {
+			await builder.create.$createButton.click();
+			expect(await isDisplayed(builder.create.$jsonButton));
+		});
+	});
+
+	describe("JSON", () => {
 		it("option is displayed",  async () => {
 			expect(await isDisplayed(builder.create.$jsonButton)).toBe(true);
 		});
@@ -27,7 +40,7 @@ describe("Builder", () => {
 		});
 
 		it("builds form", async () => {
-			await enterLongTextToInput(builder.create.json.$input, formJSON);
+			await enterLongTextToInput(builder.create.json.inputSelector, formJSON);
 			await builder.create.json.$submit.click();
 			await builder.waitUntilLoaded();
 			expect(await isDisplayed(builder.formPreview.$container)).toBe(true);
@@ -35,11 +48,12 @@ describe("Builder", () => {
 	});
 
 	describe("databank option", () => {
-		beforeAll(async() => {
+		beforeAll(async () => {
 			builder = await createBuilder();
+			await builder.create.$createButton.click();
 		});
 
-		it("displays databank and JSON options for creating a form", async () => {
+		it("option is displayed", async () => {
 			expect(await isDisplayed(builder.create.$DatabankButton)).toBe(true);
 		});
 	});
@@ -47,8 +61,9 @@ describe("Builder", () => {
 	describe("lang", () => {
 		beforeAll(async() => {
 			builder = await createBuilder();
+			await builder.create.$createButton.click();
 			await builder.create.$jsonButton.click();
-			await enterLongTextToInput(builder.create.json.$input, formJSON);
+			await enterLongTextToInput(builder.create.json.inputSelector, formJSON);
 			await builder.create.json.$submit.click();
 			await builder.waitUntilLoaded();
 		});
@@ -71,7 +86,8 @@ describe("Builder", () => {
 			});
 
 			it("changes preview form lang", async () => {
-				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText()).toBe("Observatörernas namn är offentliga");
+				expect(await builder.formPreview.locate("gatheringEvent.legPublic").$("strong").getText())
+					.toBe("Observatörernas namn är offentliga");
 			});
 
 			it("doesn't change editor UI lang", async () => {
