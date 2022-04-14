@@ -68,10 +68,22 @@ export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: 
 
 export const isObject = _isObject;
 
+/**
+ * Removes the name space prefix.
+ *
+ * Example:
+ * unprefixProp("MY.document"); // returns "document"
+ **/
 export const unprefixProp = (s: string) => s.replace(/^.+\./, "");
 
 export const fetchJSON = (path: string, options?: any) => fetch(path, options).then(r => r.json());
 
+/**
+ * Converts an array into a dictionary with the array items as the keys.
+ *
+ * Example:
+ * dictionary(["a", "b"]); // returns { a: true, b: true }
+ **/
 export const dictionarify = (arr: string[]): Record<string, true> => arr.reduce((dict, key) => {
 	dict[key] = true;
 	return dict;
