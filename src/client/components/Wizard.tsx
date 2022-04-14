@@ -65,7 +65,7 @@ export const FormCreatorWizard = ({onCreate, allowList = false, ...config}: Form
 		<Modal onHide={onHide} show={true}>
 			<Modal.Header>
 				<Breadcrumb>{stepsTaken.map((step, i) =>
-					<BreadcrumbItem key={step}
+					<WizardBreadcrumbItem key={step}
 					                setStepsTaken={setStepsTaken}
 					                steps={stepsTaken.slice(0, i + 1)}
 					                rootStep={rootStep}
@@ -81,11 +81,13 @@ export const FormCreatorWizard = ({onCreate, allowList = false, ...config}: Form
 	);
 };
 
-function BreadcrumbItem(
-	{setStepsTaken, steps, rootStep}:
-	{setStepsTaken: React.Dispatch<React.SetStateAction<string[]>>,
-		steps: string[],
-		rootStep: Pick<WizardStep, "children">
+function WizardBreadcrumbItem(
+	{setStepsTaken, steps, rootStep, active}:
+	{
+		setStepsTaken: React.Dispatch<React.SetStateAction<string[]>>;
+		steps: string[];
+		rootStep: Pick<WizardStep, "children">;
+		active?: boolean;
 	}) {
 	const {theme, translations} = React.useContext(Context);
 	const {Breadcrumb} = theme;
@@ -95,7 +97,7 @@ function BreadcrumbItem(
 		rootStep as WizardStep
 	);
 	const wizardStep = getStep(steps);
-	return <Breadcrumb.Item onClick={onClick}>{translations[wizardStep.label]}</Breadcrumb.Item>;
+	return <Breadcrumb.Item onClick={onClick} active={active}>{translations[wizardStep.label]}</Breadcrumb.Item>;
 }
 
 function GenericWizardStepChooser(
