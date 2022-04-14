@@ -47,7 +47,7 @@ const apiClientImpl = (...args: ConstructorParameters<typeof ApiClientImplementa
 const apiClient = new ApiClient(apiClientImpl(
 	config.apiBase,
 	config.accessToken,
-	config.userToken,
+	undefined,
 	LANG
 ), LANG, {fi: {}, sv: {}, en: {}});
 
