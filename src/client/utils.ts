@@ -12,7 +12,7 @@ const CSS_NAMESPACE = "ljb";
  *
  * Example:
  * const local = nmspc("local");
- * local("foo"); // => "ljb-local-foo"
+ * local("foo"); // returns "ljb-local-foo"
  **/
 export const nmspc = (_nmspc?: string) => (s?: string) =>
 	s === undefined
@@ -25,7 +25,7 @@ export const nmspc = (_nmspc?: string) => (s?: string) =>
  * CSS namespace relative to global laji-form-builder scope ("ljb").
  *
  * Example:
- * gnmspc("foo"); // => "ljb-local-foo"
+ * gnmspc("foo"); // returns "ljb-local-foo"
  **/
 export const gnmspc  = nmspc();
 

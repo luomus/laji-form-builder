@@ -100,7 +100,7 @@ const view: RequestHandler = async (req, res, next) => {
 	if (req.url.match("/static") || req.url.startsWith("/__webpack")) {
 		return next();
 	}
-	res.sendFile(path.join(__dirname, "view", "index.html"));
+	res.sendFile(path.join(__dirname, "view", "index.html"), {dotfiles: "allow"});
 };
 
 const server = express();
