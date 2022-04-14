@@ -46,7 +46,7 @@ export default class MetadataService {
 
 	getProperties = this.cache(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
 		return (await this.apiClient.fetch(
-			`/metadata/classes/${this.getPropertyNameFromContext(property)}/properties`,
+			`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
 			{lang: "multi"})
 		).results as PropertyModel[];
 	})

@@ -123,7 +123,7 @@ describe("fields", () => {
 
 		it("doesn't allow properties", async () => {
 			const form = {
-				context: "gatherings", // Not a class but property. "MY.gathering" would be fine.
+				context: "gatherings", // Not a class but property. "gathering" would be fine.
 				fields: [{ name: "locality" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
