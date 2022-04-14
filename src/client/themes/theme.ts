@@ -1,7 +1,8 @@
 import {
 	Theme as LajiFormTheme,
 	ButtonGroupProps as LajiFormButtonGroupProps,
-	ListGroupProps as LajiFormListGroupProps
+	ListGroupProps as LajiFormListGroupProps,
+	BreadcrumbItem as LajiFormBreadcrumbItem,
 } from "laji-form/lib/themes/theme";
 export * from "laji-form/lib/themes/theme";
 
@@ -19,9 +20,14 @@ export interface ButtonGroupProps extends LajiFormButtonGroupProps, HasMaybeClas
 	block?: true;
 }
 
+export type Breadcrumb = React.ComponentType<any> & {
+	Item: React.ComponentType<LajiFormBreadcrumbItem & {active?: boolean}>;
+}
+
 export type ListGroupProps = LajiFormListGroupProps & HasMaybeClassName;
 
 export interface Theme extends LajiFormTheme {
 	ButtonGroup: React.ComponentType<ButtonGroupProps>;
-	ListGroup: React.ComponentType<ListGroupProps>
+	ListGroup: React.ComponentType<ListGroupProps>;
+	Breadcrumb: Breadcrumb;
 }

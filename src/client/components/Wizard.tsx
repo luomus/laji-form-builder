@@ -68,7 +68,8 @@ export const FormCreatorWizard = ({onCreate, allowList = false, ...config}: Form
 					<BreadcrumbItem key={step}
 					                setStepsTaken={setStepsTaken}
 					                steps={stepsTaken.slice(0, i + 1)}
-					                rootStep={rootStep} />
+					                rootStep={rootStep}
+					                active={i === stepsTaken.length - 1} />
 				)}</Breadcrumb>
 			</Modal.Header>
 			<Modal.Body>
