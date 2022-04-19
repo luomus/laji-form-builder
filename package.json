@@ -9,7 +9,7 @@
     "start:prod": "node build/src/server/start.js",
     "test": "npm run test:server && npm run test:client",
     "test:client": "HOST=localhost PORT=8082 protractor protractor.conf.js",
-    "test:client:ci": "webdriver-manager update --standalone false --gecko false && HOST=localhost PORT=8082 STANDALONE=true protractor protractor.conf.js",
+    "test:client:ci": "webdriver-manager update --gecko false && HOST=localhost PORT=8082 STANDALONE=true protractor protractor.conf.js",
     "test:client:debug": "HEADLESS=false HOST=localhost PORT=8082 node --inspect-brk node_modules/protractor/bin/protractor protractor.conf.js",
     "test:server": "ts-node node_modules/jasmine-xml-reporter/bin/jasmine.js --conf=jasmine.json \"test/server/*-spec.ts\"",
     "test:server:ci": "npm run test:server -- --junitreport --output=test-results/server",
