@@ -1,0 +1,757 @@
+{
+"currentPage": 1,
+"pageSize": 33,
+"total": 33,
+"results": [
+{
+"property": "MY.acknowledgeNoUnitsInCensus",
+"label": {
+"en": "No units in census",
+"fi": "Laskennassa ei havaintoja",
+"sv": "Inga enheter i census"
+},
+"domain": [
+"MZ.gatheringEvent",
+"MY.gathering"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "acknowledgeNoUnitsInCensus"
+},
+{
+"property": "MY.artificialLight",
+"label": {
+"fi": "Keinovalo",
+"en": "Artificial light",
+"sv": "Konstgjort ljus"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.artificialLightEnum"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "artificialLight"
+},
+{
+"property": "MY.breaksDuringCensusInMinutes",
+"label": {
+"fi": "Pidettyjen taukojen määrä minuutteina",
+"en": "Breaks kept in minutes",
+"sv": "raster hålls på några minuter"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:nonNegativeInteger"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "breaksDuringCensusInMinutes"
+},
+{
+"property": "MY.censusHinderedByEnviromentalFactors",
+"label": {
+"sv": "Väder (etc) hindrade folkräkningen",
+"fi": "Sääolot (tms) haittasivat",
+"en": "Weather (etc) hindered the census"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "censusHinderedByEnviromentalFactors"
+},
+{
+"property": "MY.censusHinderedByFog",
+"label": {
+"sv": "Dimma hindrade folkräkningen",
+"en": "Fog hindered the census",
+"fi": "Sumu/usva haittasi"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "censusHinderedByFog"
+},
+{
+"property": "MY.censusHinderedByRain",
+"label": {
+"en": "Rain hindered the census",
+"fi": "Sade haittasi",
+"sv": "Regn hindrade folkräkningen"
+},
+"domain": [
+"MZ.gatheringEvent",
+"MY.gathering"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "censusHinderedByRain"
+},
+{
+"property": "MY.censusHinderedByWind",
+"label": {
+"fi": "Tuuli haittasi",
+"sv": "Vind hindrade folkräkningen",
+"en": "Wind hindered the census"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "censusHinderedByWind"
+},
+{
+"property": "MY.censusPrematurelyAborted",
+"label": {
+"en": "Was the census prematurely aborted?",
+"fi": "Jäikö laskenta kesken?",
+"sv": "Var folkräkningen avbruten i förtid?"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "censusPrematurelyAborted"
+},
+{
+"property": "MY.cloudCover",
+"label": {
+"fi": "Pilvisyys",
+"en": "Cloudiness",
+"sv": "grumlighet"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.cloudCoverOktaEnum"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "cloudCover"
+},
+{
+"property": "MY.cloudCoverEnd",
+"label": {
+"fi": "Pilvisyys lopetettaessa",
+"en": "End cloud cover"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.cloudCoverOktaEnum"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "cloudCoverEnd"
+},
+{
+"property": "MY.cloudCoverStart",
+"label": {
+"fi": "Pilvisyys alkaessa",
+"en": "Start cloud cover"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.cloudCoverOktaEnum"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "cloudCoverStart"
+},
+{
+"property": "MY.completeList",
+"label": {
+"sv": "Lista fullständighet",
+"en": "List completeness",
+"fi": "Lajiluettelon täydellisyys"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.completeListClass"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": true,
+"multiLanguage": false,
+"shortName": "completeList"
+},
+{
+"property": "MY.dateBegin",
+"label": {
+"fi": "Alku",
+"en": "Start date",
+"sv": "Startdatum"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent",
+"MZ.unitGathering"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 2,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "dateBegin"
+},
+{
+"property": "MY.dateEnd",
+"label": {
+"fi": "Loppu",
+"sv": "Slutdatum",
+"en": "End date"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent",
+"MZ.unitGathering"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 3,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "dateEnd"
+},
+{
+"property": "MY.gatheringFact",
+"label": {},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.gatheringFactClass"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": true,
+"multiLanguage": false,
+"shortName": "gatheringFact"
+},
+{
+"property": "MY.geometry",
+"label": {
+"fi": "Koordinaatit",
+"en": "Coordinates"
+},
+"domain": [
+"MZ.unitGathering",
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"MZ.geometry"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "geometry"
+},
+{
+"property": "MY.gpsUsed",
+"label": {
+"fi": "GPS käytössä",
+"en": "GPS used",
+"sv": "GPS används"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "gpsUsed"
+},
+{
+"property": "MY.leg",
+"label": {
+"en": "Leg",
+"sv": "Leg",
+"fi": "Kerääjä (leg)"
+},
+"domain": [
+"MZ.gatheringEvent",
+"MY.gathering"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "unbounded",
+"required": false,
+"hasMany": true,
+"sortOrder": 1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "leg",
+"comment": {
+"en": "Name of the collector(s), in format 'Lastname, Firstname; Lastname Firstname'"
+}
+},
+{
+"property": "MY.legPublic",
+"label": {
+"sv": "Namnen ska visas offentligt?",
+"fi": "Näytetäänkö nimet julkisesti?",
+"en": "Display names publically?"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 4,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "legPublic"
+},
+{
+"property": "MY.legUserID",
+"label": {
+"fi": "Käyttäjätunnus"
+},
+"domain": [
+"MZ.gatheringEvent",
+"MY.gathering"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "unbounded",
+"required": false,
+"hasMany": true,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "legUserID",
+"comment": {
+"fi": "Alkuperäislähteen käyttäjätunnus"
+}
+},
+{
+"property": "MY.namedPlaceNotes",
+"label": {
+"sv": "Info om denna rutt",
+"en": "Info about this route",
+"fi": "Reitin kuvaus"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 7,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "namedPlaceNotes"
+},
+{
+"property": "MY.notes",
+"label": {
+"fi": "Lisätiedot",
+"sv": "Anteckningar",
+"en": "Notes"
+},
+"domain": [
+"MZ.gatheringEvent",
+"MY.unit",
+"MY.gathering",
+"MY.collection",
+"MY.document"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 9,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "notes",
+"comment": {
+"en": "Additional information to the data in each section."
+}
+},
+{
+"property": "MY.rainIntensity",
+"label": {
+"fi": "Sade",
+"en": "Rain intensity",
+"sv": "Regnintensitet"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.rainIntensityEnum"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "rainIntensity"
+},
+{
+"property": "MY.routeDirectionAdhered",
+"label": {
+"sv": "Vidhäftade ruttanvisningen",
+"fi": "Reitin kiertosuuntaa noudatettiin",
+"en": "Adhered route direction"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 6,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "routeDirectionAdhered"
+},
+{
+"property": "MY.spottingScopeUsed",
+"label": {
+"en": "Spotting scope",
+"fi": "Kaukoputki"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent",
+"MY.gatheringFactClass"
+],
+"range": [
+"xsd:boolean"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "spottingScopeUsed"
+},
+{
+"property": "MY.startDistanceFromNECorner",
+"label": {
+"en": "Start distance from NE corner (m)",
+"fi": "Lähtöpisteen etäisyys reitin koillisnurkasta (m)"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 8,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "startDistanceFromNECorner"
+},
+{
+"property": "MY.startPointDeviation",
+"label": {
+"fi": "Aloituspisteen poikkeama (m)",
+"en": "Start point deviation (m)",
+"sv": "Startpunkt avvikelse (m)"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:integer"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": 5,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "startPointDeviation"
+},
+{
+"property": "MY.taxonCensus",
+"label": {
+"fi": "Kattavasti kirjattu taksoni",
+"en": "Completely recorded taxon"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"MY.taxonCensusClass"
+],
+"minOccurs": "0",
+"maxOccurs": "unbounded",
+"required": false,
+"hasMany": true,
+"sortOrder": -1,
+"isEmbeddable": true,
+"multiLanguage": false,
+"shortName": "taxonCensus",
+"comment": {
+"": "This property is used for documenting those taxa that are completely recorded as part of the gathering event"
+}
+},
+{
+"property": "MY.temperature",
+"label": {
+"en": "Temperature in celsius",
+"fi": "Lämpötila",
+"sv": "Temperatur"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:integer"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "temperature"
+},
+{
+"property": "MY.temperatureEnd",
+"label": {
+"fi": "Lämpö lopetettaessa / °C",
+"en": "End temperature / °C"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:decimal"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "temperatureEnd"
+},
+{
+"property": "MY.temperatureStart",
+"label": {
+"fi": "Lämpö alkaessa / °C",
+"en": "Start temperature / °C"
+},
+"domain": [
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:decimal"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "temperatureStart"
+},
+{
+"property": "MY.timeEnd",
+"label": {
+"sv": "Slutet",
+"fi": "Lopetusaika",
+"en": "End time"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "timeEnd"
+},
+{
+"property": "MY.timeStart",
+"label": {
+"fi": "Aloitusaika",
+"en": "Start time",
+"sv": "Starttid"
+},
+"domain": [
+"MY.gathering",
+"MZ.gatheringEvent"
+],
+"range": [
+"xsd:string"
+],
+"minOccurs": "0",
+"maxOccurs": "1",
+"required": false,
+"hasMany": false,
+"sortOrder": -1,
+"isEmbeddable": false,
+"multiLanguage": false,
+"shortName": "timeStart"
+}
+],
+"lastPage": 1,
+"@context": "http://schema.laji.fi/context/generic.jsonld"
+}
