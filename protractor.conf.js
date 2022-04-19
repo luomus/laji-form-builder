@@ -51,7 +51,7 @@ exports.config = {
 		require("ts-node").register({
 			project: require("path").join(__dirname, "./tsconfig.json")
 		});
-		require("./src/server/start").default;
+		require("./src/server/start-dev").default;
 	} : undefined,
 	onPrepare: async () => {
 		require("ts-node").register({
