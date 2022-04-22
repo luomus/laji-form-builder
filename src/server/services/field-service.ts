@@ -325,11 +325,14 @@ export default class FieldService {
 					any[key] = await recursively(any[key]);
 				}
 			} else if (typeof any === "string" && any.startsWith("...taxonSet:")) {
-				const taxonSet = await this.apiClient.fetch(
+				const taxonSets = any.replace("...taxonSet:", "").split(",");
+				const taxonSetResults = await Promise.all(taxonSets.map(taxonSet => this.apiClient.fetch(
 					"/taxa",
-					{pageSize: 1000, taxonSets: any.split(":")[1], selectedFields: "id"}
-				);
-				return taxonSet.results?.map(({id}: any) => id) || [];
+					{pageSize: 1000, taxonSets: taxonSet, selectedFields: "id"}
+				)));
+				return taxonSetResults
+					.reduce((flat, result) => [...flat, ...result.results], [])
+					.map(({id}: any) => id) || [];
 			}
 			return any;
 		};

@@ -728,3 +728,25 @@ describe("patching", () => {
 		expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 	});
 });
+
+describe("taxonSets", () => {
+	it("works for single", async() => {
+		const form = {
+			uiSchema: {test: "...taxonSet:MX.taxonSetSykeBumblebee"}
+		};
+
+		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		expect(jsonFormat.uiSchema.test.length).toBe(38);
+		expect(jsonFormat.uiSchema.test[0]).toBe("MX.204772");
+	});
+
+	it("works for multiple", async() => {
+		const form = {
+			uiSchema: {test: "...taxonSet:MX.taxonSetSykeBumblebee,MX.taxonSetSykeBumblebeeOther"}
+		};
+
+		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		expect(jsonFormat.uiSchema.test.length).toBe(38 + 9);
+		expect(jsonFormat.uiSchema.test[38]).toBe("MX.53474");
+	});
+});
