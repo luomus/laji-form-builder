@@ -189,6 +189,20 @@ describe("/api", () => {
 				.expect((response: any) => {
 					const form = response.body;
 					expect(form).toBeDefined();
+					expectOnlyProps(form, [...masterProps, "translations", "extra"]);
+					expect(form.title[0]).toBe("@", "Form title wasn't in untranslated format");
+				})
+				.end(finish(done));
+		});
+
+		it("returns in master format when expand false", async (done) => {
+			request(app)
+				.get(`/api/${TEST_FORM_ID}?expand=false`)
+				.expect(200)
+				.expect("Content-Type", "application/json; charset=utf-8")
+				.expect((response: any) => {
+					const form = response.body;
+					expect(form).toBeDefined();
 					expectOnlyProps(form, [...masterProps, "translations"]);
 					expect(form.title[0]).toBe("@", "Form title wasn't in untranslated format");
 				})

@@ -52,7 +52,7 @@ api.get("/:id", langCheckMiddleWare, async (req, res) => {
 	if (expand && expand !== "false" && expand !== "true") {
 		return error(res, 422, "Query param expand should be one of 'true', 'false'");
 	}
-	const _expand = expand === "true";
+	const _expand = expand !== "false";
 	if (format !== Format.Schema && format !== Format.JSON) {
 		return error(res, 422, "Query param format should be one of 'json', 'schema'");
 	}
