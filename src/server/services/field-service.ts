@@ -1,86 +1,68 @@
 import ApiClient from "laji-form/lib/ApiClient";
 import MetadataService from "../../services/metadata-service";
-import { Field, JSONSchemaE, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, AltTreeNode, AltTreeParent,
-	FieldOptions, 
-	ExtendedMaster,
-	isFormExtensionField,
-	FormExtensionField} from "../../model";
-import { reduceWith, JSONSchema, multiLang, translate, unprefixProp, isObject, dictionarify } from "../../utils";
+import SchemaService from "./schema-service";
+import ExpandedJSONService from "./expanded-json-service";
+import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
+	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format } from "../../model";
+import { reduceWith, unprefixProp, isObject, translate } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
-import * as rjsf from "@rjsf/core";
 import { formFetch, UnprocessableError } from "./main-service";
 
-interface InternalProperty extends PropertyModel {
+export interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
 }
 
 export default class FieldService {
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
-	private lang: Lang;
+	private schemaService: SchemaService;
+	private expandedJSONService: ExpandedJSONService;
 
 	constructor(apiClient: ApiClient, metadataService: MetadataService, lang: Lang) {
 		this.apiClient = apiClient;
 		this.metadataService = metadataService;
-		this.lang = lang;
+		this.schemaService = new SchemaService(metadataService, apiClient, lang);
+		this.expandedJSONService = new ExpandedJSONService(metadataService, lang);
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
-		this.prepopulate = this.prepopulate.bind(this);
 		this.masterToSchemaFormat = this.masterToSchemaFormat.bind(this);
 	}
 
 	setLang(lang: Lang) {
-		this.lang = lang;
-		this.metadataService.setLang(lang);
-		this.apiClient.setLang(lang);
+		this.schemaService.setLang(lang);
+		this.expandedJSONService.setLang(lang);
 	}
 
-	async masterToSchemaFormat(rawMaster: Master, lang?: Lang): Promise<SchemaFormat> {
-		const master = await this.parseMaster(rawMaster);
-		const rootField = master.fields
-			? this.getRootField(master)
+	masterToSchemaFormat(master: Master, lang?: Lang): Promise<SchemaFormat> {
+		return this.convert(master, Format.Schema, lang);
+	}
+
+	masterToExpandedJSONFormat(master: Master, lang?: Lang): Promise<ExpandedJSONFormat> {
+		return this.convert(master, Format.JSON, lang);
+	}
+
+	async convert(master: Master, format: Format.Schema, lang?: Lang) : Promise<SchemaFormat>
+	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
+	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat>
+	{
+		const expandedMaster = await this.expandMaster(master, lang);
+		const rootField = expandedMaster.fields
+			? this.getRootField(expandedMaster)
 			: undefined;
-
-		const schema = rootField
-			? await this.masterToJSONSchema(master, rootField)
-			: {};
-		const {fields, "@type": _type, "@context": _context, ..._master} = master;
-		return reduceWith(
-			{
-				schema,
-				uiSchema: {},
-				excludeFromCopy: [],
-				..._master
-			} as (SchemaFormat & Pick<Master, "translations">),
-			master,
-			[
-				addValidators("validators"),
-				addValidators("warnings"),
-				addAttributes,
-				addExcludeFromCopy,
-				rootField ? this.addExtra({...rootField || {}, fields: master.fields}) : undefined,
-				addUiSchemaContext,
-				addLanguage(lang),
-				this.prepopulate,
-				(schemaFormat) => lang && schemaFormat.translations && (lang in schemaFormat.translations)
-					? translate(schemaFormat, schemaFormat.translations[lang]!)
-					: schemaFormat,
-				removeTranslations(lang)
-			]
-		);
-	}
-
-	private async masterToJSONSchema(master: ExtendedMaster, rootField: Field): Promise<SchemaFormat["schema"]> {
-		const {fields} = master;
-		if (!fields || !fields.length) {
-			return Promise.resolve(JSONSchema.object());
-		}
-
-		return this.fieldToSchema(
-			{...rootField, fields},
-			this.getRootProperty(rootField)
-		);
+		const rootProperty = rootField
+			? this.getRootProperty(rootField)
+			: undefined;
+		const converter = format === "schema"
+			? this.schemaService
+			: this.expandedJSONService;
+		const converted = await converter.convert(expandedMaster, rootField, rootProperty);
+		return reduceWith(converted, undefined, [
+			(converted) => lang && converted.translations && (lang in converted.translations)
+				? translate(converted, converted.translations[lang]!)
+				: converted,
+			removeTranslations(lang)
+		]);
 	}
 
 	private getRootField(master: Pick<Master, "context">): Field  {
@@ -106,106 +88,28 @@ export default class FieldService {
 		};
 	}
 
-	private async fieldToSchema(
-		field: Field,
-		property: InternalProperty,
-	): Promise<JSONSchemaE> {
-		const {fields = []} = field;
 
-		const transformationsForAllTypes = [
-			addExcludeFromCopyToSchema,
-			optionsToSchema,
-			addTitle(property, this.lang),
-			addDefault
-		];
+	private async expandMaster(master: Master, lang?: Lang): Promise<ExpandedMaster> {
+		const linkedMaster = await reduceWith<any, undefined, ExpandedMaster>(
+			JSON.parse(JSON.stringify(master)),
+			undefined,
+			[
+				this.mapBaseForm,
+				this.mapBaseFormFromFields
+			]
+		);
 
-		if (property.isEmbeddable) {
-			const properties = fields
-				? (await this.metadataService.getProperties(property.range[0]))
-					.reduce<Record<string, InternalProperty>>((propMap, prop) => {
-						if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
-							propMap[unprefixProp(prop.property)] = prop;
-						}
-						return propMap;
-					}, {})
-				: {};
+		const rootField = linkedMaster.fields
+			? this.getRootField(linkedMaster)
+			: undefined;
 
-			const schemaProperties = await Promise.all(
-				fields.map(async field => {
-					let prop = properties[field.name];
-					if (!prop) {
-						prop = this.mapUnknownFieldWithTypeToProperty(field);
-					}
-					return [
-						field.name,
-						await this.fieldToSchema(field, prop)
-					] as [string, JSONSchemaE];
-				})
-			);
-
-			return reduceWith(
-				mapEmbeddable(
-					field,
-					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [name]: schema}), {}),
-				),
-				field,
-				[
-					addRequireds(properties),
-					mapMaxOccurs(property),
-					...transformationsForAllTypes
-				]
-			);
-		} else {
-			return reduceWith<JSONSchemaE, Field>(
-				this.metadataService.getJSONSchemaFromProperty(property),
-				field,
-				[
-					addValueOptions,
-					filterWhitelist,
-					filterBlacklist,
-					hide,
-					...transformationsForAllTypes
-				]
-			);
-		}
-	}
-
-	private mapFieldType(type?: string) {
-		switch (type) {
-		case ("checkbox"):
-			return "xsd:boolean";
-		case ("text"):
-		default:
-			return "xsd:string";
-		}
-	}
-
-	private mapUnknownFieldWithTypeToProperty(field: Field): InternalProperty {
-		if (!field.type) {
-			throw new UnprocessableError(`Bad field ${field.name}`);
-		}
-		return {
-			property: field.name,
-			range: [this.mapFieldType(field.type)],
-			shortName: field.name,
-			label: {},
-			isEmbeddable: false,
-			maxOccurs: "1",
-			minOccurs: "0",
-			multiLanguage: false,
-			required: false,
-			domain: []
-		};
-	}
-
-	private parseMaster(master: Master): Promise<ExtendedMaster> {
-		return reduceWith(JSON.parse(JSON.stringify(master)), undefined, [
-			this.mapBaseForm,
-			this.mapBaseFormFromFields,
+		return reduceWith(linkedMaster, undefined, [
 			addDefaultValidators,
 			this.applyPatches,
-			this.addTaxonSets
-		]) as Promise<ExtendedMaster>;
+			this.addTaxonSets,
+			rootField && this.addExtra({...rootField || {}, fields: linkedMaster.fields}),
+			addLanguage(lang)
+		]);
 	}
 
 	mapBaseFormFrom(form: Master, baseForm: Master) {
@@ -241,7 +145,7 @@ export default class FieldService {
 			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
-				await this.parseMaster(await formFetch(`/${formID}`));
+				await this.expandMaster(await formFetch(`/${formID}`));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!master.context && context) {
@@ -279,8 +183,8 @@ export default class FieldService {
 			: master;
 	}
 
-	private addExtra(field: Field) {
-		return async (schemaFormat: SchemaFormat) => {
+	private addExtra <T>(field: Field) {
+		return async (input: T) => {
 			const toParentMap = (range: Range[]) => {
 				return range.reduce((parentMap, item) => {
 					parentMap[item.id] = item.altParent ? [item.altParent] : [];
@@ -300,7 +204,7 @@ export default class FieldService {
 					for (const _field of field.fields) {
 						let prop = properties.find(p => unprefixProp(p.property) === _field.name);
 						if (!prop) {
-							prop = this.mapUnknownFieldWithTypeToProperty(_field);
+							prop = mapUnknownFieldWithTypeToProperty(_field);
 						}
 						collectedTrees = {...collectedTrees, ...(await recursively(_field, prop))};
 					}
@@ -310,7 +214,7 @@ export default class FieldService {
 			};
 
 			const extra = await recursively(field, this.getRootProperty(field));
-			return Object.keys(extra).length ? {...schemaFormat, extra} : schemaFormat;
+			return Object.keys(extra).length ? {...input, extra} : input;
 		};
 	}
 
@@ -340,300 +244,14 @@ export default class FieldService {
 	}
 
 
-	private async prepopulate(schemaFormat: SchemaFormat) {
-		const {prepopulatedDocument, prepopulateWithInformalTaxonGroups} = schemaFormat.options || {};
-		if (!prepopulateWithInformalTaxonGroups) {
-			return schemaFormat;
-		}
-		const species = (await this.apiClient.fetch("/taxa/MX.37600/species", {
-			informalGroupFilters: prepopulateWithInformalTaxonGroups,
-			selectedFields: "id,scientificName,vernacularName",
-			lang: "fi",
-			taxonRanks: "MX.species",
-			onlyFinnish: true,
-			pageSize: 1000
-		})).results;
-		return {
-			...schemaFormat,
-			options: {
-				...schemaFormat.options,
-				prepopulatedDocument: rjsf.utils.getDefaultFormState(
-					schemaFormat.schema,
-					merge((prepopulatedDocument || {}), {
-						gatherings: [{
-							units: species.map((s: any) => ({
-								identifications: [{
-									taxonID: s.id,
-									taxonVerbatim: s.vernacularName || "",
-									taxon: s.scientificName || ""
-								}]
-							}))
-						}]
-					},
-					{arrayMerge: combineMerge}
-					),
-				)
-			}
-		};
-	}
 }
 
-// From https://www.npmjs.com/package/deepmerge README
-const combineMerge = (target: any, source: any, options: any) => {
-	const destination = target.slice();
-
-	source.forEach((item: any, index: number) => {
-		if (typeof destination[index] === "undefined") {
-			destination[index] = options.cloneUnlessOtherwiseSpecified(item, options);
-		} else if (options.isMergeableObject(item)) {
-			destination[index] = merge(target[index], item, options);
-		} else if (target.indexOf(item) === -1) {
-			destination.push(item);
-		}
-	});
-	return destination;
-};
-
-const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
-	const required = field.fields?.reduce<string[]>((reqs, f) => {
-		if (f.required) {
-			reqs.push(f.name);
-		}
-		return reqs;
-	}, []);
-	return JSONSchema.object(properties, {required});
-};
-
-const mapMaxOccurs = ({maxOccurs}: InternalProperty) => (schema: JSONSchemaE) =>
-	maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
-
-const addTitle = (property: InternalProperty, lang: Lang) => (schema: any, field: Field) => {
-	const title = property._rootProp
-		? undefined
-		: (field.label
-			?? multiLang(property.label, lang)
-			?? property.property
-		);
-	if (title !== undefined) {
-		schema.title = title;
-	}
-	return schema;
-};
-
-const addDefault = (schema: any, field: Field) => {
-	const _default = field.options?.default;
-	if (_default !== undefined) {
-		schema.default = _default;
-	}
-	return schema;
-};
-
-const filterList = (listName: string, white = true) => (schema: JSONSchemaE, field: Field) => {
-	const list: string[] = (field.options || {} as any)[listName];
-
-	if (!list) {
-		return schema;
-	}
-
-	const dict = dictionarify(list);
-	const _check = (w: string) => !dict[w];
-	const check = white ? _check : (w: string) => !_check(w);
-
-	const schemaForEnum: any = schema.type === "string"
-		? schema
-		: schema.type === "array"
-			? schema.items
-			: undefined;
-
-	if (schemaForEnum.enum) {
-		[...schemaForEnum.enum].forEach((w: string) => {
-			if (check(w) && schemaForEnum.enum && schemaForEnum.enumNames) {
-				const idxInEnum = schemaForEnum.enum.indexOf(w);
-				schemaForEnum.enum.splice(idxInEnum, 1);
-				schemaForEnum.enumNames.splice(idxInEnum, 1);
-			}
-		});
-	}
-
-	return schema;
-};
-
-const filterWhitelist = filterList("whitelist");
-const filterBlacklist = filterList("blacklist", false);
-
-const hide = (schema: JSONSchemaE, field: Field) => {
-	if (field.type === "hidden") {
-		delete schema.enum;
-		delete schema.enumNames;
-	}
-	return schema;
-};
-
-const addValueOptions = (schema: JSONSchemaE, field: Field) => {
-	const {value_options} = field.options || {};
-	if (!value_options) {
-		return schema;
-	}
-	const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(([_enum, enumNames], option) => {
-		_enum.push(option);
-		const label = value_options[option];
-		enumNames.push(label);
-		return [_enum, enumNames];
-	}, [[], []]);
-	const enumData = {
-		enum: _enum,
-		enumNames
-	};
-	return schema.type === "array"
-		? { ...schema, items: {...(schema.items as any), ...enumData}, uniqueItems: true}
-		: {...schema, ...enumData};
-};
-
-const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
-	if (field.options?.excludeFromCopy) {
-		(schema as any).excludeFromCopy = true;
-	}
-	return schema as JSONSchemaE;
-};
-
-const stringNumberLargerThan = (value: string, largerThan: number) =>
-	!isNaN(parseInt(value)) && parseInt(value) > largerThan;
-
-const addRequireds = (properties: Record<string, InternalProperty>) => (schema: JSONSchemaE) =>
-	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
-		const property = properties[unprefixProp(propertyName)];
-		if (!property) {
-			return schema;
-		}
-		const isRequired = (stringNumberLargerThan(property.minOccurs, 0) || property.required)
-			&& !schema.required?.includes(property.shortName);
-		if (isRequired) {
-			if (!schema.required) {
-				schema.required = [];
-			}
-			schema.required.push(property.shortName);
-		}
-		return schema;
-	}, schema);
-
-const optionsToSchema = (schema: JSONSchemaE, field: Field) =>
-	field.options
-		? (["uniqueItems", "minItems", "maxItems"] as (keyof FieldOptions)[]).reduce(
-			(schema, prop) =>
-				prop in (field.options as FieldOptions)
-					? {...schema, [prop]: (field.options as FieldOptions)[prop]}
-					: schema,
-			schema)
-		: schema;
-
-const addValidators = (type: "validators" | "warnings") =>
-	(schemaFormat: SchemaFormat & Pick<Master, "translations">, master: ExtendedMaster) => {
-		const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
-			let validators: any = {};
-			if (field[type]) {
-				validators = field[type];
-			}
-			return field.fields
-				? field.fields.reduce<any>((validators, field) => {
-					const {name} = field;
-					const schemaForField = schema.type === "object"
-						? (schema.properties as any)[name]
-						: (schema as any).items.properties[name];
-					const nextPath = `${path}/${name}`;
-					const fieldValidators = recursively(field, schemaForField, nextPath);
-					if (fieldValidators && Object.keys(fieldValidators).length) {
-						let validatorsTarget: any;
-						if (schema.type === "object") {
-							validators.properties = validators.properties || {};
-							validatorsTarget = validators.properties;
-						} else if (schema.type === "array") {
-							if (!validators.items) {
-								validators.items = {};
-							}
-							if (!validators.items.properties) {
-								validators.items.properties = {};
-							}
-							validatorsTarget = validators.items.properties;
-						}
-						validatorsTarget[name] = fieldValidators;
-					}
-					return validators;
-				}, validators)
-				: validators;
-		};
-
-		const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
-		return {...schemaFormat, [type]: validators.properties || {}};
-	};
-
-const addAttributes = (schemaFormat: SchemaFormat, master: Master) => 
-	typeof master.id === "string"
-		? {
-			...schemaFormat,
-			attributes: {id: master.id}
-		}
-		: schemaFormat;
-
-const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
-	const exclude = (schema: any, path: string) => schema.excludeFromCopy ? [path] : [];
-	const excludeRecursively = (schema: SchemaFormat["schema"], path: string): string[] => 
-		[
-			...exclude(schema, path),
-			...(
-				/* eslint-disable indent */
-				schema.type === "array" ? excludeRecursively(schema.items, path + "[*]") :
-				schema.type === "object" ? Object.keys(schema.properties).reduce(
-					(excludeFromCopy, prop) => [
-						...excludeFromCopy,
-						...excludeRecursively(schema.properties[prop], path + "." + prop)
-					], []) :
-				[]
-				/* eslint-enable indent */
-			)
-		];
-
-	return {...schemaFormat, excludeFromCopy: excludeRecursively(schemaFormat.schema, "$")};
-};
-
-const addUiSchemaContext = (schemaFormat: SchemaFormat) => {
-	if (!schemaFormat.extra) {
-		return schemaFormat;
-	}
-	const uiSchemaContext = Object.keys(schemaFormat.extra).reduce<Record<string, {tree: AltTreeParent}>>(
-		(uiSchemaContext, propName) => {
-			const parentMap = schemaFormat.extra![propName].altParent;
-			const rootNode: AltTreeParent = {children: {}, order: []};
-			const nodes: Record<string, AltTreeNode> = {tree: rootNode};
-			const root: {tree: AltTreeParent} = {tree: rootNode};
-			Object.keys(parentMap).reduce<AltTreeParent>((tree, child) => {
-				const parent = parentMap[child][0] || "tree";
-				if (!nodes[parent]) {
-					nodes[parent] = {children: {}, order: []};
-				}
-				if (!nodes[parent].children) {
-					nodes[parent].children = {};
-					nodes[parent].order = [];
-				}
-				if (!nodes[child]) {
-					nodes[child] = {};
-				}
-				nodes[parent].children[child] = nodes[child];
-				nodes[parent].order.push(child);
-				return tree;
-			}, root.tree);
-
-			uiSchemaContext[propName] = root;
-			return uiSchemaContext;
-		}, {});
-	return {...schemaFormat, uiSchemaContext};
-};
-
-const addLanguage = (language?: Lang) => (schemaFormat: SchemaFormat) =>
+const addLanguage = (language?: Lang) => <T>(obj: T) =>
 	language
-		? {...schemaFormat, language}
-		: schemaFormat;
+		? {...obj, language}
+		: obj;
 
-export const removeTranslations = (language?: Lang) => (schemaFormat: SchemaFormat | Master) => {
+export const removeTranslations = (language?: Lang) => (schemaFormat: CommonFormat) => {
 	if (language) {
 		const {translations, ..._schemaFormat} = schemaFormat;
 		return _schemaFormat;
@@ -690,7 +308,7 @@ const defaultValidators: Record<string, DefaultValidator> = {
 	"/gatherings/geometry": defaultGeometryValidator
 };
 
-const addDefaultValidators = (master: ExtendedMaster) => {
+const addDefaultValidators = (master: ExpandedMaster) => {
 	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
 			const nextPath = `${path}/${field.name}`;
@@ -730,4 +348,32 @@ const addDefaultValidators = (master: ExtendedMaster) => {
 	};
 	recursively(master.fields || [], "");
 	return master;
+};
+
+const mapFieldType = (type?: string) => {
+	switch (type) {
+	case ("checkbox"):
+		return "xsd:boolean";
+	case ("text"):
+	default:
+		return "xsd:string";
+	}
+};
+
+export const mapUnknownFieldWithTypeToProperty = (field: Field): InternalProperty => {
+	if (!field.type) {
+		throw new UnprocessableError(`Bad field ${field.name}`);
+	}
+	return {
+		property: field.name,
+		range: [mapFieldType(field.type)],
+		shortName: field.name,
+		label: {},
+		isEmbeddable: false,
+		maxOccurs: "1",
+		minOccurs: "0",
+		multiLanguage: false,
+		required: false,
+		domain: []
+	};
 };

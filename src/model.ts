@@ -35,13 +35,15 @@ export interface PropertyContext {
 
 export type Lang = "fi" | "sv" | "en";
 
-export const isLang = (lang: any): lang is Lang => typeof lang === "string" && ["fi", "sv", "en"].includes(lang);
+export const LANGS: Lang[] = ["fi", "en", "sv"];
+
+export const isLang = (lang: any): lang is Lang => typeof lang === "string" && LANGS.includes(lang as any);
 
 export type CompleteTranslations = Record<Lang, {[key: string]: string}>;
 export type Translations = Partial<Record<Lang, {[key: string]: string}>>;
 
-export interface FormListing {
-	id: string;
+export interface CommonFormat {
+	id?: string;
 	options?: any;
 	title?: string;
 	logo?: string;
@@ -51,22 +53,45 @@ export interface FormListing {
 	category?: string;
 	collectionID?: string;
 	name?: string;
+	translations?: Translations;
+	language?: Lang;
 }
 
-export interface Master extends Omit<FormListing, "id"> {
-	id?: string;
-	language?: Lang;
-	translations?: Translations;
+export interface FormListing extends CommonFormat {
+	id: string;
+}
+
+export interface CommonExpanded extends CommonFormat {
+	uiSchema?: any;
+}
+
+export interface Master extends CommonExpanded {
 	fields?: (Field | FormExtensionField)[];
 	baseFormID?: string;
 	patch?: any[];
-	uiSchema?: any;
 	"@type"?: string;
 	"@context"?: string;
 	context?: string;
+	extra?: Record<string, {altParent: AltParentMap}>;
 }
 
-export interface ExtendedMaster extends Master {
+export interface SchemaFormat extends CommonExpanded {
+	schema?: any;
+	validators?: any;
+	warnings?: any;
+	excludeFromCopy: string[];
+	extra?: Record<string, {altParent: AltParentMap}>;
+	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
+	language?: Lang;
+	context?: string;
+	translations?: Translations;
+}
+
+export interface ExpandedJSONFormat extends CommonExpanded {
+	fields?: ExpandedField[];
+}
+
+export interface ExpandedMaster extends Omit<Master, "baseFormID"> {
 	fields?: Field[];
 }
 
@@ -80,23 +105,43 @@ export interface FieldOptions {
 	whitelist?: string[];
 	blacklist?: string[];
 	uniqueItems?: boolean;
-	value_options?: Record<string, string>;
-	target_element?: {
-		type: "text";
-	};
 	maxItems?: number;
 	minItems?: number;
+	value_options?: Record<string, string>;
 }
 
 export interface Field {
 	name: string;
-	type?: "checkbox" | "hidden";
+	type?: "hidden";
 	required?: boolean;
 	options?: FieldOptions;
 	validators?: any;
 	warnings?: any;
 	label?: string;
 	fields?: Field[];
+}
+
+export type ExpandedFieldType =
+	"text"
+	| "fieldset"
+	| "select"
+	| "checkbox"
+	| "string"
+	| "number"
+	| "integer"
+	| "integer:nonNegativeInteger"
+	| "integer:positiveInteger";
+
+export interface ExpandedFieldOptions extends FieldOptions {
+	target_element?: {
+		type: ExpandedFieldType;
+	};
+}
+
+export interface ExpandedField extends Omit<Field, "type" | "fields"> {
+	type?: "hidden" | "collection" | ExpandedFieldType;
+	fields?: ExpandedField[];
+	options?: ExpandedFieldOptions;
 }
 
 export interface FormExtensionField {
@@ -113,20 +158,6 @@ export type AltTreeLeaf = {
 export type AltTreeNode = AltTreeParent | AltTreeLeaf;
 
 export type AltParentMap = Record<string, string[]>;
-
-export interface SchemaFormat {
-	options?: any;
-	schema?: any;
-	uiSchema?: any;
-	validators?: any;
-	warnings?: any;
-	excludeFromCopy: string[];
-	extra?: Record<string, {altParent: AltParentMap}>;
-	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
-	language?: Lang;
-	context?: string;
-	translations?: Translations;
-}
 
 export interface JSONSchemaE extends JSONSchema7 {
 	excludeFromCopy?: boolean;
@@ -148,4 +179,9 @@ export interface Class {
 
 export interface FormDeleteResult {
 	affected: number;
+}
+
+export enum Format {
+	Schema = "schema",
+	JSON = "json"
 }

@@ -1,7 +1,7 @@
 import express, { ErrorRequestHandler, RequestHandler, Response } from "express";
 import bodyParser from "body-parser";
 import path from "path";
-import { isLang, Lang } from "../model";
+import { Format, isLang, Lang } from "../model";
 import MainService, { StoreError, UnprocessableError } from "./services/main-service";
 
 const error = (res: Response, status: number, error: any, stack?: any) => {
@@ -48,11 +48,15 @@ api.get("/", langCheckMiddleWare, async (req, res) => {
 
 api.get("/:id", langCheckMiddleWare, async (req, res) => {
 	const {id} = req.params;
-	const {lang, format = "json"} = req.query;
-	if (format !== "schema" && format !== "json") {
+	const {lang, format = "json", expand} = req.query;
+	if (expand && expand !== "false" && expand !== "true") {
+		return error(res, 422, "Query param expand should be one of 'true', 'false'");
+	}
+	const _expand = expand === "true";
+	if (format !== Format.Schema && format !== Format.JSON) {
 		return error(res, 422, "Query param format should be one of 'json', 'schema'");
 	}
-	return res.status(200).json(await main.getForm(id, lang as (Lang | undefined), format));
+	return res.status(200).json(await main.getForm(id, lang as (Lang | undefined), format, _expand));
 });
 
 api.post("/", async (req, res) => {

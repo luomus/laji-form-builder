@@ -22,8 +22,8 @@ export default class FormService {
 		const query: any = {format: "json", lang: undefined};
 		if (!this.formApiClient) {
 			query.lang = "multi";
-			query.expand = false;
 		}
+		query.expand = false;
 		return this.fetch(`/${id}`, query);
 	}
 

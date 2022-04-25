@@ -6,7 +6,7 @@ import queryString from "querystring";
 import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { removeTranslations } from "./field-service";
-import { FormListing, isLang, Lang, Master } from "../../model";
+import { FormListing, isLang, Lang, Master, Format } from "../../model";
 
 export class StoreError extends Error {
 	status: number;
@@ -149,20 +149,21 @@ export default class MainService {
 	private getRemoteForm = this.cache((id: string) => formFetch(`/${id}`));
 
 	private getFormCache = this.cache((id: string) =>
-		this.cache(async (lang?: Lang, format: "json" | "schema" = "json") => {
+		this.cache(async (lang?: Lang, format: Format = Format.JSON, expand = true) => {
 			const form = await this.getRemoteForm(id);
 			lang && this.setLang(lang);
+			const isConvertable = (format === Format.Schema || format === Format.JSON && expand); 
 			return reduceWith(form, lang, [
-				format === "schema" && this.fieldService.masterToSchemaFormat,
+				(master, lang) => isConvertable ? this.fieldService.convert(master, format as any, lang) : master,
 				(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
 					? translate(form, form.translations[lang])
 					: form,
 				format !== "schema" && isLang(lang) && removeTranslations(lang)
 			]);
-		}, {length: 2}), {promise: false});
+		}, {length: 3}), {promise: false});
 
-	getForm(id: string, lang?: Lang, format: "json" | "schema" = "json") {
-		return this.getFormCache(id)(lang, format);
+	getForm(id: string, lang?: Lang, format: Format  = Format.JSON, expand = true) {
+		return this.getFormCache(id)(lang, format, expand);
 	}
 
 	async saveForm(form: Master) {
