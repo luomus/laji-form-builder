@@ -73,6 +73,9 @@ exports.config = {
 	},
 	plugins: multiCapabilities.length === 1 && multiCapabilities[0] === chrome && [{
 		package: "protractor-console-plugin",
-		exclude: [/Uncaught \(in promise\)/, /Failed to load resource:/]
+		exclude: [
+			/Uncaught \(in promise\)/, /Failed to load resource:/,
+			/React state update on an unmounted component./
+		]
 	}]
 };
