@@ -6,7 +6,7 @@
   "scripts": {
     "start": "npm run start:dev",
     "start:dev": "nodemon src/server/start-dev.ts --ignore test --ignore src/client",
-    "start:prod": "node build/src/server/start.js",
+    "start:prod": "node build/main.js",
     "test": "npm run test:server && npm run test:client",
     "test:client": "HOST=localhost PORT=8082 protractor protractor.conf.js",
     "test:client:ci": "webdriver-manager update --gecko false && HOST=localhost PORT=8082 STANDALONE=true protractor protractor.conf.js",
