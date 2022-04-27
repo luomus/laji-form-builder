@@ -1,10 +1,7 @@
 import request from "supertest";
-import bootstrap from "../../src/server/server";
+import app from "../../src/server/server";
 import { FormListing, Master } from "../../src/model";
 import { exposedProps, exposedOptions, formFetch } from "../../src/server/services/main-service";
-import path from "path";
-
-const app = bootstrap({staticPath: path.join(__dirname, "..", "..", "static", "index.html")});
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();

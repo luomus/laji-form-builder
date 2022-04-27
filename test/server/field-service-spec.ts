@@ -3,7 +3,7 @@ import ApiClientImplementation from "../../src/server/api-client-implementation"
 import config from "../../config.json";
 import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
-import { SchemaFormat, Field, Master } from "../../src/model";
+import { SchemaFormat, Master } from "../../src/model";
 
 const LANG = "fi";
 const mock = !(process.env.MOCK === "false");
