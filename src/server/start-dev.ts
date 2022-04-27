@@ -35,7 +35,6 @@ server.use(historyApiFallback({
 			return context.parsedUrl.pathname as string;
 		}}
 	],
-	verbose: true,
 	disableDotRule: true,
 	index: "/static/index.html"
 }));
