@@ -9,7 +9,9 @@ module.exports = {
 	],
 	output: {
 		path: path.join(__dirname, "static"),
-		filename: "main.js"
+		filename: "main.js",
+		publicPath: "/static",
+		clean: true
 	},
 	plugins: [
 		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"production\""}),

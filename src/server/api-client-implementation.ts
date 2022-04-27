@@ -1,4 +1,4 @@
-import fetch from "isomorphic-fetch";
+import fetch from "cross-fetch";
 import queryString from "querystring";
 import merge from "deepmerge";
 import { ApiClientImplementation } from "laji-form/lib/ApiClient";

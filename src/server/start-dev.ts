@@ -1,4 +1,4 @@
-import server from "./server";
+import bootstrap from "./server";
 import webpack from "webpack";
 import path from "path";
 const webpackConfig = require("../../webpack.config.static.js");
@@ -16,16 +16,14 @@ const config = {
 		}),
 		new webpack.HotModuleReplacementPlugin()
 	],
-	output: {
-		publicPath: "/static",
-		clean: true
-	},
 	entry: [
 		...webpackConfig.entry,
 		"webpack-hot-middleware/client",
 	]
 };
 const compiler = webpack(config);
+
+const server = bootstrap({staticPath: path.join(__dirname, "..", "..", "static", "index.html")});
 
 server.use(require("webpack-dev-middleware")(compiler, {
 	publicPath: "/static"

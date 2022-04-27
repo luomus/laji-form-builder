@@ -4,7 +4,7 @@ import * as React from "react";
 import { render } from "react-dom";
 import LajiForm, { Notifier } from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "../../client/themes/bs3";
-import ApiClientImplementation from "./ApiClientImplementation";
+import ApiClientImplementation from "../api-client-implementation";
 import lajiFormTranslations from "laji-form/lib/translations.json";
 import FormService from "../../client/services/form-service";
 import { constructTranslations } from "laji-form/lib/utils";

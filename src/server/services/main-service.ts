@@ -1,5 +1,5 @@
 import ApiClient from "laji-form/lib/ApiClient";
-import ApiClientImplementation from "../view/ApiClientImplementation";
+import ApiClientImplementation from "../api-client-implementation";
 import * as config from "../../../config.json";
 import { reduceWith, fetchJSON, translate, dictionarify } from "../../utils";
 import queryString from "querystring";

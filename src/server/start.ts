@@ -1,5 +1,8 @@
-import express from "express";
-import server from "./server";
+import express, { RequestHandler } from "express";
+import path from "path";
+import bootstrap from "./server";
+
+const server = bootstrap({staticPath: path.join(__dirname, "..", "static", "index.html")});
 
 server.use("/static", express.static("static"));
 
