@@ -166,6 +166,10 @@ export default class MainService {
 	}
 
 	async saveForm(form: Master) {
+		const error = await this.fieldService.getError(form);
+		if (error) {
+			throw error;
+		}
 		const remoteForm = await formFetch("/", undefined, {
 			method: "POST",
 			body: JSON.stringify(form),
@@ -179,6 +183,10 @@ export default class MainService {
 	}
 
 	async updateForm(id: string, form: Master) {
+		const error = await this.fieldService.getError(form);
+		if (error) {
+			throw error;
+		}
 		const remoteForm = await formFetch(`/${id}`, undefined, {
 			method: "PUT",
 			body: JSON.stringify(form),

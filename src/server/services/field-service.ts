@@ -243,7 +243,16 @@ export default class FieldService {
 		return recursively(master);
 	}
 
-
+	/**
+	 * Returns an error if the form is invalid, undefined if valid.
+	 */
+	async getError(master: Master) {
+		try {
+			await this.convert(master, Format.Schema);
+		} catch (e) {
+			return e;
+		}
+	}
 }
 
 const addLanguage = (language?: Lang) => <T>(obj: T) =>
