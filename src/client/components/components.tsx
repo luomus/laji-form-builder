@@ -1,7 +1,7 @@
 import * as React from "react";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
-import { classNames, nmspc, gnmspc } from "../utils";
+import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "../utils";
 import { ButtonProps } from "../themes/theme";
 
 export interface Stylable {
@@ -341,12 +341,15 @@ export const SubmitButton = (props: ButtonProps) => {
 
 interface FormJSONEditorProps<T> extends Classable {
 	onSubmit: (value: T) => void;
+	onSubmitDraft: (value: T) => void;
 	onChange?: (value: T) => void;
 	value?: T;
 	submitLabel?: string;
 }
 
-export function FormJSONEditor<T>({value, onSubmit, onChange, submitLabel, className}: FormJSONEditorProps<T>) {
+export function FormJSONEditor<T>(
+	{value, onSubmit, onSubmitDraft, onChange, className}: FormJSONEditorProps<T>
+) {
 	const {translations} = React.useContext(Context);
 	const [json, _setJSON] = React.useState(value);
 	const setJSON = React.useCallback((json) => {
@@ -356,7 +359,10 @@ export function FormJSONEditor<T>({value, onSubmit, onChange, submitLabel, class
 
 
 	const [valid, setValid] = React.useState(false);
-	const onClick = React.useCallback(() => onSubmit(json as unknown as T), [json, onSubmit]);
+	const useOnButtonClick = (method: (value: any) => void) =>
+		React.useCallback(() => method(json as unknown as T), [method]);
+	const onClickSubmit = useOnButtonClick(onSubmit);
+	const onClickSubmitDraft = useOnButtonClick(onSubmitDraft);
 
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
@@ -365,9 +371,15 @@ export function FormJSONEditor<T>({value, onSubmit, onChange, submitLabel, class
 	return (
 		<div className={className}>
 			<JSONEditor value={json} onChange={setJSON} rows={20} onValidChange={setValid} live={true} ref={ref} />
-			<SubmitButton onClick={onClick}
+			<SubmitButton onClick={onClickSubmitDraft}
 			              disabled={!json || !valid}
-			>{submitLabel || translations["Wizard.option.json.import"]}
+			              variant={"default"}
+			              className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
+			>{translations["Wizard.option.json.import.draft"]}
+			</SubmitButton>
+			<SubmitButton onClick={onClickSubmit}
+			              disabled={!json || !valid}
+			>{translations["Save"]}
 			</SubmitButton>
 		</div>
 	);

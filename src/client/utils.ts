@@ -5,13 +5,14 @@ import { isObject, parseJSONPointer } from "../utils";
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
-const CSS_NAMESPACE = "ljb";
+export const CSS_NAMESPACE = "ljb";
 
 /** 
  * Create a CSS Namespace factory relative to the laji-form-builder scope ("ljb").
  *
  * Example:
  * const local = nmspc("local");
+ * local(""); // returns "ljb-local"
  * local("foo"); // returns "ljb-local-foo"
  **/
 export const nmspc = (_nmspc?: string) => (s?: string) =>
@@ -25,6 +26,7 @@ export const nmspc = (_nmspc?: string) => (s?: string) =>
  * CSS namespace relative to global laji-form-builder scope ("ljb").
  *
  * Example:
+ * gnmspc(""); // returns "ljb"
  * gnmspc("foo"); // returns "ljb-local-foo"
  **/
 export const gnmspc  = nmspc();

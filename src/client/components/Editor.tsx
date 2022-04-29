@@ -34,7 +34,8 @@ export interface EditorProps extends Stylable, Classable {
 	onLangChange: (lang: Lang) => void;
 	height?: number;
 	onHeightChange?: (height: number) => void;
-	onSave: () => void;
+	onSave: (master: Master) => void;
+	onSaveFromState: () => void;
 	saving?: boolean;
 	documentFormVisible: boolean;
 	errorMsg?: string;
@@ -120,7 +121,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				<EditorToolbar active={this.state.activeEditorMode}
 				               onEditorChange={this.onActiveEditorChange}
 				               onLangChange={this.props.onLangChange}
-				               onSave={this.onSave} 
+				               onSave={this.props.onSaveFromState} 
 				               onSelectedField={this.onPickerSelectedField}
 				               onSelectedOptions={this.onPickerSelectedOptions}
 				               containerRef={this.containerRef}
@@ -200,13 +201,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
 					                                                   onHide={this.hideJSONEditor}
+					                                                   onSave={this.props.onSave}
 					                                                   onChange={this.props.onChange} />}
 				</div>
 			) : null;
-	}
-
-	onSave = () => {
-		this.props.onSave();
 	}
 
 	onHeightChange = ({height}: {height: number}) => {
@@ -772,9 +770,12 @@ interface FormJSONEditorProps {
 	master: Master;
 	onHide: () => void;
 	onChange: EditorProps["onChange"];
+	onSave: EditorProps["onSave"];
 }
 
-const FormJSONEditorModal = React.memo(function FormJSONEditorModal ({master, onHide, onChange}: FormJSONEditorProps) {
+const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
+	{master, onHide, onSave, onChange}: FormJSONEditorProps)
+{
 	const {theme, translations} = React.useContext(Context);
 	const {Modal} = theme;
 
@@ -784,10 +785,15 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal ({master, on
 
 	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(undefined);
 
-	const onSubmit = React.useCallback((value: Master) => {
+	const onSubmitDraft = React.useCallback((value: Master) => {
 		onChange({type: "master", value});
 		setTmpValue(undefined);
 	}, [onChange, setTmpValue]);
+
+	const onSubmit = React.useCallback((value: Master) => {
+		onSave(value);
+		setTmpValue(undefined);
+	}, [onSave, setTmpValue]);
 
 	const onHideCheckForChanges = React.useCallback(() => {
 		tmpValue
@@ -801,7 +807,10 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal ({master, on
 			<Modal.Header closeButton={true}>
 			</Modal.Header>
 			<Modal.Body>
-				<FormJSONEditor value={master} onSubmit={onSubmit} onChange={setTmpValue} submitLabel={"OK"} />
+				<FormJSONEditor value={master}
+				                onSubmit={onSubmit}
+				                onSubmitDraft={onSubmitDraft}
+				                onChange={setTmpValue} />
 			</Modal.Body>
 		</Modal>
 	);

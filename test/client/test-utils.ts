@@ -142,7 +142,7 @@ export class BuilderPO {
 		json: {
 			inputSelector: classNames(this.wizardNmspc("json"), gcnmspc("json-editor")),
 			$input: $(this.wizardNmspc("json")).$("textarea") as ElementFinder,
-			$submit: $(this.wizardNmspc("json")).$("button") as ElementFinder
+			$submit: $(this.wizardNmspc("json")).$(this.wizardNmspc("json-preview-btn")) as ElementFinder
 		}
 	}
 }

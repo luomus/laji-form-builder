@@ -148,7 +148,7 @@ const FormCreatorWizardOptionButton = ({children, option, onSelect, variant}: Fo
 };
 
 interface FormCreatorProps {
-	onCreate: (form: Omit<Master, "id">) => void;
+	onCreate: (form: Omit<Master, "id">, save?: boolean) => void;
 	onChoose: (id: string) => void;
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
@@ -172,11 +172,13 @@ const prepareImportedJSON = (json: any, translations: Record<string, string>) =>
 
 function FormCreatorJSON({onCreate}: WizardStepProps) {
 	const {translations} = React.useContext(Context);
-	const onSubmit = React.useCallback(
-		(json: Master) => onCreate(prepareImportedJSON(json, translations)),
-		[onCreate, translations]
+	const useOnSubmit = (save?: boolean) => React.useCallback(
+		(json: Master) => onCreate(prepareImportedJSON(json, translations), save),
+		[save]
 	);
-	return <FormJSONEditor onSubmit={onSubmit} className={wizardNmspc("json")} />;
+	const onSubmit = useOnSubmit(true);
+	const onSubmitDraft = useOnSubmit(false);
+	return <FormJSONEditor onSubmit={onSubmit} onSubmitDraft={onSubmitDraft} className={wizardNmspc("json")} />;
 }
 
 interface FormCreatorDatabankProps extends WizardStepProps {
@@ -187,6 +189,7 @@ interface FormCreatorDatabankProps extends WizardStepProps {
 function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBankFormID}: FormCreatorDatabankProps) {
 	const {translations} = React.useContext(Context);
 	const submitRef = React.useRef<_LajiForm>(null);
+	const [saveOnSubmit, setSubmitType] = React.useState<boolean>(false);
 	const schema = JSONSchema.object({
 		name: JSONSchema.String({title: translations["Wizard.databank.form.name"]}),
 		collectionID: JSONSchema.String({title: translations["Wizard.databank.form.collectionID"]}),
@@ -199,9 +202,7 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 			}
 		}
 	};
-	const onSubmit = React.useCallback(() => {
-		submitRef.current?.submit();
-	}, [submitRef]);
+
 	const onLajiFormSubmit = React.useCallback(
 		({formData: {name, collectionID, primary}}:
 		{formData: {name: string, collectionID: string, primary: boolean}}) => onCreate({
@@ -210,12 +211,25 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 			baseFormID: primary
 				? primaryDataBankFormID
 				: secondaryDataBankFormID
-		}),
-		[onCreate, primaryDataBankFormID, secondaryDataBankFormID]
+		}, saveOnSubmit),
+		[saveOnSubmit, onCreate, primaryDataBankFormID, secondaryDataBankFormID]
 	);
+
+	const onSubmit = React.useCallback(() => {
+		setSubmitType(true);
+		submitRef.current?.submit();
+	}, [setSubmitType, submitRef]);
+	const onSubmitDraft = React.useCallback(() => {
+		setSubmitType(false);
+		submitRef.current?.submit();
+	}, [setSubmitType, submitRef]);
+
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
-			<SubmitButton onClick={onSubmit}>{translations["Wizard.option.json.import"]}</SubmitButton>
+			<SubmitButton onClick={onSubmit}>{translations["Save"]}</SubmitButton>
+			<SubmitButton onClick={onSubmitDraft} variant="default">
+				{translations["Wizard.option.json.import.draft"]}
+			</SubmitButton>
 		</LajiForm>
 	);
 }

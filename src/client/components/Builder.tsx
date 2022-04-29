@@ -223,6 +223,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				schemaFormat={schemaFormat}
 				onChange={this.onEditorChange}
 				onSave={this.onSave}
+				onSaveFromState={this.onSaveFromState}
 				onLangChange={this.onLangChange}
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
@@ -541,18 +542,18 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.props.onChange(updated);
 	}
 
-	onSave = async () => {
-		if (!this.state.master) {
+	onSave = async (master: Master) => {
+		if (!master) {
 			return;
 		}
 		try {
 			this.setState({saving: true});
-			if (this.state.master.id) {
-				await this.formService.update(this.state.master);
-				this.setState({saving: false});
+			if (master.id) {
+				await this.formService.update(master);
+				this.setState({saving: false, id: master.id});
 			} else {
-				const master = await this.formService.create(this.state.master);
-				this.setState({master, saving: false}, this.propagateState);
+				const masterResponse = await this.formService.create(master);
+				this.setState({master: masterResponse, saving: false}, this.propagateState);
 			}
 			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
 		} catch (e) {
@@ -561,7 +562,17 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		}
 	}
 
-	onCreate = async (master: Master) => {
+	onSaveFromState = () => {
+		if (!this.state.master) {
+			return;
+		}
+		this.onSave(this.state.master);
+	}
+
+	onCreate = async (master: Master, save = false) => {
+		if (save) {
+			this.onSave(master);
+		}
 		this.setState({tmp: true}, async () => {
 			this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(master), {master});
 		});

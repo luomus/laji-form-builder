@@ -69,10 +69,10 @@
 		"sv": "Importera från JSON",
 		"en": "Import from JSON"
 	},
-	"wizard.option.json.import": {
-		"fi": "Tuo",
-		"sv": "Importera",
-		"en": "Import"
+	"wizard.option.json.import.draft": {
+		"fi": "Esikatsele",
+		"sv": "Förhandsvisa",
+		"en": "Preview"
 	},
 	"wizard.option.json.removeId": {
 		"fi": "Poistetaanko lomakkeelta ID? Jos ei poisteta, tallennus ylikirjoittaa ID:ta vastaavan lomakkeen.",
