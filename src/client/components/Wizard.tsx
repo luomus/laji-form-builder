@@ -174,7 +174,7 @@ function FormCreatorJSON({onCreate}: WizardStepProps) {
 	const {translations} = React.useContext(Context);
 	const useOnSubmit = (save?: boolean) => React.useCallback(
 		(json: Master) => onCreate(prepareImportedJSON(json, translations), save),
-		[save]
+		[save, translations] // eslint-disable-line react-hooks/exhaustive-deps
 	);
 	const onSubmit = useOnSubmit(true);
 	const onSubmitDraft = useOnSubmit(false);

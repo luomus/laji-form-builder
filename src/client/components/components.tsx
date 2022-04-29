@@ -359,10 +359,8 @@ export function FormJSONEditor<T>(
 
 
 	const [valid, setValid] = React.useState(false);
-	const useOnButtonClick = (method: (value: any) => void) =>
-		React.useCallback(() => method(json as unknown as T), [method]);
-	const onClickSubmit = useOnButtonClick(onSubmit);
-	const onClickSubmitDraft = useOnButtonClick(onSubmitDraft);
+	const onClickSubmit = React.useCallback(() => onSubmit(json as unknown as T), [json, onSubmit]);
+	const onClickSubmitDraft = React.useCallback(() => onSubmitDraft(json as unknown as T), [json, onSubmitDraft]);
 
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
