@@ -37,6 +37,7 @@ export interface EditorProps extends Stylable, Classable {
 	onSave: () => void;
 	saving?: boolean;
 	documentFormVisible: boolean;
+	errorMsg?: string;
 }
 
 export interface EditorState {
@@ -48,8 +49,6 @@ export interface EditorState {
 	jsonEditorOpen?: boolean;
 }
 
-const withoutNameSpacePrefix = (str: string) => str.replace(/^[^./]+\./, "");
-
 class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
 	static contextType = Context;
 	state = {hasError: false}
@@ -58,7 +57,7 @@ class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: 
 	}
 	render() {
 		return this.state.hasError
-			? <div className={gnmspc("warning")}>{this.context.translations["Editor.error.ui"]}</div>
+			? <div className={gnmspc("error")}>{this.context.translations["Editor.error.ui"]}</div>
 			: this.props.children;
 	}
 }
@@ -104,7 +103,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		const fieldEditorStyle: React.CSSProperties = {
 			width: "100%"
 		};
-		const {master, schemaFormat} = this.props;
+		const {master, schemaFormat, errorMsg} = this.props;
 		if (!master || !schemaFormat) {
 			return <Spinner size={100} />;
 		}
@@ -116,6 +115,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 						{translateKey(translations, "Editor.warning.baseFormID", {baseFormID: master.baseFormID})}
 					</div>
 				)}
+				{errorMsg && <div className={gnmspc("error")}>{translations[errorMsg] || errorMsg}</div>}
 				{master.patch && <div className={gnmspc("warning")}>{translations["Editor.warning.patch"]}</div>}
 				<EditorToolbar active={this.state.activeEditorMode}
 				               onEditorChange={this.onActiveEditorChange}
@@ -237,7 +237,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				return _field;
 			}
 			const child  = (_field.fields as FieldOptions[])
-				.find(_child => withoutNameSpacePrefix(_child.name) === next) as FieldOptions;
+				.find(_child => _child.name === next) as FieldOptions;
 			return findField(child, rest.join("/"));
 		};
 		return {
@@ -341,7 +341,7 @@ const Fields = React.memo(function _Fields({
 				       onSelected={onSelected}
 				       onDeleted={onDeleted}
 				       selected={selected}
-				       pointer={`${pointer}/${withoutNameSpacePrefix(f.name)}`}
+				       pointer={`${pointer}/${f.name}`}
 				       expanded={expanded}
 				       fieldsContainerElem={fieldsContainerElem}
 				/>
@@ -451,7 +451,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 					<Clickable className={expandClassName}
 					           onClick={fields.length ? this.toggleExpand : undefined}
 					           key="expand" />
-					<Clickable className={this.nmspc("label")}>{withoutNameSpacePrefix(name)}</Clickable>
+					<Clickable className={this.nmspc("label")}>{name}</Clickable>
 					<Clickable className={this.nmspc("delete")} onClick={this.onThisDeleted} />
 				</Clickable>
 				{this.state.expanded && (

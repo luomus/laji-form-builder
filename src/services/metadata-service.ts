@@ -1,5 +1,5 @@
 import memoize, { Memoized } from "memoizee";
-import ApiClient from "laji-form/lib/ApiClient";
+import ApiClient from "../api-client";
 import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang, Class } from "../model";
 import { reduceWith, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
 
@@ -45,7 +45,7 @@ export default class MetadataService {
 		}, reject))
 
 	getProperties = this.cache(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
-		return (await this.apiClient.fetch(
+		return (await this.apiClient.fetchJSON(
 			`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
 			{lang: "multi"})
 		).results as PropertyModel[];
@@ -53,7 +53,7 @@ export default class MetadataService {
 
 	getRange = this.cache((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
-		|| this.apiClient.fetch(
+		|| this.apiClient.fetchJSON(
 			// eslint-disable-next-line max-len
 			`/metadata/ranges/${unprefixProp(typeof property === "string" ? property : this.getPropertyNameFromContext(property))}`,
 			{lang: "multi"}
@@ -65,7 +65,7 @@ export default class MetadataService {
 			return this.allRanges;
 		}
 		const ranges = await (
-			this.apiClient.fetch("/metadata/ranges", {lang: "multi"}) as Promise<Record<string, Range[]>>
+			this.apiClient.fetchJSON("/metadata/ranges", {lang: "multi"}) as Promise<Record<string, Range[]>>
 		);
 		this.allRanges = ranges;
 		return ranges;
@@ -166,7 +166,7 @@ export default class MetadataService {
 		return mapPropertyToJSONSchema(property);
 	}
 
-	getClasses = this.cache(async (): Promise<Class[]> => (await this.apiClient.fetch("/metadata/classes")).results)
+	getClasses = this.cache(async (): Promise<Class[]> => (await this.apiClient.fetchJSON("/metadata/classes")).results)
 }
 
 const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({

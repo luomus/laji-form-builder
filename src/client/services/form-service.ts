@@ -1,5 +1,6 @@
-import ApiClient from "laji-form/lib/ApiClient";
+import ApiClient from "../../api-client";
 import { FormDeleteResult, FormListing, Lang, Master, SchemaFormat } from "../../model";
+
 
 export default class FormService {
 	private apiClient: ApiClient;
@@ -12,48 +13,48 @@ export default class FormService {
 		this.lang = lang;
 	}
 
-	private fetch(path: string, query?: Record<string, unknown>, options?: Record<string, unknown>) {
+	private fetchJSON(path: string, query?: Record<string, unknown>, options?: Record<string, unknown>) {
 		return this.formApiClient
-			? this.formApiClient.fetch(path, query, options)
-			: this.apiClient.fetch(`/forms/${path}`, query, options);
+			? this.formApiClient.fetchJSON(path, query as any, options)
+			: this.apiClient.fetchJSON(`/forms/${path}`, query as any, options);
 	}
 
 	getMaster(id: string): Promise<Master> {
-		const query: any = {format: "json", lang: undefined};
+		const query: any = {format: "json"};
 		if (!this.formApiClient) {
 			query.lang = "multi";
 		}
 		query.expand = false;
-		return this.fetch(`/${id}`, query);
+		return this.fetchJSON(`/${id}`, query);
 	}
 
 	getSchemaFormat(id: string): Promise<SchemaFormat> {
-		return this.fetch(`/${id}`, {format: "schema", lang: this.lang});
+		return this.fetchJSON(`/${id}`, {format: "schema", lang: this.lang});
 	}
 
 	update(form: any): Promise<void> {
-		return this.fetch(`/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form), headers: {
+		return this.fetchJSON(`/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form), headers: {
 			"Content-Type": "application/json"
 		}});
 	}
 
 	create(form: any): Promise<Master> {
-		return this.fetch("", undefined, {method: "POST", body: JSON.stringify(form), headers: {
+		return this.fetchJSON("", undefined, {method: "POST", body: JSON.stringify(form), headers: {
 			"Content-Type": "application/json"
 		}});
 	}
 
 	delete(id: string): Promise<FormDeleteResult> {
-		return this.fetch(`/${id}`, undefined, {method: "DELETE"});
+		return this.fetchJSON(`/${id}`, undefined, {method: "DELETE"});
 	}
 
 	async getForms(): Promise<FormListing[]> {
-		const response = (await this.fetch("", undefined));
+		const response = (await this.fetchJSON("", undefined));
 		return this.formApiClient ? response.forms : response.results;
 	}
 
 	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
-		return this.fetch("/transform", undefined, {method: "POST", body: JSON.stringify(master), headers: {
+		return this.fetchJSON("/transform", undefined, {method: "POST", body: JSON.stringify(master), headers: {
 			"Content-Type": "application/json"
 		}});
 	}

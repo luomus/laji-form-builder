@@ -1,4 +1,3 @@
-import ApiClient from "laji-form/lib/ApiClient";
 import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
@@ -8,6 +7,7 @@ import { reduceWith, unprefixProp, isObject, translate } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import { formFetch, UnprocessableError } from "./main-service";
+import ApiClient from "../../api-client";
 
 export interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
@@ -230,7 +230,7 @@ export default class FieldService {
 				}
 			} else if (typeof any === "string" && any.startsWith("...taxonSet:")) {
 				const taxonSets = any.replace("...taxonSet:", "").split(",");
-				const taxonSetResults = await Promise.all(taxonSets.map(taxonSet => this.apiClient.fetch(
+				const taxonSetResults = await Promise.all(taxonSets.map(taxonSet => this.apiClient.fetchJSON(
 					"/taxa",
 					{pageSize: 1000, taxonSets: taxonSet, selectedFields: "id"}
 				)));

@@ -1,5 +1,3 @@
-import ApiClient from "laji-form/lib/ApiClient";
-import ApiClientImplementation from "../api-client-implementation";
 import * as config from "../../../config.json";
 import { reduceWith, fetchJSON, translate, dictionarify } from "../../utils";
 import queryString from "querystring";
@@ -7,6 +5,7 @@ import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master, Format } from "../../model";
+import ApiClient from "../../api-client";
 
 export class StoreError extends Error {
 	status: number;
@@ -42,12 +41,12 @@ const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, op
 
 export const formFetch = lajiStoreFetch("/form");
 
-const apiClient = new ApiClient(new ApiClientImplementation(
+const apiClient = new ApiClient(
 	config.apiBase,
 	config.accessToken,
 	undefined,
 	DEFAULT_LANG
-), DEFAULT_LANG, {fi: {}, sv: {}, en: {}});
+);
 
 export const exposedProps: Record<keyof FormListing, true> = dictionarify([
 	"id", "logo", "title", "description", "shortDescription",

@@ -160,14 +160,22 @@ interface WizardStepProps extends FormCreatorProps {
 	steps?: WizardStepChildren;
 }
 
-const prepareImportedJSON = (json: any) => {
-	const _json = JSON.parse(JSON.stringify(json));
-	delete _json.id;
-	return _json;
+const prepareImportedJSON = (json: any, translations: Record<string, string>) => {
+	const removeId = json.id && confirm(translations["Wizard.option.json.removeId"]);
+	if (removeId) {
+		const _json = JSON.parse(JSON.stringify(json));
+		delete _json.id;
+		return _json;
+	}
+	return json;
 };
 
 function FormCreatorJSON({onCreate}: WizardStepProps) {
-	const onSubmit = React.useCallback((json: Master) => onCreate(prepareImportedJSON(json)), [onCreate]);
+	const {translations} = React.useContext(Context);
+	const onSubmit = React.useCallback(
+		(json: Master) => onCreate(prepareImportedJSON(json, translations)),
+		[onCreate, translations]
+	);
 	return <FormJSONEditor onSubmit={onSubmit} className={wizardNmspc("json")} />;
 }
 

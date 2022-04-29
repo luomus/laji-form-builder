@@ -1,4 +1,3 @@
-import ApiClient from "laji-form/lib/ApiClient";
 import MetadataService from "../../services/metadata-service";
 import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSchemaE, Lang, Master, SchemaFormat
 } from "../../model";
@@ -7,6 +6,7 @@ import { dictionarify, JSONSchema, multiLang, reduceWith, unprefixProp } from ".
 import * as rjsf from "@rjsf/core";
 import merge from "deepmerge";
 import ConverterService from "./converter-service";
+import ApiClient from "../../api-client";
 
 export default class SchemaService extends ConverterService<SchemaFormat> {
 	metadataService: MetadataService;
@@ -110,7 +110,7 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 		if (!prepopulateWithInformalTaxonGroups) {
 			return schemaFormat;
 		}
-		const species = (await this.apiClient.fetch("/taxa/MX.37600/species", {
+		const species = (await this.apiClient.fetchJSON("/taxa/MX.37600/species", {
 			informalGroupFilters: prepopulateWithInformalTaxonGroups,
 			selectedFields: "id,scientificName,vernacularName",
 			lang: "fi",

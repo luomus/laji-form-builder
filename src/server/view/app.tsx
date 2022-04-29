@@ -4,15 +4,12 @@ import * as React from "react";
 import { render } from "react-dom";
 import LajiForm, { Notifier } from "laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "../../client/themes/bs3";
-import ApiClientImplementation from "../api-client-implementation";
-import lajiFormTranslations from "laji-form/lib/translations.json";
 import FormService from "../../client/services/form-service";
-import { constructTranslations } from "laji-form/lib/utils";
-import ApiClient from "laji-form/lib/ApiClient";
 import "../../client/styles";
 import "notus/src/notus.css";
 import  _notus from "notus";
-import { CompleteTranslations, isLang, Lang, SchemaFormat } from "../../model";
+import { isLang, Lang, SchemaFormat } from "../../model";
+import ApiClient from "../../api-client";
 
 const notus = _notus();
 
@@ -51,33 +48,24 @@ const uriToState = (uri: string) => {
 const initialUri = window.location.href;
 const initialRoute = uriToState(initialUri);
 
-const apiClient = new ApiClientImplementation(
+const apiClient = new ApiClient(
 	config.apiBase,
 	config.accessToken,
 	undefined,
 	initialRoute.lang
 );
-const formApiClient = new ApiClientImplementation(
+const formApiClient = new ApiClient(
 	config.formApiBase,
 	config.accessToken,
 	undefined,
 	initialRoute.lang
 );
 
-const _lajiFormTranslations = constructTranslations(lajiFormTranslations) as unknown as CompleteTranslations;
 const initialLang = initialRoute.lang || DEFAULT_LANG;
 const formService = new FormService(
-	new ApiClient(
-		apiClient,
-		initialLang,
-		_lajiFormTranslations
-	),
+	apiClient,
 	initialLang,
-	new ApiClient(
-		formApiClient,
-		initialLang,
-		_lajiFormTranslations
-	)
+	formApiClient,
 );
 
 (async () => {

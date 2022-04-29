@@ -20,13 +20,21 @@ export default class ApiClient implements ApiClientImplementation {
 	}
 
 	getBaseQuery() {
-		return {access_token: this.accessToken, personToken: this.personToken};
+		return {access_token: this.accessToken, personToken: this.personToken, lang: this.lang};
 	}
 
-	fetch(path: string, query?: any, options?: any) {
+	fetch(path: string, query?: any, options?: any): Promise<Response> {
 		const baseQuery = this.getBaseQuery();
 		const queryObject = (typeof query === "object") ? merge(baseQuery, query) : baseQuery;
-		return fetch(`${this.BASE_URL}${path}?${queryString.stringify(queryObject)}`, options);
+		return new Promise((resolve, reject) => {
+			fetch(`${this.BASE_URL}${path}?${queryString.stringify(queryObject)}`, options).then(response => {
+				if (response.status > 400) {
+					reject(response);
+				} else {
+					resolve(response);
+				}
+			});
+		});
 	}
 
 	async fetchJSON(path: string, query?: any, options?: any) {

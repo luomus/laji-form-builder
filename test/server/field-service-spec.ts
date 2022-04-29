@@ -1,16 +1,15 @@
-import ApiClient from "laji-form/lib/ApiClient";
-import ApiClientImplementation from "../../src/server/api-client-implementation";
 import config from "../../config.json";
 import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
 import { SchemaFormat, Master } from "../../src/model";
+import ApiClient from "../../src/api-client";
 
 const LANG = "fi";
 const mock = !(process.env.MOCK === "false");
 
-class MockApiClientImplementation extends ApiClientImplementation {
+class MockApiClient extends ApiClient {
 	mock(path: string, query?: any, options?: any): Response | undefined {
-		if (options.method) {
+		if (options?.method) {
 			return undefined;
 		}
 		const queryString = new URLSearchParams(query);
@@ -40,16 +39,16 @@ class MockApiClientImplementation extends ApiClientImplementation {
 	}
 }
 
-const apiClientImpl = (...args: ConstructorParameters<typeof ApiClientImplementation>) => mock
-	? new MockApiClientImplementation(...args)
-	: new ApiClientImplementation(...args);
+const apiClientImpl = (...args: ConstructorParameters<typeof ApiClient>) => mock
+	? new MockApiClient(...args)
+	: new ApiClient(...args);
 
-const apiClient = new ApiClient(apiClientImpl(
+const apiClient = apiClientImpl(
 	config.apiBase,
 	config.accessToken,
 	undefined,
 	LANG
-), LANG, {fi: {}, sv: {}, en: {}});
+);
 
 const fieldService = new FieldService(apiClient, new MetadataService(apiClient, LANG), LANG);
 

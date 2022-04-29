@@ -1,6 +1,4 @@
 import * as React from "react";
-import ApiClient, {ApiClientImplementation} from "laji-form/lib/ApiClient";
-import lajiFormTranslations from "laji-form/lib/translations.json";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
@@ -9,24 +7,25 @@ import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnm
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { PropertyModel, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations } from "../../model";
+import { PropertyModel, PropertyRange, Lang, Master, SchemaFormat, Field } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
+import ApiClient from "../../api-client";
 
 export interface BuilderProps {
 	lang: Lang;
 	onChange: (form: any) => void;
 	onLangChange: (lang: Lang) => void;
-	apiClient: ApiClientImplementation;
+	apiClient: ApiClient;
 	theme: Theme;
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
 	id?: string;
 	notifier?: Notifier;
 	documentFormVisible?: boolean;
-	formApiClient?: ApiClientImplementation;
+	formApiClient?: ApiClient;
 	allowList?: boolean;
 	onSelected?: (id: string) => void;
 }
@@ -34,6 +33,7 @@ export interface BuilderState {
 	id?: string;
 	master?: Master;
 	schemaFormat?: MaybeError<SchemaFormat>;
+	errorMsg?: string;
 	lang: Lang;
 	editorHeight?: number;
 	tmp?: boolean;
@@ -69,17 +69,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	constructor(props: BuilderProps) {
 		super(props);
-		this.apiClient = new ApiClient(
-			props.apiClient,
-			props.lang || "fi",
-			constructTranslations(lajiFormTranslations) as unknown as CompleteTranslations
-		);
-		this.formApiClient = props.formApiClient 
-			? new ApiClient(
-				props.formApiClient,
-				props.lang || "fi",
-				constructTranslations(lajiFormTranslations) as unknown as CompleteTranslations)
-			: undefined;
+		this.apiClient = props.apiClient;
+		this.formApiClient = props.formApiClient;
 
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
@@ -92,6 +83,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			}, {} as Notifier);
 
 		this.onSelected = this.onSelected.bind(this);
+		this.propagateState = this.propagateState.bind(this);
 	}
 
 	componentDidMount() {
@@ -132,30 +124,52 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.props.onSelected?.(id);
 	}
 
-	updateSchemaFormat(): Promise<MaybeError<SchemaFormat> | undefined> {
+	updateSchemaFormat() {
 		this.schemaFormatPromise?.cancel();
 		const {id} = this.state;
-		const schemaFormatPromise = id
-			? this.formService.getSchemaFormat(id)
-			: Promise.resolve(undefined);
-		const promise = new Promise<MaybeError<SchemaFormat> | undefined>(resolve =>
-			schemaFormatPromise
-				.then((schemaFormat) => this.setState({schemaFormat}, () => resolve(schemaFormat)))
-				.catch(e => this.setState({schemaFormat: "error"}, () => resolve("error")))
+		if (typeof id !== "string") {
+			this.setState({schemaFormat: undefined, errorMsg: undefined});
+			this.propagateState();
+		}
+		this.schemaFormatPromise = makeCancellable(
+			this.updateStateFromSchemaFormatPromise(this.formService.getSchemaFormat(id as string))
 		);
-		this.schemaFormatPromise = makeCancellable(promise);
-		return promise;
+	}
+
+	private async updateStateFromSchemaFormatPromise(
+		schemaUpdatePromise: Promise<SchemaFormat>,
+		additionalState: Partial<BuilderState> = {})
+	: Promise<void> {
+		this.setState(
+			await this.getStateFromSchemaFormatPromise(schemaUpdatePromise, additionalState) as BuilderState,
+			this.propagateState
+		);
+	}
+
+	private async getStateFromSchemaFormatPromise(schemaUpdatePromise: Promise<SchemaFormat>,
+		additionalState: Partial<BuilderState> = {}): Promise<Partial<BuilderState>> {
+		let schemaFormat: SchemaFormat;
+		try {
+			schemaFormat = await schemaUpdatePromise;
+			return {schemaFormat, errorMsg: undefined, ...(additionalState as any)};
+		} catch (e) {
+			let msg;
+			try {
+				msg = (await e.json()).error;
+			} catch (e) {
+				msg = "get.error";
+			}
+			return {schemaFormat: "error", errorMsg: msg, ...(additionalState as any)};
+		}
 	}
 
 	onLangChange = (lang: Lang) => {
 		this.setState({lang}, async () => {
 			this.updateLang();
 			if (!this.state.tmp) {
-				await this.updateSchemaFormat();
-				this.propagateState();
+				this.updateSchemaFormat();
 			} else if (this.state.master) {
-				const schemaFormat = await this.formService.masterToSchemaFormat(this.state.master);
-				this.setState({schemaFormat}, this.propagateState);
+				this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(this.state.master));
 			}
 			this.props.onLangChange(this.state.lang);
 		});
@@ -202,7 +216,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {schemaFormat, master, saving} = this.state;
+		const {schemaFormat, master, saving, errorMsg} = this.state;
 		return (
 			<Editor
 				master={master}
@@ -215,6 +229,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				saving={saving}
 				documentFormVisible={this.props.documentFormVisible ?? true}
 				className={gnmspc("")}
+				errorMsg={errorMsg}
 			/>
 		);
 	}
@@ -229,24 +244,33 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			return;
 		}
 
-		if (!schemaFormat || !isValid(schemaFormat)) {
-			const schemaFormat = await this.formService.masterToSchemaFormat(master);
-			this.setState({master, schemaFormat}, () => {
-				if (!this.state.master) {
-					return;
-				}
-				this.propagateState();
-			});
-			return;
-		}
+		const sync = async () => {
+			this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(master), {master});
+		};
+
+		const syncOnBadState = (schemaFormat?: MaybeError<SchemaFormat>): schemaFormat is "error" | undefined => {
+			if (!schemaFormat || !isValid(schemaFormat)) {
+				sync();
+				return true;
+			}
+			return false;
+		};
 
 		const {translations = {fi: {}, sv: {}, en: {}}} = master;
 		const changed: any = {master, schemaFormat};
 		for (const event of (events instanceof Array ? events : [events])) {
 			if (isMasterChangeEvent(event)) {
 				changed.master = event.value;
-				changed.schemaFormat = await this.formService.masterToSchemaFormat(changed.master);
+				const state = await this.getStateFromSchemaFormatPromise(
+					this.formService.masterToSchemaFormat(changed.master)
+				);
+				Object.keys(state).forEach((key: keyof BuilderState) => {
+					changed[key] = state[key];
+				});
 			} else if (isUiSchemaChangeEvent(event)) {
+				if (syncOnBadState(schemaFormat)) {
+					return;
+				}
 				changed.master = {
 					...(changed.master || {}),
 					uiSchema: updateSafelyWithJSONPointer(
@@ -293,6 +317,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			} else if (event.type === "field") {
 				const splitted = event.selected.split("/").filter(s => s);
 				if (isFieldDeleteEvent(event)) {
+					if (syncOnBadState(schemaFormat)) {
+						return;
+					}
 					const filterFields = (field: Field, pointer: string[]): Field => {
 						const [p, ...remaining] = pointer;
 						return {
@@ -346,6 +373,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				} else if (isFieldAddEvent(event)) {
 					const propertyModel = event.value;
 					if (propertyModel.range[0] !== PropertyRange.Id) {
+						if (syncOnBadState(schemaFormat)) {
+							return;
+						}
 						const addField = (fields: Field[], path: string[], property: string): Field[] => {
 							if (!path.length) {
 								return [...fields, {name: property}];
@@ -448,6 +478,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						fields: updateField(changed.master.fields, splitted, event.value),
 					};
 					if (event.value.validators) {
+						if (syncOnBadState(schemaFormat)) {
+							return;
+						}
 						changed.schema = {
 							...changed.schema,
 							validators: updateValidators(
@@ -459,6 +492,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						};
 					}
 					if (event.value.warnings) {
+						if (syncOnBadState(schemaFormat)) {
+							return;
+						}
 						changed.schema = {
 							...changed.schema,
 							warnings: updateValidators(
@@ -471,6 +507,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 					}
 				}
 			} else if (isOptionChangeEvent(event)) {
+				if (syncOnBadState(schemaFormat)) {
+					return;
+				}
 				const {path, value} = event;
 				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
 				changed.schemaFormat = updateSafelyWithJSONPointer(
@@ -488,8 +527,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		});
 	}
 
-	propagateState = () => {
+	propagateState() {
 		if (!this.state.master || !isValid(this.state.schemaFormat)) {
+			this.props.onChange({});
 			return;
 		}
 		const {translations, fields, ...toTranslate} = this.state.master;
@@ -512,21 +552,18 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				this.setState({saving: false});
 			} else {
 				const master = await this.formService.create(this.state.master);
-				this.setState({master, saving: false}, () => {
-					this.propagateState();
-				});
+				this.setState({master, saving: false}, this.propagateState);
 			}
-			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["save.success"]);
+			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
 		} catch (e) {
-			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["save.error"]);
+			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["Save.error"]);
 			this.setState({saving: false});
 		}
 	}
 
 	onCreate = async (master: Master) => {
 		this.setState({tmp: true}, async () => {
-			const schemaFormat = await this.formService.masterToSchemaFormat(master);
-			this.setState({master, schemaFormat}, this.propagateState);
+			this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(master), {master});
 		});
 	}
 }

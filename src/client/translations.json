@@ -39,6 +39,11 @@
 		"sv": "Inspelningen misslyckades",
 		"en": "Save failed"
 	},
+	"get.error": {
+		"fi": "Lomakkeella on jotain vikaa",
+		"sv": "Det är något fel på formuläret",
+		"en": "There is something wrong with the forn"
+	},
 	"wizard.createOrList": {
 		"fi": "Tee uusi tai valitse",
 		"sv": "gör en ny eller välj",
@@ -68,6 +73,11 @@
 		"fi": "Tuo",
 		"sv": "Importera",
 		"en": "Import"
+	},
+	"wizard.option.json.removeId": {
+		"fi": "Poistetaanko lomakkeelta ID? Jos ei poisteta, tallennus ylikirjoittaa ID:ta vastaavan lomakkeen.",
+		"sv": "Vill du ta bort ID:t från formuläret? Om inte, kommer sparandet att skriva över formuläret med detta ID",
+		"en": "Do you want to remove the ID from the form? If not, saving will overwrite the form with this ID"
 	},
 	"wizard.databank.form.primary": {
 		"fi": "Onko aineisto primääridataa?",

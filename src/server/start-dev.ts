@@ -31,10 +31,11 @@ const compiler = webpack(config);
 // Redirect all but /static/* to the static index.html, since it's a  single-page app.
 server.use(historyApiFallback({
 	rewrites: [
-		{from: /^\/static\//, to: (context) => {
+		{from: /^\/(static|__webpack_hmr)/, to: (context) => {
 			return context.parsedUrl.pathname as string;
-		}}
+		}},
 	],
+	verbose: false,
 	disableDotRule: true,
 	index: "/static/index.html"
 }));
