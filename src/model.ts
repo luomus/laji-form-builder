@@ -95,6 +95,8 @@ export interface ExpandedMaster extends Omit<Master, "baseFormID"> {
 	fields?: Field[];
 }
 
+export type RemoteMaster = Master & {id: string};
+
 export function isFormExtensionField(field: Field | FormExtensionField): field is FormExtensionField {
 	return !!(field as any).formID;
 }

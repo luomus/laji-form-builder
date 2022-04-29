@@ -1,5 +1,5 @@
 import ApiClient from "../../api-client";
-import { FormDeleteResult, FormListing, Lang, Master, SchemaFormat } from "../../model";
+import { FormDeleteResult, FormListing, Lang, Master, RemoteMaster, SchemaFormat } from "../../model";
 
 
 export default class FormService {
@@ -38,7 +38,7 @@ export default class FormService {
 		}});
 	}
 
-	create(form: any): Promise<Master> {
+	create(form: any): Promise<RemoteMaster> {
 		return this.fetchJSON("", undefined, {method: "POST", body: JSON.stringify(form), headers: {
 			"Content-Type": "application/json"
 		}});

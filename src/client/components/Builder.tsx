@@ -120,7 +120,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	onSelected(id: string) {
-		// this.updateFromId(id);
 		this.props.onSelected?.(id);
 	}
 
@@ -554,6 +553,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			} else {
 				const masterResponse = await this.formService.create(master);
 				this.setState({master: masterResponse, saving: false}, this.propagateState);
+				this.onSelected(masterResponse.id);
 			}
 			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
 		} catch (e) {
