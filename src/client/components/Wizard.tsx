@@ -5,7 +5,7 @@ import { FormJSONEditor, HasChildren, Spinner, Stylable, SubmitButton } from "./
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult } from "../../model";
 import { JSONSchema } from "../../utils";
-import { nmspc } from "../utils";
+import { classNames, gnmspc, nmspc } from "../utils";
 import { translate as translateKey } from "laji-form/lib/utils";
 import { ButtonProps, ButtonGroupProps } from "../themes/theme";
 
@@ -62,7 +62,7 @@ export const FormCreatorWizard = ({onCreate, allowList = false, ...config}: Form
 		rootStep as WizardStep);
 	const Step = wizardStep.component;
 	return (
-		<Modal onHide={onHide} show={true}>
+		<Modal onHide={onHide} show={true} dialogClassName={classNames(gnmspc(), gnmspc("editor"))}>
 			<Modal.Header>
 				<Breadcrumb>{stepsTaken.map((step, i) =>
 					<WizardBreadcrumbItem key={step}
