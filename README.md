@@ -10,7 +10,7 @@ This repo is responsible for two things:
 
 REST JSON API `/api`:
 * `/api?{lang?: fi | en | sv}` list forms as JSON
-* `/api/:id?{lang?: fi | en | sv, format: json | schema = json}` list forms as JSON
+* `/api/:id?{lang?: fi | en | sv, format: json | schema = json, expand: true | false = true}` list forms as JSON
 * `/api` (`POST`) Create new form entry
 * `/api/:id` (`PUT`) Update form entry
 * `/api/:id` (`DELETE`) Delete form entry
