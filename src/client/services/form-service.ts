@@ -54,7 +54,7 @@ export default class FormService {
 	}
 
 	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
-		return this.fetchJSON("/transform", undefined, {method: "POST", body: JSON.stringify(master), headers: {
+		return this.fetchJSON("/transform", {lang: this.lang}, {method: "POST", body: JSON.stringify(master), headers: {
 			"Content-Type": "application/json"
 		}});
 	}
