@@ -63,7 +63,7 @@ describe("/api", () => {
 					expect(forms.length).toBeGreaterThan(0);
 				})
 				.end(finish(done));
-		});
+		}, 10000); // 10s
 
 		it("returns as untranslated", (done) => {
 			if (!forms) {
