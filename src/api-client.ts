@@ -20,7 +20,7 @@ export default class ApiClient implements ApiClientImplementation {
 	}
 
 	getBaseQuery() {
-		return {access_token: this.accessToken, personToken: this.personToken, lang: this.lang};
+		return {access_token: this.accessToken, personToken: this.personToken};
 	}
 
 	fetch(path: string, query?: any, options?: any): Promise<Response> {
