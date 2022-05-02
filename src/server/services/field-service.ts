@@ -268,6 +268,11 @@ export default class FieldService {
 			return e;
 		}
 	}
+
+	flush() {
+		this.cacheStore.forEach(c => c.clear());
+		this.cacheStore = [];
+	}
 }
 
 const addLanguage = (language?: Lang) => <T>(obj: T) =>

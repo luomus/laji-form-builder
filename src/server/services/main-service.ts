@@ -185,12 +185,14 @@ export default class MainService {
 		this.getFormCache(id).clear();
 		this.getRemoteForm.delete(id);
 		this.getForms.clear();
+		this.fieldService.flush();
 		return remoteForm;
 	}
 
 	async deleteForm(id: string) {
 		this.getFormCache(id).clear();
 		this.getRemoteForm.delete(id);
+		this.fieldService.flush();
 		this.getForms.clear();
 		return formFetch(`/${id}`, undefined, {method: "DELETE"});
 	}
@@ -207,5 +209,6 @@ export default class MainService {
 		this.cacheStore.forEach(c => c.clear());
 		this.cacheStore = [];
 		this.metadataService.flush();
+		this.fieldService.flush();
 	}
 }
