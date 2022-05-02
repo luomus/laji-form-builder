@@ -8,12 +8,21 @@ import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import { formFetch, UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
+import memoize, { Memoized } from "memoizee";
 
 export interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
 }
 
 export default class FieldService {
+	private cacheStore: (Memoized<any>)[] = [];
+	// eslint-disable-next-line @typescript-eslint/ban-types
+	private cache = <F extends Function>(fn: F, options?: memoize.Options & { clearDepLength?: number }) => {
+		const cached = memoize(fn, { promise: true, primitive: true, ...(options || {}) });
+		this.cacheStore.push(cached);
+		return cached;
+	};
+
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
 	private schemaService: SchemaService;
@@ -27,6 +36,7 @@ export default class FieldService {
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
 		this.masterToSchemaFormat = this.masterToSchemaFormat.bind(this);
+		this.linkMaster = this.linkMaster.bind(this);
 	}
 
 	setLang(lang: Lang) {
@@ -88,9 +98,8 @@ export default class FieldService {
 		};
 	}
 
-
-	private async expandMaster(master: Master, lang?: Lang): Promise<ExpandedMaster> {
-		const linkedMaster = await reduceWith<any, undefined, ExpandedMaster>(
+	linkMaster(master: Master) {
+		return reduceWith<any, undefined, ExpandedMaster>(
 			JSON.parse(JSON.stringify(master)),
 			undefined,
 			[
@@ -98,6 +107,10 @@ export default class FieldService {
 				this.mapBaseFormFromFields
 			]
 		);
+	}
+
+	private async expandMaster(master: Master, lang?: Lang): Promise<ExpandedMaster> {
+		const linkedMaster = await this.linkMaster(master);
 
 		const rootField = linkedMaster.fields
 			? this.getRootField(linkedMaster)
@@ -124,15 +137,17 @@ export default class FieldService {
 		return form;
 	}
 
+	private getRemoteForm = this.cache((id: string) => formFetch(`/${id}`));
+
 	private mapBaseForm = async (master: Master) => {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm: Master = await this.mapBaseForm(await formFetch(`/${master.baseFormID}`));
+		const baseForm: Master = await this.mapBaseForm(await this.getRemoteForm(master.baseFormID));
 		return this.mapBaseFormFrom(master, baseForm);
 	}
 
-	private mapBaseFormFromFields = async (master: Master) => {
+	mapBaseFormFromFields = async (master: Master) => {
 		if (!master.fields) {
 			return master;
 		}
@@ -145,7 +160,7 @@ export default class FieldService {
 			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
-				await this.expandMaster(await formFetch(`/${formID}`));
+				await this.expandMaster(await this.getRemoteForm(formID));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!master.context && context) {

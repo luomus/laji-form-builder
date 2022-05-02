@@ -48,19 +48,30 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p?.then;
 }
 
+/**
+ * Reduces an initial value into something else with the given reducer functions.
+ * An additional value can be given, which will be provided for each reducer function as the 2nd param.
+ *
+ * @param initialValue The initial value that is passed to each reducer as 1st param.
+ * @param reduceWith An additional value that is passed to each reducer as 2nd param.
+ * @param reducers An array of functions which return the accumulated result which is passed to the next reducer.
+ * The reducer can also return an observable. If the reducer is falsy, it will be skipped.
+ *
+ * @returns The accumulated result
+ */
 export function reduceWith<T, P, R = T>(
-	startValue: T | Promise<T>,
+	initialValue: T | Promise<T>,
 	reduceWith: P,
-	fns: (((value: T, reduceWith: P) => unknown) | undefined | false)[]
+	reducers: (((value: T, reduceWith: P) => unknown) | undefined | false)[]
 ): Promise<R> {
-	return fns.reduce((promise, fn) => promise.then(
+	return reducers.reduce((promise, fn) => promise.then(
 		value => fn !== false && isPromise<T>(fn)
 			? fn(value as T, reduceWith)
 			: Promise.resolve(fn
 				? fn(value as T, reduceWith)
 				: value)
 	)
-	, isPromise(startValue) ? startValue : Promise.resolve(startValue)) as Promise<R>;
+	, isPromise(initialValue) ? initialValue : Promise.resolve(initialValue)) as Promise<R>;
 }
 
 export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>

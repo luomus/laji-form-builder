@@ -43,7 +43,7 @@ describe("/api", () => {
 	describe("/ (form listing)", () => {
 		let forms: any[];
 
-		it("returns 422 for bad lang", async (done) => {
+		it("returns 422 for bad lang", (done) => {
 			request(app)
 				.get("/api?lang=badlang")
 				.expect((response: any) => {
@@ -53,7 +53,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns list of forms", async (done) => {
+		it("returns list of forms", (done) => {
 			request(app)
 				.get("/api")
 				.expect(200)
@@ -65,7 +65,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns as untranslated", async (done) => {
+		it("returns as untranslated", (done) => {
 			if (!forms) {
 				return;
 			}
@@ -77,7 +77,7 @@ describe("/api", () => {
 
 
 		// When new prop is added to be exposed, note that this might fail if none of the forms return that prop!
-		it("returns only certain properties", async (done) => {
+		it("returns only certain properties", (done) => {
 			if (!forms) {
 				return;
 			}
@@ -91,7 +91,7 @@ describe("/api", () => {
 			done();
 		});
 
-		it("doesn't return any other properties", async (done) => {
+		it("doesn't return any other properties", (done) => {
 			if (!forms) {
 				return;
 			}
@@ -103,7 +103,7 @@ describe("/api", () => {
 			done();
 		});
 
-		it("returns only certain options", async (done) => {
+		it("returns only certain options", (done) => {
 			const gatheredOptions: Record<string, boolean> = {};
 			forms.forEach(f => {
 				f.options && Object.keys(f.options).forEach(key => {
@@ -114,7 +114,7 @@ describe("/api", () => {
 			done();
 		});
 
-		it("doesn't return any other options", async (done) => {
+		it("doesn't return any other options", (done) => {
 			if (!forms) {
 				return;
 			}
@@ -126,7 +126,7 @@ describe("/api", () => {
 			done();
 		});
 
-		it("extends base form", async (done) => {
+		it("extends base form", (done) => {
 			request(app)
 				.get("/api")
 				.expect(200)
@@ -140,7 +140,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns translated when query param lang present", async (done) => {
+		it("returns translated when query param lang present", (done) => {
 			request(app)
 				.get("/api?lang=fi")
 				.expect(200)
@@ -153,7 +153,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns supportedLanguage all if none specified", async (done) => {
+		it("returns supportedLanguage all if none specified", (done) => {
 			const testForm = forms.find(f => f.id === TEST_FORM_ID);
 			expect(testForm.supportedLanguage).toEqual(["en", "fi", "sv"]);
 			done();
@@ -161,7 +161,7 @@ describe("/api", () => {
 	});
 
 	describe("/:id (get form)", () => {
-		it("returns 422 for bad lang", async (done) => {
+		it("returns 422 for bad lang", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}?lang=badlang`)
 				.expect((response: any) => {
@@ -171,7 +171,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns in master format by default", async (done) => {
+		it("returns in master format by default", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}`)
 				.expect(200)
@@ -185,7 +185,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns in master format when expand false", async (done) => {
+		it("returns in master format when expand false", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}?expand=false`)
 				.expect(200)
@@ -199,7 +199,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns translated and without translations when query param lang present", async (done) => {
+		it("returns translated and without translations when query param lang present", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}?lang=fi`)
 				.expect(200)
@@ -212,7 +212,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns in schema format when query param format=schema", async (done) => {
+		it("returns in schema format when query param format=schema", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}?format=schema`)
 				.expect(200)
@@ -226,7 +226,7 @@ describe("/api", () => {
 		});
 
 		// eslint-disable-next-line max-len
-		it("returns in schema format and translated and without translations when format=schema and query param lang present", async (done) => {
+		it("returns in schema format and translated and without translations when format=schema and query param lang present", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}?format=schema&lang=fi`)
 				.expect(200)
@@ -242,7 +242,7 @@ describe("/api", () => {
 	});
 
 	describe("/transform", () => {
-		it("returns 422 for bad lang", async (done) => {
+		it("returns 422 for bad lang", (done) => {
 			request(app)
 				.post("/api/transform?lang=badlang")
 				.send(testForm)
@@ -253,7 +253,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns 500 for unexpected error", async (done) => {
+		it("returns 500 for unexpected error", (done) => {
 			request(app)
 				.post("/api/transform")
 				.send({patch: "foo"})
@@ -264,7 +264,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns 422 for known error", async (done) => {
+		it("returns 422 for known error", (done) => {
 			request(app)
 				.post("/api/transform")
 				.send({fields: [{name: "foo"}]})
@@ -275,7 +275,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("transforms master format to schema format untranslated without lang param", async (done) => {
+		it("transforms master format to schema format untranslated without lang param", (done) => {
 			request(app)
 				.post("/api/transform")
 				.send(testForm)
@@ -292,7 +292,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("transforms master format to schema format translated when query param lang present", async (done) => {
+		it("transforms master format to schema format translated when query param lang present", (done) => {
 			request(app)
 				.post("/api/transform?lang=fi")
 				.send(testForm)
@@ -312,7 +312,7 @@ describe("/api", () => {
 	let createdForm: Master;
 
 	describe("/ POST (form creation)", () => {
-		it("returns 422 if form has id", async (done) => {
+		it("returns 422 if form has id", (done) => {
 			request(app)
 				.post("/api")
 				.send(testForm)
@@ -325,7 +325,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("returns JSON error for store error", async (done) => {
+		it("returns JSON error for store error", (done) => {
 			const {id, ..._testForm} = testForm;
 			request(app)
 				.post("/api")
@@ -340,7 +340,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("creates form and returns in master format", async (done) => {
+		it("creates form and returns in master format", (done) => {
 			const {id, ..._testForm} = testForm;
 			request(app)
 				.post("/api")
@@ -358,7 +358,7 @@ describe("/api", () => {
 	});
 
 	describe("/:id PUT (form update)", () => {
-		it("returns JSON error for store error", async (done) => {
+		it("returns JSON error for store error", (done) => {
 			request(app)
 				.post("/api")
 				.send({...testForm, "badprop": "bad!"})
@@ -372,7 +372,7 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
-		it("updates form and returns in master format", async (done) => {
+		it("updates form and returns in master format", (done) => {
 			const title = "test title";
 			request(app)
 				.put(`/api/${createdForm.id}`)
@@ -391,7 +391,7 @@ describe("/api", () => {
 	});
 
 	describe("/:id DELETE (form delete)", () => {
-		it("updates form and returns in master format", async (done) => {
+		it("updates form and returns in master format",(done) => {
 			request(app)
 				.delete(`/api/${createdForm.id}`)
 				.expect(200)
@@ -403,7 +403,7 @@ describe("/api", () => {
 	});
 
 	describe("/flush", () => {
-		it("works", async (done) => {
+		it("works", (done) => {
 			request(app)
 				.get("/api/flush")
 				.expect(200)

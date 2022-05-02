@@ -83,37 +83,32 @@ const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
 		return copy;
 	}, {} as T);
 };
+const addDefaultSupportedLanguage = (f: FormListing) => f.supportedLanguage
+	? f
+	: {...f, supportedLanguage: ["en", "fi", "sv"]};
+
+const translateSafely = (lang?: Lang) => (f: Master) => (isLang(lang) && f.translations && lang in f.translations)
+	? translate(f, (f.translations[lang] as {[key: string]: string}))
+	: f;
 
 export default class MainService {
-	cacheStore: (Memoized<any>)[] = [];
+	private cacheStore: (Memoized<any>)[] = [];
 	// eslint-disable-next-line @typescript-eslint/ban-types
-	cache = <F extends Function>(fn: F, options?: memoize.Options & { clearDepLength?: number }) => {
+	private cache = <F extends Function>(fn: F, options?: memoize.Options & { clearDepLength?: number }) => {
 		const cached = memoize(fn, { promise: true, primitive: true, ...(options || {}) });
 		this.cacheStore.push(cached);
 		return cached;
 	};
-	metadataService = new MetadataService(apiClient, DEFAULT_LANG);
-	fieldService = new FieldService(apiClient, this.metadataService, DEFAULT_LANG);
+	private metadataService = new MetadataService(apiClient, DEFAULT_LANG);
+	private fieldService = new FieldService(apiClient, this.metadataService, DEFAULT_LANG);
 
 	constructor() {
 		this.exposeFormListing = this.exposeFormListing.bind(this);
-		this.extendBaseForm = this.extendBaseForm.bind(this);
 	}
 
 	setLang(lang: Lang) {
 		this.metadataService.setLang(lang);
 		this.fieldService.setLang(lang);
-	}
-
-	private extendBaseForm(form: Master, forms: Master[]) {
-		if (!form.baseFormID) {
-			return form;
-		}
-
-		const baseForm = forms.find(f => f.id === form.baseFormID);
-		return baseForm
-			? this.fieldService.mapBaseFormFrom(form, baseForm)
-			: form;
 	}
 
 	private exposeFormListing(form: Master) {
@@ -131,16 +126,11 @@ export default class MainService {
 		const remoteForms: Master[] = (await formFetch("/", {page_size: 10000})).member;
 		lang && this.setLang(lang);
 		return Promise.all(remoteForms.map(form => {
-			const {translations} = form;
-			return reduceWith<Master, Master[], FormListing>(form, remoteForms, [
-				this.extendBaseForm,
+			return reduceWith<Master, undefined, FormListing>(form, undefined, [
+				this.fieldService.linkMaster,
+				translateSafely(lang),
 				this.exposeFormListing,
-				f => f.supportedLanguage
-					? f
-					: {...f, supportedLanguage: ["en", "fi", "sv"]},
-				f => (isLang(lang) && translations && lang in translations)
-					? translate(f, (translations[lang] as {[key: string]: string}))
-					: f
+				addDefaultSupportedLanguage
 			]);
 		}));
 	}, { length: 1 });
