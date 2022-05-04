@@ -40,7 +40,7 @@ export default class MetadataService {
 	}
 
 	propertiesContext = new Promise<PropertyContextDict>(
-		(resolve, reject) => fetchJSON("https://schema.laji.fi/context/document.jsonld").then(result => {
+		(resolve, reject) => fetchJSON<any>("https://schema.laji.fi/context/document.jsonld").then(result => {
 			result?.["@context"] ? resolve(preparePropertiesContext(result?.["@context"])) : reject();
 		}, reject))
 

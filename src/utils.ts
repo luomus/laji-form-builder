@@ -2,7 +2,7 @@ import fetch from "cross-fetch";
 import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
 import { JSONSchemaE, Lang } from "./model";
 
-export const translate = (obj: any, translations: {[key: string]: string}) => {
+export const translate = (obj: any, translations: Record<string, string>) => {
 	function translate(_any: any): any {
 		if (isObject(_any)) {
 			return Object.keys(_any).reduce<any>((translated, key) => {
@@ -87,7 +87,7 @@ export const isObject = _isObject;
  **/
 export const unprefixProp = (s: string) => s.replace(/^.+\./, "");
 
-export const fetchJSON = (path: string, options?: any) => fetch(path, options).then(r => r.json());
+export const fetchJSON = <T>(path: string, options?: any) => fetch(path, options).then(r => r.json() as unknown as T);
 
 /**
  * Converts an array into a dictionary with the array items as the keys.
@@ -99,3 +99,9 @@ export const dictionarify = (arr: string[]): Record<string, true> => arr.reduce(
 	dict[key] = true;
 	return dict;
 }, {} as Record<string, true>);
+
+export const dictionarifyByKey = <T extends Record<string, unknown>>(objects: T[], key: keyof T) =>
+	objects.reduce<Record<string, T>>((map, obj) => {
+		map[obj[key] as string] = obj;
+		return map;
+	}, {});

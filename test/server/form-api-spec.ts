@@ -1,7 +1,8 @@
 import request from "supertest";
 import app from "../../src/server/server";
 import { FormListing, Master } from "../../src/model";
-import { exposedProps, exposedOptions, formFetch } from "../../src/server/services/main-service";
+import { exposedProps, exposedOptions } from "../../src/server/services/main-service";
+import { formFetch } from "../../src/server/services/store-service";
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
@@ -36,7 +37,7 @@ let testForm: Master;
 describe("/api", () => {
 
 	beforeAll(async done => {
-		testForm = await formFetch(`/${TEST_FORM_ID}`);
+		testForm = await formFetch(`/${TEST_FORM_ID}`) as Master;
 		done();
 	});
 

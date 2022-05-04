@@ -6,31 +6,25 @@ import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, 
 import { reduceWith, unprefixProp, isObject, translate } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
-import { formFetch, UnprocessableError } from "./main-service";
+import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
-import memoize, { Memoized } from "memoizee";
+import StoreService from "./store-service";
 
 export interface InternalProperty extends PropertyModel {
 	_rootProp?: boolean
 }
 
 export default class FieldService {
-	private cacheStore: (Memoized<any>)[] = [];
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	private cache = <F extends Function>(fn: F, options?: memoize.Options & { clearDepLength?: number }) => {
-		const cached = memoize(fn, { promise: true, primitive: true, ...(options || {}) });
-		this.cacheStore.push(cached);
-		return cached;
-	};
-
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
+	private storeService: StoreService;
 	private schemaService: SchemaService;
 	private expandedJSONService: ExpandedJSONService;
 
-	constructor(apiClient: ApiClient, metadataService: MetadataService, lang: Lang) {
+	constructor(apiClient: ApiClient, metadataService: MetadataService, storeService: StoreService, lang: Lang) {
 		this.apiClient = apiClient;
 		this.metadataService = metadataService;
+		this.storeService = storeService;
 		this.schemaService = new SchemaService(metadataService, apiClient, lang);
 		this.expandedJSONService = new ExpandedJSONService(metadataService, lang);
 
@@ -137,13 +131,11 @@ export default class FieldService {
 		return form;
 	}
 
-	private getRemoteForm = this.cache((id: string) => formFetch(`/${id}`));
-
 	private mapBaseForm = async (master: Master) => {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm: Master = await this.mapBaseForm(await this.getRemoteForm(master.baseFormID));
+		const baseForm: Master = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID));
 		return this.mapBaseFormFrom(master, baseForm);
 	}
 
@@ -160,7 +152,7 @@ export default class FieldService {
 			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
-				await this.expandMaster(await this.getRemoteForm(formID));
+				await this.expandMaster(await this.storeService.getForm(formID));
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!master.context && context) {
@@ -267,11 +259,6 @@ export default class FieldService {
 		} catch (e) {
 			return e;
 		}
-	}
-
-	flush() {
-		this.cacheStore.forEach(c => c.clear());
-		this.cacheStore = [];
 	}
 }
 

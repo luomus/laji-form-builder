@@ -1,7 +1,8 @@
 import express, { ErrorRequestHandler, RequestHandler, Response } from "express";
 import bodyParser from "body-parser";
 import { Format, isLang, Lang } from "../model";
-import MainService, { StoreError, UnprocessableError } from "./services/main-service";
+import MainService, { UnprocessableError } from "./services/main-service";
+import { StoreError } from "./services/store-service";
 
 const error = (res: Response, status: number, error: any, stack?: any) => {
 	const err: any = {

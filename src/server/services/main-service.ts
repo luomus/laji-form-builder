@@ -1,25 +1,11 @@
 import * as config from "../../../config.json";
-import { reduceWith, fetchJSON, translate, dictionarify } from "../../utils";
-import queryString from "querystring";
+import { reduceWith, translate, dictionarify } from "../../utils";
 import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master, Format } from "../../model";
 import ApiClient from "../../api-client";
-
-export class StoreError extends Error {
-	status: number;
-	storeError: string;
-	constructor(code: number, storeError: any) {
-		super("Store error");
-		// eslint-disable-next-line max-len
-		// Explanation https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
-		Object.setPrototypeOf(this, StoreError.prototype);
-
-		this.status = code;
-		this.storeError = storeError;
-	}
-}
+import StoreService from "./store-service";
 
 // Intended to be used for checked errors, which the controller should return with 422.
 export class UnprocessableError extends Error {
@@ -32,14 +18,6 @@ export class UnprocessableError extends Error {
 }
 
 const DEFAULT_LANG = "en";
-
-const lajiStoreFetch = (endpoint: string) => async (url: string, query?: any, options?: any) => 
-	 fetchJSON(`${config.lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
-		...(options || {}),
-		headers: { Authorization: config.lajiStoreAuth, ...(options?.headers || {}) },
-	});
-
-export const formFetch = lajiStoreFetch("/form");
 
 const apiClient = new ApiClient(
 	config.apiBase,
@@ -100,7 +78,8 @@ export default class MainService {
 		return cached;
 	};
 	private metadataService = new MetadataService(apiClient, DEFAULT_LANG);
-	private fieldService = new FieldService(apiClient, this.metadataService, DEFAULT_LANG);
+	private storeService = new StoreService();
+	private fieldService = new FieldService(apiClient, this.metadataService, this.storeService, DEFAULT_LANG);
 
 	constructor() {
 		this.exposeFormListing = this.exposeFormListing.bind(this);
@@ -123,9 +102,8 @@ export default class MainService {
 	}
 
 	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
-		const remoteForms: Master[] = (await formFetch("/", {page_size: 10000})).member;
 		lang && this.setLang(lang);
-		return Promise.all(remoteForms.map(form => {
+		return Promise.all((await this.storeService.getForms()).map(form => {
 			return reduceWith<Master, undefined, FormListing>(form, undefined, [
 				this.fieldService.linkMaster,
 				translateSafely(lang),
@@ -135,23 +113,21 @@ export default class MainService {
 		}));
 	}, { length: 1 });
 
-	private getRemoteForm = this.cache((id: string) => formFetch(`/${id}`));
-
 	private getFormCache = this.cache((id: string) =>
 		this.cache(async (lang?: Lang, format: Format = Format.JSON, expand = true) => {
-			const form = await this.getRemoteForm(id);
+			const form = await this.storeService.getForm(id);
 			lang && this.setLang(lang);
 			const isConvertable = (format === Format.Schema || format === Format.JSON && expand); 
 			return reduceWith(form, lang, [
 				(master, lang) => isConvertable ? this.fieldService.convert(master, format as any, lang) : master,
 				(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
-					? translate(form, form.translations[lang])
+					? translate(form, form.translations[lang] as Record<string, string>)
 					: form,
 				format !== "schema" && isLang(lang) && removeTranslations(lang)
 			]);
 		}, {length: 3}), {promise: false});
 
-	getForm(id: string, lang?: Lang, format: Format  = Format.JSON, expand = true) {
+	getForm(id: string, lang?: Lang, format: Format = Format.JSON, expand = true) {
 		return this.getFormCache(id)(lang, format, expand);
 	}
 
@@ -160,16 +136,9 @@ export default class MainService {
 		if (error) {
 			throw error;
 		}
-		const remoteForm = await formFetch("/", undefined, {
-			method: "POST",
-			body: JSON.stringify(form),
-			headers: {"Content-Type": "application/json"}
-		});
-		if (remoteForm.status > 400) {
-			throw new StoreError(remoteForm.status, remoteForm.error);
-		}
+		const remoteForms = this.storeService.createForm(form);
 		this.getForms.clear();
-		return remoteForm;
+		return remoteForms;
 	}
 
 	async updateForm(id: string, form: Master) {
@@ -177,24 +146,19 @@ export default class MainService {
 		if (error) {
 			throw error;
 		}
-		const remoteForm = await formFetch(`/${id}`, undefined, {
-			method: "PUT",
-			body: JSON.stringify(form),
-			headers: {"Content-Type": "application/json"}
-		});
+		const remoteForm = this.storeService.updateForm(id, form);
 		this.getFormCache(id).clear();
-		this.getRemoteForm.delete(id);
 		this.getForms.clear();
-		this.fieldService.flush();
 		return remoteForm;
 	}
 
 	async deleteForm(id: string) {
-		this.getFormCache(id).clear();
-		this.getRemoteForm.delete(id);
-		this.fieldService.flush();
-		this.getForms.clear();
-		return formFetch(`/${id}`, undefined, {method: "DELETE"});
+		const response = await this.storeService.deleteForm(id);
+		if (response.affected > 0) {
+			this.getFormCache(id).clear();
+			this.getForms.clear();
+		}
+		return response;
 	}
 
 	transform(form: Master, lang?: Lang) {
@@ -208,7 +172,7 @@ export default class MainService {
 	flush() {
 		this.cacheStore.forEach(c => c.clear());
 		this.cacheStore = [];
+		this.storeService.flush();
 		this.metadataService.flush();
-		this.fieldService.flush();
 	}
 }

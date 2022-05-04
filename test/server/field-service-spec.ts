@@ -3,6 +3,7 @@ import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
 import { SchemaFormat, Master } from "../../src/model";
 import ApiClient from "../../src/api-client";
+import StoreService from "../../src/server/services/store-service";
 
 const LANG = "fi";
 const mock = !(process.env.MOCK === "false");
@@ -50,7 +51,7 @@ const apiClient = apiClientImpl(
 	LANG
 );
 
-const fieldService = new FieldService(apiClient, new MetadataService(apiClient, LANG), LANG);
+const fieldService = new FieldService(apiClient, new MetadataService(apiClient, LANG), new StoreService(), LANG);
 
 const throwsError = async (task: () => unknown) => {
 	try {
