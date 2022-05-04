@@ -13,7 +13,7 @@ export enum PropertyRange {
 	Decimal = "xsd:decimal"
 }
 
-export interface PropertyModel {
+export type PropertyModel = {
 	property: string;
 	label: Partial<Record<Lang, string>>;
 	range: (PropertyRange | string)[];
@@ -27,7 +27,7 @@ export interface PropertyModel {
 	domain: string[];
 }
 
-export interface PropertyContext {
+export type PropertyContext = {
 	"@id": string;
 	"@type"?: PropertyRange;
 	"@container"?: "@set";
@@ -39,10 +39,10 @@ export const LANGS: Lang[] = ["fi", "en", "sv"];
 
 export const isLang = (lang: any): lang is Lang => typeof lang === "string" && LANGS.includes(lang as any);
 
-export type CompleteTranslations = Record<Lang, {[key: string]: string}>;
-export type Translations = Partial<Record<Lang, {[key: string]: string}>>;
+export type CompleteTranslations = Record<Lang, Record<string, string>>;
+export type Translations = Partial<CompleteTranslations>
 
-export interface CommonFormat {
+export type CommonFormat = {
 	id?: string;
 	options?: any;
 	title?: string;
@@ -57,15 +57,15 @@ export interface CommonFormat {
 	language?: Lang;
 }
 
-export interface FormListing extends CommonFormat {
+export type FormListing = CommonFormat & {
 	id: string;
 }
 
-export interface CommonExpanded extends CommonFormat {
+export type CommonExpanded = CommonFormat & {
 	uiSchema?: any;
 }
 
-export interface Master extends CommonExpanded {
+export type Master = CommonExpanded & {
 	fields?: (Field | FormExtensionField)[];
 	baseFormID?: string;
 	patch?: any[];
@@ -75,7 +75,7 @@ export interface Master extends CommonExpanded {
 	extra?: Record<string, {altParent: AltParentMap}>;
 }
 
-export interface SchemaFormat extends CommonExpanded {
+export type SchemaFormat = CommonExpanded & {
 	schema?: any;
 	validators?: any;
 	warnings?: any;
@@ -87,11 +87,11 @@ export interface SchemaFormat extends CommonExpanded {
 	translations?: Translations;
 }
 
-export interface ExpandedJSONFormat extends CommonExpanded {
+export type ExpandedJSONFormat = CommonExpanded & {
 	fields?: ExpandedField[];
 }
 
-export interface ExpandedMaster extends Omit<Master, "baseFormID"> {
+export type ExpandedMaster = Omit<Master, "baseFormID"> & {
 	fields?: Field[];
 }
 
@@ -101,7 +101,7 @@ export function isFormExtensionField(field: Field | FormExtensionField): field i
 	return !!(field as any).formID;
 }
 
-export interface FieldOptions {
+export type FieldOptions = {
 	excludeFromCopy?: boolean;
 	default?: any;
 	whitelist?: string[];
@@ -112,7 +112,7 @@ export interface FieldOptions {
 	value_options?: Record<string, string>;
 }
 
-export interface Field {
+export type Field = {
 	name: string;
 	type?: "hidden";
 	required?: boolean;
@@ -134,23 +134,23 @@ export type ExpandedFieldType =
 	| "integer:nonNegativeInteger"
 	| "integer:positiveInteger";
 
-export interface ExpandedFieldOptions extends FieldOptions {
+export type ExpandedFieldOptions = FieldOptions & {
 	target_element?: {
 		type: ExpandedFieldType;
 	};
 }
 
-export interface ExpandedField extends Omit<Field, "type" | "fields"> {
+export type ExpandedField = Omit<Field, "type" | "fields"> & {
 	type?: "hidden" | "collection" | ExpandedFieldType;
 	fields?: ExpandedField[];
 	options?: ExpandedFieldOptions;
 }
 
-export interface FormExtensionField {
+export type FormExtensionField = {
 	formID: string;
 }
 
-export interface AltTreeParent {
+export type AltTreeParent = {
 	children: Record<string, AltTreeNode>;
 	order: string[];
 }
@@ -161,25 +161,25 @@ export type AltTreeNode = AltTreeParent | AltTreeLeaf;
 
 export type AltParentMap = Record<string, string[]>;
 
-export interface JSONSchemaE extends JSONSchema7 {
+export type JSONSchemaE = JSONSchema7 & {
 	excludeFromCopy?: boolean;
 	enumNames?: string[];
 }
 
-export interface Range {
+export type Range = {
 	id: string;
 	value?: Partial<Record<Lang, string>>;
 	vernacularName?: Partial<Record<Lang, string>>;
 	altParent?: string;
 }
 
-export interface Class {
+export type Class = {
 	class: string;
 	label: Partial<Record<Lang, string>>;
 	shortName: string
 }
 
-export interface FormDeleteResult {
+export type FormDeleteResult = {
 	affected: number;
 }
 
