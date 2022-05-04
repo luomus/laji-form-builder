@@ -803,7 +803,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	}, [tmpValue, translations, onSubmit, onHide]);
 
 	return (
-		<Modal show={true} onHide={onHideCheckForChanges} dialogClassName={classNames(gnmspc(), gnmspc("editor"))}>
+		<Modal show={true} onHide={onHideCheckForChanges} dialogClassName={classNames(gnmspc())}>
 			<Modal.Header closeButton={true}>
 			</Modal.Header>
 			<Modal.Body>

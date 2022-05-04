@@ -70,10 +70,6 @@ $bRadius: 2px;
 	}
 }
 
-.ljb.ljb-editor .modal-content {
-	@include editor;
-}
-
 .ljb {
 	$root: &;
 	&-field {
@@ -303,5 +299,9 @@ $bRadius: 2px;
 				}
 			}
 		}
+	}
+
+	.modal-content {
+		@include editor;
 	}
 }

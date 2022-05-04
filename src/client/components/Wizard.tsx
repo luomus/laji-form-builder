@@ -62,7 +62,7 @@ export const FormCreatorWizard = ({onCreate, allowList = false, ...config}: Form
 		rootStep as WizardStep);
 	const Step = wizardStep.component;
 	return (
-		<Modal onHide={onHide} show={true} dialogClassName={classNames(gnmspc(), gnmspc("editor"))}>
+		<Modal onHide={onHide} show={true} dialogClassName={classNames(gnmspc())}>
 			<Modal.Header>
 				<Breadcrumb>{stepsTaken.map((step, i) =>
 					<WizardBreadcrumbItem key={step}
