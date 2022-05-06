@@ -8,6 +8,7 @@ const view: RequestHandler = async (req, res, next) => {
 	if (req.url.match("/static") || req.url.startsWith("/__webpack")) {
 		return next();
 	}
+	res.setHeader("Cache-Control", "no-store");
 	res.sendFile(path.join(__dirname, "..", "static", "index.html"), {dotfiles: "allow"});
 };
 server.use("/", view);
