@@ -313,19 +313,6 @@ describe("/api", () => {
 	let createdForm: Master;
 
 	describe("/ POST (form creation)", () => {
-		it("returns 422 if form has id", (done) => {
-			request(app)
-				.post("/api")
-				.send(testForm)
-				.set("Content-Type", "application/json")
-				.expect(422)
-				.expect((response: any) => {
-					expect(response.status).toBe(422);
-					expect(response.error).toBeTruthy();
-				})
-				.end(finish(done));
-		});
-
 		it("returns JSON error for store error", (done) => {
 			const {id, ..._testForm} = testForm;
 			request(app)

@@ -60,9 +60,6 @@ api.get("/:id", langCheckMiddleWare, async (req, res) => {
 });
 
 api.post("/", async (req, res) => {
-	if (req.body.id) {
-		return error(res, 422, "Shouldn't specify id when creating a new form entry");
-	}
 	let result: any;
 	try {
 		result = await main.saveForm(req.body);
