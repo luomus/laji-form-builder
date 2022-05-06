@@ -174,5 +174,10 @@ export default class MainService {
 		this.cacheStore = [];
 		this.storeService.flush();
 		this.metadataService.flush();
+		this.warmup();
+	}
+
+	warmup() {
+		this.getForms();
 	}
 }

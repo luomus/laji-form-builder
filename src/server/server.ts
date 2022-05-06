@@ -36,7 +36,7 @@ const api = express();
 
 api.use("/", bodyParser.json({limit: "1MB"}));
 
-api.get("/flush", async (req, res) => {
+api.get("/flush", (req, res) => {
 	main.flush();
 	return res.json({flush: "ok"});
 });
@@ -113,5 +113,7 @@ server.use("/lajiform", (req, res) => {
 });
 
 server.use("/api", api);
+
+main.warmup();
 
 export default server;
