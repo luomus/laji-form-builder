@@ -1,24 +1,40 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+const devMode = process.env.NODE_ENV !== "production";
 
 module.exports = {
-	mode: "production",
+	mode: process.env.NODE_ENV,
 	entry: [
 		path.join(path.resolve(), "src", "server", "view", "app")
 	],
 	output: {
 		path: path.join(__dirname, "static"),
-		filename: "main.js",
+		filename: "[name].[contenthash].js",
 		publicPath: "/static",
 		clean: true
 	},
+	optimization: {
+		moduleIds: "deterministic",
+		runtimeChunk: "single",
+		splitChunks: {
+			cacheGroups: {
+				vendor: {
+					test: /[\\/]node_modules[\\/]/,
+					name: "vendors",
+					chunks: "all",
+				},
+			},
+		}
+	},
 	plugins: [
-		new webpack.DefinePlugin({"process.env.NODE_ENV": "\"production\""}),
 		new HtmlWebpackPlugin({
 			template: path.join(path.resolve(), "src", "server", "view", "index.html"),
 			favicon: path.join(path.resolve(), "src", "server", "view", "favicon.ico")
 		}),
+		...(devMode ? [] : [new MiniCssExtractPlugin({filename: "[name].[hash].css"})])
 	],
 	module: {
 		rules: [
@@ -46,15 +62,9 @@ module.exports = {
 			{
 				test: /\.s?css$/,
 				use: [
-					{
-						loader: "style-loader"
-					},
-					{
-						loader: "css-loader"
-					},
-					{
-						loader: "sass-loader"
-					}
+					devMode ? "style-loader" : MiniCssExtractPlugin.loader,
+					"css-loader",
+					"sass-loader"
 				]
 			},
 			{
@@ -73,4 +83,4 @@ module.exports = {
 	resolve: {
 		extensions: [".tsx", ".ts", ".js", ".json"]
 	}
-};
+}

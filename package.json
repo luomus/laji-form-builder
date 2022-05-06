@@ -70,6 +70,7 @@
     "jasmine-reporters": "^2.5.0",
     "jasmine-spec-reporter": "^7.0.0",
     "jasmine-xml-reporter": "^1.2.1",
+    "mini-css-extract-plugin": "^2.6.0",
     "node-sass": "^6.0.1",
     "nodemon": "^2.0.15",
     "notus": "^0.3.2",
