@@ -23,13 +23,20 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 	return next();
 };
 
-const errorHandlerMiddleWare: ErrorRequestHandler = (err, req, res, next) => {
+const errorHandlerJSONMiddleWare: ErrorRequestHandler = (err, req, res, next) => {
 	if (err instanceof UnprocessableError) {
 		error(res, 422, err.message);
 	} else {
 		error(res, 500, err.message, err.stack);
 	}
 };
+
+const storeErrorHandlerMiddleWare: ErrorRequestHandler = (err, req, res, next) => {
+	if (err instanceof StoreError) {
+		return error(res, err.status, err.storeError);
+	}
+	throw err;
+}
 
 const main = new MainService();
 const api = express();
@@ -60,29 +67,11 @@ api.get("/:id", langCheckMiddleWare, async (req, res) => {
 });
 
 api.post("/", async (req, res) => {
-	let result: any;
-	try {
-		result = await main.saveForm(req.body);
-	} catch (e) {
-		if (e instanceof StoreError) {
-			return error(res, e.status, e.storeError);
-		}
-		throw e;
-	}
-	return res.status(200).json(result);
+	return res.status(200).json(await main.saveForm(req.body));
 });
 
 api.put("/:id", async (req, res) => {
-	let result: any;
-	try {
-		result = await main.updateForm(req.params.id, req.body);
-	} catch (e) {
-		if (e instanceof StoreError) {
-			return error(res, e.status, e.storeError);
-		}
-		throw e;
-	}
-	return res.status(200).json(result);
+	return res.status(200).json(await main.updateForm(req.params.id, req.body));
 });
 
 api.delete("/:id", async (req, res) => {
@@ -93,7 +82,7 @@ api.post("/transform", langCheckMiddleWare, async (req, res) => {
 	return res.status(200).json(await main.transform(req.body, req.query.lang as (Lang | undefined)));
 });
 
-api.use(errorHandlerMiddleWare);
+api.use(storeErrorHandlerMiddleWare, errorHandlerJSONMiddleWare);
 
 const server = express();
 
