@@ -186,7 +186,7 @@ export default class FieldService {
 	private applyPatches(master: Master) {
 		const {patch, ..._master} = master;
 		return patch
-			? (applyPatch(_master, patch).newDocument as Master)
+			? (applyPatch(_master, patch, undefined, false).newDocument as Master)
 			: master;
 	}
 
