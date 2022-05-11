@@ -253,7 +253,7 @@ export default class FieldService {
 	/**
 	 * Returns an error if the form is invalid, undefined if valid.
 	 */
-	async getError(master: Master) {
+	async validate(master: Master) {
 		try {
 			await this.convert(master, Format.Schema);
 		} catch (e) {

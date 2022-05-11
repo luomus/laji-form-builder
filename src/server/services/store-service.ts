@@ -71,6 +71,7 @@ export default class StoreService {
 		if (isStoreError(response)) {
 			throw new StoreError(response);
 		}
+		this.forms[id] = response;
 		return response;
 	});
 
@@ -97,6 +98,7 @@ export default class StoreService {
 			throw new StoreError(response);
 		}
 		this.getForm.delete(id);
+		delete this.forms[id];
 		this.getForms.clear();
 		return response;
 	}
@@ -107,6 +109,7 @@ export default class StoreService {
 			throw new StoreError(response);
 		}
 		this.getForm.delete(id);
+		delete this.forms[id];
 		this.getForms.clear();
 		return response;
 	}

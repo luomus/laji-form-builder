@@ -132,7 +132,7 @@ export default class MainService {
 	}
 
 	async saveForm(form: Master) {
-		const error = await this.fieldService.getError(form);
+		const error = await this.fieldService.validate(form);
 		if (error) {
 			throw error;
 		}
@@ -142,7 +142,7 @@ export default class MainService {
 	}
 
 	async updateForm(id: string, form: Master) {
-		const error = await this.fieldService.getError(form);
+		const error = await this.fieldService.validate(form);
 		if (error) {
 			throw error;
 		}
