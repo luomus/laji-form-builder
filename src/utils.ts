@@ -2,7 +2,7 @@ import fetch from "cross-fetch";
 import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
 import { JSONSchemaE, Lang } from "./model";
 
-export const translate = (obj: any, translations: Record<string, string>) => {
+export const translate = <T>(obj: T, translations: Record<string, string>): T => {
 	function translate(_any: any): any {
 		if (isObject(_any)) {
 			return Object.keys(_any).reduce<any>((translated, key) => {
@@ -48,31 +48,46 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p?.then;
 }
 
+export type MaybePromise <T> = T | Promise<T>;
+
+interface Reducer<T, R, P> {
+	(value: T, reduceWith: P): Promise<R> | R;
+}
+
+export const bypass = <T>(any: T): T => any;
+
 /**
  * Reduces an initial value into something else with the given reducer functions.
  * An additional value can be given, which will be provided for each reducer function as the 2nd param.
  *
  * @param initialValue The initial value that is passed to each reducer as 1st param.
  * @param reduceWith An additional value that is passed to each reducer as 2nd param.
- * @param reducers An array of functions which return the accumulated result which is passed to the next reducer.
- * The reducer can also return an observable. If the reducer is falsy, it will be skipped.
+ * @param {...reducers} Functions which return the accumulated result which is passed to the next reducer.
  *
- * @returns The accumulated result
+ * @returns The accumulated result.
  */
-export function reduceWith<T, P, R = T>(
-	initialValue: T | Promise<T>,
-	reduceWith: P,
-	reducers: (((value: T, reduceWith: P) => unknown) | undefined | false)[]
-): Promise<R> {
+/* eslint-disable max-len */
+function reduceWith<T, P>(initialValue: T | Promise<T>, reduceWith: P): Promise<T>;
+function reduceWith<T, P, A>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>): Promise<A>;
+function reduceWith<T, P, A, B>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>): Promise<B>;
+function reduceWith<T, P, A, B, C>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>): Promise<C>;
+function reduceWith<T, P, A, B, C, D>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>): Promise<D>;
+ function reduceWith<T, P, A, B, C, D, E>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>): Promise<E>;
+function reduceWith<T, P, A, B, C, D, E, F>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>): Promise<F>;
+function reduceWith<T, P, A, B, C, D, E, F, G>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>, op7: Reducer<F, G, P>): Promise<G>;
+function reduceWith<T, P, A, B, C, D, E, F, G, H>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>, op7: Reducer<F, G, P>, op8: Reducer<G, H, P>): Promise<H>;
+function reduceWith<T, P, A, B, C, D, E, F, G, H, I>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>, op7: Reducer<F, G, P>, op8: Reducer<G, H, P>, op9: Reducer<H, I, P>): Promise<I>;
+function reduceWith<T, P>(initialValue: T | Promise<T>, reduceWith: P, ...reducers: Reducer<any, any, P>[]): Promise<any> {
 	return reducers.reduce((promise, fn) => promise.then(
-		value => fn !== false && isPromise<T>(fn)
-			? fn(value as T, reduceWith)
-			: Promise.resolve(fn
-				? fn(value as T, reduceWith)
-				: value)
+		value => isPromise(fn)
+			? fn(value, reduceWith)
+			: Promise.resolve(fn(value, reduceWith))
 	)
-	, isPromise(initialValue) ? initialValue : Promise.resolve(initialValue)) as Promise<R>;
+	, isPromise(initialValue) ? initialValue : Promise.resolve(initialValue));
 }
+/* eslint-enable max-len */
+
+export { reduceWith }; 
 
 export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>
 	!obj ? undefined : (obj[lang] ?? obj["en"]);

@@ -1,7 +1,7 @@
 import MetadataService from "../../services/metadata-service";
-import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSchemaE, Lang, Master, SchemaFormat
-} from "../../model";
-import { InternalProperty, mapUnknownFieldWithTypeToProperty } from "./field-service";
+import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSchemaE, Lang, Master, PropertyModel,
+	SchemaFormat } from "../../model";
+import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchema, multiLang, reduceWith, unprefixProp } from "../../utils";
 import * as rjsf from "@rjsf/core";
 import merge from "deepmerge";
@@ -25,12 +25,9 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 		this.lang = lang;
 	}
 
-	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: InternalProperty) {
+	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: PropertyModel) {
 		const schema = rootField && rootProperty
-			? await this.fieldToSchema(
-				{...rootField, fields: master.fields || []},
-				rootProperty
-			)
+			? await this.fieldToSchema({...rootField, fields: master.fields || []}, rootProperty, true)
 			: JSONSchema.object();
 		const {fields, "@type": _type, "@context": _context, ..._master} = master;
 		return reduceWith(
@@ -39,29 +36,21 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 				uiSchema: {},
 				excludeFromCopy: [],
 				..._master
-			} as (SchemaFormat & Pick<Master, "translations">),
+			},
 			master,
-			[
-				addValidators("validators"),
-				addValidators("warnings"),
-				addAttributes,
-				addExcludeFromCopy,
-				addUiSchemaContext,
-				this.prepopulate,
-			]
+			addValidators("validators"),
+			addValidators("warnings"),
+			addAttributes,
+			addExcludeFromCopy,
+			addUiSchemaContext,
+			this.prepopulate
 		);
 	}
 
-	async fieldToSchema(field: Field, property: InternalProperty): Promise<JSONSchemaE> {
+	async fieldToSchema(field: Field, property: PropertyModel, isRootProperty = false): Promise<JSONSchemaE> {
 		const {fields = []} = field;
 
-		const transformationsForAllTypes = [
-			addExcludeFromCopyToSchema,
-			optionsToSchema,
-			addTitle(property, this.lang),
-			addDefault
-		];
-
+		let transformed: JSONSchemaE;
 		if (property.isEmbeddable) {
 			const properties = await this.getProperties(fields, property);
 
@@ -73,39 +62,44 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 					}
 					return [
 						field.name,
-						await this.fieldToSchema(field, prop)
+						await this.fieldToSchema(field, prop, false)
 					] as [string, JSONSchemaE];
 				})
 			);
 
-			return reduceWith(
+			transformed = await reduceWith(
 				mapEmbeddable(
 					field,
 					schemaProperties.reduce((ps, [name, schema]) => ({...ps, [name]: schema}), {}),
 				),
 				field,
-				[
-					addRequireds(properties),
-					mapMaxOccurs(property),
-					...transformationsForAllTypes
-				]
+				addRequireds(properties),
+				mapMaxOccurs(property),
+				addExcludeFromCopyToSchema,
 			);
 		} else {
-			return reduceWith<JSONSchemaE, Field>(
+			transformed = await reduceWith(
 				this.metadataService.getJSONSchemaFromProperty(property),
 				field,
-				[
-					addValueOptions,
-					filterWhitelist,
-					filterBlacklist,
-					hide,
-					...transformationsForAllTypes
-				]
+				addValueOptions,
+				filterWhitelist,
+				filterBlacklist,
+				hide,
+				addExcludeFromCopyToSchema,
 			);
 		}
+
+		return reduceWith(
+			transformed, 
+			field,
+			optionsToSchema,
+			addTitle(property, this.lang, isRootProperty),
+			addDefault
+		);
+
 	}
 
-	private async prepopulate(schemaFormat: SchemaFormat) {
+	private async prepopulate<T extends Pick<SchemaFormat, "schema" | "options">>(schemaFormat: T) {
 		const {prepopulatedDocument, prepopulateWithInformalTaxonGroups} = schemaFormat.options || {};
 		if (!prepopulateWithInformalTaxonGroups) {
 			return schemaFormat;
@@ -160,8 +154,8 @@ const optionsToSchema = (schema: JSONSchemaE, field: Field) =>
 			schema)
 		: schema;
 
-const addTitle = (property: InternalProperty, lang: Lang) => (schema: any, field: Field) => {
-	const title = property._rootProp
+const addTitle = (property: PropertyModel, lang: Lang, isRootProperty = false) => (schema: any, field: Field) => {
+	const title = isRootProperty
 		? undefined
 		: (field.label
 			?? multiLang(property.label, lang)
@@ -191,13 +185,13 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 	return JSONSchema.object(properties, {required});
 };
 
-const mapMaxOccurs = ({maxOccurs}: InternalProperty) => (schema: JSONSchemaE) =>
+const mapMaxOccurs = ({maxOccurs}: PropertyModel) => (schema: JSONSchemaE) =>
 	maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
 
 const stringNumberLargerThan = (value: string, largerThan: number) =>
 	!isNaN(parseInt(value)) && parseInt(value) > largerThan;
 
-const addRequireds = (properties: Record<string, InternalProperty>) => (schema: JSONSchemaE) =>
+const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) =>
 	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
 		const property = properties[unprefixProp(propertyName)];
 		if (!property) {
@@ -275,8 +269,16 @@ const hide = (schema: JSONSchemaE, field: Field) => {
 	return schema;
 };
 
-const addValidators = (type: "validators" | "warnings") =>
-	(schemaFormat: SchemaFormat & Pick<Master, "translations">, master: ExpandedMaster) => {
+type AddValidatorsInput = Pick<SchemaFormat, "schema"> & Pick<Master, "translations">;
+
+function addValidators<T extends AddValidatorsInput>(type: "validators")
+	: ((schemaFormat: T, master: ExpandedMaster) => T & {validators: any})
+function addValidators<T extends AddValidatorsInput>(type: "warnings")
+	: ((schemaFormat: T, master: ExpandedMaster) => T & {warnings: any})
+function addValidators<T extends AddValidatorsInput>(type: "validators" | "warnings")
+	: ((schemaFormat: T, master: ExpandedMaster) => T & {validators?: any, warnings?: any})
+{
+	return (schemaFormat: T, master: ExpandedMaster)  => {
 		const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
 			let validators: any = {};
 			if (field[type]) {
@@ -314,16 +316,19 @@ const addValidators = (type: "validators" | "warnings") =>
 		const validators = recursively({fields: master.fields, name: ""}, schemaFormat.schema, "");
 		return {...schemaFormat, [type]: validators.properties || {}};
 	};
+}
 
-const addAttributes = (schemaFormat: SchemaFormat, master: Master) => 
-	typeof master.id === "string"
-		? {
-			...schemaFormat,
-			attributes: {id: master.id}
-		}
-		: schemaFormat;
 
-const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
+const addAttributes = <T extends Record<string, unknown>>(schemaFormat: T, master: Master)
+	: T & {attributes?: {id: string}} => 
+		typeof master.id === "string"
+			? {
+				...schemaFormat,
+				attributes: {id: master.id}
+			}
+			: schemaFormat;
+
+const addExcludeFromCopy = <T extends Pick<SchemaFormat, "schema">>(schemaFormat: T) => {
 	const exclude = (schema: any, path: string) => schema.excludeFromCopy ? [path] : [];
 	const excludeRecursively = (schema: SchemaFormat["schema"], path: string): string[] => 
 		[
@@ -344,7 +349,8 @@ const addExcludeFromCopy = (schemaFormat: SchemaFormat) => {
 	return {...schemaFormat, excludeFromCopy: excludeRecursively(schemaFormat.schema, "$")};
 };
 
-const addUiSchemaContext = (schemaFormat: SchemaFormat) => {
+const addUiSchemaContext = <T extends Pick<SchemaFormat, "extra">>(schemaFormat: T)
+	: T & {uiSchemaContext?: Record<string, {tree: AltTreeParent}>} => {
 	if (!schemaFormat.extra) {
 		return schemaFormat;
 	}

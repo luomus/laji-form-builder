@@ -150,11 +150,13 @@ export default class MetadataService {
 			({...schema, title: multiLang(label, this.lang)});
 
 		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
-			reduceWith<JSONSchema, PropertyModel>(mapRangeToSchema(property), property, [
+			reduceWith(
+				mapRangeToSchema(property),
+				property, 
 				mapMaxOccurs,
 				mapUniqueItemsForUnboundedAlt,
 				mapLabel
-			]);
+			);
 
 		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<JSONSchemaE> =>
 			JSONSchema.object((

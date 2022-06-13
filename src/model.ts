@@ -77,9 +77,13 @@ export type Master = CommonExpanded & {
 
 export type SchemaFormat = CommonExpanded & {
 	schema?: any;
-	validators?: any;
-	warnings?: any;
+	validators: any;
+	warnings: any;
 	excludeFromCopy: string[];
+	uiSchema: any;
+	attributes?: {
+		id: string
+	},
 	extra?: Record<string, {altParent: AltParentMap}>;
 	uiSchemaContext?: Record<string, {tree: AltTreeParent}>;
 	language?: Lang;
@@ -91,7 +95,9 @@ export type ExpandedJSONFormat = CommonExpanded & {
 	fields?: ExpandedField[];
 }
 
-export type ExpandedMaster = Omit<Master, "baseFormID"> & {
+export type SupportedFormat = ExpandedJSONFormat | SchemaFormat | RemoteMaster;
+
+export type ExpandedMaster = Omit<Master, "baseFormID" | "patch"> & {
 	fields?: Field[];
 }
 

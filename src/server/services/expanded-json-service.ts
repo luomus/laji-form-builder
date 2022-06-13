@@ -2,7 +2,7 @@ import { CompleteTranslations, ExpandedField, ExpandedJSONFormat, ExpandedMaster
 	PropertyRange } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import { dictionarify, reduceWith } from "../../utils";
-import { InternalProperty, mapUnknownFieldWithTypeToProperty } from "./field-service";
+import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import ConverterService from "./converter-service";
 
 export default class ExpandedJSONService extends ConverterService<ExpandedJSONFormat> {
@@ -21,7 +21,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		this.lang = lang;
 	}
 
-	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: InternalProperty) {
+	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: PropertyModel) {
 		if (!rootField || !rootProperty) {
 			return master as ExpandedJSONFormat;
 		}
@@ -47,9 +47,9 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 	/**
 	 * Returns the expanded fields and mutates the translations to have the alt labels.
 	 */
-	async expandField(field: Field, property: InternalProperty, translations: CompleteTranslations)
+	async expandField(field: Field, property: PropertyModel, translations: CompleteTranslations)
 	: Promise<ExpandedField> {
-		return reduceWith(field, property, [
+		return reduceWith(field, property, 
 			this.expandChildren(translations),
 			this.mapRange(translations),
 			mapEmbeddable,
@@ -57,7 +57,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 			filterWhitelist,
 			filterBlacklist,
 			addLabel(translations)
-		]);
+		);
 	}
 
 	expandChildren = (translations: CompleteTranslations) => async (field: Field, property: PropertyModel) => {
@@ -76,7 +76,8 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		)};
 	}
 
-	mapRange = (translations: CompleteTranslations) => async (field: Field, property: PropertyModel) => {
+	mapRange = (translations: CompleteTranslations) => async (field: Field, property: PropertyModel)
+	: Promise<Omit<Field, "type"> & Pick<ExpandedField, "type">> => {
 		const range = property.range[0];
 		if (await this.metadataService.isAltRange(range)) {
 			if (field.type === "hidden") {
@@ -112,14 +113,15 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		}
 	}
 
-	async mapAltRange(field: Field, property: PropertyModel, translations: CompleteTranslations) {
+	async mapAltRange(field: Field, property: PropertyModel, translations: CompleteTranslations)
+	: Promise<Omit<Field, "type"> & Pick<ExpandedField, "type">> {
 		const range = await this.metadataService.getRange(property.range[0]);
 		return {
 			...field,
 			type: "select",
 			options: {
 				...(field.options || {}),
-				value_options: field.options?.value_options || range.reduce((collected, r) => {
+				value_options: field.options?.value_options || range.reduce<Record<string, string>>((collected, r) => {
 					LANGS.forEach(lang => {
 						const translation = r.value?.[lang];
 						if (typeof translation === "string") {

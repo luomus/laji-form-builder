@@ -3,16 +3,12 @@ import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
 	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format } from "../../model";
-import { reduceWith, unprefixProp, isObject, translate } from "../../utils";
+import { reduceWith, unprefixProp, isObject, translate, bypass } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
-
-export interface InternalProperty extends PropertyModel {
-	_rootProp?: boolean
-}
 
 export default class FieldService {
 	private apiClient: ApiClient;
@@ -60,13 +56,13 @@ export default class FieldService {
 		const converter = format === "schema"
 			? this.schemaService
 			: this.expandedJSONService;
-		const converted = await converter.convert(expandedMaster, rootField, rootProperty);
-		return reduceWith(converted, undefined, [
+		const converted = await converter.convert(expandedMaster, rootField, rootProperty) as CommonFormat;
+		return reduceWith(converted, undefined, 
 			(converted) => lang && converted.translations && (lang in converted.translations)
 				? translate(converted, converted.translations[lang]!)
 				: converted,
 			removeTranslations(lang)
-		]);
+		);
 	}
 
 	private getRootField(master: Pick<Master, "context">): Field  {
@@ -76,7 +72,7 @@ export default class FieldService {
 		return {name: master.context ? unprefixProp(master.context) : "document"};
 	}
 
-	private getRootProperty(rootField: Field): InternalProperty {
+	private getRootProperty(rootField: Field): PropertyModel {
 		return {
 			property: rootField.name,
 			isEmbeddable: true,
@@ -87,19 +83,16 @@ export default class FieldService {
 			minOccurs: "1",
 			maxOccurs: "1",
 			multiLanguage: false,
-			domain: [],
-			_rootProp: true
+			domain: []
 		};
 	}
 
 	linkMaster(master: Master) {
-		return reduceWith<any, undefined, ExpandedMaster>(
-			JSON.parse(JSON.stringify(master)),
+		return reduceWith(
+			JSON.parse(JSON.stringify(master)) as Master,
 			undefined,
-			[
-				this.mapBaseForm,
-				this.mapBaseFormFromFields
-			]
+			this.mapBaseForm,
+			this.mapBaseFormFromFields,
 		);
 	}
 
@@ -110,16 +103,17 @@ export default class FieldService {
 			? this.getRootField(linkedMaster)
 			: undefined;
 
-		return reduceWith(linkedMaster, undefined, [
+		return reduceWith(linkedMaster, undefined,
 			addDefaultValidators,
 			this.applyPatches,
 			this.addTaxonSets,
-			rootField && this.addExtra({...rootField || {}, fields: linkedMaster.fields}),
+			rootField && this.addExtra({...rootField || {}, fields: linkedMaster.fields}) || bypass,
 			addLanguage(lang)
-		]);
+		);
 	}
 
-	mapBaseFormFrom(form: Master, baseForm: Master) {
+	mapBaseFormFrom<T extends Pick<Master, "baseFormID" | "translations" | "uiSchema">>(form: T, baseForm: Master)
+	: Omit<T, "baseFormID"> {
 		const {id, ..._baseForm} = baseForm;
 		form = {
 			..._baseForm,
@@ -131,17 +125,19 @@ export default class FieldService {
 		return form;
 	}
 
-	private mapBaseForm = async (master: Master) => {
+	private mapBaseForm = async <T extends Pick<Master, "baseFormID" | "translations" | "uiSchema">>(master: T)
+	: Promise<Omit<T, "baseFormID">> => {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm: Master = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID));
+		const baseForm = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID));
 		return this.mapBaseFormFrom(master, baseForm);
 	}
 
-	mapBaseFormFromFields = async (master: Master) => {
+	mapBaseFormFromFields = async <T extends Pick<Master, "fields" | "translations" | "uiSchema" | "context">>
+	(master: T) : Promise<Omit<T, "fields"> & { fields?: Field[]; }> => {
 		if (!master.fields) {
-			return master;
+			return master as (T & { fields?: Field[]; });
 		}
 
 		for (const idx in master.fields) {
@@ -163,7 +159,7 @@ export default class FieldService {
 			}
 			master.fields = mergeFields(master.fields, fields);
 		}
-		return master;
+		return master as (T & { fields?: Field[]; });
 
 		function mergeFields(fieldsFrom: (Field | FormExtensionField)[], fieldsTo: (Field | FormExtensionField)[])
 			: (Field | FormExtensionField)[] {
@@ -183,10 +179,10 @@ export default class FieldService {
 		}
 	}
 
-	private applyPatches(master: Master) {
+	private applyPatches<T extends Pick<Master, "patch">>(master: T): Omit<T, "patch"> {
 		const {patch, ..._master} = master;
 		return patch
-			? (applyPatch(_master, patch, undefined, false).newDocument as Master)
+			? (applyPatch(_master, patch, undefined, false).newDocument as T)
 			: master;
 	}
 
@@ -198,7 +194,7 @@ export default class FieldService {
 					return parentMap;
 				}, {} as Record<string, string[]>);
 			};
-			const recursively = async (field: Field, property: InternalProperty) => {
+			const recursively = async (field: Field, property: PropertyModel) => {
 				const range = property.range[0];
 				if (await this.metadataService.isAltRange(range)) {
 					const rangeModel = await this.metadataService.getRange(range);
@@ -324,7 +320,7 @@ const defaultValidators: Record<string, DefaultValidator> = {
 	"/gatherings/geometry": defaultGeometryValidator
 };
 
-const addDefaultValidators = (master: ExpandedMaster) => {
+const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "translations">>(master: T): T  => {
 	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
 			const nextPath = `${path}/${field.name}`;
@@ -376,7 +372,7 @@ const mapFieldType = (type?: string) => {
 	}
 };
 
-export const mapUnknownFieldWithTypeToProperty = (field: Field): InternalProperty => {
+export const mapUnknownFieldWithTypeToProperty = (field: Field): PropertyModel => {
 	if (!field.type) {
 		throw new UnprocessableError(`Bad field ${field.name}`);
 	}

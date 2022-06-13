@@ -1,9 +1,9 @@
 import * as config from "../../../config.json";
-import { reduceWith, translate, dictionarify } from "../../utils";
+import { reduceWith, translate, dictionarify, bypass } from "../../utils";
 import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { removeTranslations } from "./field-service";
-import { FormListing, isLang, Lang, Master, Format } from "../../model";
+import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster } from "../../model";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
 
@@ -61,7 +61,7 @@ const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
 		return copy;
 	}, {} as T);
 };
-const addDefaultSupportedLanguage = (f: FormListing) => f.supportedLanguage
+const addDefaultSupportedLanguage = (f: FormListing): FormListing => f.supportedLanguage
 	? f
 	: {...f, supportedLanguage: ["en", "fi", "sv"]};
 
@@ -104,12 +104,15 @@ export default class MainService {
 	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
 		lang && this.setLang(lang);
 		return Promise.all((await this.storeService.getForms()).map(form => {
-			return reduceWith<Master, undefined, FormListing>(form, undefined, [
+			const result = reduceWith(
+				form,
+				undefined,
 				this.fieldService.linkMaster,
 				translateSafely(lang),
 				this.exposeFormListing,
 				addDefaultSupportedLanguage
-			]);
+			);
+			return result;
 		}));
 	}, { length: 1 });
 
@@ -118,13 +121,16 @@ export default class MainService {
 			const form = await this.storeService.getForm(id);
 			lang && this.setLang(lang);
 			const isConvertable = (format === Format.Schema || format === Format.JSON && expand); 
-			return reduceWith(form, lang, [
-				(master, lang) => isConvertable ? this.fieldService.convert(master, format as any, lang) : master,
-				(form, lang) => format !== "schema" && isLang(lang) && form.translations && lang in form.translations
-					? translate(form, form.translations[lang] as Record<string, string>)
-					: form,
-				format !== "schema" && isLang(lang) && removeTranslations(lang)
-			]);
+			return reduceWith(form, lang, 
+				(master, lang): RemoteMaster | Promise<SupportedFormat> => isConvertable
+					? this.fieldService.convert(master, format as any, lang)
+					: master,
+				(form, lang) =>
+					format !== "schema" && isLang(lang) && form.translations && lang in form.translations
+						? translate(form, form.translations[lang] as Record<string, string>)
+						: form,
+				format !== "schema" && isLang(lang) && removeTranslations(lang) || bypass
+			);
 		}, {length: 3}), {promise: false});
 
 	getForm(id: string, lang?: Lang, format: Format = Format.JSON, expand = true) {
@@ -163,10 +169,12 @@ export default class MainService {
 
 	transform(form: Master, lang?: Lang) {
 		lang && this.setLang(lang);
-		return reduceWith(form, lang, [
+		return reduceWith(
+			form,
+			lang, 
 			this.fieldService.masterToSchemaFormat,
-			isLang(lang) && removeTranslations(lang)
-		]);
+			isLang(lang) && removeTranslations(lang) || bypass
+		);
 	}
 
 	flush() {
