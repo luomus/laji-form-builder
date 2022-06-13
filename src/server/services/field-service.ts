@@ -61,7 +61,8 @@ export default class FieldService {
 			(converted) => lang && converted.translations && (lang in converted.translations)
 				? translate(converted, converted.translations[lang]!)
 				: converted,
-			removeTranslations(lang)
+			removeTranslations(lang),
+			addEmptyOptions
 		);
 	}
 
@@ -270,6 +271,10 @@ export const removeTranslations = (language?: Lang) => (schemaFormat: CommonForm
 	}
 	return schemaFormat;
 };
+
+export const addEmptyOptions = <T extends {options?: CommonFormat["options"]}>(form: T)
+	: Omit<T, "options"> & {options: CommonFormat["options"]} => 
+		({...form, options: form.options || {}});
 
 interface DefaultValidatorItem {
 	validator: any;

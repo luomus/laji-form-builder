@@ -2,7 +2,7 @@ import * as config from "../../../config.json";
 import { reduceWith, translate, dictionarify, bypass } from "../../utils";
 import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
-import FieldService, { removeTranslations } from "./field-service";
+import FieldService, { addEmptyOptions, removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster } from "../../model";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
@@ -98,7 +98,7 @@ export default class MainService {
 				delete exposed.options;
 			}
 		}
-		return  exposed;
+		return exposed;
 	}
 
 	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
@@ -110,7 +110,8 @@ export default class MainService {
 				this.fieldService.linkMaster,
 				translateSafely(lang),
 				this.exposeFormListing,
-				addDefaultSupportedLanguage
+				addDefaultSupportedLanguage,
+				addEmptyOptions
 			);
 			return result;
 		}));

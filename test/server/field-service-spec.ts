@@ -978,3 +978,17 @@ describe("taxonSets", () => {
 		expect(jsonFormat.uiSchema.test[38]).toBe("MX.53474");
 	});
 });
+
+describe("options", () => {
+	describe("always defined", () => {
+		it("for schema format", async () => {
+			const schemaFormat = await fieldService.masterToSchemaFormat({}, LANG);
+			expect(schemaFormat.options).toEqual({});
+		});
+
+		it("for json format", async () => {
+			const jsonFormat = await fieldService.masterToExpandedJSONFormat({}, LANG);
+			expect(jsonFormat.options).toEqual({});
+		});
+	});
+});

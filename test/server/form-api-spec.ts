@@ -159,6 +159,13 @@ describe("/api", () => {
 			expect(testForm.supportedLanguage).toEqual(["en", "fi", "sv"]);
 			done();
 		});
+
+		it("returns empty options if undefined", (done) => {
+			forms.forEach(f => {
+				expect(f.options).not.toBe(undefined);
+			});
+			done();
+		});
 	});
 
 	describe("/:id (get form)", () => {
