@@ -3,7 +3,7 @@ import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
 	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format } from "../../model";
-import { reduceWith, unprefixProp, isObject, translate, bypass } from "../../utils";
+import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import { UnprocessableError } from "./main-service";
@@ -66,11 +66,11 @@ export default class FieldService {
 		);
 	}
 
-	private getRootField(master: Pick<Master, "context">): Field  {
+	private getRootField(master: Pick<Master, "context">): Field {
 		if (master.context && master.context.match(/[^.]+\..+/)) {
 			throw new UnprocessableError("Don't use namespace prefix for context");
 		}
-		return {name: master.context ? unprefixProp(master.context) : "document"};
+		return {name: unprefixProp(getPropertyContextName(master.context))};
 	}
 
 	private getRootProperty(rootField: Field): PropertyModel {

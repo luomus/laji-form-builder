@@ -378,7 +378,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						}
 						const addField = (fields: Field[], path: string[], property: string): Field[] => {
 							if (!path.length) {
-								return [...fields, {name: property}];
+								return [...fields, {name: unprefixProp(property)}];
 							}
 							const [next, ...remaining] = path;
 							return fields.map(field => field.name === next

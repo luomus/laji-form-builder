@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
-import { unprefixProp, translate, JSONSchema, parseJSONPointer } from "../../utils";
+import { unprefixProp, translate, JSONSchema, parseJSONPointer, getPropertyContextName } from "../../utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "./Context";
@@ -89,9 +89,9 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		}
 		const propertyModel = (this.state.childProps as PropertyModel[])
 			.find(childProp => childProp.property === property);
-		if ((propertyModel as PropertyModel).range.includes(PropertyRange.String)) {
+		if (propertyModel) {
 			this.setState({lajiFormToucher: this.state.lajiFormToucher + 1});
-			this.props.onChange([{type: "field", op: "add", value: propertyModel as PropertyModel}]);
+			this.props.onChange([{type: "field", op: "add", value: propertyModel}]);
 		}
 	}
 
@@ -103,20 +103,25 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	}
 
 	getPropertyContextForPath(path: string): Promise<PropertyContext> {
-		const last = path.split("/").pop() as string;
-		const propertyName = path === ""
-			? "document"
-			: last;
+		const context = getPropertyContextName(this.props.context);
+		if (path === "/") {
+			return Promise.resolve({
+				"@id": `http://tun.fi/${context}`,
+				"@container": "@set"
+			});
+		}
+		const propertyName = path.split("/").pop() as string;
 		return new Promise((resolve, reject) =>
-			this.context.metadataService.propertiesContext.then((propertiesContext: any) => { // TODO why is any needed?
-				resolve(propertiesContext[propertyName]);
-			}, reject)
+			this.context.metadataService.getPropertiesContextFor(unprefixProp(context))
+				.then((propertiesContext) => { // TODO why is any needed?
+					resolve(propertiesContext[propertyName]);
+				}, reject)
 		);
 	}
 
-	getProperties = (path: string): Promise<PropertyModel[]> => {
-		return this.getPropertyContextForPath(path).then(this.context.metadataService.getProperties);
-	}
+	getProperties = (path: string): Promise<PropertyModel[]> =>
+		this.getPropertyContextForPath(path)
+			.then(context => this.context.metadataService.getProperties(context, this.context.lang));
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;

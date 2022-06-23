@@ -7,7 +7,7 @@ import {
 import {
 	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
 } from "../utils";
-import { parseJSONPointer } from "../../utils";
+import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MaybeError, isValid } from "./Builder";
 import { Context } from "./Context";
@@ -164,7 +164,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				<ActiveEditorErrorBoundary>
 					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} ref={this.fieldsRef}>
 						<Fields className={gnmspc("field-chooser")}
-						        fields={this.getFields(master.fields)}
+						        fields={this.getFields(master)}
 						        onSelected={this.onFieldSelected}
 						        onDeleted={this.onFieldDeleted}
 						        selected={this.state.selected}
@@ -212,11 +212,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		this.props.onHeightChange?.(height);
 	}
 
-	getFields = memoize((fields: any): any => ([{
-		name: "document",
-		label: "Document",
-		type: "fieldset",
-		fields
+	getFields = memoize((master: Master): any => ([{
+		name: unprefixProp(getPropertyContextName(master.context)),
+		fields: master.fields
 	}]));
 
 	onFieldSelected = (field: string) => {
@@ -246,10 +244,11 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				fieldPointerToUiSchemaPointer(schemaFormat.schema, selected),
 				!!"safely"
 			),
-			field: findField(this.getFields(master.fields)[0], selected),
+			field: findField(this.getFields(master)[0], selected),
 			translations: master.translations?.[editorLang as Lang] || {},
 			path: selected,
-			onChange: this.onEditorChange
+			onChange: this.onEditorChange,
+			context: master.context
 		};
 	}
 
@@ -267,7 +266,13 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	getSelected = () => this.getFieldPath(this.state.selected || "");
 
-	getFieldPath = ((path: string) => path === "/document" ? "" : path.replace("/document", ""));
+	getFieldPath = (path: string) => {
+		const globalSlashRegexp = /\//g;
+		const firstSlashSeparatedPathPart = /\/[^/]*/;
+		const slashMatch = path.match(globalSlashRegexp);
+		const isRootField = slashMatch && slashMatch.length === 1;
+		return isRootField ? "/" : path.replace(firstSlashSeparatedPathPart, "");
+	}
 
 	onPickerSelectedField = (selected: string) => {
 		const state: Partial<EditorState> = {selected};
@@ -309,6 +314,7 @@ export interface FieldEditorProps extends Classable {
 	translations: any;
 	path: string;
 	onChange: (changed: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => void;
+	context?: string
 }
 
 type OnSelectedCB = (field: string) => void;

@@ -3,8 +3,6 @@ import ApiClient from "../api-client";
 import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang, Class } from "../model";
 import { reduceWith, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
 
-type PropertyContextDict = Record<string, PropertyContext>;
-
 export default class MetadataService {
 	private apiClient: ApiClient;
 	private lang: Lang;
@@ -39,15 +37,14 @@ export default class MetadataService {
 		return propertyName;
 	}
 
-	propertiesContext = new Promise<PropertyContextDict>(
-		(resolve, reject) => fetchJSON<any>("https://schema.laji.fi/context/document.jsonld").then(result => {
-			result?.["@context"] ? resolve(preparePropertiesContext(result?.["@context"])) : reject();
-		}, reject))
+	getPropertiesContextFor = this.cache((context: string) => 
+		fetchJSON<{"@context": Record<string, PropertyContext>}>(`https://schema.laji.fi/context/${context}.jsonld`)
+			.then(result => result["@context"]))
 
-	getProperties = this.cache(async (property: PropertyContext | string): Promise<PropertyModel[]> => {
+	getProperties = this.cache(async (property: PropertyContext | string, lang = "multi"): Promise<PropertyModel[]> => {
 		return (await this.apiClient.fetchJSON(
 			`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
-			{lang: "multi"})
+			{lang})
 		).results as PropertyModel[];
 	})
 
@@ -170,11 +167,3 @@ export default class MetadataService {
 
 	getClasses = this.cache(async (): Promise<Class[]> => (await this.apiClient.fetchJSON("/metadata/classes")).results)
 }
-
-const preparePropertiesContext = (propertiesContext: PropertyContextDict) => ({
-	document: {
-		"@id": "http://tun.fi/MY.document",
-		"@container": "@set" as const,
-	},
-	...propertiesContext
-});

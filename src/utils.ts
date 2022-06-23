@@ -120,3 +120,6 @@ export const dictionarifyByKey = <T extends Record<string, unknown>>(objects: T[
 		map[obj[key] as string] = obj;
 		return map;
 	}, {});
+
+export const getPropertyContextName = (context?: string) =>
+	typeof context === "string" ? context : "MY.document";
