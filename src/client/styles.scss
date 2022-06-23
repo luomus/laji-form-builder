@@ -218,6 +218,7 @@ $bRadius: 2px;
 	&-json-editor {
 		font-family: monospace;
 		font-size: 12px;
+		max-height: 80vh;
 
 		&-invalid {
 		background-color: $danger-2;

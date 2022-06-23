@@ -368,7 +368,7 @@ export function FormJSONEditor<T>(
 
 	return (
 		<div className={className}>
-			<JSONEditor value={json} onChange={setJSON} rows={20} onValidChange={setValid} live={true} ref={ref} />
+			<JSONEditor value={json} onChange={setJSON} onValidChange={setValid} live={true} ref={ref} />
 			<SubmitButton onClick={onClickSubmitDraft}
 			              disabled={!json || !valid}
 			              variant={"default"}
