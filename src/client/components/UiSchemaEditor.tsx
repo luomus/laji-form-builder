@@ -26,6 +26,8 @@ const TitleWithoutPrefix = React.memo((props: any) => <LajiFormTitle {...props} 
 
 export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
 	static contextType = Context;
+	context!: React.ContextType<typeof Context>;
+
 	static defaultProps = {
 		uiSchema: {}
 	};

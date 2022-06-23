@@ -23,6 +23,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	propertyChildsPromise: CancellablePromise<PropertyModel[] | void>;
 
 	static contextType = Context;
+	context!: React.ContextType<typeof Context>;
 
 	state = {
 		lajiFormToucher: 0

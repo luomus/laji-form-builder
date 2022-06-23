@@ -52,6 +52,7 @@ export interface EditorState {
 
 class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
 	static contextType = Context;
+	context!: React.ContextType<typeof Context>;
 	state = {hasError: false}
 	static getDerivedStateFromError() {
 		return {hasError: true};
