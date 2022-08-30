@@ -321,15 +321,22 @@ export const defaultGeometryValidator: DefaultValidator = {
 	}
 };
 
-const defaultValidators: Record<string, DefaultValidator> = {
-	"/gatherings/geometry": defaultGeometryValidator
+const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
+	"MY.document": {
+		"/gatherings/geometry": defaultGeometryValidator
+	}
 };
 
-const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "translations">>(master: T): T  => {
+const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "translations" | "context">>(master: T): T  => {
+	const contextDefaultValidators = defaultValidators[getPropertyContextName(master.context)];
+	if (!contextDefaultValidators) {
+		return master;
+	}
+
 	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
 			const nextPath = `${path}/${field.name}`;
-			const _defaultValidators = defaultValidators[nextPath]?.["validators"];
+			const _defaultValidators = contextDefaultValidators[nextPath]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
 				if (validatorName in (field.validators || {})) {
@@ -363,6 +370,7 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 			recursively(field.fields || [], nextPath);
 		});
 	};
+
 	recursively(master.fields || [], "");
 	return master;
 };
