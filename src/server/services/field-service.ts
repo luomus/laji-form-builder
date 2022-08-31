@@ -278,7 +278,8 @@ export const addEmptyOptions = <T extends {options?: CommonFormat["options"]}>(f
 
 interface DefaultValidatorItem {
 	validator: any;
-	translations: Record<string, Record<Lang, string>>;
+	translations?: Record<string, Record<Lang, string>>;
+	mergeStrategy?: "replace" | "merge" // Defaults to "replace".
 }
 
 interface DefaultValidator {
@@ -286,7 +287,7 @@ interface DefaultValidator {
 	warnings?: {[validatorName: string]: DefaultValidatorItem};
 }
 
-export const defaultGeometryValidator: DefaultValidator = {
+const defaultGeometryValidator: DefaultValidator = {
 	validators: {
 		geometry: {
 			validator: {
@@ -321,9 +322,30 @@ export const defaultGeometryValidator: DefaultValidator = {
 	}
 };
 
+const defaultDateValidator: DefaultValidator = {
+	validators: {
+		date: {
+			validator: {
+				earliest: "1000-01-01",
+				tooEarly: "@dateTooEarlyValidation"
+			},
+			translations: {
+				"@dateTooEarlyValidation": {
+					en: "Date is too early. Earliest possible is %{date}",
+					sv: "Datumet är för tidigt. Tidigast möjliga är %{date}",
+					fi: "Päivämäärä on liian varhainen. Varhaisin mahdollinen on %{date}",
+				}
+			},
+			mergeStrategy: "merge"
+		}
+	},
+};
+
 const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
 	"MY.document": {
-		"/gatherings/geometry": defaultGeometryValidator
+		"/gatherings/geometry": defaultGeometryValidator,
+		"/gatheringEvent/dateBegin": defaultDateValidator,
+		"/gatheringEvent/dateEnd": defaultDateValidator
 	}
 };
 
@@ -339,17 +361,26 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 			const _defaultValidators = contextDefaultValidators[nextPath]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
+				const defaultValidator = _defaultValidators[validatorName];
+				const {mergeStrategy = "replace"} = defaultValidator;
 				if (validatorName in (field.validators || {})) {
 					if (field.validators[validatorName] === false) {
 						delete field.validators[validatorName];
+						return;
 					}
-					return;
+					if (mergeStrategy === "replace") {
+						return;
+					}
 				}
 				if (!field.validators) {
 					field.validators = {};
 				}
-				const defaultValidator = _defaultValidators[validatorName];
-				field.validators[validatorName] = defaultValidator.validator;
+				if (mergeStrategy === "merge" && field.validators[validatorName]) {
+					field.validators[validatorName] =
+						merge(defaultValidator.validator, field.validators[validatorName]);
+				} else { // "replace" strategy, used also if strategy is "merge" but there is nothing to merge.
+					field.validators[validatorName] = defaultValidator.validator;
+				}
 				if (defaultValidator.translations) {
 					master.translations = {
 						...(master.translations || {}),
@@ -358,10 +389,10 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 						en: (master.translations?.en || {}),
 					};
 					Object.keys(defaultValidator.translations).forEach(translationKey => {
-						Object.keys(defaultValidator.translations[translationKey]).forEach((lang: Lang) => {
+						Object.keys(defaultValidator.translations![translationKey]).forEach((lang: Lang) => {
 							if (!(translationKey in (master.translations as Translations)[lang]!)) {
 								(master.translations as Translations)[lang]![translationKey] =
-									defaultValidator.translations[translationKey][lang];
+									defaultValidator.translations![translationKey][lang];
 							}
 						});
 					});

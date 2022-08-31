@@ -700,7 +700,7 @@ describe("fields", () => {
 			expect(schemaFormat.validators.gatherings.items.properties.units.presence).toBe(true);
 			expect(schemaFormat.warnings.gatherings.items.properties.units.presence).toBe(true);
 		});
-		
+
 		describe("default geometry validator", () => {
 			it("is added", async () => {
 				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ]};
@@ -713,7 +713,7 @@ describe("fields", () => {
 			it("messages can be overridden", async () => {
 				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ],
 					translations: {
-						fi: {
+						[LANG]: {
 							"@geometryValidation": "foo"
 						}
 					}
@@ -737,6 +737,62 @@ describe("fields", () => {
 			it("can be removed with false", async () => {
 				const form = { fields: [ { name: "gatherings", fields: [
 					{ name: "geometry", validators: { geometry: false } }
+				]} ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators).toEqual({});
+			});
+		});
+
+		describe("default dateBegin/dateEnd validator", () => {
+			it("is added", async () => {
+				const form = { fields: [ { name: "gatheringEvent", fields: [
+					{ name: "dateBegin" }, { name: "dateEnd" }
+				]} ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				["dateBegin", "dateEnd"].forEach(field => {
+					expect(schemaFormat.validators.gatheringEvent.properties[field].date.earliest).toBe("1000-01-01");
+				});
+			});
+
+			it("messages can be overridden", async () => {
+				const form = {
+					fields: [ { name: "gatheringEvent", fields: [
+						{ name: "dateBegin" }, { name: "dateEnd" }
+					]} ],
+					translations: {
+						[LANG]: {
+							"@dateTooEarlyValidation": "foo"
+						}
+					}
+				};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				["dateBegin", "dateEnd"].forEach(field => {
+					expect(schemaFormat.validators.gatheringEvent.properties[field].date.tooEarly).toBe("foo");
+				});
+			});
+
+			it("merged to existing validators", async () => {
+				const validators = {
+					date: {
+						latest: "should be kept",
+						earliest: "should replace the default validator"
+					}
+				};
+				const form = { fields: [ { name: "gatheringEvent", fields: [
+					{ name: "dateBegin", validators }, { name: "dateEnd", validators }
+				]} ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				["dateBegin", "dateEnd"].forEach(field => {
+					expect(schemaFormat.validators.gatheringEvent.properties[field].date.latest).toBe("should be kept");
+					expect(schemaFormat.validators.gatheringEvent.properties[field].date.earliest)
+						.toBe("should replace the default validator");
+				});
+			});
+
+			it("can be removed with false", async () => {
+				const form = { fields: [ { name: "gatheringEvent", fields: [
+					{ name: "dateBegin", validators: { date: false } },
+					{ name: "dateEnd", validators: { date: false } }
 				]} ]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators).toEqual({});
