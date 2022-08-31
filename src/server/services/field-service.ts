@@ -293,7 +293,7 @@ const defaultGeometryValidator: DefaultValidator = {
 			validator: {
 				maximumSize: 10,
 				message: {
-					missingGeometries: "@geometryValidation",
+					missingGeometries: "@geometryValidationAtLeastOne",
 					invalidBoundingBoxHectares: "@geometryHectaresMaxValidation",
 					notGeometry: "@geometryValidation",
 					missingType: "@geometryValidation",
@@ -306,9 +306,14 @@ const defaultGeometryValidator: DefaultValidator = {
 			},
 			translations: {
 				"@geometryValidation": {
-					en: "Gathering must have at least one feature.",
-					sv: "Platsen måste ha åtminstone en figur.",
-					fi: "Paikalla täytyy olla vähintään yksi kuvio."
+					en: "Invalid geometry",
+					sv: "Ogiltig geometri",
+					fi: "Epäkelpo kuvio"
+				},
+				"@geometryValidationAtLeastOne": {
+					en: "Must have at least one feature.",
+					sv: "Måste ha åtminstone en figur.",
+					fi: "Täytyy olla vähintään yksi kuvio."
 				},
 				"@geometryHectaresMaxValidation": {
 					en: "Too big area. Maximum is %{max} hectares",
@@ -329,6 +334,13 @@ const defaultGatheringGeometryValidator: DefaultValidator = merge(
 				validator: {
 					requireShape: true,
 					includeGatheringUnits: true
+				},
+				translations: {
+					"@geometryValidationAtLeastOne": {
+						en: "Gathering must have at least one feature.",
+						sv: "Platsen måste ha åtminstone en figur.",
+						fi: "Paikalla täytyy olla vähintään yksi kuvio."
+					},
 				},
 				mergeStrategy: "replace"
 			}
