@@ -142,7 +142,6 @@ export default class MetadataService {
 				? {...schema, uniqueItems: true}
 				: schema;
 
-
 		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) =>
 			({...schema, title: multiLang(label, this.lang)});
 

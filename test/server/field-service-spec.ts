@@ -710,6 +710,20 @@ describe("fields", () => {
 					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
 			});
 
+			it("is added for all geometries in schema", async () => {
+				const form = { fields: [
+					{ name: "gatheringEvent", fields: [ { name: "geometry" } ] },
+					{ name: "gatherings", fields: [ { name: "geometry" } ]}
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.requireShape).toBe(true);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
+					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.requireShape).toBe(true);
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
+					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
+			});
+
 			it("messages can be overridden", async () => {
 				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ],
 					translations: {

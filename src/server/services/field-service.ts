@@ -342,23 +342,22 @@ const defaultDateValidator: DefaultValidator = {
 };
 
 const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
-	"MY.document": {
-		"/gatherings/geometry": defaultGeometryValidator,
-		"/gatheringEvent/dateBegin": defaultDateValidator,
-		"/gatheringEvent/dateEnd": defaultDateValidator
+	"document": {
+		"geometry": defaultGeometryValidator,
+		"dateBegin": defaultDateValidator,
+		"dateEnd": defaultDateValidator
 	}
 };
 
 const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "translations" | "context">>(master: T): T  => {
-	const contextDefaultValidators = defaultValidators[getPropertyContextName(master.context)];
+	const contextDefaultValidators = defaultValidators[unprefixProp(getPropertyContextName(master.context))];
 	if (!contextDefaultValidators) {
 		return master;
 	}
 
-	const recursively = (fields: Field[], path: string) => {
+	const recursively = (fields: Field[]) => {
 		fields.forEach(field => {
-			const nextPath = `${path}/${field.name}`;
-			const _defaultValidators = contextDefaultValidators[nextPath]?.["validators"];
+			const _defaultValidators = contextDefaultValidators[unprefixProp(field.name)]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
 				const defaultValidator = _defaultValidators[validatorName];
@@ -398,11 +397,11 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 					});
 				}
 			});
-			recursively(field.fields || [], nextPath);
+			recursively(field.fields || []);
 		});
 	};
 
-	recursively(master.fields || [], "");
+	recursively(master.fields || []);
 	return master;
 };
 
