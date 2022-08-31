@@ -291,9 +291,7 @@ const defaultGeometryValidator: DefaultValidator = {
 	validators: {
 		geometry: {
 			validator: {
-				requireShape: true,
 				maximumSize: 10,
-				includeGatheringUnits: true,
 				message: {
 					missingGeometries: "@geometryValidation",
 					invalidBoundingBoxHectares: "@geometryHectaresMaxValidation",
@@ -317,10 +315,26 @@ const defaultGeometryValidator: DefaultValidator = {
 					sv: "För stort område. Maximalt är %{max} hektar",
 					fi: "Liian iso alue. Maksimi on %{max} hehtaaria",
 				}
-			}
+			},
+			mergeStrategy: "merge"
 		}
 	}
 };
+
+const defaultGatheringGeometryValidator: DefaultValidator = merge(
+	defaultGeometryValidator,
+	{
+		validators: {
+			geometry: {
+				validator: {
+					requireShape: true,
+					includeGatheringUnits: true
+				},
+				mergeStrategy: "replace"
+			}
+		}
+	}
+);
 
 const defaultDateValidator: DefaultValidator = {
 	validators: {
@@ -341,9 +355,15 @@ const defaultDateValidator: DefaultValidator = {
 	},
 };
 
+/* 
+ * Validation is done context-aware, so that e.g. { document: { geometry: <validator> } } will validate each MY.geometry
+ * (MY.document's geometry), but not e.g.MNP.geometry (MNP.namedPlace's geometry). If the field pointer is a JSON
+ * Pointer, the schema structure matching the pointer will use that validator, overriding any other validators.
+ */
 const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
 	"document": {
 		"geometry": defaultGeometryValidator,
+		"/gatherings/geometry": defaultGatheringGeometryValidator,
 		"dateBegin": defaultDateValidator,
 		"dateEnd": defaultDateValidator
 	}
@@ -355,9 +375,11 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 		return master;
 	}
 
-	const recursively = (fields: Field[]) => {
+	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
-			const _defaultValidators = contextDefaultValidators[unprefixProp(field.name)]?.["validators"];
+			const nextPath = `${path}/${field.name}`;
+			const _defaultValidators = contextDefaultValidators[nextPath]?.["validators"]
+				|| contextDefaultValidators[unprefixProp(field.name)]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
 				const defaultValidator = _defaultValidators[validatorName];
@@ -397,11 +419,11 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 					});
 				}
 			});
-			recursively(field.fields || []);
+			recursively(field.fields || [], nextPath);
 		});
 	};
 
-	recursively(master.fields || []);
+	recursively(master.fields || [], "");
 	return master;
 };
 

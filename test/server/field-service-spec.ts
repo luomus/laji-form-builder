@@ -716,10 +716,8 @@ describe("fields", () => {
 					{ name: "gatherings", fields: [ { name: "geometry" } ]}
 				]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.requireShape).toBe(true);
 				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
 					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
-				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.requireShape).toBe(true);
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
 			});
@@ -738,6 +736,24 @@ describe("fields", () => {
 					.toBe("foo");
 			});
 
+
+			it("can be removed with false", async () => {
+				const form = { fields: [ { name: "gatherings", fields: [
+					{ name: "geometry", validators: { geometry: false } }
+				]} ]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators).toEqual({});
+			});
+		});
+
+		describe("default gatherings geometry validator", () => {
+			it("overrides the default geometry validator", async () => {
+				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]}]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const {geometry} = schemaFormat.validators.gatherings.items.properties;
+				expect(geometry.geometry.requireShape).toBe(true);
+			});
+
 			it("overriding overrides completely", async () => {
 				const form = { fields: [ { name: "gatherings", fields: [
 					{ name: "geometry", validators: { geometry: { foo: "bar" }} }
@@ -748,13 +764,6 @@ describe("fields", () => {
 				expect(geometry.geometry.foo).toBe("bar");
 			});
 
-			it("can be removed with false", async () => {
-				const form = { fields: [ { name: "gatherings", fields: [
-					{ name: "geometry", validators: { geometry: false } }
-				]} ]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators).toEqual({});
-			});
 		});
 
 		describe("default dateBegin/dateEnd validator", () => {
