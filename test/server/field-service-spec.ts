@@ -703,36 +703,39 @@ describe("fields", () => {
 
 		describe("default geometry validator", () => {
 			it("is added", async () => {
-				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ]};
+				const form = { fields: [ { name: "gatheringEvent", fields: [ { name: "geometry" } ]} ]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.requireShape).toBe(true);
-				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
-					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.maximumSize).toBeTruthy();
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
+					.toBe("Täytyy olla vähintään yksi kuvio.");
 			});
 
 			it("is added for all geometries in schema", async () => {
 				const form = { fields: [
 					{ name: "gatheringEvent", fields: [ { name: "geometry" } ] },
-					{ name: "gatherings", fields: [ { name: "geometry" } ]}
+					{ name: "gatherings", fields: [
+						{name: "units", fields: [ { name: "unitGathering", fields: [ { name: "geometry" } ] } ] }
+					]}
 				]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
-					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
-					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
+					.toBe("Täytyy olla vähintään yksi kuvio.");
+				expect(schemaFormat.validators.gatherings.items.properties
+					.units.items.properties.unitGathering.properties.geometry.geometry.message.missingGeometries)
+					.toBe("Täytyy olla vähintään yksi kuvio.");
 			});
 
 			it("messages can be overridden", async () => {
-				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]} ],
+				const form = { fields: [ { name: "gatheringEvent", fields: [ { name: "geometry" } ]} ],
 					translations: {
 						[LANG]: {
-							"@geometryValidation": "foo"
+							"@geometryValidationAtLeastOne": "foo"
 						}
 					}
 				};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.requireShape).toBe(true);
-				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.maximumSize).toBeTruthy();
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("foo");
 			});
 
@@ -764,6 +767,14 @@ describe("fields", () => {
 				expect(geometry.geometry.foo).toBe("bar");
 			});
 
+			it("message overrides default geometry validator message", async () => {
+				const form = { fields: [
+					{ name: "gatherings", fields: [ { name: "geometry" } ]}
+				]};
+				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
+					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
+			});
 		});
 
 		describe("default dateBegin/dateEnd validator", () => {

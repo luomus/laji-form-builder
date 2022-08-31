@@ -333,10 +333,13 @@ const defaultGatheringGeometryValidator: DefaultValidator = merge(
 			geometry: {
 				validator: {
 					requireShape: true,
-					includeGatheringUnits: true
+					includeGatheringUnits: true,
+					message: {
+						missingGeometries: "@gatheringGeometryValidationAtLeastOne",
+					}
 				},
 				translations: {
-					"@geometryValidationAtLeastOne": {
+					"@gatheringGeometryValidationAtLeastOne": {
 						en: "Gathering must have at least one feature.",
 						sv: "Platsen måste ha åtminstone en figur.",
 						fi: "Paikalla täytyy olla vähintään yksi kuvio."
@@ -369,7 +372,7 @@ const defaultDateValidator: DefaultValidator = {
 
 /* 
  * Validation is done context-aware, so that e.g. { document: { geometry: <validator> } } will validate each MY.geometry
- * (MY.document's geometry), but not e.g.MNP.geometry (MNP.namedPlace's geometry). If the field pointer is a JSON
+ * (MY.document's geometry), but not e.g. MNP.geometry (MNP.namedPlace's geometry). If the field pointer is a JSON
  * Pointer, the schema structure matching the pointer will use that validator, overriding any other validators.
  */
 const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
@@ -391,7 +394,7 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 		fields.forEach(field => {
 			const nextPath = `${path}/${field.name}`;
 			const _defaultValidators = contextDefaultValidators[nextPath]?.["validators"]
-				|| contextDefaultValidators[unprefixProp(field.name)]?.["validators"];
+				|| contextDefaultValidators[field.name]?.["validators"];
 
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
 				const defaultValidator = _defaultValidators[validatorName];
