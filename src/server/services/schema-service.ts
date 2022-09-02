@@ -104,7 +104,8 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 		if (!prepopulateWithInformalTaxonGroups) {
 			return schemaFormat;
 		}
-		const species = (await this.apiClient.fetchJSON("/taxa/MX.37600/species", {
+		const BIOTA = "MX.37600";
+		const species = (await this.apiClient.fetchJSON(`/taxa/${BIOTA}/species`, {
 			informalGroupFilters: prepopulateWithInformalTaxonGroups,
 			selectedFields: "id,scientificName,vernacularName",
 			lang: "fi",
