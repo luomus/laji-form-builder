@@ -130,7 +130,7 @@ export default class MainService {
 					format !== "schema" && isLang(lang) && form.translations && lang in form.translations
 						? translate(form, form.translations[lang] as Record<string, string>)
 						: form,
-				format !== "schema" && isLang(lang) && removeTranslations(lang) || bypass
+				format !== "schema" ? removeTranslations(lang) : bypass
 			);
 		}, {length: 3}), {promise: false});
 
@@ -174,7 +174,7 @@ export default class MainService {
 			form,
 			lang, 
 			this.fieldService.masterToSchemaFormat,
-			isLang(lang) && removeTranslations(lang) || bypass
+			removeTranslations(lang)
 		);
 	}
 

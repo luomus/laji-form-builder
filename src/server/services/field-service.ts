@@ -2,7 +2,7 @@ import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
-	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format } from "../../model";
+	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang } from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -265,7 +265,7 @@ const addLanguage = (language?: Lang) => <T>(obj: T) =>
 		: obj;
 
 export const removeTranslations = (language?: Lang) => (schemaFormat: CommonFormat) => {
-	if (language) {
+	if (isLang(language)) {
 		const {translations, ..._schemaFormat} = schemaFormat;
 		return _schemaFormat;
 	}
