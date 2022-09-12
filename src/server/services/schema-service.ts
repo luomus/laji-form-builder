@@ -74,8 +74,7 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 				),
 				field,
 				addRequireds(properties),
-				mapMaxOccurs(property),
-				addExcludeFromCopyToSchema,
+				mapMaxOccurs(property)
 			);
 		} else {
 			transformed = await reduceWith(
@@ -84,8 +83,7 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 				addValueOptions,
 				filterWhitelist,
 				filterBlacklist,
-				hide,
-				addExcludeFromCopyToSchema,
+				hide
 			);
 		}
 
@@ -137,13 +135,6 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 		};
 	}
 }
-
-const addExcludeFromCopyToSchema = (schema: JSONSchemaE, field: Field) => {
-	if (field.options?.excludeFromCopy) {
-		(schema as any).excludeFromCopy = true;
-	}
-	return schema as JSONSchemaE;
-};
 
 const optionsToSchema = (schema: JSONSchemaE, field: Field) =>
 	field.options
@@ -329,25 +320,35 @@ const addAttributes = <T extends Record<string, unknown>>(schemaFormat: T, maste
 			}
 			: schemaFormat;
 
-const addExcludeFromCopy = <T extends Pick<SchemaFormat, "schema">>(schemaFormat: T) => {
-	const exclude = (schema: any, path: string) => schema.excludeFromCopy ? [path] : [];
-	const excludeRecursively = (schema: SchemaFormat["schema"], path: string): string[] => 
+const addExcludeFromCopy = <T extends Pick<SchemaFormat, "schema">>(schemaFormat: T, master: ExpandedMaster) => {
+	const exclude = (field: Pick<Field, "fields" | "options">, path: string) =>
+		field.options?.excludeFromCopy ? [path] : [];
+	const excludeRecursively = (field: Pick<Field, "fields" | "options">, schema: SchemaFormat["schema"], path: string)
+		: string[] => 
 		[
-			...exclude(schema, path),
+			...exclude(field, path),
 			...(
-				/* eslint-disable indent */
-				schema.type === "array" ? excludeRecursively(schema.items, path + "[*]") :
-				schema.type === "object" ? Object.keys(schema.properties).reduce(
-					(excludeFromCopy, prop) => [
+				field.fields
+					? field.fields.reduce((excludeFromCopy, field) => [
 						...excludeFromCopy,
-						...excludeRecursively(schema.properties[prop], path + "." + prop)
-					], []) :
-				[]
-				/* eslint-enable indent */
+						...excludeRecursively(field,
+							schema.type === "array"
+								? schema.items.properties[field.name]
+								: schema.properties[field.name],
+							schema.type === "array"
+								? path + "[*]." + field.name
+								: path + "." + field.name
+						)
+					], [])
+					: []
 			)
 		];
 
-	return {...schemaFormat, excludeFromCopy: excludeRecursively(schemaFormat.schema, "$")};
+	return {
+		...schemaFormat, excludeFromCopy: master.fields
+			? excludeRecursively({fields: master.fields}, schemaFormat.schema, "$")
+			: []
+	};
 };
 
 const addUiSchemaContext = <T extends Pick<SchemaFormat, "extra">>(schemaFormat: T)

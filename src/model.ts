@@ -168,7 +168,6 @@ export type AltTreeNode = AltTreeParent | AltTreeLeaf;
 export type AltParentMap = Record<string, string[]>;
 
 export type JSONSchemaE = JSONSchema7 & {
-	excludeFromCopy?: boolean;
 	enumNames?: string[];
 }
 

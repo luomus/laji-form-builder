@@ -453,14 +453,6 @@ describe("fields", () => {
 					schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 				});
 
-				it("populated to schema", async () => {
-					const {units} = schemaFormat.schema.properties.gatherings.items.properties;
-					expect(schemaFormat.schema.properties.gatherings.excludeFromCopy).toBe(true);
-					expect(units.excludeFromCopy).toBe(true);
-					expect(units.items.properties.unitGatheringexcludeFromCopy).toBe(undefined);
-					expect(units.items.properties.unitGathering.properties.dateEnd.excludeFromCopy).toBe(true);
-				});
-
 				it("populated to root excludeFromCopy list", async () => {
 					expect(schemaFormat.excludeFromCopy).toEqual([
 						"$.gatherings",
