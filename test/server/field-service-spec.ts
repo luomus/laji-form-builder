@@ -776,7 +776,8 @@ describe("fields", () => {
 				]} ]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 				["dateBegin", "dateEnd"].forEach(field => {
-					expect(schemaFormat.validators.gatheringEvent.properties[field].date.earliest).toBe("1000-01-01");
+					const {datetime} = schemaFormat.validators.gatheringEvent.properties[field];
+					expect(datetime.earliest).toBe("1000-01-01");
 				});
 			});
 
@@ -793,13 +794,13 @@ describe("fields", () => {
 				};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 				["dateBegin", "dateEnd"].forEach(field => {
-					expect(schemaFormat.validators.gatheringEvent.properties[field].date.tooEarly).toBe("foo");
+					expect(schemaFormat.validators.gatheringEvent.properties[field].datetime.tooEarly).toBe("foo");
 				});
 			});
 
 			it("merged to existing validators", async () => {
 				const validators = {
-					date: {
+					datetime: {
 						latest: "should be kept",
 						earliest: "should replace the default validator"
 					}
@@ -809,16 +810,17 @@ describe("fields", () => {
 				]} ]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 				["dateBegin", "dateEnd"].forEach(field => {
-					expect(schemaFormat.validators.gatheringEvent.properties[field].date.latest).toBe("should be kept");
-					expect(schemaFormat.validators.gatheringEvent.properties[field].date.earliest)
+					const {datetime} = schemaFormat.validators.gatheringEvent.properties[field];
+					expect(datetime.latest).toBe("should be kept");
+					expect(datetime.earliest)
 						.toBe("should replace the default validator");
 				});
 			});
 
 			it("can be removed with false", async () => {
 				const form = { fields: [ { name: "gatheringEvent", fields: [
-					{ name: "dateBegin", validators: { date: false } },
-					{ name: "dateEnd", validators: { date: false } }
+					{ name: "dateBegin", validators: { datetime: false } },
+					{ name: "dateEnd", validators: { datetime: false } }
 				]} ]};
 				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators).toEqual({});

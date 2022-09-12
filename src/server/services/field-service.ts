@@ -353,7 +353,7 @@ const defaultGatheringGeometryValidator: DefaultValidator = merge(
 
 const defaultDateValidator: DefaultValidator = {
 	validators: {
-		date: {
+		datetime: {
 			validator: {
 				earliest: "1000-01-01",
 				tooEarly: "@dateTooEarlyValidation"
