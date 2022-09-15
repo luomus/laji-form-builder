@@ -121,16 +121,20 @@ export default class MainService {
 		this.cache(async (lang?: Lang, format: Format = Format.JSON, expand = true) => {
 			const form = await this.storeService.getForm(id);
 			lang && this.setLang(lang);
-			const isConvertable = (format === Format.Schema || format === Format.JSON && expand); 
-			return reduceWith(form, lang, 
+			const isConvertable = (
+				format === Format.Schema
+				|| format === Format.SchemaWithEnums
+				|| format === Format.JSON && expand
+			);
+			return reduceWith(form, lang,
 				(master, lang): RemoteMaster | Promise<SupportedFormat> => isConvertable
 					? this.fieldService.convert(master, format as any, lang)
 					: master,
 				(form, lang) =>
-					format !== "schema" && isLang(lang) && form.translations && lang in form.translations
+					format === Format.JSON && isLang(lang) && form.translations && lang in form.translations
 						? translate(form, form.translations[lang] as Record<string, string>)
 						: form,
-				format !== "schema" ? removeTranslations(lang) : bypass
+				format === Format.JSON ? removeTranslations(lang) : bypass
 			);
 		}, {length: 3}), {promise: false});
 

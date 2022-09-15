@@ -3,7 +3,7 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Classable, Stylable, Clickable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./Builder";
-import { PropertyModel, SchemaFormat, Master, JSONSchemaE, PropertyRange, Lang } from "../../model";
+import { PropertyModel, SchemaFormat, Master, JSONSchema7WithEnums, PropertyRange, Lang } from "../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../utils";
 import { detectChangePaths, gnmspc  } from "../utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
@@ -87,7 +87,7 @@ const prepareUiSchema = (schema: any, uiSchema: any, filter?: string[]) => {
 		return uiSchema;
 	}
 
-	const doFilter = (schema: JSONSchemaE, uiSchema: any, filter: FilterTreeNode) => {
+	const doFilter = (schema: JSONSchema7WithEnums, uiSchema: any, filter: FilterTreeNode) => {
 		const getProperties = (schema: any): any => schema.properties || schema.items.properties;
 		const properties = getProperties(schema);
 		Object.keys(properties).forEach((prop: string) => {

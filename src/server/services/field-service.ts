@@ -2,19 +2,22 @@ import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
-	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang } from "../../model";
+	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchema7WithEnums } from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
+import ConverterService from "./converter-service";
+import {JSONSchema7} from "json-schema";
 
 export default class FieldService {
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
 	private storeService: StoreService;
-	private schemaService: SchemaService;
+	private schemaService: SchemaService<JSONSchema7>;
+	private schemaServiceWithEnums: SchemaService<JSONSchema7WithEnums>;
 	private expandedJSONService: ExpandedJSONService;
 
 	constructor(apiClient: ApiClient, metadataService: MetadataService, storeService: StoreService, lang: Lang) {
@@ -22,6 +25,7 @@ export default class FieldService {
 		this.metadataService = metadataService;
 		this.storeService = storeService;
 		this.schemaService = new SchemaService(metadataService, apiClient, lang);
+		this.schemaServiceWithEnums = new SchemaService(metadataService, apiClient, lang, true);
 		this.expandedJSONService = new ExpandedJSONService(metadataService, lang);
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
@@ -31,6 +35,7 @@ export default class FieldService {
 
 	setLang(lang: Lang) {
 		this.schemaService.setLang(lang);
+		this.schemaServiceWithEnums.setLang(lang);
 		this.expandedJSONService.setLang(lang);
 	}
 
@@ -38,14 +43,22 @@ export default class FieldService {
 		return this.convert(master, Format.Schema, lang);
 	}
 
+	masterToSchemaWithEnumsFormat(master: Master, lang?: Lang): Promise<SchemaFormat<JSONSchema7WithEnums>> {
+		return this.convert(master, Format.SchemaWithEnums, lang);
+	}
+
 	masterToExpandedJSONFormat(master: Master, lang?: Lang): Promise<ExpandedJSONFormat> {
 		return this.convert(master, Format.JSON, lang);
 	}
 
-	async convert(master: Master, format: Format.Schema, lang?: Lang) : Promise<SchemaFormat>
-	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
-	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat>
-	{
+	async convert(master: Master, format: Format.Schema, lang?: Lang)
+		: Promise<SchemaFormat>
+	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang)
+		: Promise<SchemaFormat<JSONSchema7WithEnums>>
+	async convert(master: Master, format: Format.JSON, lang?: Lang)
+		: Promise<ExpandedJSONFormat>
+	async convert(master: Master, format: Format, lang?: Lang)
+		: Promise<SchemaFormat | ExpandedJSONFormat> {
 		const expandedMaster = await this.expandMaster(master, lang);
 		const rootField = expandedMaster.fields
 			? this.getRootField(expandedMaster)
@@ -53,9 +66,18 @@ export default class FieldService {
 		const rootProperty = rootField
 			? this.getRootProperty(rootField)
 			: undefined;
-		const converter = format === "schema"
-			? this.schemaService
-			: this.expandedJSONService;
+		let converter: ConverterService<any>;
+		switch (format) {
+		case Format.Schema:
+			converter = this.schemaService;
+			break;
+		case Format.SchemaWithEnums:
+			converter = this.schemaServiceWithEnums;
+			break;
+		case Format.JSON:
+			converter = this.expandedJSONService;
+			break;
+		}
 		const converted = await converter.convert(expandedMaster, rootField, rootProperty) as CommonFormat;
 		return reduceWith(converted, undefined, 
 			(converted) => lang && converted.translations && (lang in converted.translations)

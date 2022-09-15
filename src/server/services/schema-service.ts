@@ -1,22 +1,28 @@
 import MetadataService from "../../services/metadata-service";
-import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSchemaE, Lang, Master, PropertyModel,
-	SchemaFormat } from "../../model";
+import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, isJSONSchema7WithEnums,
+	JSONSchema7WithEnums, Lang, Master, PropertyModel, SchemaFormat } from "../../model";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchema, multiLang, reduceWith, unprefixProp } from "../../utils";
 import * as rjsf from "@rjsf/core";
 import merge from "deepmerge";
 import ConverterService from "./converter-service";
 import ApiClient from "../../api-client";
+import { JSONSchema7 } from "json-schema";
 
-export default class SchemaService extends ConverterService<SchemaFormat> {
+export default class SchemaService<T extends (JSONSchema7 | JSONSchema7WithEnums) = JSONSchema7>
+	extends ConverterService<SchemaFormat> {
+
 	metadataService: MetadataService;
 	apiClient: ApiClient;
 	lang: Lang;
-	constructor(metadataService: MetadataService, apiClient: ApiClient, lang: Lang) {
+	useEnums = false;
+
+	constructor(metadataService: MetadataService, apiClient: ApiClient, lang: Lang, useEnums = false) {
 		super(metadataService);
 		this.metadataService = metadataService;
 		this.apiClient = apiClient;
 		this.lang = lang;
+		this.useEnums = useEnums;
 
 		this.prepopulate = this.prepopulate.bind(this);
 	}
@@ -47,10 +53,11 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 		);
 	}
 
-	async fieldToSchema(field: Field, property: PropertyModel, isRootProperty = false): Promise<JSONSchemaE> {
+	async fieldToSchema(field: Field, property: PropertyModel, isRootProperty = false)
+	: Promise<T> {
 		const {fields = []} = field;
 
-		let transformed: JSONSchemaE;
+		let transformed: T;
 		if (property.isEmbeddable) {
 			const properties = await this.getProperties(fields, property);
 
@@ -63,7 +70,7 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 					return [
 						field.name,
 						await this.fieldToSchema(field, prop, false)
-					] as [string, JSONSchemaE];
+					] as [string, T];
 				})
 			);
 
@@ -75,16 +82,16 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 				field,
 				addRequireds(properties),
 				mapMaxOccurs(property)
-			);
+			) as T;
 		} else {
 			transformed = await reduceWith(
-				this.metadataService.getJSONSchemaFromProperty(property),
+				this.metadataService.getJSONSchemaFromProperty(property, this.useEnums),
 				field,
-				addValueOptions,
-				filterWhitelist,
-				filterBlacklist,
-				hide
-			);
+				addValueOptions(this.useEnums),
+				filterWhitelist(this.useEnums),
+				filterBlacklist(this.useEnums),
+				hide(this.useEnums)
+			) as T;
 		}
 
 		return reduceWith(
@@ -136,7 +143,7 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 	}
 }
 
-const optionsToSchema = (schema: JSONSchemaE, field: Field) =>
+const optionsToSchema = <T extends JSONSchema7>(schema: T, field: Field) =>
 	field.options
 		? (["uniqueItems", "minItems", "maxItems"] as (keyof FieldOptions)[]).reduce(
 			(schema, prop) =>
@@ -167,7 +174,7 @@ const addDefault = (schema: any, field: Field) => {
 	return schema;
 };
 
-const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
+const mapEmbeddable = (field: Field, properties: JSONSchema7["properties"]) => {
 	const required = field.fields?.reduce<string[]>((reqs, f) => {
 		if (f.required) {
 			reqs.push(f.name);
@@ -177,13 +184,13 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaE["properties"]) => {
 	return JSONSchema.object(properties, {required});
 };
 
-const mapMaxOccurs = ({maxOccurs}: PropertyModel) => (schema: JSONSchemaE) =>
+const mapMaxOccurs = ({maxOccurs}: PropertyModel) => <T extends JSONSchema7>(schema: T) =>
 	maxOccurs === "unbounded" ? JSONSchema.array(schema) : schema;
 
 const stringNumberLargerThan = (value: string, largerThan: number) =>
 	!isNaN(parseInt(value)) && parseInt(value) > largerThan;
 
-const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSONSchemaE) =>
+const addRequireds = (properties: Record<string, PropertyModel>) => <T extends JSONSchema7>(schema: T) =>
 	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
 		const property = properties[unprefixProp(propertyName)];
 		if (!property) {
@@ -200,66 +207,85 @@ const addRequireds = (properties: Record<string, PropertyModel>) => (schema: JSO
 		return schema;
 	}, schema);
 
-const addValueOptions = (schema: JSONSchemaE, field: Field) => {
-	const {value_options} = field.options || {};
-	if (!value_options) {
-		return schema;
-	}
-	const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(([_enum, enumNames], option) => {
-		_enum.push(option);
-		const label = value_options[option];
-		enumNames.push(label);
-		return [_enum, enumNames];
-	}, [[], []]);
-	const enumData = {
-		enum: _enum,
-		enumNames
+const addValueOptions = (useEnums = false) =>
+	<T extends JSONSchema7 | JSONSchema7WithEnums>(schema: T, field: Field) => {
+		const {value_options} = field.options || {};
+		if (!value_options) {
+			return schema;
+		}
+		const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(
+			([_enum, enumNames], option) => {
+				_enum.push(option);
+				const label = value_options[option];
+				enumNames.push(label);
+				return [_enum, enumNames];
+			}, [[], []]);
+		const {type, ...enumData} = JSONSchema.enu({
+			enum: _enum,
+			enumNames
+		}, undefined, useEnums);
+		return schema.type === "array"
+			? { ...schema, items: {...(schema.items as any), ...enumData}, uniqueItems: true}
+			: {...schema, ...enumData};
 	};
-	return schema.type === "array"
-		? { ...schema, items: {...(schema.items as any), ...enumData}, uniqueItems: true}
-		: {...schema, ...enumData};
-};
 
-const filterList = (listName: "whitelist" | "blacklist", white = true) => (schema: JSONSchemaE, field: Field) => {
-	const list = (field.options || {} as FieldOptions)[listName];
+const filterList = (listName: "whitelist" | "blacklist", white = true, useEnums = false) =>
+	<T extends JSONSchema7>(schema: T, field: Field) => {
+		const list = (field.options || {} as FieldOptions)[listName];
 
-	if (!list) {
-		return schema;
-	}
+		if (!list) {
+			return schema;
+		}
 
-	const dict = dictionarify(list);
-	const _check = (w: string) => !dict[w];
-	const check = white ? _check : (w: string) => !_check(w);
+		const dict = dictionarify(list);
+		const _check = (w: string) => !dict[w];
+		const check = white ? _check : (w: string) => !_check(w);
 
-	const schemaForEnum: any = schema.type === "string"
-		? schema
-		: schema.type === "array"
-			? schema.items
-			: undefined;
+		const schemaForEnum: any = schema.type === "string"
+			? schema
+			: schema.type === "array"
+				? schema.items
+				: undefined;
 
-	if (schemaForEnum.enum) {
-		[...schemaForEnum.enum].forEach((w: string) => {
-			if (check(w) && schemaForEnum.enum && schemaForEnum.enumNames) {
+		const enu =
+			(useEnums
+				? schema.enum
+				: (schema.oneOf as JSONSchema7["oneOf"])?.map(item => (item as any).const)
+			) || [];
+
+		[...enu].forEach((w: string) => {
+			if (!check(w)) {
+				return;
+			}
+			if (useEnums) {
 				const idxInEnum = schemaForEnum.enum.indexOf(w);
 				schemaForEnum.enum.splice(idxInEnum, 1);
 				schemaForEnum.enumNames.splice(idxInEnum, 1);
+			} else {
+				const idxInEnum = schemaForEnum.oneOf.findIndex((one: any) => one.const === w);
+				schemaForEnum.oneOf.splice(idxInEnum, 1);
 			}
 		});
-	}
 
-	return schema;
-};
+		return schema;
+	};
 
-const filterWhitelist = filterList("whitelist");
-const filterBlacklist = filterList("blacklist", false);
+const filterWhitelist = (useEnums = false) => filterList("whitelist", true, useEnums);
+const filterBlacklist = (useEnums = false) => filterList("blacklist", false, useEnums);
 
-const hide = (schema: JSONSchemaE, field: Field) => {
-	if (field.type === "hidden") {
-		delete schema.enum;
-		delete schema.enumNames;
-	}
-	return schema;
-};
+const hide = (useEnums = false) =>
+	<T extends (JSONSchema7 | JSONSchema7WithEnums)>(schema: T, field: Field) => {
+		if (field.type !== "hidden") {
+			return schema;
+		}
+		if (useEnums) {
+			delete schema.enum;
+			delete (schema as any).enumNames;
+		} else {
+			delete schema.oneOf;
+		}
+		return schema;
+	};
 
 type AddValidatorsInput = Pick<SchemaFormat, "schema"> & Pick<Master, "translations">;
 
@@ -271,7 +297,7 @@ function addValidators<T extends AddValidatorsInput>(type: "validators" | "warni
 	: ((schemaFormat: T, master: ExpandedMaster) => T & {validators?: any, warnings?: any})
 {
 	return (schemaFormat: T, master: ExpandedMaster)  => {
-		const recursively = (field: Field, schema: JSONSchemaE, path: string) => {
+		const recursively = (field: Field, schema: JSONSchema7, path: string) => {
 			let validators: any = {};
 			if (field[type]) {
 				validators = field[type];
@@ -333,8 +359,8 @@ const addExcludeFromCopy = <T extends Pick<SchemaFormat, "schema">>(schemaFormat
 						...excludeFromCopy,
 						...excludeRecursively(field,
 							schema.type === "array"
-								? schema.items.properties[field.name]
-								: schema.properties[field.name],
+								? (schema.items as any).properties[field.name]
+								: (schema.properties as any)[field.name],
 							schema.type === "array"
 								? path + "[*]." + field.name
 								: path + "." + field.name

@@ -165,7 +165,7 @@ describe("fields", () => {
 			const form = { fields: [] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.type).toBe("object");
 				expect(schemaFormat.schema.properties).toEqual({});
 			});
@@ -180,7 +180,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "locality" }]}] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.properties.gatherings.type).toBe("array");
 				expect(schemaFormat.schema.properties.gatherings.items).not.toBe(undefined);
 				expect(schemaFormat.schema.properties.gatherings.items.type).toBe("object");
@@ -198,7 +198,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatheringEvent", fields: [{ name: "leg" }]}] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.properties.gatheringEvent.properties.leg.type).toBe("array");
 			});
 
@@ -213,7 +213,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "editor" }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.properties.editor.type).toBe("string");
 			});
 
@@ -227,7 +227,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "genbank" }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.properties.genbank.type).toBe("array");
 				expect(schemaFormat.schema.properties.genbank.items.type).toBe("string");
 			});
@@ -243,7 +243,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "observationDays" }] }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {observationDays} = schemaFormat.schema.properties.gatherings.items.properties;
 				expect(observationDays.type).toBe("integer");
 			});
@@ -258,7 +258,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "relativeHumidity" }] }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 
 				const {relativeHumidity} = schemaFormat.schema.properties.gatherings.items.properties;
 				expect(relativeHumidity.type).toBe("integer");
@@ -275,7 +275,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "observationMinutes" }] }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {observationMinutes} = schemaFormat.schema.properties.gatherings.items.properties;
 				expect(observationMinutes.type).toBe("integer");
 				expect(observationMinutes.exclusiveMinimum).toBe(0);
@@ -291,7 +291,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "samplingAreaSizeInSquareMeters" }] }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {samplingAreaSizeInSquareMeters} = schemaFormat.schema.properties.gatherings.items.properties;
 				expect(samplingAreaSizeInSquareMeters.type).toBe("number");
 			});
@@ -306,7 +306,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "isTemplate" }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 
 				const {isTemplate} = schemaFormat.schema.properties;
 				expect(isTemplate.type).toBe("boolean");
@@ -322,7 +322,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "acknowledgedWarnings" }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const acknowledgedWarnings = schemaFormat.schema.properties.acknowledgedWarnings.items;
 				expect(acknowledgedWarnings.type).toBe("object");
 				expect(acknowledgedWarnings.properties).toEqual({});
@@ -338,7 +338,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "geometry" }] }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {geometry} = schemaFormat.schema.properties.gatherings.items.properties;
 				expect(geometry.type).toBe("object");
 				expect(geometry.properties).toEqual({});
@@ -354,8 +354,19 @@ describe("fields", () => {
 			const form = { fields: [{ name: "secureLevel" }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				const {secureLevel} = schemaFormat.schema.properties;
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
+				expect(secureLevel.type).toBe("string");
+				expect(secureLevel.oneOf.length).toBe(10);
+				expect(secureLevel.oneOf[0].const).toBe("");
+				expect(secureLevel.oneOf[0].title).toBe("");
+				expect(secureLevel.oneOf[1].const).toBe("MX.secureLevelNone");
+				expect(secureLevel.oneOf[1].title).toBe("Ei karkeistettu");
+			});
+
+			it("for schema-with-enum format", async () => {
+				const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
 				expect(secureLevel.type).toBe("string");
 				expect(secureLevel.enum.length).toBe(10);
 				expect(secureLevel.enumNames.length).toBe(10);
@@ -380,8 +391,14 @@ describe("fields", () => {
 			});
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				const {secureLevel} = schemaFormat.schema.properties;
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
+				expect(secureLevel.oneOf).toEqual([{const: "MX.secureLevelKM5", title: "5 km"}]);
+			});
+
+			it("for schema-with-enums format", async () => {
+				const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
 				expect(secureLevel.enum).toEqual(["MX.secureLevelKM5"]);
 				expect(secureLevel.enumNames).toEqual(["5 km"]);
 			});
@@ -396,8 +413,14 @@ describe("fields", () => {
 			const form = { fields: [{ name: "secureLevel", options: {blacklist: ["MX.secureLevelKM5", "foo", ""]} }] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				const {secureLevel} = schemaFormat.schema.properties;
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
+				expect(secureLevel.oneOf.length).toBe(8);
+			});
+
+			it("for schema-with-enums format", async () => {
+				const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
 				expect(secureLevel.enum.length).toBe(8);
 				expect(secureLevel.enumNames.length).toBe(8);
 			});
@@ -412,7 +435,7 @@ describe("fields", () => {
 			const form = { fields: [{ name: "gatherings" }, { name: "secureLevel" } ] };
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.required).toEqual(["gatherings"]);
 			});
 
@@ -426,7 +449,7 @@ describe("fields", () => {
 			const form = { fields: [ { name: "secureLevel", options: { default: "secureLevelKM5" }} ]};
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.schema.properties.secureLevel.default).toBe("secureLevelKM5");
 			});
 
@@ -471,7 +494,16 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					const {coordinateSource} = schemaFormat.schema.properties.gatherings.items.properties;
+					expect(coordinateSource.oneOf).toEqual([
+						{const: "a", title: "aLabel"},
+						{const: "b", title: "bLabel"}
+					]);
+				});
+
+				it("for schema-with-enums format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
 					const {coordinateSource} = schemaFormat.schema.properties.gatherings.items.properties;
 					expect(coordinateSource.enum).toEqual(["a", "b"]);
 					expect(coordinateSource.enumNames).toEqual(["aLabel", "bLabel"]);
@@ -483,17 +515,34 @@ describe("fields", () => {
 				});
 			});
 
-			it("value_options add uniqueItems if array", async () => {
-				const form = { fields: [
-					{ name: "gatherings",
-						fields: [ { name: "batHabitat", options: { value_options: {a: "aLabel", b: "bLabel"} }} ]
-					}
-				]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				const batHabitat = schemaFormat.schema.properties.gatherings.items.properties.batHabitat;
-				expect(batHabitat.items.enum).toEqual(["a", "b"]);
-				expect(batHabitat.items.enumNames).toEqual(["aLabel", "bLabel"]);
-				expect(batHabitat.uniqueItems).toEqual(true);
+			describe("value_options add uniqueItems if array", () => {
+				it("for schema format", async () => {
+					const form = { fields: [
+						{ name: "gatherings",
+							fields: [ { name: "batHabitat", options: { value_options: {a: "aLabel", b: "bLabel"} }} ]
+						}
+					]};
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					const batHabitat = schemaFormat.schema.properties.gatherings.items.properties.batHabitat;
+					expect(batHabitat.items.oneOf).toEqual([
+						{const: "a", title: "aLabel"},
+						{const: "b", title: "bLabel"}
+					]);
+					expect(batHabitat.uniqueItems).toEqual(true);
+				});
+
+				it("for schema-with-enums format", async () => {
+					const form = { fields: [
+						{ name: "gatherings",
+							fields: [ { name: "batHabitat", options: { value_options: {a: "aLabel", b: "bLabel"} }} ]
+						}
+					]};
+					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+					const batHabitat = schemaFormat.schema.properties.gatherings.items.properties.batHabitat;
+					expect(batHabitat.items.enum).toEqual(["a", "b"]);
+					expect(batHabitat.items.enumNames).toEqual(["aLabel", "bLabel"]);
+					expect(batHabitat.uniqueItems).toEqual(true);
+				});
 			});
 
 			it("whitelist works", () => {
@@ -502,7 +551,15 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+					expect(schemaFormat.schema.properties.secureLevel.oneOf).toEqual([
+						{const: "", title:  ""},
+						{const: "MX.secureLevelKM5", title: "5 km"}
+					]);
+				});
+
+				it("for schema-with-enums format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.secureLevel.enum).toEqual(["", "MX.secureLevelKM5"]);
 					expect(schemaFormat.schema.properties.secureLevel.enumNames).toEqual(["", "5 km"]);
 				});
@@ -522,7 +579,14 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					expect(schemaFormat.schema.properties.secureLevel.oneOf).toEqual([
+						{const: "", title:  ""}
+					]);
+				});
+
+				it("for schema-with-enums format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
 					expect(schemaFormat.schema.properties.secureLevel.enum).toEqual([""]);
 					expect(schemaFormat.schema.properties.secureLevel.enumNames).toEqual([""]);
 				});
@@ -542,8 +606,16 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-					const {secureLevel} = schemaFormat.schema.properties;
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					expect(schemaFormat.schema.properties.secureLevel.oneOf).toEqual([
+						{const: "MX.secureLevelKM1", title:  "1 km"},
+						{const: "MX.secureLevelKM25", title: "25 km"}
+					]);
+				});
+
+				it("for schema-with-enums format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+					const {secureLevel}: any = schemaFormat.schema.properties;
 					expect(secureLevel.enum).toEqual(["MX.secureLevelKM1", "MX.secureLevelKM25"]);
 					expect(secureLevel.enumNames).toEqual(["1 km", "25 km"]);
 				});
@@ -566,6 +638,11 @@ describe("fields", () => {
 					expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
 				});
 
+				it("for schema-with-enums format", async () => {
+					expect(await throwsError(() => fieldService.masterToSchemaWithEnumsFormat(form, LANG)))
+						.toBe(false);
+				});
+
 				it("for json format", async () => {
 					expect(await throwsError(() => fieldService.masterToExpandedJSONFormat(form, LANG))).toBe(false);
 				});
@@ -577,7 +654,7 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.secureLevel.uniqueItems).toEqual(true);
 				});
 
@@ -593,7 +670,7 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.gatherings.maxItems).toEqual(3);
 				});
 
@@ -609,7 +686,7 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.gatherings.minItems).toEqual(3);
 				});
 
@@ -626,8 +703,8 @@ describe("fields", () => {
 			]};
 
 			it("for schema format", async () => {
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
-				const {secureLevel} = schemaFormat.schema.properties;
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+				const {secureLevel}: any = schemaFormat.schema.properties;
 				expect(secureLevel.enum).toBe(undefined);
 				expect(secureLevel.enumNames).toBe(undefined);
 			});
@@ -643,25 +720,25 @@ describe("fields", () => {
 			describe("for schema format", () => {
 				it("not populated for root", async () => {
 					const form = { fields: [ { name: "gatherings" } ]};
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.title).toBe(undefined);
 				});
 
 				it("populated from property metadata", async () => {
 					const form = { fields: [ { name: "gatherings" } ]};
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.gatherings.title).toBe("Keruutapahtumat");
 				});
 
 				it("can be overridden", async () => {
 					const form = { fields: [ { name: "gatherings", label: "foo" } ]};
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.gatherings.title).toBe("foo");
 				});
 
 				it("can be overridden with empty", async () => {
 					const form = { fields: [ { name: "gatherings", label: "" } ]};
-					const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.gatherings.title).toBe("");
 				});
 			});
@@ -678,7 +755,7 @@ describe("fields", () => {
 	describe("validators", () => {
 		it("empty object for undefined", async () => {
 			const form = {};
-			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 			expect(schemaFormat.validators).toEqual({});
 			expect(schemaFormat.warnings).toEqual({});
 		});
@@ -687,7 +764,7 @@ describe("fields", () => {
 			const form = { fields: [ { name: "gatherings", validators: { presence: true }, fields: [
 				{ name: "units", validators: { presence: true }, warnings: { presence: true } }
 			]} ]};
-			const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 			expect(schemaFormat.validators.gatherings.presence).toBe(true);
 			expect(schemaFormat.validators.gatherings.items.properties.units.presence).toBe(true);
 			expect(schemaFormat.warnings.gatherings.items.properties.units.presence).toBe(true);
@@ -696,7 +773,7 @@ describe("fields", () => {
 		describe("default geometry validator", () => {
 			it("is added", async () => {
 				const form = { fields: [ { name: "gatheringEvent", fields: [ { name: "geometry" } ]} ]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.maximumSize).toBeTruthy();
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("Täytyy olla vähintään yksi kuvio.");
@@ -709,7 +786,7 @@ describe("fields", () => {
 						{name: "units", fields: [ { name: "unitGathering", fields: [ { name: "geometry" } ] } ] }
 					]}
 				]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("Täytyy olla vähintään yksi kuvio.");
 				expect(schemaFormat.validators.gatherings.items.properties
@@ -725,7 +802,7 @@ describe("fields", () => {
 						}
 					}
 				};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.maximumSize).toBeTruthy();
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("foo");
@@ -736,7 +813,7 @@ describe("fields", () => {
 				const form = { fields: [ { name: "gatherings", fields: [
 					{ name: "geometry", validators: { geometry: false } }
 				]} ]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators).toEqual({});
 			});
 		});
@@ -744,7 +821,7 @@ describe("fields", () => {
 		describe("default gatherings geometry validator", () => {
 			it("overrides the default geometry validator", async () => {
 				const form = { fields: [ { name: "gatherings", fields: [ { name: "geometry" } ]}]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {geometry} = schemaFormat.validators.gatherings.items.properties;
 				expect(geometry.geometry.requireShape).toBe(true);
 			});
@@ -753,7 +830,7 @@ describe("fields", () => {
 				const form = { fields: [ { name: "gatherings", fields: [
 					{ name: "geometry", validators: { geometry: { foo: "bar" }} }
 				]}]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {geometry} = schemaFormat.validators.gatherings.items.properties;
 				expect(geometry.geometry.requireShape).toBe(undefined);
 				expect(geometry.geometry.foo).toBe("bar");
@@ -763,7 +840,7 @@ describe("fields", () => {
 				const form = { fields: [
 					{ name: "gatherings", fields: [ { name: "geometry" } ]}
 				]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators.gatherings.items.properties.geometry.geometry.message.missingGeometries)
 					.toBe("Paikalla täytyy olla vähintään yksi kuvio.");
 			});
@@ -774,7 +851,7 @@ describe("fields", () => {
 				const form = { fields: [ { name: "gatheringEvent", fields: [
 					{ name: "dateBegin" }, { name: "dateEnd" }
 				]} ]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				["dateBegin", "dateEnd"].forEach(field => {
 					const {datetime} = schemaFormat.validators.gatheringEvent.properties[field];
 					expect(datetime.earliest).toBe("1000-01-01");
@@ -792,7 +869,7 @@ describe("fields", () => {
 						}
 					}
 				};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				["dateBegin", "dateEnd"].forEach(field => {
 					expect(schemaFormat.validators.gatheringEvent.properties[field].datetime.tooEarly).toBe("foo");
 				});
@@ -808,7 +885,7 @@ describe("fields", () => {
 				const form = { fields: [ { name: "gatheringEvent", fields: [
 					{ name: "dateBegin", validators }, { name: "dateEnd", validators }
 				]} ]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				["dateBegin", "dateEnd"].forEach(field => {
 					const {datetime} = schemaFormat.validators.gatheringEvent.properties[field];
 					expect(datetime.latest).toBe("should be kept");
@@ -822,7 +899,7 @@ describe("fields", () => {
 					{ name: "dateBegin", validators: { datetime: false } },
 					{ name: "dateEnd", validators: { datetime: false } }
 				]} ]};
-				const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				expect(schemaFormat.validators).toEqual({});
 			});
 		});
@@ -832,13 +909,13 @@ describe("fields", () => {
 describe("extra", () => {
 	it("undefined if no fields with alt parents", async () => {
 		const form = { fields: [ { name: "gatherings" } ]};
-		const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 		expect(schemaFormat.extra).toBe(undefined);
 	});
 
 	it("populated from field with alt parents", async () => {
 		const form = { fields: [ { name: "gatherings", fields: [ { name: "habitat" } ]} ]};
-		const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 		const extra = schemaFormat.extra as any;
 		expect(extra.habitat.altParent["MY.habitatEnumValue1"]).toEqual([]);
 		expect(extra.habitat.altParent["MY.habitatEnumValue2"]).toEqual(["MY.habitatEnumValue1"]);
@@ -848,13 +925,13 @@ describe("extra", () => {
 describe("uiSchemaContext", () => {
 	it("undefined if no fields with alt parents", async () => {
 		const form = { fields: [ { name: "gatherings" } ]};
-		const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 		expect(schemaFormat.uiSchemaContext).toBe(undefined);
 	});
 
 	it("populated from field with alt parents", async () => {
 		const form = { fields: [ { name: "gatherings", fields: [ { name: "habitat" } ]} ]};
-		const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 		const node = (schemaFormat.uiSchemaContext as any).habitat.tree
 			.children["MY.habitatEnumValue1"].children["MY.habitatEnumValue2"];
 		expect(node.children).toEqual({
@@ -875,13 +952,13 @@ describe("uiSchemaContext", () => {
 describe("language", () => {
 	it("not added if not asked for", async () => {
 		const form = { };
-		const schemaFormat = await fieldService.masterToSchemaFormat(form);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form);
 		expect(schemaFormat.language).toBe(undefined);
 	});
 
 	it("added if asked for", async () => {
 		const form = { };
-		const schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 		expect(schemaFormat.language).toBe(LANG);
 	});
 });
@@ -931,13 +1008,13 @@ describe("prepopulatedDocument population", () => {
 describe("translations", () => {
 	it("doesn't crash when not present and is undefined", async () => {
 		const form = { };
-		const schemaFormat = await fieldService.masterToSchemaFormat(form);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form);
 		expect(schemaFormat.translations).toBe(undefined);
 	});
 
 	it("included when asked without lang", async () => {
 		const form = { translations: {fi: {}, en: {}}};
-		const schemaFormat = await fieldService.masterToSchemaFormat(form);
+		const schemaFormat: any = await fieldService.masterToSchemaFormat(form);
 		expect(schemaFormat.translations).toEqual({fi: {}, en: {}});
 	});
 
@@ -986,7 +1063,7 @@ describe("patching", () => {
 			uiSchema,
 			patch: [patch[0]]
 		};
-		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const jsonFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 		expect(jsonFormat.schema.properties.gatherings.items.properties.municipality.title).toBe("foo");
 	});
 
@@ -997,7 +1074,7 @@ describe("patching", () => {
 			patch
 		};
 
-		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const jsonFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 
 		expect(jsonFormat.schema.properties.gatherings.items.properties.municipality.title).toBe("foo");
 		expect(jsonFormat.schema.properties.gatherings.items.properties.locality.title).toBe("bar");
@@ -1024,7 +1101,7 @@ describe("patching", () => {
 			]
 		};
 
-		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+		const jsonFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 
 		expect(jsonFormat.schema.properties.gatherings.items.properties.municipality.title).toBe("foo");
 		expect(jsonFormat.uiSchema.municipality).toBe("foo");
@@ -1066,7 +1143,7 @@ describe("taxonSets", () => {
 describe("options", () => {
 	describe("always defined", () => {
 		it("for schema format", async () => {
-			const schemaFormat = await fieldService.masterToSchemaFormat({}, LANG);
+			const schemaFormat: any = await fieldService.masterToSchemaFormat({}, LANG);
 			expect(schemaFormat.options).toEqual({});
 		});
 

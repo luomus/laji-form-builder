@@ -1,6 +1,7 @@
+import { JSONSchema7 } from "json-schema";
 import memoize, { Memoized } from "memoizee";
 import ApiClient from "../api-client";
-import { PropertyModel, PropertyContext, PropertyRange, JSONSchemaE, Range, Lang, Class } from "../model";
+import { PropertyModel, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema7WithEnums } from "../model";
 import { reduceWith, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
 
 export default class MetadataService {
@@ -70,8 +71,17 @@ export default class MetadataService {
 
 	isAltRange = async (range: string) => !!(await this.getAllRanges())[range];
 
-	getJSONSchemaFromProperty(property: PropertyModel) {
-		const mapRangeToSchema = async (property: PropertyModel): Promise<JSONSchemaE> => {
+	getJSONSchemaFromProperty<T extends JSONSchema7>
+	(property: PropertyModel): Promise<T>;
+	getJSONSchemaFromProperty<T extends JSONSchema7>
+	(property: PropertyModel, useEnums: false): Promise<T>;
+	getJSONSchemaFromProperty<T extends JSONSchema7WithEnums>
+	(property: PropertyModel, useEnums: true): Promise<T>;
+	getJSONSchemaFromProperty<T extends JSONSchema7 | JSONSchema7WithEnums>
+	(property: PropertyModel, useEnums: boolean): Promise<T>
+	getJSONSchemaFromProperty<T extends JSONSchema7 | JSONSchema7WithEnums>
+	(property: PropertyModel, useEnums = false): Promise<T> {
+		const mapRangeToSchema = async (property: PropertyModel): Promise<T> => {
 			const range = property.range[0];
 			const isRange = await this.isAltRange(range);
 			if (isRange) {
@@ -88,12 +98,12 @@ export default class MetadataService {
 								: e.id
 					);
 				}
-				return JSONSchema.enu({enum: enums, enumNames});
+				return JSONSchema.enu({enum: enums, enumNames}, undefined, useEnums) as T;
 			}
 			if (property.multiLanguage) {
 				return JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) =>
 					({...props, [lang]: {type: "string"}}),
-				{}));
+				{})) as T;
 			}
 			let schema;
 			switch (range) {
@@ -129,23 +139,23 @@ export default class MetadataService {
 					return propertiesToSchema(await this.getProperties(range));
 				}
 			}
-			return schema;
+			return schema as T;
 		};
 
-		const mapMaxOccurs = (schema: JSONSchemaE, {maxOccurs}: PropertyModel) =>
+		const mapMaxOccurs = (schema: T, {maxOccurs}: PropertyModel) =>
 			maxOccurs === "unbounded"
 				? JSONSchema.array(schema)
 				: schema;
 
-		const mapUniqueItemsForUnboundedAlt = async (schema: JSONSchemaE, {range, maxOccurs}: PropertyModel) => 
+		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: PropertyModel) => 
 			(await this.isAltRange(range[0])) && maxOccurs === "unbounded"
 				? {...schema, uniqueItems: true}
 				: schema;
 
-		const mapLabel = (schema: JSONSchemaE, {label}: PropertyModel) =>
+		const mapLabel = (schema: T, {label}: PropertyModel) =>
 			({...schema, title: multiLang(label, this.lang)});
 
-		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<JSONSchemaE> =>
+		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<T> =>
 			reduceWith(
 				mapRangeToSchema(property),
 				property, 
@@ -154,12 +164,12 @@ export default class MetadataService {
 				mapLabel
 			);
 
-		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<JSONSchemaE> =>
+		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<T> =>
 			JSONSchema.object((
 				await Promise.all(modelProperties.map(
 					async m => ({property: m.shortName, schema: (await mapPropertyToJSONSchema(m))})
 				))
-			).reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {}));
+			).reduce((properties, {property, schema}) => ({...properties, [property]: schema}), {})) as T;
 
 		return mapPropertyToJSONSchema(property);
 	}

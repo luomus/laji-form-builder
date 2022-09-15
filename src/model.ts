@@ -75,8 +75,8 @@ export type Master = CommonExpanded & {
 	extra?: Record<string, {altParent: AltParentMap}>;
 }
 
-export type SchemaFormat = CommonExpanded & {
-	schema?: any;
+export type SchemaFormat<T extends JSONSchema7 | JSONSchema7WithEnums = JSONSchema7> = CommonExpanded & {
+	schema: T;
 	validators: any;
 	warnings: any;
 	excludeFromCopy: string[];
@@ -167,8 +167,14 @@ export type AltTreeNode = AltTreeParent | AltTreeLeaf;
 
 export type AltParentMap = Record<string, string[]>;
 
-export type JSONSchemaE = JSONSchema7 & {
+export type JSONSchema7WithEnums = JSONSchema7 & {
+	enum?: string[];
 	enumNames?: string[];
+}
+
+export function isJSONSchema7WithEnums(schema: JSONSchema7 | JSONSchema7WithEnums)
+	: schema is JSONSchema7WithEnums {
+	return schema.enum && (schema as any).enumNames;
 }
 
 export type Range = {
@@ -190,5 +196,6 @@ export type FormDeleteResult = {
 
 export enum Format {
 	Schema = "schema",
+	SchemaWithEnums = "schema-with-enums",
 	JSON = "json"
 }

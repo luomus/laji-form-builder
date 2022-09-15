@@ -1,6 +1,7 @@
 import fetch from "cross-fetch";
+import { JSONSchema7 } from "json-schema";
 import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
-import { JSONSchemaE, Lang } from "./model";
+import { JSONSchema7WithEnums, Lang } from "./model";
 
 export const translate = <T>(obj: T, translations: Record<string, string>): T => {
 	function translate(_any: any): any {
@@ -26,18 +27,39 @@ export const translate = <T>(obj: T, translations: Record<string, string>): T =>
 	return translate(obj);
 };
 
+type EVOptions = Record<string, unknown>;
+
 export class JSONSchema {
-	static type = (type: string) => (options = {}) => ({type, ...options} as JSONSchemaE);
+	static type = (type: string) => (options = {}) => ({type, ...options} as JSONSchema7);
 	static String = JSONSchema.type("string");
 	static Number = JSONSchema.type("number");
 	static Integer = JSONSchema.type("integer");
 	static Boolean = JSONSchema.type("boolean");
 	static array = (items: any, options = {}) => JSONSchema.type("array")({items, ...options});
-	static enu = (_enum: {enum: string[], enumNames: string[]}, options?: any) => ({
-		...JSONSchema.String(options),
-		..._enum
-	})
 	static object = (properties = {}, options = {}) => JSONSchema.type("object")({properties, ...options});
+
+	static enu(_enum: {enum: string[], enumNames: string[]})
+		: JSONSchema7;
+	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions)
+		: JSONSchema7;
+	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions | undefined, useEnums: false)
+		: JSONSchema7;
+	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions | undefined, useEnums: true)
+		: JSONSchema7WithEnums;
+	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions  | undefined, useEnums: boolean)
+		: JSONSchema7 | JSONSchema7WithEnums;
+	static enu(_enum: {enum: string[], enumNames: string[]}, options?: EVOptions, useEnums = false)
+		: JSONSchema7 | JSONSchema7WithEnums {
+		return {
+			...JSONSchema.String(options),
+			...(!useEnums
+				? {oneOf: _enum.enum.reduce((oneOf, enu, idx) => {
+					oneOf.push({const: enu, title: _enum.enumNames[idx]});
+					return oneOf;
+				}, [] as {const: string, title: string}[])}
+				: _enum)
+		};
+	}
 }
 
 export const parseJSONPointer = (obj: any, path: string, safeMode?: true | "createParents") => {
@@ -48,10 +70,8 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p?.then;
 }
 
-export type MaybePromise <T> = T | Promise<T>;
-
 interface Reducer<T, R, P> {
-	(value: T, reduceWith: P): Promise<R> | R;
+	(value: T, reduceWith: P): R | Promise<R>;
 }
 
 export const bypass = <T>(any: T): T => any;
@@ -72,7 +92,7 @@ function reduceWith<T, P, A>(initialValue: T | Promise<T>, reduceWith: P, op1: R
 function reduceWith<T, P, A, B>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>): Promise<B>;
 function reduceWith<T, P, A, B, C>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>): Promise<C>;
 function reduceWith<T, P, A, B, C, D>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>): Promise<D>;
- function reduceWith<T, P, A, B, C, D, E>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>): Promise<E>;
+function reduceWith<T, P, A, B, C, D, E>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>): Promise<E>;
 function reduceWith<T, P, A, B, C, D, E, F>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>): Promise<F>;
 function reduceWith<T, P, A, B, C, D, E, F, G>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>, op7: Reducer<F, G, P>): Promise<G>;
 function reduceWith<T, P, A, B, C, D, E, F, G, H>(initialValue: T | Promise<T>, reduceWith: P, op1: Reducer<T, A, P>, op2: Reducer<A, B, P>, op3: Reducer<B, C, P>, op4: Reducer<C, D, P>, op5: Reducer<D, E, P>, op6: Reducer<E, F, P>, op7: Reducer<F, G, P>, op8: Reducer<G, H, P>): Promise<H>;

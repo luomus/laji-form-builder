@@ -9,7 +9,7 @@ export default abstract class ConverterService<T extends CommonFormat> {
 		this.metadataService = metadataService;
 	}
 
-	abstract convert(master: ExpandedMaster, rootField: Field, rootProperty: PropertyModel): Promise<T>;
+	abstract convert(master: ExpandedMaster, rootField?: Field, rootProperty?: PropertyModel): Promise<T>;
 
 	async getProperties(fields: Field[], property: PropertyModel) {
 		return fields
