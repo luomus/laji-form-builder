@@ -1,4 +1,3 @@
-import { JSONSchema7 } from "json-schema";
 
 export enum PropertyRange {
 	Int = "xsd:integer",
@@ -75,8 +74,8 @@ export type Master = CommonExpanded & {
 	extra?: Record<string, {altParent: AltParentMap}>;
 }
 
-export type SchemaFormat<T extends JSONSchema7 | JSONSchema7WithEnums = JSONSchema7> = CommonExpanded & {
-	schema: T;
+export type SchemaFormat<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum = JSONSchemaEnumOneOf> = CommonExpanded & {
+	schema: JSONSchema<T>;
 	validators: any;
 	warnings: any;
 	excludeFromCopy: string[];
@@ -167,16 +166,6 @@ export type AltTreeNode = AltTreeParent | AltTreeLeaf;
 
 export type AltParentMap = Record<string, string[]>;
 
-export type JSONSchema7WithEnums = JSONSchema7 & {
-	enum?: string[];
-	enumNames?: string[];
-}
-
-export function isJSONSchema7WithEnums(schema: JSONSchema7 | JSONSchema7WithEnums)
-	: schema is JSONSchema7WithEnums {
-	return schema.enum && (schema as any).enumNames;
-}
-
 export type Range = {
 	id: string;
 	value?: Partial<Record<Lang, string>>;
@@ -198,4 +187,47 @@ export enum Format {
 	Schema = "schema",
 	SchemaWithEnums = "schema-with-enums",
 	JSON = "json"
+}
+
+export type JSONSchema<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf> =
+	JSONSchemaObject
+	| JSONSchemaArray
+	| JSONSchemaNumber
+	| JSONSchemaInteger
+	| JSONSchemaBoolean
+	| JSONSchemaString
+	| E;
+
+interface JSONShemaTypeCommon<T, D> {
+	type: T;
+	default?: D;
+	title?: string;
+}
+
+export interface JSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
+	extends JSONShemaTypeCommon<"object", Record<string, unknown>> {
+	properties: Record<string, JSONSchema<E>>;
+	required?: string[];
+}
+
+export interface JSONSchemaArray extends JSONShemaTypeCommon<"array", unknown[]> {
+	items: JSONSchema;
+	uniqueItems?: boolean;
+}
+
+export type JSONSchemaNumber = JSONShemaTypeCommon<"number", number>;
+
+export type JSONSchemaInteger = JSONShemaTypeCommon<"integer", number>;
+
+export type JSONSchemaBoolean = JSONShemaTypeCommon<"boolean", boolean>;
+
+export type JSONSchemaString = JSONShemaTypeCommon<"string", string>;
+
+export interface JSONSchemaEnumOneOf extends JSONSchemaString {
+	oneOf: {const: string, title: string}[];
+}
+
+export interface JSONSchemaV6Enum extends JSONSchemaString {
+	enum: string[];
+	enumNames: string[];
 }

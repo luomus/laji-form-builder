@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
-import { JSONSchema7 } from "json-schema";
 import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
-import { JSONSchema7WithEnums, Lang } from "./model";
+import { JSONSchema, JSONSchemaArray, JSONSchemaBoolean, JSONSchemaEnumOneOf, JSONSchemaInteger, JSONSchemaNumber,
+	JSONSchemaObject, JSONSchemaString, JSONSchemaV6Enum, Lang } from "./model";
 
 export const translate = <T>(obj: T, translations: Record<string, string>): T => {
 	function translate(_any: any): any {
@@ -29,29 +29,30 @@ export const translate = <T>(obj: T, translations: Record<string, string>): T =>
 
 type EVOptions = Record<string, unknown>;
 
-export class JSONSchema {
-	static type = (type: string) => (options = {}) => ({type, ...options} as JSONSchema7);
-	static String = JSONSchema.type("string");
-	static Number = JSONSchema.type("number");
-	static Integer = JSONSchema.type("integer");
-	static Boolean = JSONSchema.type("boolean");
-	static array = (items: any, options = {}) => JSONSchema.type("array")({items, ...options});
-	static object = (properties = {}, options = {}) => JSONSchema.type("object")({properties, ...options});
+export class JSONSchemaBuilder {
+	static type = <T extends JSONSchema>(type: string) => (options = {}) => ({type, ...options} as T);
+	static String = JSONSchemaBuilder.type<JSONSchemaString>("string");
+	static Number = JSONSchemaBuilder.type<JSONSchemaNumber>("number");
+	static Integer = JSONSchemaBuilder.type<JSONSchemaInteger>("integer");
+	static Boolean = JSONSchemaBuilder.type<JSONSchemaBoolean>("boolean");
+	static array = (items: any, options = {}) => JSONSchemaBuilder.type<JSONSchemaArray>("array")({items, ...options});
+	static object = (properties = {}, options = {}) =>
+		JSONSchemaBuilder.type<JSONSchemaObject>("object")({properties, ...options});
 
 	static enu(_enum: {enum: string[], enumNames: string[]})
-		: JSONSchema7;
+		: JSONSchemaEnumOneOf;
 	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions)
-		: JSONSchema7;
+		: JSONSchemaEnumOneOf;
 	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions | undefined, useEnums: false)
-		: JSONSchema7;
+		: JSONSchemaEnumOneOf;
 	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions | undefined, useEnums: true)
-		: JSONSchema7WithEnums;
+		: JSONSchemaV6Enum;
 	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions  | undefined, useEnums: boolean)
-		: JSONSchema7 | JSONSchema7WithEnums;
+		: JSONSchemaEnumOneOf | JSONSchemaV6Enum;
 	static enu(_enum: {enum: string[], enumNames: string[]}, options?: EVOptions, useEnums = false)
-		: JSONSchema7 | JSONSchema7WithEnums {
+		: JSONSchemaEnumOneOf | JSONSchemaV6Enum {
 		return {
-			...JSONSchema.String(options),
+			...JSONSchemaBuilder.String(options),
 			...(!useEnums
 				? {oneOf: _enum.enum.reduce((oneOf, enu, idx) => {
 					oneOf.push({const: enu, title: _enum.enumNames[idx]});

@@ -1,6 +1,6 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
-import { unprefixProp, translate, JSONSchema, parseJSONPointer, getPropertyContextName } from "../../utils";
+import { unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getPropertyContextName } from "../../utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "./Context";
@@ -68,7 +68,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					_enumNames.push(`${prop.property} (${prop.label})`);
 					return [_enums, _enumNames];
 				}, [[], []]);
-			const schema = JSONSchema.enu({enum: enums, enumNames}, {title: this.context.translations.AddProperty});
+			const schema = JSONSchemaBuilder.enu({enum: enums, enumNames}, {title: this.context.translations.AddProperty});
 			return (
 				<LajiForm
 					key={this.state.lajiFormToucher}
@@ -132,24 +132,24 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			|| type === "integer" && "Integer"
 			|| type;
 
-		const maybePrimitiveDefault = (JSONSchema as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)]?.();
+		const maybePrimitiveDefault = (JSONSchemaBuilder as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)]?.();
 		const _default = typeof maybePrimitiveDefault !== "function"
 			? maybePrimitiveDefault
-			: JSONSchema.object({});
+			: JSONSchemaBuilder.object({});
 		const optionsProps: any = {
-			excludeFromCopy: JSONSchema.Boolean(),
+			excludeFromCopy: JSONSchemaBuilder.Boolean(),
 			default: _default
 		};
 		const {enum: _enum, enumNames} = this.props.schema;
 		if (this.props.schema.enum) {
-			const list = JSONSchema.array(JSONSchema.enu({enum: _enum, enumNames}), {uniqueItems: true});
+			const list = JSONSchemaBuilder.array(JSONSchemaBuilder.enu({enum: _enum, enumNames}), {uniqueItems: true});
 			optionsProps.whitelist = list;
 			optionsProps.blacklist = list;
 		}
-		const schema = JSONSchema.object({
-			options: JSONSchema.object(optionsProps, {title: ""}),
-			validators: JSONSchema.object({}),
-			warnings: JSONSchema.object({}),
+		const schema = JSONSchemaBuilder.object({
+			options: JSONSchemaBuilder.object(optionsProps, {title: ""}),
+			validators: JSONSchemaBuilder.object({}),
+			warnings: JSONSchemaBuilder.object({}),
 		});
 		const itemUiSchema = { "ui:field": "TextareaEditorField", "ui:options": { minRows: 5 } };
 		const uiSchema: any = {

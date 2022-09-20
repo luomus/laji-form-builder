@@ -1,8 +1,8 @@
-import { JSONSchema7 } from "json-schema";
 import memoize, { Memoized } from "memoizee";
 import ApiClient from "../api-client";
-import { PropertyModel, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema7WithEnums } from "../model";
-import { reduceWith, fetchJSON, JSONSchema, multiLang, unprefixProp } from "../utils";
+import { PropertyModel, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, JSONSchemaV6Enum,
+	JSONSchemaEnumOneOf } from "../model";
+import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } from "../utils";
 
 export default class MetadataService {
 	private apiClient: ApiClient;
@@ -71,15 +71,15 @@ export default class MetadataService {
 
 	isAltRange = async (range: string) => !!(await this.getAllRanges())[range];
 
-	getJSONSchemaFromProperty<T extends JSONSchema7>
+	getJSONSchemaFromProperty<T extends JSONSchema>
 	(property: PropertyModel): Promise<T>;
-	getJSONSchemaFromProperty<T extends JSONSchema7>
+	getJSONSchemaFromProperty<T extends JSONSchema>
 	(property: PropertyModel, useEnums: false): Promise<T>;
-	getJSONSchemaFromProperty<T extends JSONSchema7WithEnums>
+	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaV6Enum>>
 	(property: PropertyModel, useEnums: true): Promise<T>;
-	getJSONSchemaFromProperty<T extends JSONSchema7 | JSONSchema7WithEnums>
+	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>>
 	(property: PropertyModel, useEnums: boolean): Promise<T>
-	getJSONSchemaFromProperty<T extends JSONSchema7 | JSONSchema7WithEnums>
+	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>>
 	(property: PropertyModel, useEnums = false): Promise<T> {
 		const mapRangeToSchema = async (property: PropertyModel): Promise<T> => {
 			const range = property.range[0];
@@ -98,43 +98,43 @@ export default class MetadataService {
 								: e.id
 					);
 				}
-				return JSONSchema.enu({enum: enums, enumNames}, undefined, useEnums) as T;
+				return JSONSchemaBuilder.enu({enum: enums, enumNames}, undefined, useEnums) as T;
 			}
 			if (property.multiLanguage) {
-				return JSONSchema.object(["fi", "sv", "en"].reduce((props, lang) =>
+				return JSONSchemaBuilder.object(["fi", "sv", "en"].reduce((props, lang) =>
 					({...props, [lang]: {type: "string"}}),
 				{})) as T;
 			}
 			let schema;
 			switch (range) {
 			case PropertyRange.String:
-				schema = JSONSchema.String();
+				schema = JSONSchemaBuilder.String();
 				break;
 			case PropertyRange.Boolean:
-				schema = JSONSchema.Boolean();
+				schema = JSONSchemaBuilder.Boolean();
 				break;
 			case PropertyRange.Int:
-				schema = JSONSchema.Integer();
+				schema = JSONSchemaBuilder.Integer();
 				break;
 			case PropertyRange.NonNegativeInteger:
-				schema = JSONSchema.Integer({minimum: 0});
+				schema = JSONSchemaBuilder.Integer({minimum: 0});
 				break;
 			case PropertyRange.PositiveInteger:
-				schema = JSONSchema.Integer({exclusiveMinimum: 0});
+				schema = JSONSchemaBuilder.Integer({exclusiveMinimum: 0});
 				break;
 			case PropertyRange.Decimal:
-				schema = JSONSchema.Number();
+				schema = JSONSchemaBuilder.Number();
 				break;
 			case PropertyRange.DateTime:
-				schema = JSONSchema.String({format: "date-time"});
+				schema = JSONSchemaBuilder.String({format: "date-time"});
 				break;
 			case PropertyRange.keyValue:
 			case PropertyRange.keyAny:
-				schema = JSONSchema.object();
+				schema = JSONSchemaBuilder.object();
 				break;
 			default:
 				if (!property.isEmbeddable && unprefixProp(property.property) !== "geometry") {
-					schema = JSONSchema.String();
+					schema = JSONSchemaBuilder.String();
 				} else {
 					return propertiesToSchema(await this.getProperties(range));
 				}
@@ -144,7 +144,7 @@ export default class MetadataService {
 
 		const mapMaxOccurs = (schema: T, {maxOccurs}: PropertyModel) =>
 			maxOccurs === "unbounded"
-				? JSONSchema.array(schema)
+				? JSONSchemaBuilder.array(schema)
 				: schema;
 
 		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: PropertyModel) => 
@@ -165,7 +165,7 @@ export default class MetadataService {
 			);
 
 		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<T> =>
-			JSONSchema.object((
+			JSONSchemaBuilder.object((
 				await Promise.all(modelProperties.map(
 					async m => ({property: m.shortName, schema: (await mapPropertyToJSONSchema(m))})
 				))

@@ -2,7 +2,8 @@ import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
-	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchema7WithEnums } from "../../model";
+	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum
+} from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -10,14 +11,13 @@ import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
 import ConverterService from "./converter-service";
-import {JSONSchema7} from "json-schema";
 
 export default class FieldService {
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
 	private storeService: StoreService;
-	private schemaService: SchemaService<JSONSchema7>;
-	private schemaServiceWithEnums: SchemaService<JSONSchema7WithEnums>;
+	private schemaService: SchemaService<JSONSchemaEnumOneOf>;
+	private schemaServiceWithEnums: SchemaService<JSONSchemaV6Enum>;
 	private expandedJSONService: ExpandedJSONService;
 
 	constructor(apiClient: ApiClient, metadataService: MetadataService, storeService: StoreService, lang: Lang) {
@@ -43,7 +43,7 @@ export default class FieldService {
 		return this.convert(master, Format.Schema, lang);
 	}
 
-	masterToSchemaWithEnumsFormat(master: Master, lang?: Lang): Promise<SchemaFormat<JSONSchema7WithEnums>> {
+	masterToSchemaWithEnumsFormat(master: Master, lang?: Lang): Promise<SchemaFormat<JSONSchemaV6Enum>> {
 		return this.convert(master, Format.SchemaWithEnums, lang);
 	}
 
@@ -54,7 +54,7 @@ export default class FieldService {
 	async convert(master: Master, format: Format.Schema, lang?: Lang)
 		: Promise<SchemaFormat>
 	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang)
-		: Promise<SchemaFormat<JSONSchema7WithEnums>>
+		: Promise<SchemaFormat<JSONSchemaV6Enum>>
 	async convert(master: Master, format: Format.JSON, lang?: Lang)
 		: Promise<ExpandedJSONFormat>
 	async convert(master: Master, format: Format, lang?: Lang)

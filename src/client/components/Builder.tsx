@@ -2,7 +2,7 @@ import * as React from "react";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
-import { unprefixProp, JSONSchema, translate } from "../../utils";
+import { unprefixProp, JSONSchemaBuilder, translate } from "../../utils";
 import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnmspc } from "../utils";
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
@@ -389,15 +389,15 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						const getSchemaForProperty = (property: PropertyModel) => {
 							switch (property.range[0]) {
 							case PropertyRange.String:
-								return JSONSchema.String();
+								return JSONSchemaBuilder.String();
 							case PropertyRange.Boolean:
-								return JSONSchema.Boolean();
+								return JSONSchemaBuilder.Boolean();
 							case PropertyRange.Int:
-								return JSONSchema.Integer();
+								return JSONSchemaBuilder.Integer();
 							case PropertyRange.PositiveInteger: // TODO validator
-								return JSONSchema.Number();
+								return JSONSchemaBuilder.Number();
 							case PropertyRange.DateTime: // TODO datetime uiSchema
-								return JSONSchema.String();
+								return JSONSchemaBuilder.String();
 							default:
 								throw new Error("Unknown property range");
 							}

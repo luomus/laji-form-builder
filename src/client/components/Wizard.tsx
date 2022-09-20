@@ -4,7 +4,7 @@ import _LajiForm from "laji-form/lib/components/LajiForm";
 import { FormJSONEditor, HasChildren, Spinner, Stylable, SubmitButton } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult } from "../../model";
-import { JSONSchema } from "../../utils";
+import { JSONSchemaBuilder } from "../../utils";
 import { classNames, gnmspc, nmspc } from "../utils";
 import { translate as translateKey } from "laji-form/lib/utils";
 import { ButtonProps, ButtonGroupProps } from "../themes/theme";
@@ -190,10 +190,10 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 	const {translations} = React.useContext(Context);
 	const submitRef = React.useRef<_LajiForm>(null);
 	const [saveOnSubmit, setSubmitType] = React.useState<boolean>(false);
-	const schema = JSONSchema.object({
-		name: JSONSchema.String({title: translations["Wizard.databank.form.name"]}),
-		collectionID: JSONSchema.String({title: translations["Wizard.databank.form.collectionID"]}),
-		primary: JSONSchema.Boolean({title: translations["Wizard.databank.form.primary"], default: true})
+	const schema = JSONSchemaBuilder.object({
+		name: JSONSchemaBuilder.String({title: translations["Wizard.databank.form.name"]}),
+		collectionID: JSONSchemaBuilder.String({title: translations["Wizard.databank.form.collectionID"]}),
+		primary: JSONSchemaBuilder.Boolean({title: translations["Wizard.databank.form.primary"], default: true})
 	}, {required: ["name", "collectionID"]});
 	const uiSchema = {
 		primary: {
