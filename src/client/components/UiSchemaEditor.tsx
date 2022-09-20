@@ -10,12 +10,12 @@ import {
 import { parseJSONPointer, JSONSchemaBuilder } from "../../utils";
 import LajiForm from "./LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
-import LajiFormTitle from "laji-form/lib/components/fields/TitleField";
+import LajiFormTitle from "laji-form/lib/components/templates/TitleField";
 import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions,
 	isEmptyString, immutableDelete } from "laji-form/lib/utils";
 import { JSONEditor } from "./components";
 import { Context } from "./Context";
-import { FieldProps } from "@rjsf/core";
+import { FieldProps } from "laji-form/lib/components/LajiForm";
 
 const PREFIX = "$";
 
@@ -369,7 +369,7 @@ export const TextareaEditorField = (props: FieldProps) => {
 			: value)
 	)), [_onChange, _lajiFormId]);
 	const { minRows, maxRows, rows } = getUiOptions(props.uiSchema);
-	const {Label} = props.formContext;
+	const Label = props.formContext.Label as any;
 	return (
 		<React.Fragment>
 			<Label label={label} />
@@ -395,6 +395,7 @@ const UiFieldEditor = (props: any) => {
 };
 
 export const EditorLajiForm = (props: any) => {
-	const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix, TitleField: TitleWithoutPrefix };
-	return <LajiForm fields={fields} {...props} />;
+	const fields = { TextareaEditorField, UiFieldEditor, Label: LabelWithoutPrefix };
+	const templates = { TitleFieldTemplate: TitleWithoutPrefix };
+	return <LajiForm fields={fields} templates={templates} {...props} />;
 };

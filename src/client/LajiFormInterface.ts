@@ -1,6 +1,8 @@
 import memoize from "memoizee";
 import LajiForm from "laji-form/lib/components/LajiForm";
-import RJSF, { Field, Widget } from "@rjsf/core";
+import RJSF from "@rjsf/core";
+import validator from "@rjsf/validator-ajv6";
+import { Field, Widget } from "@rjsf/utils";
 import { getComponentPropTypes, propTypesToSchema } from "./utils";
 
 class _LajiFormInterface {
@@ -13,7 +15,8 @@ class _LajiFormInterface {
 			schema: {},
 			uiSchema: {},
 			fields: lajiForm.getFields(),
-			widgets: lajiForm.getWidgets()
+			widgets: lajiForm.getWidgets(),
+			validator
 		})as any).getRegistry();
 	})
 

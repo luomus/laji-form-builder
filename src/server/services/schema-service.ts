@@ -3,7 +3,7 @@ import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSc
 	JSONSchemaObject, JSONSchemaV6Enum, Lang, Master, PropertyModel, SchemaFormat } from "../../model";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchemaBuilder, multiLang, reduceWith, unprefixProp } from "../../utils";
-import * as rjsf from "@rjsf/core";
+import { getDefaultFormState } from "laji-form/lib/utils";
 import merge from "deepmerge";
 import ConverterService from "./converter-service";
 import ApiClient from "../../api-client";
@@ -121,7 +121,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 			...schemaFormat,
 			options: {
 				...schemaFormat.options,
-				prepopulatedDocument: rjsf.utils.getDefaultFormState(
+				prepopulatedDocument: getDefaultFormState(
 					schemaFormat.schema as any,
 					merge((prepopulatedDocument || {}), {
 						gatherings: [{

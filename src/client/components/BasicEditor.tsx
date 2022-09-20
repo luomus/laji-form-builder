@@ -7,7 +7,7 @@ import { Context } from "./Context";
 import LajiForm from "./LajiForm";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { PropertyModel, PropertyRange, PropertyContext, Field } from "../../model";
+import { PropertyModel, PropertyContext, Field } from "../../model";
 import { CancellablePromise, detectChangePaths, makeCancellable } from "../utils";
 
 interface BasicEditorState {
@@ -68,7 +68,10 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 					_enumNames.push(`${prop.property} (${prop.label})`);
 					return [_enums, _enumNames];
 				}, [[], []]);
-			const schema = JSONSchemaBuilder.enu({enum: enums, enumNames}, {title: this.context.translations.AddProperty});
+			const schema = JSONSchemaBuilder.enu(
+				{enum: enums, enumNames},
+				{title: this.context.translations.AddProperty}
+			);
 			return (
 				<LajiForm
 					key={this.state.lajiFormToucher}
@@ -132,7 +135,8 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			|| type === "integer" && "Integer"
 			|| type;
 
-		const maybePrimitiveDefault = (JSONSchemaBuilder as any)[schemaTypeToJSONSchemaUtilType(this.props.schema.type)]?.();
+		const JSB = (JSONSchemaBuilder as any);
+		const maybePrimitiveDefault = JSB[schemaTypeToJSONSchemaUtilType(this.props.schema.type)]?.();
 		const _default = typeof maybePrimitiveDefault !== "function"
 			? maybePrimitiveDefault
 			: JSONSchemaBuilder.object({});
