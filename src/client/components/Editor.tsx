@@ -39,6 +39,7 @@ export interface EditorProps extends Stylable, Classable {
 	saving?: boolean;
 	documentFormVisible: boolean;
 	errorMsg?: string;
+	onRemountLajiForm?: () => void;
 }
 
 export interface EditorState {
@@ -128,7 +129,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               containerRef={this.containerRef}
 				               saving={this.props.saving}
 											 openJSONEditor={this.openJSONEditor}
-				               documentFormVisible={this.props.documentFormVisible} />
+				               documentFormVisible={this.props.documentFormVisible}
+				               onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
 			</div>
 		);
@@ -512,6 +514,7 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	saving?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
+	onRemountLajiForm?: () => void;
 }
 
 const toolbarNmspc = nmspc("editor-toolbar");
@@ -530,9 +533,11 @@ const EditorToolbar = ({
 	saving,
 	containerRef,
 	documentFormVisible,
-	openJSONEditor
+	openJSONEditor,
+	onRemountLajiForm
 }: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
+	const {Glyphicon} = React.useContext(Context).theme;
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser onChange={onLangChange} />
@@ -540,6 +545,9 @@ const EditorToolbar = ({
 			            onSelectedField={onSelectedField}
 			            onSelectedOptions={onSelectedOptions}
 			            containerRef={containerRef} />
+			{onRemountLajiForm && <Button onClick={onRemountLajiForm} small>
+				<Glyphicon glyph="refresh"  />
+			</Button>}
 			<Button onClick={openJSONEditor} small>JSON</Button>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} documentFormVisible={documentFormVisible} />

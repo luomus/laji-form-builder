@@ -136,10 +136,16 @@ const formService = new FormService(
 		const propsForTestEnv = {
 			className: lang
 		};
+		const [key, setKey] = React.useState(0);
+
+		const onRemountLajiForm =  React.useCallback(() => {
+			setKey(key + 1);
+		}, [key]);
 
 		return (
 			<React.Fragment>
-				<LajiForm {...form}
+				<LajiForm key={key}
+				          {...form}
 				          {...propsForTestEnv}
 				          lang={lang}
 				          formData={formData}
@@ -160,6 +166,7 @@ const formService = new FormService(
 												 allowList={true}
 				                 onSelected={onSelected}
 				                 notifier={notifier}
+				                 onRemountLajiForm={onRemountLajiForm}
 				/>
 			</React.Fragment>
 		);

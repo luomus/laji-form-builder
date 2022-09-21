@@ -28,6 +28,7 @@ export interface BuilderProps {
 	formApiClient?: ApiClient;
 	allowList?: boolean;
 	onSelected?: (id: string) => void;
+	onRemountLajiForm?: () => void;
 }
 export interface BuilderState {
 	id?: string;
@@ -230,6 +231,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				documentFormVisible={this.props.documentFormVisible ?? true}
 				className={gnmspc("")}
 				errorMsg={errorMsg}
+				onRemountLajiForm={this.props.onRemountLajiForm}
 			/>
 		);
 	}
