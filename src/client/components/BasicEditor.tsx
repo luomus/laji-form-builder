@@ -7,7 +7,7 @@ import { Context } from "./Context";
 import LajiForm from "./LajiForm";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { PropertyModel, PropertyContext, Field } from "../../model";
+import { PropertyModel, PropertyContext, Field, JSONSchema } from "../../model";
 import { CancellablePromise, detectChangePaths, makeCancellable } from "../utils";
 
 interface BasicEditorState {
@@ -140,13 +140,13 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		const _default = typeof maybePrimitiveDefault !== "function"
 			? maybePrimitiveDefault
 			: JSONSchemaBuilder.object({});
-		const optionsProps: any = {
+		const optionsProps: Record<string, JSONSchema> = {
 			excludeFromCopy: JSONSchemaBuilder.Boolean(),
 			default: _default
 		};
-		const {enum: _enum, enumNames} = this.props.schema;
-		if (this.props.schema.enum) {
-			const list = JSONSchemaBuilder.array(JSONSchemaBuilder.enu({enum: _enum, enumNames}), {uniqueItems: true});
+		const {oneOf} = this.props.schema;
+		if (oneOf) {
+			const list = JSONSchemaBuilder.array(JSONSchemaBuilder.String({oneOf}), {uniqueItems: true});
 			optionsProps.whitelist = list;
 			optionsProps.blacklist = list;
 		}
@@ -158,7 +158,9 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		const itemUiSchema = { "ui:field": "TextareaEditorField", "ui:options": { minRows: 5 } };
 		const uiSchema: any = {
 			validators: itemUiSchema,
-			warnings: itemUiSchema
+			warnings: itemUiSchema,
+			excludeFromCopy: {},
+			default: {}
 		};
 		if ((schema as any)?.properties.options.properties.default.type === "object") {
 			uiSchema.options = {default: itemUiSchema};
