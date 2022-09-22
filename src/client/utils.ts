@@ -27,7 +27,7 @@ export const nmspc = (_nmspc?: string) => (s?: string) =>
  *
  * Example:
  * gnmspc(""); // returns "ljb"
- * gnmspc("foo"); // returns "ljb-local-foo"
+ * gnmspc("foo"); // returns "ljb-foo"
  **/
 export const gnmspc  = nmspc();
 
