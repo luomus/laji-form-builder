@@ -674,11 +674,6 @@ const Highlighter = ({highlightedElem, active, onElemHighlighted}
 	: {highlightedElem?: Element, active?: boolean, onElemHighlighted: (e: Element) => void}) => {
 	const ref = React.useRef<HTMLDivElement>(null);
 	const highlighter = ref.current;
-	if (highlighter) {
-		highlighter.className = gnmspc("picker-highlighter");
-		highlighter.style.position = "absolute";
-		highlighter.style.zIndex = "1039";
-	}
 	const onMouseMove = React.useCallback(({clientX, clientY}: MouseEvent) => {
 		const elems = document.elementsFromPoint(clientX, clientY);
 		onElemHighlighted(highlighter && elems[0] === highlighter ? elems[1] : elems[0]);
@@ -720,7 +715,12 @@ const Highlighter = ({highlightedElem, active, onElemHighlighted}
 			highlighter.style.height = height + "px";
 		}
 	}, [highlighter, highlightedElem, top, width, left, height, scrolled]);
-	return createPortal(<div ref={ref} />, document.body);
+	return createPortal(
+		<div ref={ref}
+		     className={gnmspc("picker-highlighter")}
+		     style={{position: "absolute", zIndex: 1039}} />,
+		document.body
+	);
 };
 
 interface EditorChooserProps { 
