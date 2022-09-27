@@ -1,6 +1,6 @@
 import MetadataService from "../../services/metadata-service";
 import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSchema, JSONSchemaEnumOneOf,
-	JSONSchemaObject, JSONSchemaV6Enum, Lang, Master, PropertyModel, SchemaFormat } from "../../model";
+	JSONSchemaObject, JSONSchemaV6Enum, Lang, Master, Property, SchemaFormat } from "../../model";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchemaBuilder, multiLang, reduceWith, unprefixProp } from "../../utils";
 import { getDefaultFormState } from "laji-form/lib/utils";
@@ -30,7 +30,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		this.lang = lang;
 	}
 
-	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: PropertyModel) {
+	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: Property) {
 		const schema = rootField && rootProperty
 			? await this.fieldToSchema({...rootField, fields: master.fields || []}, rootProperty, true)
 			: JSONSchemaBuilder.object();
@@ -52,7 +52,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		);
 	}
 
-	async fieldToSchema(field: Field, property: PropertyModel, isRootProperty = false)
+	async fieldToSchema(field: Field, property: Property, isRootProperty = false)
 	: Promise<JSONSchema<T>> {
 		const {fields = []} = field;
 
@@ -152,7 +152,7 @@ const optionsToSchema = <T extends JSONSchema>(schema: T, field: Field) =>
 			schema)
 		: schema;
 
-const addTitle = (property: PropertyModel, lang: Lang, isRootProperty = false) => (schema: any, field: Field) => {
+const addTitle = (property: Property, lang: Lang, isRootProperty = false) => (schema: any, field: Field) => {
 	const title = isRootProperty
 		? undefined
 		: (field.label
@@ -183,14 +183,14 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaObject["properties"])
 	return JSONSchemaBuilder.object(properties, {required});
 };
 
-const mapMaxOccurs = ({maxOccurs}: PropertyModel) =>
+const mapMaxOccurs = ({maxOccurs}: Property) =>
 	<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum)>(schema: JSONSchema<T>) =>
 		maxOccurs === "unbounded" ? JSONSchemaBuilder.array(schema) : schema;
 
 const stringNumberLargerThan = (value: string, largerThan: number) =>
 	!isNaN(parseInt(value)) && parseInt(value) > largerThan;
 
-const addRequireds = (properties: Record<string, PropertyModel>) =>
+const addRequireds = (properties: Record<string, Property>) =>
 	<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum)>(schema: JSONSchemaObject<T>) =>
 		Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
 			const property = properties[unprefixProp(propertyName)];

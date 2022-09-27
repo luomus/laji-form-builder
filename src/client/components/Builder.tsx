@@ -7,7 +7,7 @@ import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnm
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { PropertyModel, PropertyRange, Lang, Master, SchemaFormat, Field } from "../../model";
+import { Property, PropertyRange, Lang, Master, SchemaFormat, Field } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
@@ -388,7 +388,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 								: field
 							);
 						};
-						const getSchemaForProperty = (property: PropertyModel) => {
+						const getSchemaForProperty = (property: Property) => {
 							switch (property.range[0]) {
 							case PropertyRange.String:
 								return JSONSchemaBuilder.String();
@@ -404,7 +404,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 								throw new Error("Unknown property range");
 							}
 						};
-						const addSchemaField = (schema: any, path: string[], property: PropertyModel): any => {
+						const addSchemaField = (schema: any, path: string[], property: Property): any => {
 							const [next, ...remaining] = path;
 							const propName = next || unprefixProp(property.property);
 							const schemaForNext = !next
@@ -623,7 +623,7 @@ export interface FieldDeleteEvent extends FieldEvent {
 }
 export interface FieldAddEvent extends FieldEvent {
 	op: "add";
-	value: PropertyModel;
+	value: Property;
 }
 export interface FieldUpdateEvent extends FieldEvent {
 	op: "update";

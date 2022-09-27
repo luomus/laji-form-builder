@@ -7,11 +7,11 @@ import { Context } from "./Context";
 import LajiForm from "./LajiForm";
 import { Spinner } from "./components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { PropertyModel, PropertyContext, Field, JSONSchema } from "../../model";
+import { Property, PropertyContext, Field, JSONSchema } from "../../model";
 import { CancellablePromise, detectChangePaths, makeCancellable } from "../utils";
 
 interface BasicEditorState {
-	childProps?: PropertyModel[] | false;
+	childProps?: Property[] | false;
 	// Resets LajiForm so we get empty formData upon change.
 	lajiFormToucher: number;
 }
@@ -20,7 +20,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	documentTree: any;
 	// TODO why is void required?
 	propertyContextPromise: CancellablePromise<PropertyContext | void>;
-	propertyChildsPromise: CancellablePromise<PropertyModel[] | void>;
+	propertyChildsPromise: CancellablePromise<Property[] | void>;
 
 	static contextType = Context;
 	context!: React.ContextType<typeof Context>;
@@ -90,7 +90,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		if (!property) {
 			return;
 		}
-		const propertyModel = (this.state.childProps as PropertyModel[])
+		const propertyModel = (this.state.childProps as Property[])
 			.find(childProp => childProp.property === property);
 		if (propertyModel) {
 			this.setState({lajiFormToucher: this.state.lajiFormToucher + 1});
@@ -98,7 +98,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		}
 	}
 
-	propertyModelToField(property?: PropertyModel) {
+	propertyModelToField(property?: Property) {
 		if (!property) {
 			throw new Error("Tried to add nonexisting property");
 		}
@@ -122,7 +122,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		);
 	}
 
-	getProperties = (path: string): Promise<PropertyModel[]> =>
+	getProperties = (path: string): Promise<Property[]> =>
 		this.getPropertyContextForPath(path)
 			.then(context => this.context.metadataService.getProperties(context, this.context.lang));
 

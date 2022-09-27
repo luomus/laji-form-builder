@@ -1,4 +1,4 @@
-import { CommonFormat, ExpandedMaster, Field, PropertyModel } from "../../model";
+import { CommonFormat, ExpandedMaster, Field, Property } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import { unprefixProp } from "../../utils";
 
@@ -9,12 +9,12 @@ export default abstract class ConverterService<T extends CommonFormat> {
 		this.metadataService = metadataService;
 	}
 
-	abstract convert(master: ExpandedMaster, rootField?: Field, rootProperty?: PropertyModel): Promise<T>;
+	abstract convert(master: ExpandedMaster, rootField?: Field, rootProperty?: Property): Promise<T>;
 
-	async getProperties(fields: Field[], property: PropertyModel) {
+	async getProperties(fields: Field[], property: Property) {
 		return fields
 			? (await this.metadataService.getProperties(property.range[0]))
-				.reduce<Record<string, PropertyModel>>((propMap, prop) => {
+				.reduce<Record<string, Property>>((propMap, prop) => {
 					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
 						propMap[unprefixProp(prop.property)] = prop;
 					}

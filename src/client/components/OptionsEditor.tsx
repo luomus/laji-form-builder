@@ -3,7 +3,7 @@ import LajiForm from "./LajiForm";
 import { Context } from "./Context";
 import { Spinner, Classable, Stylable, Clickable } from "./components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "./Builder";
-import { PropertyModel, SchemaFormat, Master, PropertyRange, Lang } from "../../model";
+import { Property, SchemaFormat, Master, PropertyRange, Lang } from "../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../utils";
 import { detectChangePaths, gnmspc  } from "../utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
@@ -11,7 +11,7 @@ import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
 import { updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 import MetadataService from "../../services/metadata-service";
 
-export const mapRangeToUiSchema = async (property: PropertyModel, metadataService: MetadataService, lang: Lang) => {
+export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
 	const range = property.range[0];
 
 	if (range === "MY.document" || range === PropertyRange.keyValue) {
@@ -31,7 +31,7 @@ export const mapRangeToUiSchema = async (property: PropertyModel, metadataServic
 const mapComment = (comment: string | undefined, uiSchema: any) => ({...uiSchema, "ui:help": comment});
 
 export const mapPropertyToUiSchema =
-	async (property: PropertyModel, metadataService: MetadataService, lang: Lang)
+	async (property: Property, metadataService: MetadataService, lang: Lang)
 	: Promise<SchemaFormat> =>
 		mapComment(multiLang(property.comment, lang), await mapRangeToUiSchema(property, metadataService, lang));
 

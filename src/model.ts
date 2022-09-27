@@ -12,7 +12,7 @@ export enum PropertyRange {
 	Decimal = "xsd:decimal"
 }
 
-export type PropertyModel = {
+export type Property = {
 	property: string;
 	label: Partial<Record<Lang, string>>;
 	range: (PropertyRange | string)[];

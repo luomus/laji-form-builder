@@ -1,6 +1,6 @@
 import memoize, { Memoized } from "memoizee";
 import ApiClient from "../api-client";
-import { PropertyModel, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, JSONSchemaV6Enum,
+import { Property, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, JSONSchemaV6Enum,
 	JSONSchemaEnumOneOf } from "../model";
 import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } from "../utils";
 
@@ -42,11 +42,11 @@ export default class MetadataService {
 		fetchJSON<{"@context": Record<string, PropertyContext>}>(`https://schema.laji.fi/context/${context}.jsonld`)
 			.then(result => result["@context"]))
 
-	getProperties = this.cache(async (property: PropertyContext | string, lang = "multi"): Promise<PropertyModel[]> => {
+	getProperties = this.cache(async (property: PropertyContext | string, lang = "multi"): Promise<Property[]> => {
 		return (await this.apiClient.fetchJSON(
 			`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
 			{lang})
-		).results as PropertyModel[];
+		).results as Property[];
 	})
 
 	getRange = this.cache((property: PropertyContext | string): Promise<Range[]> => 
@@ -72,16 +72,16 @@ export default class MetadataService {
 	isAltRange = async (range: string) => !!(await this.getAllRanges())[range];
 
 	getJSONSchemaFromProperty<T extends JSONSchema>
-	(property: PropertyModel): Promise<T>;
+	(property: Property): Promise<T>;
 	getJSONSchemaFromProperty<T extends JSONSchema>
-	(property: PropertyModel, useEnums: false): Promise<T>;
+	(property: Property, useEnums: false): Promise<T>;
 	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaV6Enum>>
-	(property: PropertyModel, useEnums: true): Promise<T>;
+	(property: Property, useEnums: true): Promise<T>;
 	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>>
-	(property: PropertyModel, useEnums: boolean): Promise<T>
+	(property: Property, useEnums: boolean): Promise<T>
 	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>>
-	(property: PropertyModel, useEnums = false): Promise<T> {
-		const mapRangeToSchema = async (property: PropertyModel): Promise<T> => {
+	(property: Property, useEnums = false): Promise<T> {
+		const mapRangeToSchema = async (property: Property): Promise<T> => {
 			const range = property.range[0];
 			const isRange = await this.isAltRange(range);
 			if (isRange) {
@@ -142,20 +142,20 @@ export default class MetadataService {
 			return schema as T;
 		};
 
-		const mapMaxOccurs = (schema: T, {maxOccurs}: PropertyModel) =>
+		const mapMaxOccurs = (schema: T, {maxOccurs}: Property) =>
 			maxOccurs === "unbounded"
 				? JSONSchemaBuilder.array(schema)
 				: schema;
 
-		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: PropertyModel) => 
+		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: Property) => 
 			(await this.isAltRange(range[0])) && maxOccurs === "unbounded"
 				? {...schema, uniqueItems: true}
 				: schema;
 
-		const mapLabel = (schema: T, {label}: PropertyModel) =>
+		const mapLabel = (schema: T, {label}: Property) =>
 			({...schema, title: multiLang(label, this.lang)});
 
-		const mapPropertyToJSONSchema = (property: PropertyModel): Promise<T> =>
+		const mapPropertyToJSONSchema = (property: Property): Promise<T> =>
 			reduceWith(
 				mapRangeToSchema(property),
 				property, 
@@ -164,7 +164,7 @@ export default class MetadataService {
 				mapLabel
 			);
 
-		const propertiesToSchema = async (modelProperties: PropertyModel[]): Promise<T> =>
+		const propertiesToSchema = async (modelProperties: Property[]): Promise<T> =>
 			JSONSchemaBuilder.object((
 				await Promise.all(modelProperties.map(
 					async m => ({property: m.shortName, schema: (await mapPropertyToJSONSchema(m))})

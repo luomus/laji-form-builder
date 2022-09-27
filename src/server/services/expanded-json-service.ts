@@ -1,4 +1,4 @@
-import { CompleteTranslations, ExpandedField, ExpandedJSONFormat, ExpandedMaster, Field, Lang, LANGS, PropertyModel,
+import { CompleteTranslations, ExpandedField, ExpandedJSONFormat, ExpandedMaster, Field, Lang, LANGS, Property,
 	PropertyRange } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import { dictionarify, reduceWith } from "../../utils";
@@ -21,7 +21,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		this.lang = lang;
 	}
 
-	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: PropertyModel) {
+	async convert(master: ExpandedMaster, rootField?: Field, rootProperty?: Property) {
 		if (!rootField || !rootProperty) {
 			return master as ExpandedJSONFormat;
 		}
@@ -47,7 +47,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 	/**
 	 * Returns the expanded fields and mutates the translations to have the alt labels.
 	 */
-	async expandField(field: Field, property: PropertyModel, translations: CompleteTranslations)
+	async expandField(field: Field, property: Property, translations: CompleteTranslations)
 	: Promise<ExpandedField> {
 		return reduceWith(field, property, 
 			this.expandChildren(translations),
@@ -60,7 +60,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		);
 	}
 
-	expandChildren = (translations: CompleteTranslations) => async (field: Field, property: PropertyModel) => {
+	expandChildren = (translations: CompleteTranslations) => async (field: Field, property: Property) => {
 		if (!property.isEmbeddable || !field.fields) {
 			return field;
 		}
@@ -76,7 +76,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		)};
 	}
 
-	mapRange = (translations: CompleteTranslations) => async (field: Field, property: PropertyModel)
+	mapRange = (translations: CompleteTranslations) => async (field: Field, property: Property)
 	: Promise<Omit<Field, "type"> & Pick<ExpandedField, "type">> => {
 		const range = property.range[0];
 		if (await this.metadataService.isAltRange(range)) {
@@ -113,7 +113,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		}
 	}
 
-	async mapAltRange(field: Field, property: PropertyModel, translations: CompleteTranslations)
+	async mapAltRange(field: Field, property: Property, translations: CompleteTranslations)
 	: Promise<Omit<Field, "type"> & Pick<ExpandedField, "type">> {
 		const range = await this.metadataService.getRange(property.range[0]);
 		return {
@@ -138,12 +138,12 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 	}
 }
 
-const mapEmbeddable = (field: ExpandedField, property: PropertyModel) => 
+const mapEmbeddable = (field: ExpandedField, property: Property) => 
 	property.isEmbeddable
 		? {...field, type: "fieldset"}
 		: field;
 
-const mapMaxOccurs = (field: ExpandedField, property: PropertyModel) => 
+const mapMaxOccurs = (field: ExpandedField, property: Property) => 
 	property.maxOccurs === "unbounded"
 		? {
 			...field,
@@ -191,7 +191,7 @@ const filterList = (listName: "whitelist" | "blacklist", white = true) => (field
 const filterWhitelist = filterList("whitelist");
 const filterBlacklist = filterList("blacklist", false);
 
-const addLabel = (translations: CompleteTranslations) => (field: ExpandedField, property: PropertyModel) => {
+const addLabel = (translations: CompleteTranslations) => (field: ExpandedField, property: Property) => {
 	if (!("label" in field)) {
 		const labelKey = `@${field.name}`;
 		LANGS.forEach(lang => {

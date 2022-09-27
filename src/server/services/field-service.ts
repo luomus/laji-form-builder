@@ -1,7 +1,7 @@
 import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
-import { Field, Lang, Master, PropertyModel, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
+import { Field, Lang, Master, Property, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
 	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum
 } from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
@@ -95,7 +95,7 @@ export default class FieldService {
 		return {name: unprefixProp(getPropertyContextName(master.context))};
 	}
 
-	private getRootProperty(rootField: Field): PropertyModel {
+	private getRootProperty(rootField: Field): Property {
 		return {
 			property: rootField.name,
 			isEmbeddable: true,
@@ -217,7 +217,7 @@ export default class FieldService {
 					return parentMap;
 				}, {} as Record<string, string[]>);
 			};
-			const recursively = async (field: Field, property: PropertyModel) => {
+			const recursively = async (field: Field, property: Property) => {
 				const range = property.range[0];
 				if (await this.metadataService.isAltRange(range)) {
 					const rangeModel = await this.metadataService.getRange(range);
@@ -474,7 +474,7 @@ const mapFieldType = (type?: string) => {
 	}
 };
 
-export const mapUnknownFieldWithTypeToProperty = (field: Field): PropertyModel => {
+export const mapUnknownFieldWithTypeToProperty = (field: Field): Property => {
 	if (!field.type) {
 		throw new UnprocessableError(`Bad field ${field.name}`);
 	}
