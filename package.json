@@ -45,7 +45,6 @@
     "react": "^17.0.2",
     "react-bootstrap": "^0.33.1",
     "react-dom": "^17.0.2",
-    "react-jsonschema-form": "git+https://git@github.com/olzraiti/react-jsonschema-form.git#0443d2f7ff0d9e9eb5ead2de7c8e5bfcdc01d634",
     "react-spinner": "^0.2.7"
   },
   "devDependencies": {
