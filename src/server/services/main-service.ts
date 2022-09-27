@@ -7,7 +7,9 @@ import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaste
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
 
-// Intended to be used for checked errors, which the controller should return with 422.
+/**
+ * Intended to be used for checked errors, which the controller should return with 422.
+ **/
 export class UnprocessableError extends Error {
 	constructor(message: string) {
 		super(message);
@@ -26,13 +28,13 @@ const apiClient = new ApiClient(
 	DEFAULT_LANG
 );
 
-export const exposedProps: Record<keyof FormListing, true> = dictionarify([
+export const exposedProps = dictionarify<keyof FormListing>([
 	"id", "logo", "title", "description", "shortDescription",
 	"supportedLanguage", "category", "collectionID", "options",
 	"name"
 ]);
 
-export const exposedOptions: Record<keyof FormListing["options"], true> = dictionarify([
+export const exposedOptions = dictionarify<keyof FormListing["options"]>([
 	"allowExcel",
 	"allowTemplate",
 	"dataset",
@@ -61,6 +63,7 @@ const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
 		return copy;
 	}, {} as T);
 };
+
 const addDefaultSupportedLanguage = (f: FormListing): FormListing => f.supportedLanguage
 	? f
 	: {...f, supportedLanguage: ["en", "fi", "sv"]};
