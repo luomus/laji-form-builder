@@ -51,14 +51,10 @@ export default class FieldService {
 		return this.convert(master, Format.JSON, lang);
 	}
 
-	async convert(master: Master, format: Format.Schema, lang?: Lang)
-		: Promise<SchemaFormat>
-	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang)
-		: Promise<SchemaFormat<JSONSchemaV6Enum>>
-	async convert(master: Master, format: Format.JSON, lang?: Lang)
-		: Promise<ExpandedJSONFormat>
-	async convert(master: Master, format: Format, lang?: Lang)
-		: Promise<SchemaFormat | ExpandedJSONFormat> {
+	async convert(master: Master, format: Format.Schema, lang?: Lang) : Promise<SchemaFormat>
+	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang) : Promise<SchemaFormat<JSONSchemaV6Enum>>
+	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
+	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat> {
 		const expandedMaster = await this.expandMaster(master, lang);
 		const rootField = expandedMaster.fields
 			? this.getRootField(expandedMaster)
@@ -209,7 +205,7 @@ export default class FieldService {
 			: master;
 	}
 
-	private addExtra <T>(field: Field) {
+	private addExtra<T>(field: Field) {
 		return async (input: T) => {
 			const toParentMap = (range: Range[]) => {
 				return range.reduce((parentMap, item) => {
