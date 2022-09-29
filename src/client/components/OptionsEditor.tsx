@@ -18,7 +18,7 @@ export const mapRangeToUiSchema = async (property: Property, metadataService: Me
 		return {"ui:field": "TextareaEditorField"};
 	}
 	if (property.isEmbeddable) {
-		const properties = await metadataService.getProperties(range);
+		const properties = await metadataService.getPropertiesForEmbeddedProperty(range);
 		const propertiesUiSchemas = await Promise.all(
 			properties.map(p => mapPropertyToUiSchema(p, metadataService, lang))
 		);

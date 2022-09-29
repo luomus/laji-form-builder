@@ -129,6 +129,7 @@ export default class MainService {
 				|| format === Format.SchemaWithEnums
 				|| format === Format.JSON && expand
 			);
+
 			return reduceWith(form, lang,
 				(master, lang): RemoteMaster | Promise<SupportedFormat> => isConvertable
 					? this.fieldService.convert(master, format as any, lang)

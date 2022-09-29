@@ -16,8 +16,13 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 	lang: Lang;
 	useEnums = false;
 
-	constructor(metadataService: MetadataService, apiClient: ApiClient, lang: Lang, useEnums = false) {
-		super(metadataService);
+	constructor(
+		metadataService: MetadataService,
+		apiClient: ApiClient,
+		lang: Lang,
+		useEnums = false
+	) {
+		super();
 		this.metadataService = metadataService;
 		this.apiClient = apiClient;
 		this.lang = lang;
@@ -58,7 +63,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 
 		let transformed: JSONSchema<T>;
 		if (property.isEmbeddable) {
-			const properties = await this.getProperties(fields, property);
+			const properties = await this.metadataService.getProperties(fields, property);
 
 			const schemaProperties = await Promise.all(
 				fields.map(async field => {
@@ -100,7 +105,6 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 			addTitle(property, this.lang, isRootProperty),
 			addDefault
 		);
-
 	}
 
 	private async prepopulate<T extends Pick<SchemaFormat, "schema" | "options">>(schemaFormat: T) {

@@ -1,7 +1,7 @@
 import memoize, { Memoized } from "memoizee";
 import ApiClient from "../api-client";
 import { Property, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, JSONSchemaV6Enum,
-	JSONSchemaEnumOneOf } from "../model";
+	JSONSchemaEnumOneOf, Field } from "../model";
 import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } from "../utils";
 
 export default class MetadataService {
@@ -42,12 +42,25 @@ export default class MetadataService {
 		fetchJSON<{"@context": Record<string, PropertyContext>}>(`https://schema.laji.fi/context/${context}.jsonld`)
 			.then(result => result["@context"]))
 
-	getProperties = this.cache(async (property: PropertyContext | string, lang = "multi"): Promise<Property[]> => {
-		return (await this.apiClient.fetchJSON(
-			`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
-			{lang})
-		).results as Property[];
-	})
+	getPropertiesForEmbeddedProperty = this.cache(
+		async (property: PropertyContext | string, lang = "multi"): Promise<Property[]> => {
+			return (await this.apiClient.fetchJSON(
+				`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
+				{lang})
+			).results as Property[];
+		})
+
+	async getProperties(fields: Field[], property: Property) {
+		return fields
+			? (await this.getPropertiesForEmbeddedProperty(property.range[0]))
+				.reduce<Record<string, Property>>((propMap, prop) => {
+					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
+						propMap[unprefixProp(prop.property)] = prop;
+					}
+					return propMap;
+				}, {})
+			: {};
+	}
 
 	getRange = this.cache((property: PropertyContext | string): Promise<Range[]> => 
 		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
@@ -136,7 +149,7 @@ export default class MetadataService {
 				if (!property.isEmbeddable && unprefixProp(property.property) !== "geometry") {
 					schema = JSONSchemaBuilder.String();
 				} else {
-					return propertiesToSchema(await this.getProperties(range));
+					return propertiesToSchema(await this.getPropertiesForEmbeddedProperty(range));
 				}
 			}
 			return schema as T;
@@ -147,7 +160,7 @@ export default class MetadataService {
 				? JSONSchemaBuilder.array(schema)
 				: schema;
 
-		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: Property) => 
+		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: Property) =>
 			(await this.isAltRange(range[0])) && maxOccurs === "unbounded"
 				? {...schema, uniqueItems: true}
 				: schema;

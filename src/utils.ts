@@ -75,8 +75,6 @@ interface Reducer<T, R, P> {
 	(value: T, reduceWith: P): R | Promise<R>;
 }
 
-export const bypass = <T>(any: T): T => any;
-
 /**
  * Reduces an initial value into something else with the given reducer functions.
  * An additional value can be given, which will be provided for each reducer function as the 2nd param.
@@ -109,6 +107,8 @@ function reduceWith<T, P>(initialValue: T | Promise<T>, reduceWith: P, ...reduce
 /* eslint-enable max-len */
 
 export { reduceWith }; 
+
+export const bypass = <T>(any: T): T => any;
 
 export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>
 	!obj ? undefined : (obj[lang] ?? obj["en"]);

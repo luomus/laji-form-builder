@@ -124,7 +124,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	getProperties = (path: string): Promise<Property[]> =>
 		this.getPropertyContextForPath(path)
-			.then(context => this.context.metadataService.getProperties(context, this.context.lang));
+			.then(context => this.context.metadataService.getPropertiesForEmbeddedProperty(context, this.context.lang));
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;

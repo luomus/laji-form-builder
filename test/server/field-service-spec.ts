@@ -1,7 +1,7 @@
 import config from "../../config.json";
 import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
-import { SchemaFormat, Master } from "../../src/model";
+import { SchemaFormat, Master, JSONSchemaObject } from "../../src/model";
 import ApiClient from "../../src/api-client";
 import StoreService from "../../src/server/services/store-service";
 
@@ -428,6 +428,28 @@ describe("fields", () => {
 			it("for json format", async () => {
 				const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
 				expect(Object.keys(jsonFormat.fields?.[0]?.options?.value_options || {}).length).toBe(8);
+			});
+		});
+
+		describe("multiLanguage", async () => {
+			const form = { context: "dataset", fields: [{ name: "datasetName" }] };
+			let jsonFormat: SchemaFormat;
+
+			beforeAll(async () => {
+				jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+			});
+
+			it("is converted into lang object in schema", async () => {
+				const datasetSchema = (jsonFormat.schema as JSONSchemaObject).properties.datasetName;
+				expect((datasetSchema as JSONSchemaObject).properties).toEqual({
+					fi: {type: "string"},
+					sv: {type: "string"},
+					en: {type: "string"}
+				});
+			});
+
+			it("gets 'ui:multiLanguage' property in uiSchema", async () => {
+				expect(jsonFormat.uiSchema.datasetName["ui:multiLanguage"]).toBe(true);
 			});
 		});
 

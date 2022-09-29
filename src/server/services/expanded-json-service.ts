@@ -10,7 +10,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 	lang: Lang;
 
 	constructor(metadataService: MetadataService, lang: Lang) {
-		super(metadataService);
+		super();
 		this.metadataService = metadataService;
 		this.lang = lang;
 		this.expandChildren = this.expandChildren.bind(this);
@@ -64,7 +64,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		if (!property.isEmbeddable || !field.fields) {
 			return field;
 		}
-		const properties = await this.getProperties(field.fields, property);
+		const properties = await this.metadataService.getProperties(field.fields, property);
 		return {...field, fields: await Promise.all(
 			field.fields.map(field => {
 				let prop = properties[field.name];

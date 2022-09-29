@@ -11,6 +11,7 @@ import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
 import ConverterService from "./converter-service";
+import UiSchemaService from "./uischema-service";
 
 export default class FieldService {
 	private apiClient: ApiClient;
@@ -19,6 +20,7 @@ export default class FieldService {
 	private schemaService: SchemaService<JSONSchemaEnumOneOf>;
 	private schemaServiceWithEnums: SchemaService<JSONSchemaV6Enum>;
 	private expandedJSONService: ExpandedJSONService;
+	private uiSchemaService: UiSchemaService;
 
 	constructor(apiClient: ApiClient, metadataService: MetadataService, storeService: StoreService, lang: Lang) {
 		this.apiClient = apiClient;
@@ -27,6 +29,7 @@ export default class FieldService {
 		this.schemaService = new SchemaService(metadataService, apiClient, lang);
 		this.schemaServiceWithEnums = new SchemaService(metadataService, apiClient, lang, true);
 		this.expandedJSONService = new ExpandedJSONService(metadataService, lang);
+		this.uiSchemaService = new UiSchemaService(this.metadataService);
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
 		this.masterToSchemaFormat = this.masterToSchemaFormat.bind(this);
@@ -55,13 +58,16 @@ export default class FieldService {
 	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang) : Promise<SchemaFormat<JSONSchemaV6Enum>>
 	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
 	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat> {
-		const expandedMaster = await this.expandMaster(master, lang);
+		const expandedMaster = await this.expandMaster(master);
+
 		const rootField = expandedMaster.fields
-			? this.getRootField(expandedMaster)
+			? getRootField(expandedMaster)
 			: undefined;
+
 		const rootProperty = rootField
-			? this.getRootProperty(rootField)
+			? getRootProperty(rootField)
 			: undefined;
+
 		let converter: ConverterService<any>;
 		switch (format) {
 		case Format.Schema:
@@ -74,36 +80,25 @@ export default class FieldService {
 			converter = this.expandedJSONService;
 			break;
 		}
-		const converted = await converter.convert(expandedMaster, rootField, rootProperty) as CommonFormat;
-		return reduceWith(converted, undefined, 
+
+		const masterAfterFieldRelatedOperations = reduceWith(expandedMaster, undefined,
+			addDefaultValidators,
+			this.addTaxonSets,
+			rootField ? this.addExtra({...rootField, fields: expandedMaster.fields}) : bypass,
+			master => rootField && rootProperty
+				? this.uiSchemaService.expandUiSchema(master, rootField, rootProperty)
+				: master
+		);
+
+		return reduceWith(masterAfterFieldRelatedOperations, undefined, 
+			master => converter.convert(master, rootField, rootProperty) as Promise<CommonFormat>,
 			(converted) => lang && converted.translations && (lang in converted.translations)
 				? translate(converted, converted.translations[lang]!)
 				: converted,
+			addLanguage(lang),
 			removeTranslations(lang),
 			addEmptyOptions
 		);
-	}
-
-	private getRootField(master: Pick<Master, "context">): Field {
-		if (master.context && master.context.match(/[^.]+\..+/)) {
-			throw new UnprocessableError("Don't use namespace prefix for context");
-		}
-		return {name: unprefixProp(getPropertyContextName(master.context))};
-	}
-
-	private getRootProperty(rootField: Field): Property {
-		return {
-			property: rootField.name,
-			isEmbeddable: true,
-			range: [rootField.name],
-			label: {},
-			shortName: unprefixProp(rootField.name),
-			required: true,
-			minOccurs: "1",
-			maxOccurs: "1",
-			multiLanguage: false,
-			domain: []
-		};
 	}
 
 	linkMaster(master: Master) {
@@ -115,19 +110,11 @@ export default class FieldService {
 		);
 	}
 
-	private async expandMaster(master: Master, lang?: Lang): Promise<ExpandedMaster> {
+	private async expandMaster(master: Master): Promise<ExpandedMaster> {
 		const linkedMaster = await this.linkMaster(master);
 
-		const rootField = linkedMaster.fields
-			? this.getRootField(linkedMaster)
-			: undefined;
-
 		return reduceWith(linkedMaster, undefined,
-			addDefaultValidators,
 			this.applyPatches,
-			this.addTaxonSets,
-			rootField && this.addExtra({...rootField || {}, fields: linkedMaster.fields}) || bypass,
-			addLanguage(lang)
 		);
 	}
 
@@ -205,8 +192,8 @@ export default class FieldService {
 			: master;
 	}
 
-	private addExtra<T>(field: Field) {
-		return async (input: T) => {
+	private addExtra<T extends Record<string, unknown>>(field: Field) {
+		return async (input: T): Promise<T & Pick<Master, "extra">> => {
 			const toParentMap = (range: Range[]) => {
 				return range.reduce((parentMap, item) => {
 					parentMap[item.id] = item.altParent ? [item.altParent] : [];
@@ -222,7 +209,7 @@ export default class FieldService {
 					}
 				} else if (field.fields) {
 					let collectedTrees = {};
-					const properties = await this.metadataService.getProperties(property.range[0]);
+					const properties = await this.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
 					for (const _field of field.fields) {
 						let prop = properties.find(p => unprefixProp(p.property) === _field.name);
 						if (!prop) {
@@ -235,7 +222,7 @@ export default class FieldService {
 				return {};
 			};
 
-			const extra = await recursively(field, this.getRootProperty(field));
+			const extra = await recursively(field, getRootProperty(field));
 			return Object.keys(extra).length ? {...input, extra} : input;
 		};
 	}
@@ -282,12 +269,12 @@ const addLanguage = (language?: Lang) => <T>(obj: T) =>
 		? {...obj, language}
 		: obj;
 
-export const removeTranslations = (language?: Lang) => (schemaFormat: CommonFormat) => {
+export const removeTranslations = <T extends Pick<Master, "translations">>(language?: Lang) => (master: T) => {
 	if (isLang(language)) {
-		const {translations, ..._schemaFormat} = schemaFormat;
-		return _schemaFormat;
+		const {translations, ..._master} = master;
+		return _master;
 	}
-	return schemaFormat;
+	return master;
 };
 
 export const addEmptyOptions = <T extends {options?: CommonFormat["options"]}>(form: T)
@@ -487,3 +474,26 @@ export const mapUnknownFieldWithTypeToProperty = (field: Field): Property => {
 		domain: []
 	};
 };
+
+export const getRootField = (master: Pick<Master, "context">): Field => {
+	if (master.context && master.context.match(/[^.]+\..+/)) {
+		throw new UnprocessableError("Don't use namespace prefix for context");
+	}
+	return {name: unprefixProp(getPropertyContextName(master.context))};
+};
+
+export const getRootProperty = (rootField: Field): Property => {
+	return {
+		property: rootField.name,
+		isEmbeddable: true,
+		range: [rootField.name],
+		label: {},
+		shortName: unprefixProp(rootField.name),
+		required: true,
+		minOccurs: "1",
+		maxOccurs: "1",
+		multiLanguage: false,
+		domain: []
+	};
+};
+
