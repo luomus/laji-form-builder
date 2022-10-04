@@ -119,7 +119,7 @@ export type FieldOptions = {
 
 export type Field = {
 	name: string;
-	type?: "hidden";
+	type?: "hidden" | "string" | "checkbox";
 	required?: boolean;
 	options?: FieldOptions;
 	validators?: any;

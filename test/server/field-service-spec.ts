@@ -334,6 +334,38 @@ describe("fields", () => {
 			});
 		});
 
+		describe("unknown field", () => {
+			describe("with type text -> string", async () => {
+				const form: Master = { fields: [{ name: "unknownField", type: "string" }] };
+
+				it("for schema format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					const {unknownField} = schemaFormat.schema.properties;
+					expect(unknownField.type).toBe("string");
+				});
+
+				it("for json format", async () => {
+					const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
+					expect(jsonFormat.fields?.[0]?.type).toEqual("text");
+				});
+			});
+
+			describe("with type checkbox -> boolean", async () => {
+				const form: Master = { fields: [{ name: "unknownField", type: "checkbox" }] };
+
+				it("for schema format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					const {unknownField} = schemaFormat.schema.properties;
+					expect(unknownField.type).toBe("boolean");
+				});
+
+				it("for json format", async () => {
+					const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
+					expect(jsonFormat.fields?.[0]?.type).toEqual("checkbox");
+				});
+			});
+		});
+
 		describe("geometry -> empty object", () => {
 			const form = { fields: [{ name: "gatherings", fields: [{ name: "geometry" }] }] };
 
