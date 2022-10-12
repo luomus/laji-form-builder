@@ -71,7 +71,7 @@ function isPromise<T>(p: any): p is Promise<T> {
 	return !!p?.then;
 }
 
-interface Reducer<T, R, P> {
+type Reducer<T, R, P>  = {
 	(value: T, reduceWith: P): R | Promise<R>;
 }
 

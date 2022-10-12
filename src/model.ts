@@ -41,10 +41,15 @@ export const isLang = (lang: any): lang is Lang => typeof lang === "string" && L
 export type CompleteTranslations = Record<Lang, Record<string, string>>;
 export type Translations = Partial<CompleteTranslations>
 
+type KnownFormOptions = {
+	prepopulatedDocument?: Record<string, JSONObject>;
+	prepopulateWithInformalTaxonGroups?: string[];
+}
+
 export type CommonFormat = {
 	id?: string;
-	options?: any;
-	title?: string;
+	options?: JSONObject & KnownFormOptions;
+ 	title?: string;
 	logo?: string;
 	description?: string;
 	shortDescription?: string;
@@ -61,8 +66,11 @@ export type FormListing = CommonFormat & {
 }
 
 export type CommonExpanded = CommonFormat & {
-	uiSchema?: any;
+	uiSchema?: JSONObject;
 }
+
+type JSON = string | number | boolean | JSONObject | JSON[];
+export type JSONObject = { [prop: string]: JSON };
 
 export type Master = CommonExpanded & {
 	fields?: (Field | FormExtensionField)[];
@@ -76,10 +84,10 @@ export type Master = CommonExpanded & {
 
 export type SchemaFormat<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum = JSONSchemaEnumOneOf> = CommonExpanded & {
 	schema: JSONSchema<T>;
-	validators: any;
-	warnings: any;
+	validators: Record<string, JSONObject | boolean>;
+	warnings: Record<string, JSONObject | boolean>;
 	excludeFromCopy: string[];
-	uiSchema: any;
+	uiSchema: JSONObject;
 	attributes?: {
 		id: string
 	},
@@ -108,7 +116,7 @@ export function isFormExtensionField(field: Field | FormExtensionField): field i
 
 export type FieldOptions = {
 	excludeFromCopy?: boolean;
-	default?: any;
+	default?: JSON;
 	whitelist?: string[];
 	blacklist?: string[];
 	uniqueItems?: boolean;
@@ -122,8 +130,8 @@ export type Field = {
 	type?: "hidden" | "string" | "checkbox";
 	required?: boolean;
 	options?: FieldOptions;
-	validators?: any;
-	warnings?: any;
+	validators?: Record<string, JSONObject | boolean>;
+	warnings?: Record<string, JSONObject | boolean>;
 	label?: string;
 	fields?: Field[];
 }
@@ -198,19 +206,19 @@ export type JSONSchema<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSON
 	| JSONSchemaString
 	| E;
 
-interface JSONShemaTypeCommon<T, D> {
+type JSONShemaTypeCommon<T, D> = {
 	type: T;
 	default?: D;
 	title?: string;
 }
 
-export interface JSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
-	extends JSONShemaTypeCommon<"object", Record<string, unknown>> {
+export type JSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
+	= JSONShemaTypeCommon<"object", Record<string, unknown>> & {
 	properties: Record<string, JSONSchema<E>>;
 	required?: string[];
 }
 
-export interface JSONSchemaArray extends JSONShemaTypeCommon<"array", unknown[]> {
+export type JSONSchemaArray = JSONShemaTypeCommon<"array", unknown[]> & {
 	items: JSONSchema;
 	uniqueItems?: boolean;
 }
@@ -223,11 +231,11 @@ export type JSONSchemaBoolean = JSONShemaTypeCommon<"boolean", boolean>;
 
 export type JSONSchemaString = JSONShemaTypeCommon<"string", string>;
 
-export interface JSONSchemaEnumOneOf extends JSONSchemaString {
+export type JSONSchemaEnumOneOf = JSONSchemaString & {
 	oneOf: {const: string, title: string}[];
 }
 
-export interface JSONSchemaV6Enum extends JSONSchemaString {
+export type JSONSchemaV6Enum = JSONSchemaString & {
 	enum: string[];
 	enumNames: string[];
 }

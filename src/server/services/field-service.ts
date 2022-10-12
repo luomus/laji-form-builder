@@ -2,7 +2,8 @@ import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, Property, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
-	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum
+	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum,
+	JSONObject
 } from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
 import merge from "deepmerge";
@@ -281,13 +282,13 @@ export const addEmptyOptions = <T extends {options?: CommonFormat["options"]}>(f
 	: Omit<T, "options"> & {options: CommonFormat["options"]} => 
 		({...form, options: form.options || {}});
 
-interface DefaultValidatorItem {
-	validator: any;
+type DefaultValidatorItem = {
+	validator: JSONObject;
 	translations?: Record<string, Record<Lang, string>>;
 	mergeStrategy?: "replace" | "merge" // Defaults to "replace".
 }
 
-interface DefaultValidator {
+type DefaultValidator = {
 	validators?: {[validatorName: string]: DefaultValidatorItem};
 	warnings?: {[validatorName: string]: DefaultValidatorItem};
 }
@@ -404,9 +405,9 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
 				const defaultValidator = _defaultValidators[validatorName];
 				const {mergeStrategy = "replace"} = defaultValidator;
-				if (validatorName in (field.validators || {})) {
+				if (field.validators && validatorName in (field.validators)) {
 					if (field.validators[validatorName] === false) {
-						delete field.validators[validatorName];
+						delete field.validators![validatorName];
 						return;
 					}
 					if (mergeStrategy === "replace") {
@@ -417,8 +418,7 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 					field.validators = {};
 				}
 				if (mergeStrategy === "merge" && field.validators[validatorName]) {
-					field.validators[validatorName] =
-						merge(defaultValidator.validator, field.validators[validatorName]);
+					field.validators[validatorName] = merge(defaultValidator.validator, field.validators[validatorName] as JSONObject);
 				} else { // "replace" strategy, used also if strategy is "merge" but there is nothing to merge.
 					field.validators[validatorName] = defaultValidator.validator;
 				}

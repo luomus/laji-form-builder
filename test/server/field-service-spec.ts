@@ -1,7 +1,7 @@
 import config from "../../config.json";
 import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
-import { SchemaFormat, Master, JSONSchemaObject } from "../../src/model";
+import { SchemaFormat, Master, JSONSchemaObject, JSONObject } from "../../src/model";
 import ApiClient from "../../src/api-client";
 import StoreService from "../../src/server/services/store-service";
 
@@ -481,7 +481,15 @@ describe("fields", () => {
 			});
 
 			it("gets 'ui:multiLanguage' property in uiSchema", async () => {
-				expect(jsonFormat.uiSchema.datasetName["ui:multiLanguage"]).toBe(true);
+				expect((jsonFormat.uiSchema as any).datasetName["ui:multiLanguage"]).toBe(true);
+			});
+
+			it("unbounded mapped to uiSchema.items ", async () => {
+				const unboundedMultiLanguageForm = {
+					context: "taxon", fields: [{ name: "alternativeVernacularName" }]
+				};
+				const unboundedJsonFormat = await fieldService.masterToSchemaFormat(unboundedMultiLanguageForm);
+				expect((unboundedJsonFormat.uiSchema as any).alternativeVernacularName.items["ui:multiLanguage"]).toBe(true);
 			});
 		});
 
@@ -509,7 +517,7 @@ describe("fields", () => {
 
 			it("for json format", async () => {
 				const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
-				expect(jsonFormat.fields?.[0]?.options?.default).toBe("secureLevelKM5");
+				expect(jsonFormat.fields?.[0]?.options?.default as any).toBe("secureLevelKM5");
 			});
 		});
 
@@ -1021,7 +1029,7 @@ describe("prepopulatedDocument population", () => {
 
 	let schemaFormat: SchemaFormat;
 	beforeAll(async () => {
-		const form = {
+		const form: Master = {
 			fields,
 			options: {
 				prepopulateWithInformalTaxonGroups: ["MVL.181"],
@@ -1030,7 +1038,7 @@ describe("prepopulatedDocument population", () => {
 						units: [{
 							notes: "foo"
 						}]
-					}]
+					}] as unknown as JSONObject
 				}
 			}
 		};
@@ -1038,21 +1046,23 @@ describe("prepopulatedDocument population", () => {
 	});
 
 	it("merges prepopulatedDocument and prepopulateWithInformalTaxonGroups", async () => {
-		expect(schemaFormat.options.prepopulatedDocument.gatherings.length).toBe(1);
-		const gathering = schemaFormat.options.prepopulatedDocument.gatherings[0];
+		const {gatherings} = schemaFormat.options!.prepopulatedDocument as any;
+		expect(gatherings.length).toBe(1);
+		const gathering = gatherings[0];
 		expect(gathering.units[0].notes).toBe("foo");
 		expect(gathering.units[0].identifications[0].taxon).toBeTruthy();
 	});
 
 	it("populates with defaults", async () => {
-		schemaFormat.options.prepopulatedDocument.gatherings[0].units.forEach((unit: any) => {
+		const {gatherings} = schemaFormat.options!.prepopulatedDocument as any;
+		gatherings[0].units.forEach((unit: any) => {
 			expect(unit.recordBasis).toBe("MY.recordBasisHumanObservation");
 		});
 	});
 
 	it("prepopulateWithInformalTaxonGroups fills taxon data", async () => {
-		expect(schemaFormat.options.prepopulatedDocument.gatherings[0].units.length).toBeGreaterThan(1);
-		const identification = schemaFormat.options.prepopulatedDocument.gatherings[0].units[0].identifications[0];
+		expect((schemaFormat.options!.prepopulatedDocument as any).gatherings[0].units.length).toBeGreaterThan(1);
+		const identification = (schemaFormat.options!.prepopulatedDocument as any).gatherings[0].units[0].identifications[0];
 		expect(identification.taxon).toBe("Parnassius apollo");
 		expect(identification.taxonID).toBe("MX.60724");
 		expect(identification.taxonVerbatim).toBe("isoapollo");
@@ -1077,17 +1087,17 @@ describe("translations", () => {
 	it("not included when asked with lang and is translated", async () => {
 		const fi = await fieldService.masterToSchemaFormat(form, "fi");
 		expect(fi.translations).toBe(undefined);
-		expect(fi.uiSchema.test).toBe("foo");
+		expect((fi.uiSchema as any).test).toBe("foo");
 
 		const en = await fieldService.masterToSchemaFormat(form, "en");
 		expect(en.translations).toBe(undefined);
-		expect(en.uiSchema.test).toBe("bar");
+		expect((en.uiSchema as any).test).toBe("bar");
 	});
 
 	it("key not translated if lang not in translations", async () => {
 		const sv = await fieldService.masterToSchemaFormat(form, "sv");
 		expect(sv.translations).toBe(undefined);
-		expect(sv.uiSchema.test).toBe("@key");
+		expect((sv.uiSchema as any).test).toBe("@key");
 	});
 });
 
@@ -1179,8 +1189,8 @@ describe("taxonSets", () => {
 		};
 
 		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
-		expect(jsonFormat.uiSchema.test.length).toBe(38);
-		expect(jsonFormat.uiSchema.test[0]).toBe("MX.204772");
+		expect((jsonFormat.uiSchema as any).test.length).toBe(38);
+		expect((jsonFormat.uiSchema as any).test[0]).toBe("MX.204772");
 	});
 
 	it("works for multiple", async() => {
@@ -1189,8 +1199,8 @@ describe("taxonSets", () => {
 		};
 
 		const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
-		expect(jsonFormat.uiSchema.test.length).toBe(38 + 9);
-		expect(jsonFormat.uiSchema.test[38]).toBe("MX.53474");
+		expect((jsonFormat.uiSchema.test as string[]).length).toBe(38 + 9);
+		expect((jsonFormat.uiSchema.test as string[])[38]).toBe("MX.53474");
 	});
 });
 
@@ -1202,7 +1212,7 @@ describe("options", () => {
 		});
 
 		it("for json format", async () => {
-			const jsonFormat = await fieldService.masterToExpandedJSONFormat({}, LANG);
+			const jsonFormat: any = await fieldService.masterToExpandedJSONFormat({}, LANG);
 			expect(jsonFormat.options).toEqual({});
 		});
 	});

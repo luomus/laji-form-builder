@@ -2,6 +2,7 @@ import { ExpandedMaster, Field, Property } from "../../model";
 import merge from "deepmerge";
 import MetadataService from "../../services/metadata-service";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
+import { reduceWith } from "../../utils";
 
 export default class UiSchemaService {
 	metadataService: MetadataService;
@@ -9,6 +10,7 @@ export default class UiSchemaService {
 	constructor(metadataService: MetadataService) {
 		this.metadataService = metadataService;
 		this.expandUiSchema = this.expandUiSchema.bind(this);
+		this.mapEmbeddable = this.mapEmbeddable.bind(this);
 	}
 
 	async expandUiSchema<T extends Pick<ExpandedMaster, "context" | "fields" | "uiSchema">>
@@ -26,25 +28,40 @@ export default class UiSchemaService {
 	}
 
 	private async fieldToUiSchema(field: Field, property: Property): Promise<Record<string, unknown> | undefined> {
+		return reduceWith(field, property,
+			this.mapEmbeddable(field),
+			mapMultilanguage,
+			mapMaxOccurs
+		);
+	}
+
+	mapEmbeddable = (field: Field) => async (uiSchema: ExpandedMaster["uiSchema"] | undefined, property: Property) => {
+		if (!property.isEmbeddable) {
+			return uiSchema;
+		}
 		const {fields = []} = field;
-
-
-		if (property.isEmbeddable) {
-			const properties = await this.metadataService.getProperties(fields, property);
-			return fields.reduce(async (uiSchemaPromise, f) => {
-				const property = properties[f.name] || mapUnknownFieldWithTypeToProperty(f);
-				const uiSchema = await uiSchemaPromise;
-				const fieldUiSchema = await this.fieldToUiSchema(f, property);
-				if (fieldUiSchema) {
-					uiSchema[f.name] = fieldUiSchema;
+		const properties = await this.metadataService.getProperties(fields, property);
+		return fields.reduce<Promise<Record<string, unknown> | undefined>>(async (uiSchemaPromise, f) => {
+			const property = properties[f.name] || mapUnknownFieldWithTypeToProperty(f);
+			let uiSchema = await uiSchemaPromise;
+			const fieldUiSchema = await this.fieldToUiSchema(f, property);
+			if (fieldUiSchema) {
+				if (!uiSchema) {
+					uiSchema = {};
 				}
-				return uiSchema;
-			}, Promise.resolve({} as Record<string, unknown>));
-		}
-
-		if (property.multiLanguage) {
-			return {"ui:multiLanguage": true};
-		}
-		return undefined;
+				uiSchema[f.name] = fieldUiSchema;
+			}
+			return uiSchema;
+		}, Promise.resolve(undefined));
 	}
 }
+
+const mapMultilanguage = (uiSchema: ExpandedMaster["uiSchema"] | undefined, property: Property) =>
+	property.multiLanguage
+		? {...uiSchema, "ui:multiLanguage": true}
+		: uiSchema;
+
+const mapMaxOccurs = (uiSchema: ExpandedMaster["uiSchema"] | undefined, property: Property) =>
+	property.maxOccurs === "unbounded"
+		? {items: uiSchema}
+		: uiSchema;

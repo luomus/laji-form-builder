@@ -34,7 +34,7 @@ export const exposedProps = dictionarify<keyof FormListing>([
 	"name"
 ]);
 
-export const exposedOptions = dictionarify<keyof FormListing["options"]>([
+export const exposedOptions = dictionarify([
 	"allowExcel",
 	"allowTemplate",
 	"dataset",
