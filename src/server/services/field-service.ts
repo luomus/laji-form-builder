@@ -112,10 +112,9 @@ export default class FieldService {
 	}
 
 	private async expandMaster(master: Master): Promise<ExpandedMaster> {
-		const linkedMaster = await this.linkMaster(master);
-
-		return reduceWith(linkedMaster, undefined,
+		return reduceWith(await this.linkMaster(master), undefined,
 			this.applyPatches,
+			addEmptyUiSchema
 		);
 	}
 
@@ -264,6 +263,11 @@ export default class FieldService {
 		}
 	}
 }
+
+const addEmptyUiSchema = <T extends Partial<Master>>(master: T): T & { uiSchema: JSONObject } =>
+	master.uiSchema
+		? master as T & { uiSchema: JSONObject }
+		: {...master, uiSchema: {}};
 
 const addLanguage = (language?: Lang) => <T>(obj: T) =>
 	language

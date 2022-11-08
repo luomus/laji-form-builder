@@ -493,6 +493,13 @@ describe("fields", () => {
 			});
 		});
 
+		it("uiSchema defaults to empty object", async () => {
+			const form = { fields: [] };
+			const jsonFormat = await fieldService.masterToSchemaFormat(form, LANG);
+
+			expect(jsonFormat.uiSchema as any).toEqual({});
+		});
+
 		describe("gathers required properties", () => {
 			const form = { fields: [{ name: "gatherings" }, { name: "secureLevel" } ] };
 

@@ -106,6 +106,7 @@ export type SupportedFormat = ExpandedJSONFormat | SchemaFormat | RemoteMaster;
 
 export type ExpandedMaster = Omit<Master, "baseFormID" | "patch"> & {
 	fields?: Field[];
+	uiSchema: JSONObject;
 }
 
 export type RemoteMaster = Master & {id: string};

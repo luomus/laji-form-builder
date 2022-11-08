@@ -43,7 +43,6 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		return reduceWith(
 			{
 				schema,
-				uiSchema: {},
 				excludeFromCopy: [],
 				..._master
 			},
