@@ -1,5 +1,4 @@
 src
-playground
 webpack*
 .*
 config.json*
@@ -7,4 +6,7 @@ tsconfig*
 *.log
 build
 static
-test-results
+test*
+protractor*
+tslint.json
+jasmine*
