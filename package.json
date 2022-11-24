@@ -14,7 +14,7 @@
     "test:server": "ts-node node_modules/jasmine-xml-reporter/bin/jasmine.js --conf=jasmine.json \"test/server/*-spec.ts\"",
     "test:server:ci": "npm run test:server -- --junitreport --output=test-results/server",
     "test:ci": "npm run test:server:ci && npm run test:client:ci",
-    "lint": "eslint -c .eslintrc.prod.json src playground",
+    "lint": "eslint -c .eslintrc.prod.json src",
     "build:client": "rimraf lib && NODE_ENV=production tsc -p tsconfig.client.json",
     "build:build": "rimraf build && NODE_ENV=production webpack --config webpack.config.build.js",
     "build:static": "rimraf static && NODE_ENV=production webpack --config webpack.config.static.js",
