@@ -1,11 +1,14 @@
 {
 	"extends": "./tsconfig.json",
 	"compilerOptions": {
-		"outDir": "./build",
+		"outDir": "./lib",
 		"lib": [
 			"dom",
 			"es7"
 		],
 		"declaration": true
-	}
+	},
+	"include": [
+		"./src/client/**/*"
+	]
 }
