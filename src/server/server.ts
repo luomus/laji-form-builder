@@ -23,6 +23,7 @@ const langCheckMiddleWare: RequestHandler = (req, res, next) => {
 	return next();
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const errorHandlerJSONMiddleWare: ErrorRequestHandler = (err, req, res, next) => {
 	if (err instanceof UnprocessableError) {
 		error(res, 422, err.message);
@@ -31,18 +32,20 @@ const errorHandlerJSONMiddleWare: ErrorRequestHandler = (err, req, res, next) =>
 	}
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const storeErrorHandlerMiddleWare: ErrorRequestHandler = (err, req, res, next) => {
 	if (err instanceof StoreError) {
 		return error(res, err.status, err.storeError);
 	}
 	throw err;
-}
+};
 
 const main = new MainService();
 const api = express();
 
 api.use("/", bodyParser.json({limit: "1MB"}));
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 api.get("/flush", (req, res) => {
 	main.flush();
 	return res.json({flush: "ok"});
@@ -87,9 +90,11 @@ api.use(storeErrorHandlerMiddleWare, errorHandlerJSONMiddleWare);
 const server = express();
 
 // Backward compatibility for old server's URI signature.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.get("/lajiform/admin/demo", (req, res) => {
 	res.redirect("/");
 });
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 server.use("/lajiform/admin/flush", (req, res) => {
 	res.redirect("/api/flush");
 });

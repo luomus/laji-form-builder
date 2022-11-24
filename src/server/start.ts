@@ -16,5 +16,6 @@ server.use("/static", express.static("static"));
 
 const port = process.env.PORT || 8082;
 server.listen(port, () => {
+	// eslint-disable-next-line no-console
 	console.log(`Server up on port ${port}`);
 });

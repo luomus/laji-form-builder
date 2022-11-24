@@ -49,7 +49,7 @@ type KnownFormOptions = {
 export type CommonFormat = {
 	id?: string;
 	options?: JSONObject & KnownFormOptions;
- 	title?: string;
+	title?: string;
 	logo?: string;
 	description?: string;
 	shortDescription?: string;

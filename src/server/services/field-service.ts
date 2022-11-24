@@ -422,7 +422,10 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 					field.validators = {};
 				}
 				if (mergeStrategy === "merge" && field.validators[validatorName]) {
-					field.validators[validatorName] = merge(defaultValidator.validator, field.validators[validatorName] as JSONObject);
+					field.validators[validatorName] = merge(
+						defaultValidator.validator,
+						field.validators[validatorName] as JSONObject
+					);
 				} else { // "replace" strategy, used also if strategy is "merge" but there is nothing to merge.
 					field.validators[validatorName] = defaultValidator.validator;
 				}
