@@ -1,5 +1,4 @@
 import fetch from "cross-fetch";
-import queryString from "querystring";
 import merge from "deepmerge";
 import { ApiClientImplementation } from "laji-form/lib/ApiClient";
 
@@ -27,7 +26,10 @@ export default class ApiClient implements ApiClientImplementation {
 		const baseQuery = this.getBaseQuery();
 		const queryObject = (typeof query === "object") ? merge(baseQuery, query) : baseQuery;
 		return new Promise((resolve, reject) => {
-			fetch(`${this.BASE_URL}${path}?${queryString.stringify(queryObject)}`, options).then(response => {
+			fetch(
+				`${this.BASE_URL}${path}?${new URLSearchParams(queryObject as any).toString()}`,
+				options
+			).then(response => {
 				if (response.status > 400) {
 					reject(response);
 				} else {

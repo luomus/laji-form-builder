@@ -1,4 +1,3 @@
-import queryString from "querystring";
 import memoize, { Memoized } from "memoizee";
 import { Master, RemoteMaster } from "../../model";
 import { fetchJSON, dictionarifyByKey, isObject } from "../../utils";
@@ -19,7 +18,8 @@ export class StoreError extends Error {
 }
 
 const lajiStoreFetch = (endpoint: string) => async <T>(url: string, query?: any, options?: any) => 
-	 fetchJSON<T | StoreErrorModel>(`${config.lajiStoreBaseUrl}${endpoint}${url}?${queryString.stringify(query)}`, {
+	 // eslint-disable-next-line max-len
+	 fetchJSON<T | StoreErrorModel>(`${config.lajiStoreBaseUrl}${endpoint}${url}?${new URLSearchParams(query).toString()}`, {
 		...(options || {}),
 		headers: { Authorization: config.lajiStoreAuth, ...(options?.headers || {}) },
 	});
