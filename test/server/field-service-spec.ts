@@ -490,7 +490,9 @@ describe("fields", () => {
 					context: "taxon", fields: [{ name: "alternativeVernacularName" }]
 				};
 				const unboundedJsonFormat = await fieldService.masterToSchemaFormat(unboundedMultiLanguageForm);
-				expect((unboundedJsonFormat.uiSchema as any).alternativeVernacularName.items["ui:multiLanguage"]).toBe(true);
+				expect(
+					(unboundedJsonFormat.uiSchema as any).alternativeVernacularName.items["ui:multiLanguage"]
+				).toBe(true);
 			});
 		});
 
@@ -1070,7 +1072,8 @@ describe("prepopulatedDocument population", () => {
 
 	it("prepopulateWithInformalTaxonGroups fills taxon data", async () => {
 		expect((schemaFormat.options!.prepopulatedDocument as any).gatherings[0].units.length).toBeGreaterThan(1);
-		const identification = (schemaFormat.options!.prepopulatedDocument as any).gatherings[0].units[0].identifications[0];
+		const identification = (schemaFormat.options!.prepopulatedDocument as any)
+			.gatherings[0] .units[0].identifications[0];
 		expect(identification.taxon).toBe("Parnassius apollo");
 		expect(identification.taxonID).toBe("MX.60724");
 		expect(identification.taxonVerbatim).toBe("isoapollo");

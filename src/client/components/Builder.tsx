@@ -12,7 +12,8 @@ import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import ApiClient, { ApiClientImplementation } from "../../api-client";
+import ApiClient from "../../api-client";
+import { ApiClientImplementation } from "laji-form/lib/ApiClient";
 
 export interface BuilderProps {
 	lang: Lang;

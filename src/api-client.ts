@@ -2,10 +2,10 @@ import fetch from "cross-fetch";
 import { ApiClientImplementation as ApiClientAbstract } from "laji-form/lib/ApiClient";
 
 export default class ApiClient {
-	apiClient: ApiClientImplementation;
+	apiClient: ApiClientAbstract;
 	lang: string;
 
-	constructor(apiClient: ApiClientImplementation, lang = "en") {
+	constructor(apiClient: ApiClientAbstract, lang = "en") {
 		this.apiClient = apiClient;
 		this.lang = lang;
 	}

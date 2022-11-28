@@ -4,7 +4,7 @@ import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { addEmptyOptions, removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster } from "../../model";
-import ApiClient, {ApiClientImplementation} from "../../api-client";
+import ApiClient, { ApiClientImplementation } from "../../api-client";
 import StoreService from "./store-service";
 
 /**
