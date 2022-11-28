@@ -12,20 +12,20 @@ import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import ApiClient from "../../api-client";
+import ApiClient, { ApiClientImplementation } from "../../api-client";
 
 export interface BuilderProps {
 	lang: Lang;
 	onChange: (form: any) => void;
 	onLangChange: (lang: Lang) => void;
-	apiClient: ApiClient;
+	apiClient: ApiClientImplementation;
 	theme: Theme;
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
 	id?: string;
 	notifier?: Notifier;
 	documentFormVisible?: boolean;
-	formApiClient?: ApiClient;
+	formApiClient?: ApiClientImplementation;
 	allowList?: boolean;
 	onSelected?: (id: string) => void;
 	onRemountLajiForm?: () => void;
@@ -70,8 +70,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	constructor(props: BuilderProps) {
 		super(props);
-		this.apiClient = props.apiClient;
-		this.formApiClient = props.formApiClient;
+		this.apiClient = new ApiClient(props.apiClient, props.lang);
+		if (props.formApiClient) {
+			this.formApiClient = new ApiClient(props.formApiClient);
+		}
 
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);

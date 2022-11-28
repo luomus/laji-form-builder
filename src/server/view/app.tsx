@@ -9,8 +9,7 @@ import "../../client/styles";
 import "notus/src/notus.css";
 import  _notus from "notus";
 import { isLang, Lang, SchemaFormat } from "../../model";
-import ApiClient from "../../api-client";
-
+import ApiClient, { ApiClientImplementation } from "../../api-client";
 const notus = _notus();
 
 const notifier: Notifier = [
@@ -47,21 +46,23 @@ const uriToState = (uri: string) => {
 
 const initialUri = window.location.href;
 const initialRoute = uriToState(initialUri);
-
-const apiClient = new ApiClient(
-	config.apiBase,
-	config.accessToken,
-	undefined,
-	initialRoute.lang
-);
-const formApiClient = new ApiClient(
-	config.formApiBase,
-	config.accessToken,
-	undefined,
-	initialRoute.lang
-);
-
 const initialLang = initialRoute.lang || DEFAULT_LANG;
+
+
+const apiClientImplementation = new ApiClientImplementation(
+	config.apiBase,
+	config.accessToken
+);
+
+const apiClient = new ApiClient(apiClientImplementation, initialLang);
+
+const formApiClientImplementation = new ApiClientImplementation(
+	config.formApiBase,
+	config.accessToken
+);
+
+const formApiClient = new ApiClient(formApiClientImplementation, initialLang);
+
 const formService = new FormService(
 	apiClient,
 	initialLang,
@@ -160,8 +161,8 @@ const formService = new FormService(
 					               {...config}
 					               onChange={onChange}
 					               onLangChange={setLang}
-					               apiClient={apiClient}
-					               formApiClient={formApiClient}
+					               apiClient={apiClientImplementation}
+					               formApiClient={formApiClientImplementation}
 					               theme={lajiFormBs3}
 												 allowList={true}
 				                 onSelected={onSelected}

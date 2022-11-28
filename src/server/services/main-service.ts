@@ -4,7 +4,7 @@ import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { addEmptyOptions, removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster } from "../../model";
-import ApiClient from "../../api-client";
+import ApiClient, {ApiClientImplementation} from "../../api-client";
 import StoreService from "./store-service";
 
 /**
@@ -22,9 +22,10 @@ export class UnprocessableError extends Error {
 const DEFAULT_LANG = "en";
 
 const apiClient = new ApiClient(
-	config.apiBase,
-	config.accessToken,
-	undefined,
+	new ApiClientImplementation(
+		config.apiBase,
+		config.accessToken
+	),
 	DEFAULT_LANG
 );
 

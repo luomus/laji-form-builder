@@ -2,13 +2,13 @@ import config from "../../config.json";
 import FieldService from "../../src/server/services/field-service";
 import MetadataService from "../../src/services/metadata-service";
 import { SchemaFormat, Master, JSONSchemaObject, JSONObject } from "../../src/model";
-import ApiClient from "../../src/api-client";
+import ApiClient, { ApiClientImplementation } from "../../src/api-client";
 import StoreService from "../../src/server/services/store-service";
 
 const LANG = "fi";
 const mock = !(process.env.MOCK === "false");
 
-class MockApiClient extends ApiClient {
+class MockApiClient extends ApiClientImplementation {
 	mock(path: string, query?: any, options?: any): Response | undefined {
 		if (options?.method) {
 			return undefined;
@@ -40,14 +40,15 @@ class MockApiClient extends ApiClient {
 	}
 }
 
-const apiClientImpl = (...args: ConstructorParameters<typeof ApiClient>) => mock
+const apiClientImpl = (...args: ConstructorParameters<typeof ApiClientImplementation>) => mock
 	? new MockApiClient(...args)
-	: new ApiClient(...args);
+	: new ApiClientImplementation(...args);
 
-const apiClient = apiClientImpl(
-	config.apiBase,
-	config.accessToken,
-	undefined,
+const apiClient = new ApiClient(
+	apiClientImpl(
+		config.apiBase,
+		config.accessToken,
+	),
 	LANG
 );
 
