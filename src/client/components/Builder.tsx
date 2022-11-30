@@ -534,7 +534,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	propagateState() {
 		if (!this.state.master || !isValid(this.state.schemaFormat)) {
-			this.props.onChange({});
 			return;
 		}
 		const {translations, fields, ...toTranslate} = this.state.master;
