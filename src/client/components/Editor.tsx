@@ -37,7 +37,7 @@ export interface EditorProps extends Stylable, Classable {
 	onSave: (master: Master) => void;
 	onSaveFromState: () => void;
 	saving?: boolean;
-	documentFormVisible: boolean;
+	displaySchemaTabs: boolean;
 	errorMsg?: string;
 	onRemountLajiForm?: () => void;
 }
@@ -68,7 +68,7 @@ class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: 
 export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	static contextType = Context;
 	state: EditorState = {
-		activeEditorMode: this.props.documentFormVisible ? "basic" as ActiveEditorMode : "options" as ActiveEditorMode,
+		activeEditorMode: this.props.displaySchemaTabs ? "basic" as ActiveEditorMode : "options" as ActiveEditorMode,
 		pointerChoosingActive: false
 	};
 	containerRef = React.createRef<HTMLDivElement>();
@@ -78,7 +78,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	fieldsRef = React.createRef<HTMLDivElement>();
 
 	static getDerivedStateFromProps(props: EditorProps) {
-		if (!props.documentFormVisible) {
+		if (!props.displaySchemaTabs) {
 			return {activeEditorMode: "options"};
 		}
 		return {};
@@ -128,8 +128,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               onSelectedOptions={this.onPickerSelectedOptions}
 				               containerRef={this.containerRef}
 				               saving={this.props.saving}
-											 openJSONEditor={this.openJSONEditor}
-				               documentFormVisible={this.props.documentFormVisible}
+				               openJSONEditor={this.openJSONEditor}
+				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
 			</div>
@@ -532,7 +532,7 @@ const EditorToolbar = ({
 	onSelectedOptions,
 	saving,
 	containerRef,
-	documentFormVisible,
+	displaySchemaTabs,
 	openJSONEditor,
 	onRemountLajiForm
 }: ToolbarEditorProps) => {
@@ -550,7 +550,7 @@ const EditorToolbar = ({
 			</Button>}
 			<Button onClick={openJSONEditor} small>JSON</Button>
 			<EditorToolbarSeparator />
-			<EditorChooser active={active} onChange={onEditorChange} documentFormVisible={documentFormVisible} />
+			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
 			<div style={{marginLeft: "auto"}}>
 				<EditorToolbarSeparator />
 				<Button small variant="success" disabled={saving} onClick={onSave}>{translations.Save}</Button>
@@ -726,7 +726,7 @@ const Highlighter = ({highlightedElem, active, onElemHighlighted}
 interface EditorChooserProps { 
 	active: ActiveEditorMode;
 	onChange: (activeEditorMode: ActiveEditorMode) => void;
-	documentFormVisible: boolean;
+	displaySchemaTabs: boolean;
 }
 
 const editorNmspc = nmspc("editor-chooser");
@@ -734,9 +734,9 @@ const editorNmspc = nmspc("editor-chooser");
 type ActiveEditorMode = "uiSchema" | "basic" | "options";
 const tabs = {options: "Editor.tab.options", basic: "Editor.tab.basic", uiSchema: "Editor.tab.uiSchema"};
 const EditorChooser = React.memo(function EditorChooser(
-	{active, onChange, documentFormVisible}
+	{active, onChange, displaySchemaTabs}
 	: EditorChooserProps) {
-	const _tabs = documentFormVisible ? tabs : {options: tabs.options};
+	const _tabs = displaySchemaTabs ? tabs : {options: tabs.options};
 	return (
 		<div className={editorNmspc()} style={{display: "flex"}}>{
 			Object.keys(_tabs).map((_active: ActiveEditorMode) =>
