@@ -83,7 +83,7 @@ type Reducer<T, R, P>  = {
  * @param reduceWith An additional value that is passed to each reducer as 2nd param.
  * @param {...reducers} Functions which return the accumulated result which is passed to the next reducer.
  *
- * @returns The accumulated result.
+ * @returns The accumulated result as a promise.
  */
 /* eslint-disable max-len */
 function reduceWith<T, P>(initialValue: T | Promise<T>, reduceWith: P): Promise<T>;

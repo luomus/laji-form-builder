@@ -25,7 +25,7 @@ export interface BuilderProps {
 	secondaryDataBankFormID: string;
 	id?: string;
 	notifier?: Notifier;
-	documentFormVisible?: boolean;
+	displaySchemaTabs?: boolean;
 	formApiClient?: ApiClientImplementation;
 	allowList?: boolean;
 	onSelected?: (id: string) => void;
@@ -67,7 +67,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	static defaultProps = {
 		lang: "fi" as Lang,
-		documentFormVisible: true
+		displaySchemaTabs: true
 	};
 
 	constructor(props: BuilderProps) {
@@ -233,7 +233,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				height={EDITOR_HEIGHT}
 				saving={saving}
 				loading={loading}
-				documentFormVisible={this.props.documentFormVisible ?? true}
+				displaySchemaTabs={this.props.displaySchemaTabs ?? true}
 				className={gnmspc("")}
 				errorMsg={errorMsg}
 				onRemountLajiForm={this.props.onRemountLajiForm}
@@ -366,7 +366,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	propagateState() {
 		if (!this.state.master || !isValid(this.state.schemaFormat)) {
-			this.props.onChange({});
 			return;
 		}
 		const {translations, fields, ...toTranslate} = this.state.master;
