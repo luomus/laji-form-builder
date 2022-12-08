@@ -28,7 +28,7 @@ export default class UiSchemaService {
 	}
 
 	private async fieldToUiSchema(field: Field, property: Property): Promise<ExpandedMaster["uiSchema"] | undefined> {
-		return reduceWith({}, property,
+		return reduceWith(undefined, property,
 			this.mapEmbeddable(field),
 			mapMultilanguage,
 			mapMaxOccurs
@@ -62,6 +62,6 @@ const mapMultilanguage = (uiSchema: ExpandedMaster["uiSchema"] | undefined, prop
 		: uiSchema;
 
 const mapMaxOccurs = (uiSchema: ExpandedMaster["uiSchema"] | undefined, property: Property) =>
-	property.maxOccurs === "unbounded"
-		? {items: (uiSchema || {})}
+	uiSchema && property.maxOccurs === "unbounded"
+		? {items: uiSchema}
 		: uiSchema;
