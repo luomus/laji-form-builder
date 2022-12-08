@@ -1,12 +1,11 @@
 {
 	"apiBase": "https://apitest.laji.fi/v0",
-	"formBase": "localhost:8082/api",
+	"formApiBase": "http://localhost:8082/api",
 	"accessToken": "",
-	"userToken": ""
-	"userId": ""
+	"personToken": "",
 	"googleApiKey": "",
 	"lajiStoreAuth": "",
-	"lajiStoreBaseUrl": "",
+	"lajiStoreBaseUrl": "https://store-dev.luomus.fi",
 	"primaryDataBankFormID": "MHL.70",
 	"secondaryDataBankFormID": "MHL.68"
 }
