@@ -239,11 +239,15 @@ export const Button = React.memo(function Button({children, active, className, .
 });
 
 export const Spinner = React.memo(function Spinner(
-	{color = "black", size = 32} : {color?: "white" | "black", size?: number}) {
+	{color = "black", size = 32, className, style = {}}
+	: {color?: "white" | "black", size?: number} & Classable & Stylable) {
 	return (
 		<_Spinner
-			style={size ? {width: size, height: size} : {}}
-			className={classNames(gnmspc("spinner-container"), gnmspc(color === "black" ? "spinner-black" : ""))}
+			style={size ? {width: size, height: size, ...style} : style}
+			className={classNames(
+				gnmspc("spinner-container"),
+				gnmspc(color === "black" ? "spinner-black" : ""),
+				className)}
 		/>
 	);
 });

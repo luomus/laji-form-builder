@@ -87,7 +87,9 @@ describe("Editor", () => {
 			describe("ui:title", () => {
 				const fieldName = "gatheringEvent.dateBegin";
 				const getRenderedUiTitle = () => builder.formPreview.locate(fieldName).$("label").getText();
-				let origFi: string, origSv: string, origEn: string;
+				let origFi: string;
+				let origSv: string;
+				let origEn: string;
 				let $uiTitle: ElementFinder;
 
 				beforeAll(async (done) => {
@@ -106,6 +108,7 @@ describe("Editor", () => {
 
 				it("when empty adding when empty adds with all langs", async () => {
 					await updateValue($uiTitle, "foo");
+					await builder.waitUntilLoaded();
 
 					expect(await getRenderedUiTitle()).toBe("foo");
 					await builder.lang.$sv.click();
@@ -125,10 +128,16 @@ describe("Editor", () => {
 
 					it("accepting updates only for selected lang", async () => {
 						await browser.switchTo().alert().accept();
+						await builder.waitUntilLoaded();
+
 						expect(await getRenderedUiTitle()).toBe("foobar");
+
 						await builder.lang.changeTo("sv");
+
 						expect(await getRenderedUiTitle()).toBe("foobar");
+
 						await builder.lang.changeTo("en");
+
 						expect(await getRenderedUiTitle()).toBe("foobar");
 
 						await builder.lang.changeTo("fi");
@@ -136,11 +145,14 @@ describe("Editor", () => {
 
 					it("editing asks if the edition should be done for all langs after all-lang update", async () => {
 						await updateValue($uiTitle, "foobarbar");
+
 						expect(await browser.switchTo().alert().getText()).not.toBeFalsy();
 					});
 
 					it("dismissing updates only for selected lang", async () => {
 						await browser.switchTo().alert().dismiss();
+						await builder.waitUntilLoaded();
+
 						expect(await getRenderedUiTitle()).toBe("foobarbar");
 						await builder.lang.changeTo("sv");
 						expect(await getRenderedUiTitle()).toBe("foobar");
@@ -152,6 +164,7 @@ describe("Editor", () => {
 
 					it("clearing value clears for all langs without confirming and restores original label", async () => {
 						await updateValue($uiTitle, "");
+						await builder.waitUntilLoaded();
 						expect(await getRenderedUiTitle()).toBe(origFi);
 						expect(await $uiTitle.getAttribute("value")).toBe("");
 						await builder.lang.changeTo("sv");
