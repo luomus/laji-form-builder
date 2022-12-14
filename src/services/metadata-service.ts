@@ -7,7 +7,7 @@ import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } fro
 export default class MetadataService {
 	private apiClient: ApiClient;
 	private lang: Lang;
-	private allRanges: Record<string, Range[]>;
+	private allRanges: Record<string, Range[]> | undefined;
 	private cacheStore: (Memoized<any>)[] = [];
 
 	constructor(apiClient: ApiClient, lang: Lang) {
@@ -25,6 +25,7 @@ export default class MetadataService {
 	flush() {
 		this.cacheStore.forEach(c => c.clear());
 		this.cacheStore = [];
+		this.allRanges = undefined;
 	}
 
 	setLang(lang: Lang) {

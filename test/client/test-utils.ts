@@ -38,6 +38,7 @@ export class BuilderPO {
 
 	$editor = $(this.nmspc(""));
 	$toolbar = $(this.nmspc("toolbar"));
+	$toolbarSpinner = $(this.nmspc("toolbar-loader"));
 
 	private $langsContainer = this.$toolbar.$(this.nmspc("lang-chooser"));
 	private $$langs = this.$langsContainer.$$(this.nmspc("lang-chooser button"));
@@ -122,6 +123,7 @@ export class BuilderPO {
 	async waitUntilLoaded() {
 		await (browser.wait(EC.visibilityOf(this.formPreview.$container)) as Promise<void>);
 		await (browser.wait(EC.visibilityOf(this.$toolbar)) as Promise<void>);
+		await (browser.wait(EC.invisibilityOf(this.$toolbarSpinner)) as Promise<void>);
 		return;
 	}
 

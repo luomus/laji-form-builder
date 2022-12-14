@@ -29,11 +29,11 @@ export default class UiSchemaService {
 			? {...master, uiSchema: merge(expandedUiSchema, master.uiSchema)}
 			: master;
 	}
-
+	
 	private async fieldToUiSchema
 	(field: Field, property: Property, options?: FormOptions, lang?: Lang)
 	: Promise<ExpandedMaster["uiSchema"] | undefined> {
-		return reduceWith({}, property,
+		return reduceWith(undefined, property,
 			this.mapEmbeddable(field, options, lang),
 			mapMultilanguage,
 			mapMaxOccurs,
@@ -80,6 +80,6 @@ const mapMultilanguage = (uiSchema: ExpandedMaster["uiSchema"] | undefined, prop
 		: uiSchema;
 
 const mapMaxOccurs = (uiSchema: ExpandedMaster["uiSchema"] | undefined, property: Property) =>
-	property.maxOccurs === "unbounded"
-		? {items: (uiSchema || {})}
+	uiSchema && property.maxOccurs === "unbounded"
+		? {items: uiSchema}
 		: uiSchema;

@@ -37,6 +37,7 @@ export interface EditorProps extends Stylable, Classable {
 	onSave: (master: Master) => void;
 	onSaveFromState: () => void;
 	saving?: boolean;
+	loading?: boolean;
 	displaySchemaTabs: boolean;
 	errorMsg?: string;
 	onRemountLajiForm?: () => void;
@@ -128,6 +129,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               onSelectedOptions={this.onPickerSelectedOptions}
 				               containerRef={this.containerRef}
 				               saving={this.props.saving}
+				               loading={this.props.loading}
 				               openJSONEditor={this.openJSONEditor}
 				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
@@ -512,6 +514,7 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
 	saving?: boolean;
+	loading?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
 	onRemountLajiForm?: () => void;
@@ -531,6 +534,7 @@ const EditorToolbar = ({
 	onSelectedField,
 	onSelectedOptions,
 	saving,
+	loading,
 	containerRef,
 	displaySchemaTabs,
 	openJSONEditor,
@@ -551,7 +555,8 @@ const EditorToolbar = ({
 			<Button onClick={openJSONEditor} small>JSON</Button>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
-			<div style={{marginLeft: "auto"}}>
+			<div style={{marginLeft: "auto", display: "flex"}}>
+				{ loading && <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> }
 				<EditorToolbarSeparator />
 				<Button small variant="success" disabled={saving} onClick={onSave}>{translations.Save}</Button>
 			</div>

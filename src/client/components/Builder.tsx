@@ -2,12 +2,12 @@ import * as React from "react";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
-import { unprefixProp, JSONSchemaBuilder, translate } from "../../utils";
+import { unprefixProp, translate } from "../../utils";
 import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnmspc } from "../utils";
 import { Editor } from "./Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { Property, PropertyRange, Lang, Master, SchemaFormat, Field } from "../../model";
+import { Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
@@ -40,6 +40,7 @@ export interface BuilderState {
 	editorHeight?: number;
 	tmp?: boolean;
 	saving?: boolean
+	loading?: boolean;
 }
 
 export type MaybeError<T> = T | "error";
@@ -219,7 +220,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {schemaFormat, master, saving, errorMsg} = this.state;
+		const {schemaFormat, master, saving, loading, errorMsg} = this.state;
 		return (
 			<Editor
 				master={master}
@@ -231,6 +232,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
 				saving={saving}
+				loading={loading}
 				displaySchemaTabs={this.props.displaySchemaTabs ?? true}
 				className={gnmspc("")}
 				errorMsg={errorMsg}
@@ -261,70 +263,53 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			return false;
 		};
 
-		const {translations = {fi: {}, sv: {}, en: {}}} = master;
-		const changed: any = {master, schemaFormat};
+		const expandTranslations = (master: Master) => ({
+			...master,
+			translations: {fi: {}, sv: {}, en: {}, ...(master.translations || {})} as CompleteTranslations
+		});
+
+		let newMaster = expandTranslations(master); 
 		for (const event of (events instanceof Array ? events : [events])) {
 			if (isMasterChangeEvent(event)) {
-				changed.master = event.value;
-				const state = await this.getStateFromSchemaFormatPromise(
-					this.formService.masterToSchemaFormat(changed.master)
-				);
-				Object.keys(state).forEach((key: keyof BuilderState) => {
-					changed[key] = state[key];
-				});
+				newMaster = expandTranslations(event.value);
 			} else if (isUiSchemaChangeEvent(event)) {
 				if (syncOnBadState(schemaFormat)) {
 					return;
 				}
-				changed.master = {
-					...(changed.master || {}),
-					uiSchema: updateSafelyWithJSONPointer(
-						changed.master.uiSchema,
-						event.value,
-						fieldPointerToUiSchemaPointer(schemaFormat.schema, event.selected)
-					)
-				};
+				newMaster.uiSchema = updateSafelyWithJSONPointer(
+					newMaster.uiSchema,
+					event.value,
+					fieldPointerToUiSchemaPointer(schemaFormat.schema, event.selected)
+				);
 			} else if (isTranslationsAddEvent(event)) {
 				const {key, value} = event;
-				changed.master = {
-					...(changed.master || {}),
-					translations: ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
-						...translations,
-						[lang]: {
-							...translations[lang],
-							[key]: value[lang]
-						}
-					}), changed.master.translations || translations)
-				};
+				newMaster.translations = ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
+					...translations,
+					[lang]: {
+						...translations[lang],
+						[key]: value[lang]
+					}
+				}), newMaster.translations);
 			} else if (isTranslationsChangeEvent(event)) {
 				const {key, value} = event;
-				changed.master = {
-					...(changed.master || {}),
-					translations: ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
-						...translations,
-						[lang]: {
-							...translations[lang],
-							[key]: lang === this.state.lang
-								? value
-								: (translations[lang][key] || value)
-						}
-					}), changed.master.translations || translations)
-				};
+				newMaster.translations = ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
+					...translations,
+					[lang]: {
+						...translations[lang],
+						[key]: lang === this.state.lang
+							? value
+							: (translations[lang][key] || value)
+					}
+				}), newMaster.translations);
 			} else if (isTranslationsDeleteEvent(event)) {
 				const {key} = event;
-				changed.master = {
-					...(changed.master || {}),
-					translations: ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
-						...byLang,
-						[lang]: immutableDelete((changed.master.translations || translations)[lang], key)
-					}), {})
-				};
+				newMaster.translations = ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
+					...byLang,
+					[lang]: immutableDelete((newMaster.translations)[lang], key)
+				}), {} as CompleteTranslations);
 			} else if (event.type === "field") {
 				const splitted = event.selected.split("/").filter(s => s);
 				if (isFieldDeleteEvent(event)) {
-					if (syncOnBadState(schemaFormat)) {
-						return;
-					}
 					const filterFields = (field: Field, pointer: string[]): Field => {
 						const [p, ...remaining] = pointer;
 						return {
@@ -335,102 +320,22 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 								: (field.fields as Field[]).filter((f: Field) => f.name !== p)
 						};
 					};
-					const filterSchema = (schema: any, pointer: string[]): any => {
-						const [p, ...remaining] = pointer;
-						if (remaining.length) {
-							if (schema.properties) {
-								return {
-									...schema,
-									properties: {
-										...schema.properties, [p]: filterSchema(schema.properties[p], remaining)
-									}
-								};
-							} else {
-								return {
-									...schema,
-									items: {
-										...schema.items,
-										properties: {
-											...schema.items.properties,
-											[p]: filterSchema(schema.items.properties[p], remaining)
-										}
-									}
-								};
-							}
-						}
-						if (schema.properties) {
-							return {...schema, properties: immutableDelete(schema.properties, p)};
-						} else {
-							return {
-								...schema,
-								items: {...schema.items, properties: immutableDelete(schema.items.properties, p)}
-							};
-						}
-					};
-					changed.master = {
-						...(changed.master || {}),
-						fields: filterFields(changed.master, splitted).fields
-					};
-					changed.schemaFormat = {
-						...changed.schemaFormat,
-						schema: filterSchema(changed.schemaFormat.schema, splitted)
-					};
+					newMaster.fields = filterFields(newMaster as Field, splitted).fields;
 				} else if (isFieldAddEvent(event)) {
 					const propertyModel = event.value;
 					if (propertyModel.range[0] !== PropertyRange.Id) {
-						if (syncOnBadState(schemaFormat)) {
-							return;
-						}
-						const addField = (fields: Field[], path: string[], property: string): Field[] => {
+						const addField = (fields: Field[], path: string[], property: string) : Field[] => {
 							if (!path.length) {
 								return [...fields, {name: unprefixProp(property)}];
 							}
 							const [next, ...remaining] = path;
 							return fields.map(field => field.name === next
-								? {...field, fields: addField(field.fields as Field[], remaining, property)}
+								? {...field, fields: addField(field.fields || [], remaining, property)}
 								: field
 							);
 						};
-						const getSchemaForProperty = (property: Property) => {
-							switch (property.range[0]) {
-							case PropertyRange.String:
-								return JSONSchemaBuilder.String();
-							case PropertyRange.Boolean:
-								return JSONSchemaBuilder.Boolean();
-							case PropertyRange.Int:
-								return JSONSchemaBuilder.Integer();
-							case PropertyRange.PositiveInteger: // TODO validator
-								return JSONSchemaBuilder.Number();
-							case PropertyRange.DateTime: // TODO datetime uiSchema
-								return JSONSchemaBuilder.String();
-							default:
-								throw new Error("Unknown property range");
-							}
-						};
-						const addSchemaField = (schema: any, path: string[], property: Property): any => {
-							const [next, ...remaining] = path;
-							const propName = next || unprefixProp(property.property);
-							const schemaForNext = !next
-								? getSchemaForProperty(property)
-								: addSchemaField(schema.items?.properties[next]
-									|| schema.properties[next], remaining, property);
-							return schema.type === "object"
-								? {...schema, properties: {...schema.properties, [propName]: schemaForNext}}
-								: {...schema,
-									items: {
-										...schema.items,
-										properties: {...schema.items.properties, [propName]: schemaForNext}
-									}
-								};
-						};
-						changed.master = {
-							...changed.master,
-							fields: addField(changed.master.fields, splitted, event.value.property),
-						};
-						changed.schemaFormat = {
-							...changed.schemaFormat,
-							schema: addSchemaField(changed.schemaFormat.schema, splitted, event.value)
-						};
+						const fields = (newMaster.fields as Field[]) || [];
+						newMaster.fields = addField(fields, splitted, event.value.property);
 					}
 				} else if (isFieldUpdateEvent(event)) {
 					const updateField = (fields: Field[], path: string[], value: Field): Field[] => {
@@ -443,93 +348,20 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 							: field
 						);
 					};
-					const updateValidators =
-						(currentValidators: any, schema: any, path: string[], newValidators: any)
-						: any | undefined => {
-							const [next, ...remaining] = path;
-							if (next) {
-								let nextCurrentValidators, nextSchema, nextPath, nextValidators;
-								if (schema.items && schema.items.properties) {
-									nextCurrentValidators = currentValidators?.items?.properties?.[next];
-									nextSchema = schema.items.properties[next];
-									nextPath =  `/items/properties/${next}`;
-									nextValidators = updateValidators(
-										nextCurrentValidators,
-										nextSchema,
-										remaining,
-										newValidators
-									);
-								} else {
-									nextCurrentValidators = currentValidators?.properties?.[next];
-									nextSchema = schema.properties[next];
-									nextPath = `/properties/${next}`;
-									nextValidators = updateValidators(
-										nextCurrentValidators,
-										nextSchema,
-										remaining,
-										newValidators
-									);
-									if (nextCurrentValidators?.items) {
-										nextValidators = {items: nextCurrentValidators.items, ...nextValidators};
-									}
-								}
-								return updateSafelyWithJSONPointer(currentValidators, nextValidators, nextPath);
-							}
-							return newValidators;
-						};
-
-					changed.master = {
-						...changed.master,
-						fields: updateField(changed.master.fields, splitted, event.value),
-					};
-					if (event.value.validators) {
-						if (syncOnBadState(schemaFormat)) {
-							return;
-						}
-						changed.schema = {
-							...changed.schema,
-							validators: updateValidators(
-								{properties: changed.schemaFormat.validators},
-								changed.schemaFormat.schema,
-								splitted,
-								event.value.validators
-							).properties,
-						};
-					}
-					if (event.value.warnings) {
-						if (syncOnBadState(schemaFormat)) {
-							return;
-						}
-						changed.schema = {
-							...changed.schema,
-							warnings: updateValidators(
-								{properties: changed.schemaFormat.warnings},
-								changed.schemaFormat.schema,
-								splitted,
-								event.value.warnings
-							).properties,
-						};
-					}
+					newMaster.fields = updateField(newMaster.fields as Field[], splitted, event.value);
 				}
 			} else if (isOptionChangeEvent(event)) {
-				if (syncOnBadState(schemaFormat)) {
-					return;
-				}
 				const {path, value} = event;
-				changed.master = updateSafelyWithJSONPointer(changed.master, value, path);
-				changed.schemaFormat = updateSafelyWithJSONPointer(
-					changed.schemaFormat,
-					translate(value, changed.master.translations?.[this.state.lang]),
-					path
-				);
+				newMaster = updateSafelyWithJSONPointer(newMaster, value, path);
 			}
 		}
-		this.setState(changed, () => {
-			if (!this.state.master) {
-				return;
-			}
-			this.propagateState();
-		});
+		this.setState({loading: true});
+		try {
+			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
+			this.setState({master: newMaster, schemaFormat: newSchemaFormat, loading: false}, this.propagateState);
+		} catch (e) {
+			this.setState({loading: false});
+		}
 	}
 
 	propagateState() {

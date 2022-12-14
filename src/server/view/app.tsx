@@ -51,7 +51,8 @@ const initialLang = initialRoute.lang || DEFAULT_LANG;
 
 const apiClientImplementation = new ApiClientImplementation(
 	config.apiBase,
-	config.accessToken
+	config.accessToken,
+	config.personToken
 );
 
 const apiClient = new ApiClient(apiClientImplementation, initialLang);

@@ -239,11 +239,15 @@ export const Button = React.memo(function Button({children, active, className, .
 });
 
 export const Spinner = React.memo(function Spinner(
-	{color = "black", size = 32} : {color?: "white" | "black", size?: number}) {
+	{color = "black", size = 32, className, style = {}}
+	: {color?: "white" | "black", size?: number} & Classable & Stylable) {
 	return (
 		<_Spinner
-			style={size ? {width: size, height: size} : {}}
-			className={classNames(gnmspc("spinner-container"), gnmspc(color === "black" ? "spinner-black" : ""))}
+			style={size ? {width: size, height: size, ...style} : style}
+			className={classNames(
+				gnmspc("spinner-container"),
+				gnmspc(color === "black" ? "spinner-black" : ""),
+				className)}
 		/>
 	);
 });
@@ -257,7 +261,8 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 	}
 	return val;
 };
-interface JSONEditorProps extends Classable {
+
+interface JSONEditorProps extends Classable, Stylable {
 	value: any;
 	onChange: (value: any) => void;
 	rows?: number;
@@ -267,8 +272,10 @@ interface JSONEditorProps extends Classable {
 	onValidChange?: (valid: boolean) => void;
 	live?: boolean;
 }
+
 export const JSONEditor = React.forwardRef((
-	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className} : JSONEditorProps,
+	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className, style = {}}
+	: JSONEditorProps,
 	ref: React.Ref<HTMLTextAreaElement>) => {
 	const stringValue = JSON.stringify(value, undefined, 2);
 	const [tmpValue, setTmpValue] = React.useState<string>(stringValue);
@@ -325,7 +332,7 @@ export const JSONEditor = React.forwardRef((
 			className={classNames("form-control", editorNmspc(), !valid && editorNmspc("invalid"), className)}
 			onBlur={onBlur}
 			rows={_rows}
-			style={{width: "100%", resize: resizable ? "vertical" : "none"}}
+			style={{...style, width: "100%", resize: resizable ? "vertical" : "none"}}
 			onChange={_onChange}
 			value={tmpValue}
 			ref={ref}
@@ -368,7 +375,12 @@ export function FormJSONEditor<T>(
 
 	return (
 		<div className={className}>
-			<JSONEditor value={json} onChange={setJSON} onValidChange={setValid} live={true} ref={ref} />
+			<JSONEditor value={json} 
+			            onChange={setJSON}
+			            onValidChange={setValid}
+			            live={true}
+			            ref={ref}
+			            style={{height: "80vh"}} />
 			<SubmitButton onClick={onClickSubmitDraft}
 			              disabled={!json || !valid}
 			              variant={"default"}

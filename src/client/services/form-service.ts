@@ -6,11 +6,13 @@ export default class FormService {
 	private apiClient: ApiClient;
 	private formApiClient?: ApiClient;
 	private lang: Lang
+	private personToken?: string;
 
-	constructor(apiClient: ApiClient,lang: Lang, formApiClient?: ApiClient) {
+	constructor(apiClient: ApiClient,lang: Lang, formApiClient?: ApiClient, personToken?: string) {
 		this.apiClient = apiClient;
 		this.formApiClient = formApiClient;
 		this.lang = lang;
+		this.personToken = personToken;
 	}
 
 	private fetchJSON(path: string, query?: Record<string, unknown>, options?: Record<string, unknown>) {
@@ -33,19 +35,21 @@ export default class FormService {
 	}
 
 	update(form: any): Promise<void> {
-		return this.fetchJSON(`/${form.id}`, undefined, {method: "PUT", body: JSON.stringify(form), headers: {
-			"Content-Type": "application/json"
-		}});
+		return this.fetchJSON(`/${form.id}`, {personToken: this.personToken},
+			{method: "PUT", body: JSON.stringify(form), headers: {
+				"Content-Type": "application/json"
+			}});
 	}
 
 	create(form: any): Promise<RemoteMaster> {
-		return this.fetchJSON("", undefined, {method: "POST", body: JSON.stringify(form), headers: {
-			"Content-Type": "application/json"
-		}});
+		return this.fetchJSON("", {personToken: this.personToken},
+			{method: "POST", body: JSON.stringify(form), headers: {
+				"Content-Type": "application/json"
+			}});
 	}
 
 	delete(id: string): Promise<FormDeleteResult> {
-		return this.fetchJSON(`/${id}`, undefined, {method: "DELETE"});
+		return this.fetchJSON(`/${id}`, {personToken: this.personToken}, {method: "DELETE"});
 	}
 
 	async getForms(): Promise<FormListing[]> {
@@ -54,9 +58,10 @@ export default class FormService {
 	}
 
 	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
-		return this.fetchJSON("/transform", {lang: this.lang}, {method: "POST", body: JSON.stringify(master), headers: {
-			"Content-Type": "application/json"
-		}});
+		return this.fetchJSON("/transform", {lang: this.lang, personToken: this.personToken},
+			{method: "POST", body: JSON.stringify(master), headers: {
+				"Content-Type": "application/json"
+			}});
 	}
 
 	setLang(lang: Lang) {

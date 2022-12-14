@@ -485,7 +485,7 @@ describe("fields", () => {
 				expect((jsonFormat.uiSchema as any).datasetName["ui:multiLanguage"]).toBe(true);
 			});
 
-			it("unbounded mapped to uiSchema.items ", async () => {
+			it("unbounded mapped to uiSchema.items", async () => {
 				const unboundedMultiLanguageForm = {
 					context: "taxon", fields: [{ name: "alternativeVernacularName" }]
 				};

@@ -54,7 +54,7 @@ $accent-8: darken($accent, 3 * 10%);
 $accent-9: darken($accent, 4 * 10%);
 
 $hilight: $danger;
-$neutral-separating: $neutral-2;
+$neutral-separating: $neutral-7;
 
 $padding: 10px;
 $bRadius: 2px;
@@ -73,17 +73,23 @@ $bRadius: 2px;
 .ljb {
 	$root: &;
 	&-field {
-		& > span:hover {
-			background-color: $dark-3;
+
+		padding-left: $padding;
+
+		&-chooser {
+			color: $neutral-8;
+			background: initial;
+			border: none;
 		}
-		& > &-item-selected:hover {
-			background-color: $accent-4;
+
+		& > span:hover {
+			color: $neutral-1;
 		}
 		&-expanded, &-contracted {
 			width: 0px;
 		}
 		&-expanded:before, &-contracted:before {
-			color: white;
+			color: $neutral-8;
 			margin-left: -13px;
 		}
 		&-expanded:before {
@@ -108,8 +114,8 @@ $bRadius: 2px;
 			display: flex;
 
 			&-selected {
-				background-color: $accent;
-				color: white;
+				color: $accent-1;
+				font-weight: bold;
 			}
 		}
 		&-label {
@@ -165,16 +171,6 @@ $bRadius: 2px;
 
 	}
 
-	&-field-chooser {
-		color: white;
-		background: initial;
-		border: none;
-	}
-
-	&-field {
-		padding-left: $padding;
-	}
-
 	&-draggable-line {
 		background-color: #717171;
 	}
@@ -221,7 +217,6 @@ $bRadius: 2px;
 	&-json-editor {
 		font-family: monospace;
 		font-size: 12px;
-		height: 80vh !important;
 
 		&-invalid {
 		background-color: $danger-2;
