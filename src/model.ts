@@ -44,11 +44,13 @@ export type Translations = Partial<CompleteTranslations>
 type KnownFormOptions = {
 	prepopulatedDocument?: Record<string, JSONObject>;
 	prepopulateWithInformalTaxonGroups?: string[];
+	useSchemaCommmentsAsHelpTexts?: boolean;
 }
+export type FormOptions = JSONObject & KnownFormOptions;
 
 export type CommonFormat = {
 	id?: string;
-	options?: JSONObject & KnownFormOptions;
+	options?: FormOptions;
 	title?: string;
 	logo?: string;
 	description?: string;

@@ -87,7 +87,7 @@ export default class FieldService {
 			this.addTaxonSets,
 			rootField ? this.addExtra({...rootField, fields: expandedMaster.fields}) : bypass,
 			master => rootField && rootProperty
-				? this.uiSchemaService.expandUiSchema(master, rootField, rootProperty)
+				? this.uiSchemaService.expandUiSchema(master, rootField, rootProperty, master.options, lang)
 				: master
 		);
 
