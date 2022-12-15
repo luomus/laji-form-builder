@@ -2,19 +2,19 @@ import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
-import LajiFormInterface from "../LajiFormInterface";
+import LajiFormInterface from "../../LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
 	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, 
-} from "../utils";
-import { parseJSONPointer, JSONSchemaBuilder } from "../../utils";
-import LajiForm from "./LajiForm";
+} from "../../utils";
+import { parseJSONPointer, JSONSchemaBuilder } from "../../../utils";
+import LajiForm from "../LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/templates/TitleField";
 import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions,
 	isEmptyString, immutableDelete } from "laji-form/lib/utils";
-import { JSONEditor } from "./components";
-import { Context } from "./Context";
+import { JSONEditor } from "../components";
+import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
 
 const PREFIX = "$";

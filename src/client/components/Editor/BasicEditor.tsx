@@ -1,14 +1,14 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
-import { unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getPropertyContextName } from "../../utils";
+import { unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getPropertyContextName } from "../../../utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
-import { Context } from "./Context";
-import LajiForm from "./LajiForm";
-import { Spinner } from "./components";
+import { Context } from "../Context";
+import LajiForm from "../LajiForm";
+import { Spinner } from "../components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { Property, PropertyContext, Field, JSONSchema } from "../../model";
-import { CancellablePromise, detectChangePaths, makeCancellable } from "../utils";
+import { Property, PropertyContext, Field, JSONSchema } from "../../../model";
+import { CancellablePromise, detectChangePaths, makeCancellable } from "../../utils";
 
 interface BasicEditorState {
 	childProps?: Property[] | false;

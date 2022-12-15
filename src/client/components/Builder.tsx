@@ -4,7 +4,7 @@ import { Theme } from "laji-form/lib/themes/theme";
 import { updateSafelyWithJSONPointer, immutableDelete, constructTranslations } from "laji-form/lib/utils";
 import { unprefixProp, translate } from "../../utils";
 import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnmspc } from "../utils";
-import { Editor } from "./Editor";
+import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
 import { Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations } from "../../model";
