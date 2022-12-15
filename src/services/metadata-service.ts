@@ -1,30 +1,22 @@
-import memoize, { Memoized } from "memoizee";
 import ApiClient from "../api-client";
 import { Property, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, JSONSchemaV6Enum,
 	JSONSchemaEnumOneOf, Field } from "../model";
 import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } from "../utils";
+import HasCache from "./has-cache";
 
-export default class MetadataService {
+export default class MetadataService extends HasCache {
 	private apiClient: ApiClient;
 	private lang: Lang;
 	private allRanges: Record<string, Range[]> | undefined;
-	private cacheStore: (Memoized<any>)[] = [];
 
 	constructor(apiClient: ApiClient, lang: Lang) {
+		super();
 		this.apiClient = apiClient;
 		this.lang = lang;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	private cache<F extends Function>(fn: F) {
-		const cached = memoize(fn, { promise: true, primitive: true });
-		this.cacheStore.push(cached);
-		return cached;
-	}
-
 	flush() {
-		this.cacheStore.forEach(c => c.clear());
-		this.cacheStore = [];
+		super.flush();
 		this.allRanges = undefined;
 	}
 

@@ -1,11 +1,11 @@
 import * as config from "../../../config.json";
 import { reduceWith, translate, dictionarify, bypass } from "../../utils";
-import memoize, { Memoized } from "memoizee";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { addEmptyOptions, removeTranslations } from "./field-service";
 import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster } from "../../model";
 import ApiClient, { ApiClientImplementation } from "../../api-client";
 import StoreService from "./store-service";
+import HasCache from "../../services/has-cache";
 
 /**
  * Intended to be used for checked errors, which the controller should return with 422.
@@ -74,19 +74,13 @@ const translateSafely = (lang?: Lang) => (f: Master) => (isLang(lang) && f.trans
 	? translate(f, (f.translations[lang] as {[key: string]: string}))
 	: f;
 
-export default class MainService {
-	private cacheStore: (Memoized<any>)[] = [];
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	private cache = <F extends Function>(fn: F, options?: memoize.Options & { clearDepLength?: number }) => {
-		const cached = memoize(fn, { promise: true, primitive: true, ...(options || {}) });
-		this.cacheStore.push(cached);
-		return cached;
-	};
+export default class MainService extends HasCache {
 	private metadataService = new MetadataService(apiClient, DEFAULT_LANG);
 	private storeService = new StoreService();
 	private fieldService = new FieldService(apiClient, this.metadataService, this.storeService, DEFAULT_LANG);
 
 	constructor() {
+		super();
 		this.exposeFormListing = this.exposeFormListing.bind(this);
 	}
 
@@ -189,8 +183,7 @@ export default class MainService {
 	}
 
 	flush() {
-		this.cacheStore.forEach(c => c.clear());
-		this.cacheStore = [];
+		super.flush();
 		this.storeService.flush();
 		this.metadataService.flush();
 		this.warmup();

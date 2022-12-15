@@ -1,7 +1,7 @@
-import memoize, { Memoized } from "memoizee";
 import { Master, RemoteMaster } from "../../model";
 import { fetchJSON, dictionarifyByKey, isObject } from "../../utils";
 import * as config from "../../../config.json";
+import HasCache from "../../services/has-cache";
 
 export class StoreError extends Error {
 	status: number;
@@ -44,15 +44,8 @@ type MaybeStoreError<T> = T | StoreErrorModel
 const isStoreError = (response: any): response is StoreErrorModel => 
 	isObject(response) && response.status > 400;
 
-export default class StoreService {
+export default class StoreService extends HasCache {
 	private forms: Record<string, RemoteMaster>;
-	private cacheStore: (Memoized<any>)[] = [];
-	// eslint-disable-next-line @typescript-eslint/ban-types
-	private cache = <F extends Function>(fn: F, options?: memoize.Options & { clearDepLength?: number }) => {
-		const cached = memoize(fn, { promise: true, primitive: true, ...(options || {}) });
-		this.cacheStore.push(cached);
-		return cached;
-	};
 
 	getForms = this.cache(async (): Promise<RemoteMaster[]> => {
 		const response = await formFetch<ListResponse<RemoteMaster[]>>("/", {page_size: 10000});
@@ -112,10 +105,5 @@ export default class StoreService {
 		delete this.forms[id];
 		this.getForms.clear();
 		return response;
-	}
-
-	flush() {
-		this.cacheStore.forEach(c => c.clear());
-		this.cacheStore = [];
 	}
 }
