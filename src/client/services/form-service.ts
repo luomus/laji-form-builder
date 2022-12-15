@@ -1,14 +1,16 @@
 import ApiClient from "../../api-client";
 import { FormDeleteResult, FormListing, Lang, Master, RemoteMaster, SchemaFormat } from "../../model";
+import HasCache from "../../services/has-cache";
 
 
-export default class FormService {
+export default class FormService extends HasCache {
 	private apiClient: ApiClient;
 	private formApiClient?: ApiClient;
 	private lang: Lang
 	private personToken?: string;
 
 	constructor(apiClient: ApiClient,lang: Lang, formApiClient?: ApiClient, personToken?: string) {
+		super();
 		this.apiClient = apiClient;
 		this.formApiClient = formApiClient;
 		this.lang = lang;
@@ -21,24 +23,28 @@ export default class FormService {
 			: this.apiClient.fetchJSON(`/forms/${path}`, query as any, options);
 	}
 
-	getMaster(id: string): Promise<Master> {
+	getMaster = this.cache((id: string): Promise<Master> => {
 		const query: any = {format: "json"};
 		if (!this.formApiClient) {
 			query.lang = "multi";
 		}
 		query.expand = false;
 		return this.fetchJSON(`/${id}`, query);
-	}
+	});
 
-	getSchemaFormat(id: string): Promise<SchemaFormat> {
-		return this.fetchJSON(`/${id}`, {format: "schema", lang: this.lang});
-	}
+	private getSchemaFormatCache = this.cache((id: string) => this.cache((lang: Lang): Promise<SchemaFormat> => 
+		this.fetchJSON(`/${id}`, {format: "schema", lang})
+	));
 
-	update(form: any): Promise<void> {
-		return this.fetchJSON(`/${form.id}`, {personToken: this.personToken},
+	getSchemaFormat = (id: string) => this.getSchemaFormatCache(id)(this.lang);
+
+	async update(form: any): Promise<void> {
+		await this.fetchJSON(`/${form.id}`, {personToken: this.personToken},
 			{method: "PUT", body: JSON.stringify(form), headers: {
 				"Content-Type": "application/json"
 			}});
+		this.getMaster.delete(form.id);
+		this.getSchemaFormatCache(form.id).clear();
 	}
 
 	create(form: any): Promise<RemoteMaster> {
@@ -48,14 +54,18 @@ export default class FormService {
 			}});
 	}
 
-	delete(id: string): Promise<FormDeleteResult> {
-		return this.fetchJSON(`/${id}`, {personToken: this.personToken}, {method: "DELETE"});
+	async delete(id: string): Promise<FormDeleteResult> {
+		const response = await this.fetchJSON(`/${id}`, {personToken: this.personToken}, {method: "DELETE"});
+		this.getMaster.delete(id);
+		this.getSchemaFormatCache(id).clear();
+		this.getForms.clear();
+		return response;
 	}
 
-	async getForms(): Promise<FormListing[]> {
+	getForms = this.cache(async (): Promise<FormListing[]> => {
 		const response = (await this.fetchJSON("", undefined));
 		return this.formApiClient ? response.forms : response.results;
-	}
+	});
 
 	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
 		return this.fetchJSON("/transform", {lang: this.lang, personToken: this.personToken},
