@@ -31,12 +31,14 @@
     "react-jsonschema-form"
   ],
   "dependencies": {
+    "@types/deep-diff": "^1.0.2",
     "@types/memoizee": "^0.4.3",
     "@types/react": "^16.14.14",
     "@types/react-bootstrap": "^0.32.25",
     "@types/react-dom": "^17.0.9",
     "@types/react-spinner": "^0.2.0",
     "cross-fetch": "^3.1.5",
+    "deep-diff": "^1.0.2",
     "deepmerge": "^4.2.2",
     "fast-json-patch": "^3.1.0",
     "json-schema": "^0.3.0",

@@ -31,6 +31,17 @@ $warning-7: darken($warning, 2 * 10%);
 $warning-8: darken($warning, 3 * 10%);
 $warning-9: darken($warning, 4 * 10%);
 
+$success: #6ed21d;
+$success-1: lighten($success, 4 * 10%);
+$success-2: lighten($success, 3 * 10%);
+$success-3: lighten($success, 2 * 10%);
+$success-4: lighten($success, 1 * 10%);
+$success-5: $success;
+$success-6: darken($success, 1 * 10%);
+$success-7: darken($success, 2 * 10%);
+$success-8: darken($success, 3 * 10%);
+$success-9: darken($success, 4 * 10%);
+
 $dark: #47494e;
 $dark-1: lighten($dark, 4 * 10%);
 $dark-2: lighten($dark, 3 * 10%);
@@ -302,5 +313,21 @@ $bRadius: 2px;
 
 	.modal-content {
 		@include editor;
+	}
+
+	&-wide-modal {
+		width: 90%;
+	}
+
+	&-diff {
+		&-delete {
+			background-color: $danger-1;
+		}
+		&-edit {
+			background-color: $accent-1;
+		}
+		&-new {
+			background-color: $success-1;
+		}
 	}
 }

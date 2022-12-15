@@ -4,9 +4,8 @@ import memoize from "memoizee";
 import { 
 	DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, FormJSONEditor, HasChildren
 } from "./components";
-import {
-	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
-} from "../utils";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded,
+	makeCancellable } from "../utils";
 import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MaybeError, isValid } from "./Builder";
@@ -17,6 +16,7 @@ import OptionsEditor from "./OptionsEditor";
 import { Lang, Master, SchemaFormat, Field as FieldOptions } from "../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { findNearestParentSchemaElem, translate as translateKey } from "laji-form/lib/utils";
+import diff, { Diff, DiffDeleted, DiffEdit, DiffNew } from "deep-diff";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -38,6 +38,7 @@ export interface EditorProps extends Stylable, Classable {
 	onSaveFromState: () => void;
 	saving?: boolean;
 	loading?: boolean;
+	edited?: boolean;
 	displaySchemaTabs: boolean;
 	errorMsg?: string;
 	onRemountLajiForm?: () => void;
@@ -50,6 +51,7 @@ export interface EditorState {
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
 	jsonEditorOpen?: boolean;
+	diffViewerOpen?: boolean;
 }
 
 class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
@@ -130,7 +132,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               containerRef={this.containerRef}
 				               saving={this.props.saving}
 				               loading={this.props.loading}
+				               edited={this.props.edited}
 				               openJSONEditor={this.openJSONEditor}
+				               openDiffViewer={this.openDiffViewer}
 				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
@@ -208,6 +212,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					                                                   onHide={this.hideJSONEditor}
 					                                                   onSave={this.props.onSave}
 					                                                   onChange={this.props.onChange} />}
+					{this.state.diffViewerOpen && <DiffViewerModal master={master}
+					                                               onHide={this.hideDiffViewer} />}
 				</div>
 			) : null;
 	}
@@ -308,6 +314,14 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	hideJSONEditor = () => {
 		this.setState({jsonEditorOpen: false});
+	}
+
+	openDiffViewer = () => {
+		this.setState({diffViewerOpen: true});
+	}
+
+	hideDiffViewer = () => {
+		this.setState({diffViewerOpen: false});
 	}
 }
 
@@ -515,8 +529,10 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	onSave: () => void;
 	saving?: boolean;
 	loading?: boolean;
+	edited?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
+	openDiffViewer: () => void;
 	onRemountLajiForm?: () => void;
 }
 
@@ -535,30 +551,40 @@ const EditorToolbar = ({
 	onSelectedOptions,
 	saving,
 	loading,
+	edited,
 	containerRef,
 	displaySchemaTabs,
 	openJSONEditor,
+	openDiffViewer,
 	onRemountLajiForm
 }: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
-	const {Glyphicon} = React.useContext(Context).theme;
+	const {Glyphicon, ButtonGroup} = React.useContext(Context).theme;
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser onChange={onLangChange} />
-			<ElemPicker className={classNames(gnmspc("elem-picker"), gnmspc("ml"))}
-			            onSelectedField={onSelectedField}
-			            onSelectedOptions={onSelectedOptions}
-			            containerRef={containerRef} />
-			{onRemountLajiForm && <Button onClick={onRemountLajiForm} small>
-				<Glyphicon glyph="refresh"  />
-			</Button>}
-			<Button onClick={openJSONEditor} small>JSON</Button>
+			<ButtonGroup>
+				<ElemPicker className={classNames(gnmspc("elem-picker"), gnmspc("ml"))}
+				            onSelectedField={onSelectedField}
+				            onSelectedOptions={onSelectedOptions}
+				            containerRef={containerRef} />
+				{onRemountLajiForm && (
+					<Button onClick={onRemountLajiForm} small>
+						<Glyphicon glyph="refresh"  />
+					</Button>
+				) }
+				<Button onClick={openJSONEditor} small>JSON</Button>
+				<Button onClick={openDiffViewer} small disabled={!edited}>diff</Button>
+			</ButtonGroup>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
 			<div style={{marginLeft: "auto", display: "flex"}}>
 				{ loading && <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> }
 				<EditorToolbarSeparator />
-				<Button small variant="success" disabled={saving} onClick={onSave}>{translations.Save}</Button>
+				<Button small
+				        variant="success"
+				        disabled={!edited || saving}
+				        onClick={onSave}>{translations.Save}</Button>
 			</div>
 		</div>
 	);
@@ -786,7 +812,7 @@ const ActiveEditor = React.memo(function ActiveEditor(
 	);
 });
 
-interface FormJSONEditorProps {
+type FormJSONEditorProps = {
 	master: Master;
 	onHide: () => void;
 	onChange: EditorProps["onChange"];
@@ -796,8 +822,7 @@ interface FormJSONEditorProps {
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	{master, onHide, onSave, onChange}: FormJSONEditorProps)
 {
-	const {theme, translations} = React.useContext(Context);
-	const {Modal} = theme;
+	const {translations} = React.useContext(Context);
 
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
@@ -823,15 +848,127 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	}, [tmpValue, translations, onSubmit, onHide]);
 
 	return (
-		<Modal show={true} onHide={onHideCheckForChanges} dialogClassName={classNames(gnmspc())}>
+		<GenericModal onHide={onHideCheckForChanges}>
+			<FormJSONEditor value={master}
+			                onSubmit={onSubmit}
+			                onSubmitDraft={onSubmitDraft}
+			                onChange={setTmpValue} />
+		</GenericModal>
+	);
+});
+
+type DiffViewerProps = {
+	master: Master;
+	onHide: () => void;
+}
+
+type NonArrayDiff = DiffNew<unknown> | DiffEdit<unknown> | DiffDeleted<unknown>;
+
+const getDiff = memoize((obj1: unknown, obj2: unknown) => {
+	const flattenArrays = (diffs: Diff<unknown>[]): NonArrayDiff[] => {
+		return diffs.reduce((_diffs, d) => {
+			if (d.kind === "A") {
+				_diffs.push({...d.item, path: [...(d.path || []), d.index]} as NonArrayDiff);
+			} else {
+				_diffs.push(d);
+			}
+			return _diffs;
+		}, [] as NonArrayDiff[]);
+	};
+	const diffs =	diff(obj1, obj2);
+	return diffs ? flattenArrays(diffs) : [];
+});
+
+const DiffViewerModal = React.memo(function DiffViewerModal({master, onHide}: DiffViewerProps) {
+	const {formService} = React.useContext(Context);
+	const [remoteMaster, setRemoteMaster] = React.useState<Master | undefined>(undefined);
+	React.useEffect(() => {
+		if (!master.id) {
+			return;
+		}
+		const promise = makeCancellable(formService.getMaster(master.id).then(setRemoteMaster));
+		return promise.cancel;
+	}, [formService, master.id]);
+	return (
+		<GenericModal onHide={onHide}>
+			<DiffsViewer diffs={getDiff(remoteMaster, master)} />
+		</GenericModal>
+	);
+});
+
+const DiffPath = ({path}: Diff<unknown>) => <span>{path?.join(".")}</span>;
+
+const DiffKindMapper = (diff: Diff<unknown>) => {
+	switch (diff.kind) {
+	case "N":
+		return <DiffNewViewer {...diff} />;
+	case "D":
+		return <DiffDeletedViewer {...diff} />;
+	case "E":
+		return <DiffEditViewer {...diff} />;
+	default:
+		 return null;
+	}
+};
+
+const DiffNewViewer = (diff: DiffNew<unknown>) => {
+	return <span>{JSON.stringify(diff.rhs)}</span>;
+};
+
+const DiffDeletedViewer = (diff: DiffDeleted<unknown>) => {
+	return <span>{JSON.stringify(diff.lhs)}</span>;
+};
+
+const DiffEditViewer = (diff: DiffEdit<unknown>) => {
+	return <span>{`${JSON.stringify(diff.lhs)} ➞ ${JSON.stringify(diff.rhs)}`}</span>;
+};
+
+const diffNmspc = nmspc("diff");
+
+const mapDiffClassName = (kind: Diff<unknown>["kind"]) => {
+	switch (kind) {
+	case "N":
+		return diffNmspc("new");
+	case "D":
+		return diffNmspc("delete");
+	case "E":
+		return diffNmspc("edit");
+	default:
+		 return "";
+	}
+};
+
+const DiffViewerRow = (diff: Diff<unknown>) => (
+	<tr className={mapDiffClassName(diff.kind)}>
+		<th><DiffPath {...diff} /></th>
+		<td>
+			<DiffKindMapper {...diff} />
+		</td>
+	</tr>
+);
+
+const DiffsViewer = ({diffs}: {diffs: Diff<unknown>[]}) => {
+	const {theme} = React.useContext(Context);
+	const {Table} = theme;
+	return (
+		<Table bordered condensed>
+			<tbody>
+				{diffs.map(d => <DiffViewerRow key={d.path?.join() + d.kind} {...d}/>)}
+			</tbody>
+		</Table>
+	);
+};
+
+const GenericModal = ({onHide, children}: {onHide: () => void} & HasChildren) => {
+	const {theme} = React.useContext(Context);
+	const {Modal} = theme;
+	return (
+		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"))}>
 			<Modal.Header closeButton={true}>
 			</Modal.Header>
 			<Modal.Body>
-				<FormJSONEditor value={master}
-				                onSubmit={onSubmit}
-				                onSubmitDraft={onSubmitDraft}
-				                onChange={setTmpValue} />
+				{ children }
 			</Modal.Body>
 		</Modal>
 	);
-});
+};

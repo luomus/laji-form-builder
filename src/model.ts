@@ -71,7 +71,7 @@ export type CommonExpanded = CommonFormat & {
 	uiSchema?: JSONObject;
 }
 
-type JSON = string | number | boolean | JSONObject | JSON[];
+export type JSON = string | number | boolean | JSONObject | JSON[];
 export type JSONObject = { [prop: string]: JSON };
 
 export type Master = CommonExpanded & {

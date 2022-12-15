@@ -41,6 +41,7 @@ export interface BuilderState {
 	tmp?: boolean;
 	saving?: boolean
 	loading?: boolean;
+	edited?: boolean;
 }
 
 export type MaybeError<T> = T | "error";
@@ -220,7 +221,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {schemaFormat, master, saving, loading, errorMsg} = this.state;
+		const {schemaFormat, master, saving, loading, edited, errorMsg} = this.state;
 		return (
 			<Editor
 				master={master}
@@ -233,6 +234,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				height={EDITOR_HEIGHT}
 				saving={saving}
 				loading={loading}
+				edited={edited}
 				displaySchemaTabs={this.props.displaySchemaTabs ?? true}
 				className={gnmspc("")}
 				errorMsg={errorMsg}
@@ -358,7 +360,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.setState({loading: true});
 		try {
 			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
-			this.setState({master: newMaster, schemaFormat: newSchemaFormat, loading: false}, this.propagateState);
+			this.setState({
+				master: newMaster,
+				schemaFormat: newSchemaFormat,
+				loading: false,
+				edited: true
+			}, this.propagateState);
 		} catch (e) {
 			this.setState({loading: false});
 		}
