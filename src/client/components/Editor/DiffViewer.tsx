@@ -99,7 +99,7 @@ const DiffsViewer = ({diffs}: {diffs: Diff<unknown>[]}) => {
 	const {theme} = React.useContext(Context);
 	const {Table} = theme;
 	return (
-		<Table bordered condensed>
+		<Table bordered condensed className={diffNmspc()}>
 			<tbody>
 				{diffs.map(d => <DiffViewerRow key={d.path?.join() + d.kind} {...d}/>)}
 			</tbody>
