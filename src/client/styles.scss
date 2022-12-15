@@ -108,6 +108,9 @@ $bRadius: 2px;
 			color: $neutral-8;
 			margin-left: -13px;
 		}
+		&-expanded:hover::before, &-contracted:hover::before {
+			color: $neutral-1;
+		}
 		&-expanded:before {
 			content: "▼";
 		}
