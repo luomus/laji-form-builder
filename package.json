@@ -42,7 +42,7 @@
     "deepmerge": "^4.2.2",
     "fast-json-patch": "^3.1.0",
     "json-schema": "^0.3.0",
-    "laji-form": "^14.1.8",
+    "laji-form": "^14.1.9",
     "memoizee": "^0.4.14",
     "parse-prop-types": "git+https://git@github.com/olzraiti/parse-prop-types.git#c8a4540d8d0af0e47187c1d0de155c11be84b9ce",
     "react": "^17.0.2",
