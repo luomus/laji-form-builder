@@ -151,7 +151,6 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 				} else {
 					const translationKey =  `@${this.props.path}${changedPath}`;
 					if (isEmptyString(currentValue)) {
-						events.push({type: "translations", key: translationKey, value: newValue});
 						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
 					} else if (doConfirm()) {
 						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, translationKey, changedPath);
