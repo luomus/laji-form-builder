@@ -153,7 +153,6 @@ const formService = new FormService(
 				          formData={formData}
 				          apiClient={apiClient}
 				          theme={lajiFormBs3}
-				          uiSchemaContext={{}}
 				          notifier={notifier}
 				          renderSubmit={false}
 				          showShortcutButton={false} />
