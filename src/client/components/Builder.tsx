@@ -228,7 +228,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				schemaFormat={schemaFormat}
 				onChange={this.onEditorChange}
 				onSave={this.onSave}
-				onSaveFromState={this.onSaveFromState}
 				onLangChange={this.onLangChange}
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
@@ -403,13 +402,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["Save.error"]);
 			this.setState({saving: false});
 		}
-	}
-
-	onSaveFromState = () => {
-		if (!this.state.master) {
-			return;
-		}
-		this.onSave(this.state.master);
 	}
 
 	onCreate = async (master: Master, save = false) => {

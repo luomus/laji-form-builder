@@ -340,12 +340,6 @@ export const JSONEditor = React.forwardRef((
 	);
 });
 
-export const SubmitButton = (props: ButtonProps) => {
-	const {theme} = React.useContext(Context);
-	const {Button} = theme;
-	return <Button variant={"success"} {...props}>{props.children}</Button>;
-};
-
 interface FormJSONEditorProps<T> extends Classable {
 	onSubmit: (value: T) => void;
 	onSubmitDraft: (value: T) => void;
@@ -381,16 +375,17 @@ export function FormJSONEditor<T>(
 			            live={true}
 			            ref={ref}
 			            style={{height: "80vh"}} />
-			<SubmitButton onClick={onClickSubmitDraft}
-			              disabled={!json || !valid}
-			              variant={"default"}
-			              className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
+			<Button onClick={onClickSubmitDraft}
+			        disabled={!json || !valid}
+			        variant={"default"}
+			        className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
 			>{translations["Wizard.option.json.import.draft"]}
-			</SubmitButton>
-			<SubmitButton onClick={onClickSubmit}
-			              disabled={!json || !valid}
+			</Button>
+			<Button onClick={onClickSubmit}
+			        variant="primary"
+			        disabled={!json || !valid}
 			>{translations["Save"]}
-			</SubmitButton>
+			</Button>
 		</div>
 	);
 }

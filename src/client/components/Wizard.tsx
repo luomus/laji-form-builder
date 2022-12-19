@@ -1,7 +1,7 @@
 import React from "react";
 import LajiForm from "./LajiForm";
 import _LajiForm from "laji-form/lib/components/LajiForm";
-import { FormJSONEditor, HasChildren, Spinner, Stylable, SubmitButton } from "./components";
+import { FormJSONEditor, HasChildren, Spinner, Stylable, Button } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult } from "../../model";
 import { JSONSchemaBuilder } from "../../utils";
@@ -226,10 +226,10 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
-			<SubmitButton onClick={onSubmit}>{translations["Save"]}</SubmitButton>
-			<SubmitButton onClick={onSubmitDraft} variant="default">
+			<Button onClick={onSubmit}>{translations["Save"]}</Button>
+			<Button onClick={onSubmitDraft} variant="default">
 				{translations["Wizard.option.json.import.draft"]}
-			</SubmitButton>
+			</Button>
 		</LajiForm>
 	);
 }
