@@ -1,6 +1,6 @@
 import * as React from "react";
 import memoize from "memoizee";
-import { 
+import {
 	DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, FormJSONEditor, HasChildren
 } from "../components";
 import {
@@ -36,7 +36,6 @@ export interface EditorProps extends Stylable, Classable {
 	height?: number;
 	onHeightChange?: (height: number) => void;
 	onSave: (master: Master) => void;
-	onSaveFromState: () => void;
 	saving?: boolean;
 	loading?: boolean;
 	edited?: boolean;
@@ -52,7 +51,7 @@ export interface EditorState {
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
 	jsonEditorOpen?: boolean;
-	diffViewerOpen?: boolean;
+	saveModalOpen?: boolean;
 }
 
 class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
@@ -127,7 +126,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				<EditorToolbar active={this.state.activeEditorMode}
 				               onEditorChange={this.onActiveEditorChange}
 				               onLangChange={this.props.onLangChange}
-				               onSave={this.props.onSaveFromState} 
+				               onSave={this.confirmSave} 
 				               onSelectedField={this.onPickerSelectedField}
 				               onSelectedOptions={this.onPickerSelectedOptions}
 				               containerRef={this.containerRef}
@@ -135,7 +134,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               loading={this.props.loading}
 				               edited={this.props.edited}
 				               openJSONEditor={this.openJSONEditor}
-				               openDiffViewer={this.openDiffViewer}
+				               openSaveConfirm={this.openSaveConfirm}
 				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
@@ -211,10 +210,11 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
 					                                                   onHide={this.hideJSONEditor}
-					                                                   onSave={this.props.onSave}
+					                                                   onSave={this.confirmSave}
 					                                                   onChange={this.props.onChange} />}
-					{this.state.diffViewerOpen && <DiffViewerModal master={master}
-					                                               onHide={this.hideDiffViewer} />}
+					{this.state.saveModalOpen && <SaveModal master={master}
+					                                        onSave={this.onSave}
+					                                        onHide={this.hideSaveConfirm} />}
 				</div>
 			) : null;
 	}
@@ -317,12 +317,20 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		this.setState({jsonEditorOpen: false});
 	}
 
-	openDiffViewer = () => {
-		this.setState({diffViewerOpen: true});
+	openSaveConfirm = () => {
+		this.setState({saveModalOpen: true});
 	}
 
-	hideDiffViewer = () => {
-		this.setState({diffViewerOpen: false});
+	hideSaveConfirm = () => {
+		this.setState({saveModalOpen: false});
+	}
+
+	confirmSave = () => {
+		this.openSaveConfirm();
+	}
+
+	onSave = () => {
+		this.props.master && this.props.onSave(this.props.master);
 	}
 }
 
@@ -533,7 +541,7 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	edited?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
-	openDiffViewer: () => void;
+	openSaveConfirm: () => void;
 	onRemountLajiForm?: () => void;
 }
 
@@ -556,7 +564,7 @@ const EditorToolbar = ({
 	containerRef,
 	displaySchemaTabs,
 	openJSONEditor,
-	openDiffViewer,
+	openSaveConfirm,
 	onRemountLajiForm
 }: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
@@ -575,7 +583,6 @@ const EditorToolbar = ({
 					</Button>
 				) }
 				<Button onClick={openJSONEditor} small>JSON</Button>
-				<Button onClick={openDiffViewer} small disabled={!edited}>diff</Button>
 			</ButtonGroup>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
@@ -583,7 +590,7 @@ const EditorToolbar = ({
 				{ loading && <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> }
 				<EditorToolbarSeparator />
 				<Button small
-				        variant="success"
+				        variant="primary"
 				        disabled={!edited || saving}
 				        onClick={onSave}>{translations.Save}</Button>
 			</div>
@@ -694,11 +701,16 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	);
 });
 
-const DiffViewerModal = ({onHide, ...props}: Pick<GenericModalProps, "onHide"> & DiffViewerProps) => (
-	<GenericModal onHide={onHide}>
-		<DiffViewer {...props} />
-	</GenericModal>
-);
+const SaveModal = ({onSave, onHide, ...props}
+	: {onSave: () => void} & Pick<GenericModalProps, "onHide"> & DiffViewerProps) => {
+	const {translations} = React.useContext(Context);
+	return (
+		<GenericModal onHide={onHide}>
+			<DiffViewer {...props} />
+			<Button onClick={onSave} variant="primary">{translations.Save}</Button>
+		</GenericModal>
+	)
+};
 
 type GenericModalProps = {
 	onHide: () => void;
