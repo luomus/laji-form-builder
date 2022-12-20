@@ -589,7 +589,8 @@ const EditorToolbar = ({
 			<div style={{marginLeft: "auto", display: "flex"}}>
 				{ loading && <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> }
 				<EditorToolbarSeparator />
-				<Button small
+				<Button id={gnmspc("open-save-view")}
+				        small
 				        variant="primary"
 				        disabled={!edited || saving}
 				        onClick={onSave}>{translations.Save}</Button>
@@ -705,7 +706,7 @@ const SaveModal = ({onSave, onHide, ...props}
 	: {onSave: () => void} & Pick<GenericModalProps, "onHide"> & DiffViewerProps) => {
 	const {translations} = React.useContext(Context);
 	return (
-		<GenericModal onHide={onHide}>
+		<GenericModal onHide={onHide} className={gnmspc("save-modal")}>
 			<DiffViewer {...props} />
 			<Button onClick={onSave} variant="primary">{translations.Save}</Button>
 		</GenericModal>
@@ -714,13 +715,13 @@ const SaveModal = ({onSave, onHide, ...props}
 
 type GenericModalProps = {
 	onHide: () => void;
-} & HasChildren
+} & HasChildren & Classable
 
-const GenericModal = ({onHide, children}: GenericModalProps) => {
+const GenericModal = ({onHide, children, className}: GenericModalProps) => {
 	const {theme} = React.useContext(Context);
 	const {Modal} = theme;
 	return (
-		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"))}>
+		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"), className)}>
 			<Modal.Header closeButton={true}>
 			</Modal.Header>
 			<Modal.Body>

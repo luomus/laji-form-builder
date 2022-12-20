@@ -2,6 +2,8 @@ import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { isObject, parseJSONPointer } from "../utils";
+import { ContextProps } from "./components/Context";
+import { immutableDelete, isEmptyString, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -320,3 +322,45 @@ export const scrollIntoViewIfNeeded = (
 	container = document.documentElement
 ) =>
 	container.scrollTo(0, getScrollPositionForScrollIntoViewIfNeeded(elem, topOffset, bottomOffset, container));
+
+
+export function handleTranslationChange<T>(
+	obj: T,
+	events: any[],
+	path: string,
+	changedPath: string,
+	context: ContextProps,
+	currentValue: string,
+	newValue: string,
+) {
+	const doConfirm = () => !confirm(context.translations["editor.confirmDontTranslate"]);
+
+	if (newValue === undefined) {
+		if (currentValue?.[0] === "@") {
+			events.push({type: "translations", op: "delete", key: currentValue});
+		}
+		return immutableDelete(obj, changedPath);
+	} else if (currentValue?.[0] === "@") {
+		events.push({type: "translations", key: currentValue, value: newValue ?? ""});
+		return obj;
+	} else {
+		const translationKey =  `@${path}${changedPath}`;
+		if (isEmptyString(currentValue)) {
+			return updateSafelyWithJSONPointer(obj, newValue, changedPath);
+		} else if (doConfirm()) {
+			events.push(
+				{
+					type: "translations",
+					op: "add",
+					key: translationKey,
+					value: ["fi", "sv", "en"].reduce((byLang, lang) => ({
+						...byLang,
+						[lang]: lang === context.editorLang ? newValue : currentValue
+					}), {})
+				});
+			return updateSafelyWithJSONPointer(obj, translationKey, changedPath);
+		} else {
+			return updateSafelyWithJSONPointer(obj, newValue, changedPath);
+		}
+	}
+}

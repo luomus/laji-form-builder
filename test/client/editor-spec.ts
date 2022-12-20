@@ -180,7 +180,6 @@ describe("Editor", () => {
 			});
 		});
 
-
 		describe("Options editor", () => {
 			it("selected when clicked", async () => {
 				await builder.tabs.$options.click();
@@ -194,6 +193,23 @@ describe("Editor", () => {
 			it("shows form after loaded", async () => {
 				await builder.optionsEditor.waitUntilLoaded();
 				expect(await isDisplayed(builder.optionsEditor.$form)).toBe(true);
+			});
+
+			it("when empty adding when empty adds with all langs", async () => {
+				const $emptyStringField = (await builder.editorLocate("logo")).$("input");
+				await updateValue($emptyStringField, "foo");
+
+				await builder.waitUntilLoaded();
+
+				await builder.saveModal.open();
+				const diff = await builder.saveModal.getDiff();
+
+				expect(diff).toEqual([
+					{kind: "new", rhs: "foo", path: "/logo"}
+				]);
+
+				await builder.saveModal.close();
+				await builder.lang.changeTo("fi");
 			});
 		});
 	});

@@ -5,10 +5,10 @@ import { Spinner, Classable, Stylable, Clickable } from "../components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "../Builder";
 import { Property, SchemaFormat, Master, PropertyRange, Lang } from "../../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
-import { detectChangePaths, gnmspc  } from "../../utils";
+import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
+import { updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
-import { updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 import MetadataService from "../../../services/metadata-service";
 
 export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
@@ -139,7 +139,8 @@ const prepareMaster = (master: Master) => {
 export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor(
 	{master, onChange, translations, className, style, lajiFormRef, onLoaded, filter, clearFilters}
 	: FormOptionsEditorProps, ref) {
-	const { metadataService, translations: appTranslations, editorLang } = React.useContext(Context);
+	const context = React.useContext(Context);
+	const { metadataService, translations: appTranslations, editorLang } = context;
 	const [schema, setModelSchema] = React.useState<null>();
 	const [uiSchema, setModelUiSchema] = React.useState<null>();
 	React.useEffect(() => {
@@ -162,21 +163,24 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		changedPaths.forEach(changedPath => {
 			const currentValue = parseJSONPointer(newFormData, changedPath);
 			const newValue = parseJSONPointer(viewFormData, changedPath);
-			if (typeof currentValue === "string") {
-				if (currentValue[0] === "@") {
-					events.push({type: "translations", key: currentValue, value: newValue ?? ""});
-				} else {
-					const translationKey =  `@${changedPath}`;
-					newFormData = updateSafelyWithJSONPointer(newFormData, translationKey, changedPath);
-					events.push({type: "translations", key: translationKey, value: newValue});
-					events.push({type: "options", value: translationKey, path: changedPath});
-				}
+			if (typeof currentValue === "string" || typeof newValue === "string") {
+				newFormData = handleTranslationChange(
+					newFormData,
+					events,
+					"",
+					changedPath,
+					context,
+					currentValue,
+					newValue,
+				);
+				events.push({type: "options", value: parseJSONPointer(newFormData, changedPath), path: changedPath});
 			} else {
+				newFormData = updateSafelyWithJSONPointer(newFormData, newValue, changedPath);
 				events.push({type: "options", value: newValue, path: changedPath});
 			}
 		});
 		onChange(events);
-	}, [formData, onChange, _master]);
+	}, [formData, onChange, _master, context]);
 	let props: LajiFormProps & { ref?: React.Ref<_LajiForm> } = {
 		schema,
 		uiSchema,

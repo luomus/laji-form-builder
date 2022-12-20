@@ -12,13 +12,20 @@ export declare class ElementFinder extends _ElementFinder {
 }
 
 // Class namespace
-const cnmspc = (fn: (str: string) => string) => (str: string) => `.${(fn(str))}`;
+const cnmspc = (fn: (str?: string) => string) => (str?: string) => `.${(fn(str))}`;
 // Global namespace
 const gcnmspc = (str: string): string => cnmspc(gnmspc)(str);
 
 interface BuilderPOProps {
 	id?: string
 }
+
+type DiffBase = {path: string};
+type DiffNew = {kind: "new"; rhs: any} & DiffBase;
+type DiffEdit = {kind: "edit"; lhs: any; rhs: any;} & DiffBase;
+type DiffDelete = {kind: "delete"} & DiffBase;
+
+export type Diff = DiffNew | DiffEdit | DiffDelete;
 
 export class BuilderPO {
 	props: BuilderPOProps;
@@ -135,7 +142,7 @@ export class BuilderPO {
 	}
 
 	wizardNmspc = cnmspc(nmspc("creator-wizard"));
-	$creator = $(this.wizardNmspc(""));
+	$creator = $(this.wizardNmspc());
 
 	create = {
 		$createButton: $(this.wizardNmspc("create-create")) as ElementFinder,
@@ -145,6 +152,46 @@ export class BuilderPO {
 			inputSelector: classNames(this.wizardNmspc("json"), gcnmspc("json-editor")),
 			$input: $(this.wizardNmspc("json")).$("textarea") as ElementFinder,
 			$submit: $(this.wizardNmspc("json")).$(this.wizardNmspc("json-preview-btn")) as ElementFinder
+		}
+	}
+
+	saveModal = {
+		open: () => $(`#${gnmspc("open-save-view")}`).click(),
+		close: () => $(gcnmspc("save-modal")).$(".close").click(),
+		getDiff: async () => {
+			const diffNmspc = nmspc("diff");
+			const diffCnmspc = cnmspc(diffNmspc);
+			console.log("sdf", diffNmspc("new"));
+			const mapClassToKind = (className: string): Diff["kind"] => {
+				switch (className) {
+				case diffNmspc("new"):
+					return "new";
+				case diffNmspc("edit"):
+					return "edit";
+				case diffNmspc("delete"):
+					return "delete";
+				}
+				throw new Error(`unknown diff kind ${className}`);
+			};
+
+			const $container = $(diffCnmspc());
+			console.log(diffNmspc(), diffCnmspc(), await isDisplayed($container as ElementFinder));
+
+			return $container.$$("tr").reduce(async (rows: Diff[], $tr: ElementFinder) => {
+				const kind = mapClassToKind(await $tr.getAttribute("className"));
+				const ALL_DOTS = /\./g;
+				const path = "/" + (await $tr.$("th").getText()).replace(ALL_DOTS, "/");
+				const parseEdit = (text: string) => text.split(" ➞ ").map(v => JSON.parse(v));
+				if (kind === "new") {
+					rows.push({kind, path, rhs: JSON.parse(await $tr.$("td").getText())});
+				} else if (kind === "edit") {
+					const [lhs, rhs] = parseEdit(await $tr.$("td").getText());
+					rows.push({kind, path, lhs, rhs});
+				} else {
+					rows.push({kind, path});
+				}
+				return rows;
+			}, []);
 		}
 	}
 }

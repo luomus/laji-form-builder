@@ -5,14 +5,15 @@ import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
 import LajiFormInterface from "../../LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
-	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, 
+	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, handleTranslationChange, 
 } from "../../utils";
 import { parseJSONPointer, JSONSchemaBuilder } from "../../../utils";
 import LajiForm from "../LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/templates/TitleField";
-import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions,
-	isEmptyString, immutableDelete } from "laji-form/lib/utils";
+import {
+	parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions
+} from "laji-form/lib/utils";
 import { JSONEditor } from "../components";
 import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
@@ -139,35 +140,15 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
 
 			if (schemaForUiSchema?.type === "string" && !schemaForUiSchema?.enum) {
-				const doConfirm = () => !confirm(this.context.translations["editor.confirmDontTranslate"]);
-
-				if (newValue === undefined) {
-					if (currentValue?.[0] === "@") {
-						events.push({type: "translations", op: "delete", key: currentValue});
-					}
-					newUiSchema = immutableDelete(newUiSchema, changedPath);
-				} else if (currentValue?.[0] === "@") {
-					events.push({type: "translations", key: currentValue, value: newValue ?? ""});
-				} else {
-					const translationKey =  `@${this.props.path}${changedPath}`;
-					if (isEmptyString(currentValue)) {
-						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
-					} else if (doConfirm()) {
-						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, translationKey, changedPath);
-						events.push(
-							{
-								type: "translations",
-								op: "add",
-								key: translationKey,
-								value: ["fi", "sv", "en"].reduce((byLang, lang) => ({
-									...byLang,
-									[lang]: lang === this.context.editorLang ? newValue : currentValue
-								}), {})
-							});
-					} else {
-						newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
-					}
-				}
+				newUiSchema = handleTranslationChange(
+					newUiSchema,
+					events,
+					this.props.path,
+					changedPath,
+					this.context,
+					currentValue,
+					newValue
+				);
 			} else {
 				newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
 			}
