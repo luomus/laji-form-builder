@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Master } from "../../../model";
 import { Context } from "../Context";
-import { makeCancellable, nmspc } from "../../utils";
+import { gnmspc, makeCancellable, nmspc } from "../../utils";
 import diff, { Diff, DiffDeleted, DiffEdit, DiffNew } from "deep-diff";
 import memoize from "memoizee";
 
@@ -20,17 +20,16 @@ const DiffViewerModal = React.memo(function DiffViewerModal({master}: DiffViewer
 		return promise.cancel;
 	}, [formService, master.id]);
 	return (
-		<DiffsViewer diffs={getDiff(remoteMaster, master)} />
+		<DiffsViewer diffs={getDiff(remoteMaster as JSON, master as JSON)} />
 	);
 });
 
 export default DiffViewerModal;
 
+type NonArrayDiff = DiffNew<JSON> | DiffEdit<JSON> | DiffDeleted<JSON>;
 
-type NonArrayDiff = DiffNew<unknown> | DiffEdit<unknown> | DiffDeleted<unknown>;
-
-const getDiff = memoize((obj1: unknown, obj2: unknown) => {
-	const flattenArrays = (diffs: Diff<unknown>[]): NonArrayDiff[] => {
+const getDiff = memoize((obj1: JSON, obj2: JSON) => {
+	const flattenArrays = (diffs: Diff<JSON>[]): NonArrayDiff[] => {
 		return diffs.reduce((_diffs, d) => {
 			if (d.kind === "A") {
 				_diffs.push({...d.item, path: [...(d.path || []), d.index]} as NonArrayDiff);
@@ -44,9 +43,9 @@ const getDiff = memoize((obj1: unknown, obj2: unknown) => {
 	return diffs ? flattenArrays(diffs) : [];
 });
 
-const DiffPath = ({path}: Diff<unknown>) => <span>{path?.join(".")}</span>;
+const DiffPath = ({path}: Diff<JSON>) => <span>{path?.join(".")}</span>;
 
-const DiffKindMapper = (diff: Diff<unknown>) => {
+const DiffKindMapper = (diff: Diff<JSON>) => {
 	switch (diff.kind) {
 	case "N":
 		return <DiffNewViewer {...diff} />;
@@ -59,21 +58,26 @@ const DiffKindMapper = (diff: Diff<unknown>) => {
 	}
 };
 
-const DiffNewViewer = (diff: DiffNew<unknown>) => {
-	return <span>{JSON.stringify(diff.rhs)}</span>;
-};
+const prettyJSONClassName = gnmspc("pretty-json");
+const PrettyJSON = ({json}: {json: JSON}) => (
+	<React.Fragment>{
+		JSON.stringify(json, undefined, 2).split("\n").map((v, i) => <p key={i} className={prettyJSONClassName}>{v}</p>)
+	}</React.Fragment>
+);
 
-const DiffDeletedViewer = (diff: DiffDeleted<unknown>) => {
-	return <span>{JSON.stringify(diff.lhs)}</span>;
-};
+const DiffNewViewer = (diff: DiffNew<JSON>) => <PrettyJSON json={diff.rhs} />;
 
-const DiffEditViewer = (diff: DiffEdit<unknown>) => {
-	return <span>{`${JSON.stringify(diff.lhs)} ➞ ${JSON.stringify(diff.rhs)}`}</span>;
-};
+const DiffDeletedViewer = (diff: DiffDeleted<JSON>) => <PrettyJSON json={diff.lhs} />;
+
+const DiffEditViewer = (diff: DiffEdit<JSON>) => (
+	<React.Fragment>
+		<PrettyJSON json={diff.lhs} />{" ➞ "}<PrettyJSON json={diff.rhs} />
+	</React.Fragment>
+);
 
 const diffNmspc = nmspc("diff");
 
-const mapDiffClassName = (kind: Diff<unknown>["kind"]) => {
+const mapDiffClassName = (kind: Diff<JSON>["kind"]) => {
 	switch (kind) {
 	case "N":
 		return diffNmspc("new");
@@ -86,7 +90,7 @@ const mapDiffClassName = (kind: Diff<unknown>["kind"]) => {
 	}
 };
 
-const DiffViewerRow = (diff: Diff<unknown>) => (
+const DiffViewerRow = (diff: Diff<JSON>) => (
 	<tr className={mapDiffClassName(diff.kind)}>
 		<th><DiffPath {...diff} /></th>
 		<td>
@@ -95,7 +99,7 @@ const DiffViewerRow = (diff: Diff<unknown>) => (
 	</tr>
 );
 
-const DiffsViewer = ({diffs}: {diffs: Diff<unknown>[]}) => {
+const DiffsViewer = ({diffs}: {diffs: Diff<JSON>[]}) => {
 	const {theme} = React.useContext(Context);
 	const {Table} = theme;
 	return (

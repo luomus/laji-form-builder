@@ -347,4 +347,9 @@ $bRadius: 2px;
 			background-color: $success-1;
 		}
 	}
+
+	&-pretty-json {
+		margin: 0;
+		white-space: pre-wrap;
+	}
 }

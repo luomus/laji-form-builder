@@ -687,8 +687,8 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 
 	const onHideCheckForChanges = React.useCallback(() => {
 		tmpValue !== master
-			&& confirm(translations["editor.json.confirmApply"])
-			&& onSubmitDraft(tmpValue);
+			&& confirm(translations["Editor.json.discard"])
+			|| onSubmitDraft(tmpValue);
 		onHide();
 	}, [tmpValue, master, translations, onSubmitDraft, onHide]);
 
