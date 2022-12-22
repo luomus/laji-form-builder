@@ -148,5 +148,15 @@
 		"fi": "Näytä vain käytetyt ominaisuudet",
 		"sv": "Visa endast använda funktioner",
 		"en": "Display only used features"
+	},
+	"editor.save.header": {
+		"fi": "Tallenna muutokset",
+		"sv": "Spara ändringar",
+		"en": "Save changes"
+	},
+	"editor.save.description": {
+		"fi": "Vihreällä ovat uudet arvot, sinisellä muutokset ja punaisella poistot.",
+		"sv": "Gröna rader är nya värden, blå för ändringar och röda för raderingar",
+		"en": "Green rows are new values, blue for changes and red for deletions"
 	}
 }

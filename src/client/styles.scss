@@ -69,6 +69,7 @@ $neutral-separating: $neutral-7;
 
 $padding: 10px;
 $bRadius: 2px;
+$margin: 2px;
 
 :export {
 	padding: $padding;
@@ -205,10 +206,6 @@ $bRadius: 2px;
 				content: "|";
 				color: $neutral-separating;
 			}
-		}
-
-		#{$root}-ml {
-			margin-left: 2px;
 		}
 	}
 
@@ -351,5 +348,15 @@ $bRadius: 2px;
 	&-pretty-json {
 		margin: 0;
 		white-space: pre-wrap;
+	}
+
+
+	@for $factor from 1 to 6 {
+		&-ml-#{$factor} {
+			margin-left: $margin * $factor;
+		}
+		&-mb-#{$factor}{
+			margin-bottom: $margin * $factor;
+		}
 	}
 }

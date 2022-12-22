@@ -569,9 +569,8 @@ const EditorToolbar = ({
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser onChange={onLangChange} />
-			<ButtonGroup>
-				<ElemPicker className={gnmspc("ml")}
-				            onSelectedField={onSelectedField}
+			<ButtonGroup className={gnmspc("ml-1")}>
+				<ElemPicker onSelectedField={onSelectedField}
 				            onSelectedOptions={onSelectedOptions}
 				            containerRef={containerRef} />
 				{onRemountLajiForm && (
@@ -709,7 +708,8 @@ const SaveModal = ({onSave, onHide, ...props}
 	: {onSave: () => void} & Pick<GenericModalProps, "onHide"> & DiffViewerProps) => {
 	const {translations} = React.useContext(Context);
 	return (
-		<GenericModal onHide={onHide} className={gnmspc("save-modal")}>
+		<GenericModal onHide={onHide} className={gnmspc("save-modal")} header={translations["Editor.save.header"]}>
+			<div className={gnmspc("mb-5")}>{translations["Editor.save.description"]}</div>
 			<DiffViewer {...props} />
 			<Button onClick={onSave} variant="primary">{translations.Save}</Button>
 		</GenericModal>
@@ -718,14 +718,16 @@ const SaveModal = ({onSave, onHide, ...props}
 
 type GenericModalProps = {
 	onHide: () => void;
+	header?: string;
 } & HasChildren & Classable
 
-const GenericModal = ({onHide, children, className}: GenericModalProps) => {
+const GenericModal = ({onHide, children, header, className}: GenericModalProps) => {
 	const {theme} = React.useContext(Context);
 	const {Modal} = theme;
 	return (
 		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"), className)}>
 			<Modal.Header closeButton={true}>
+				{header}
 			</Modal.Header>
 			<Modal.Body>
 				{ children }
