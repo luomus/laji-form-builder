@@ -95,9 +95,9 @@
 		"en": "Collection ID"
 	},
 	"editor.options.clear": {
-		"fi": "Tyhjennä rajaukset",
-		"sv": "Rensa filter",
-		"en": "Clear filters"
+		"fi": "Tyhjennä rajaukset ✖",
+		"sv": "Rensa filter ✖",
+		"en": "Clear filters ✖"
 	},
 	"editor.warning.patch": {
 		"fi": "Muokkaus toimii rajatusti lomakkeelle jolla on '$.patches'. Käytä JSON editoria.",
@@ -143,5 +143,10 @@
 		"fi": "Tehdäänkö muutokset lomakkeelle? (ei tallennu vielä)",
 		"sv": "Ska vi tillämpa ändringarna i formuläret? (kommer inte att sparas ännu)",
 		"en": "Shall we apply the changes to the form? (won't be saved yet"
+	},
+	"editor.options.displayOnlyUsed": {
+		"fi": "Näytä vain käytetyt ominaisuudet",
+		"sv": "Visa endast använda funktioner",
+		"en": "Display only used features"
 	}
 }

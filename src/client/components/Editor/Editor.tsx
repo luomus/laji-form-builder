@@ -134,7 +134,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               loading={this.props.loading}
 				               edited={this.props.edited}
 				               openJSONEditor={this.openJSONEditor}
-				               openSaveConfirm={this.openSaveConfirm}
 				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
@@ -194,7 +193,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={master}
 			                         translations={master.translations?.[this.context.editorLang as Lang] || {}}
-			                         className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
+			                         className={gnmspc("options-editor")}
 			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
 			                         lajiFormRef={this.optionsEditorLajiFormRef}
@@ -541,7 +540,6 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	edited?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
-	openSaveConfirm: () => void;
 	onRemountLajiForm?: () => void;
 }
 
@@ -564,7 +562,6 @@ const EditorToolbar = ({
 	containerRef,
 	displaySchemaTabs,
 	openJSONEditor,
-	openSaveConfirm,
 	onRemountLajiForm
 }: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
@@ -710,7 +707,7 @@ const SaveModal = ({onSave, onHide, ...props}
 			<DiffViewer {...props} />
 			<Button onClick={onSave} variant="primary">{translations.Save}</Button>
 		</GenericModal>
-	)
+	);
 };
 
 type GenericModalProps = {

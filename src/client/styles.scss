@@ -253,19 +253,27 @@ $bRadius: 2px;
 		 }
 	}
 
-	&-options-editor-clear {
-		background: white;
-		border: 1px solid $hilight;
-		border-radius: $bRadius;
-		color: $hilight;
-		font-weight: bold;
-		padding: 0 $padding;
-		margin-right: -$padding;
-		margin-left: -$padding;
-		&:after {
-			content: "✖";
-			padding: 5px;
-		 }
+	&-options-editor {
+		&-toolbar {
+			background-color: $neutral-8;
+			border-bottom: 1px solid $neutral-separating;
+			padding: 2px;
+		}
+
+		&-clear {
+			background: white;
+			border: 1px solid $hilight;
+			border-radius: $bRadius;
+			color: $hilight;
+			font-weight: bold;
+			padding: 0 $padding;
+			margin-right: -$padding;
+			margin-left: -$padding;
+			&:after {
+				content: "✖";
+				padding: 5px;
+			}
+		}
 	}
 
 	&-picker-highlighter {
