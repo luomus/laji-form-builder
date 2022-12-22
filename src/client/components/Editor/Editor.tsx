@@ -209,7 +209,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
 					                                                   onHide={this.hideJSONEditor}
-					                                                   onSave={this.confirmSave}
+					                                                   onSave={this.onSave}
 					                                                   onChange={this.props.onChange} />}
 					{this.state.saveModalOpen && <SaveModal master={master}
 					                                        onSave={this.onSave}
@@ -664,37 +664,43 @@ type FormJSONEditorProps = {
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	{master, onHide, onSave, onChange}: FormJSONEditorProps)
 {
-	const {translations} = React.useContext(Context);
-
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
 	React.useEffect(() => ref.current?.focus(), []);
 
-	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(undefined);
+	const {translations} = React.useContext(Context);
+
+	const [displaySaveModal, setShowSaveModal] = React.useState(false);
+	const showSaveModal = React.useCallback(() => setShowSaveModal(true), [setShowSaveModal]);
+	const hideSaveModal = React.useCallback(() => setShowSaveModal(false), [setShowSaveModal]);
+
+	const [tmpValue, setTmpValue] = React.useState<Master>(master);
 
 	const onSubmitDraft = React.useCallback((value: Master) => {
 		onChange({type: "master", value});
-		setTmpValue(undefined);
+		setTmpValue(value);
 	}, [onChange, setTmpValue]);
 
-	const onSubmit = React.useCallback((value: Master) => {
-		onSave(value);
-		setTmpValue(undefined);
-	}, [onSave, setTmpValue]);
+	const onSaveChanges = React.useCallback(() => {
+		onSave(tmpValue);
+	}, [tmpValue, onSave]);
 
 	const onHideCheckForChanges = React.useCallback(() => {
-		tmpValue
+		tmpValue !== master
 			&& confirm(translations["editor.json.confirmApply"])
-			&& onSubmit(tmpValue);
+			&& onSubmitDraft(tmpValue);
 		onHide();
-	}, [tmpValue, translations, onSubmit, onHide]);
+	}, [tmpValue, master, translations, onSubmitDraft, onHide]);
 
 	return (
 		<GenericModal onHide={onHideCheckForChanges}>
 			<FormJSONEditor value={master}
-			                onSubmit={onSubmit}
+			                onSubmit={showSaveModal}
 			                onSubmitDraft={onSubmitDraft}
 			                onChange={setTmpValue} />
+			{displaySaveModal && <SaveModal master={tmpValue}
+					                            onSave={onSaveChanges}
+			                                onHide={hideSaveModal} />}
 		</GenericModal>
 	);
 });
