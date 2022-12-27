@@ -134,7 +134,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               loading={this.props.loading}
 				               edited={this.props.edited}
 				               openJSONEditor={this.openJSONEditor}
-				               openSaveConfirm={this.openSaveConfirm}
 				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
@@ -194,7 +193,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={master}
 			                         translations={master.translations?.[this.context.editorLang as Lang] || {}}
-			                         className={classNames(gnmspc("field-editor"), gnmspc("options-editor"))}
+			                         className={gnmspc("options-editor")}
 			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
 			                         lajiFormRef={this.optionsEditorLajiFormRef}
@@ -210,7 +209,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
 					                                                   onHide={this.hideJSONEditor}
-					                                                   onSave={this.confirmSave}
+					                                                   onSave={this.onSave}
 					                                                   onChange={this.props.onChange} />}
 					{this.state.saveModalOpen && <SaveModal master={master}
 					                                        onSave={this.onSave}
@@ -541,7 +540,6 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	edited?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
-	openSaveConfirm: () => void;
 	onRemountLajiForm?: () => void;
 }
 
@@ -564,7 +562,6 @@ const EditorToolbar = ({
 	containerRef,
 	displaySchemaTabs,
 	openJSONEditor,
-	openSaveConfirm,
 	onRemountLajiForm
 }: ToolbarEditorProps) => {
 	const {translations} = React.useContext(Context);
@@ -572,9 +569,8 @@ const EditorToolbar = ({
 	return (
 		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
 			<LangChooser onChange={onLangChange} />
-			<ButtonGroup>
-				<ElemPicker className={gnmspc("ml")}
-				            onSelectedField={onSelectedField}
+			<ButtonGroup className={gnmspc("ml-1")}>
+				<ElemPicker onSelectedField={onSelectedField}
 				            onSelectedOptions={onSelectedOptions}
 				            containerRef={containerRef} />
 				{onRemountLajiForm && (
@@ -667,37 +663,43 @@ type FormJSONEditorProps = {
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	{master, onHide, onSave, onChange}: FormJSONEditorProps)
 {
-	const {translations} = React.useContext(Context);
-
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
 	React.useEffect(() => ref.current?.focus(), []);
 
-	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(undefined);
+	const {translations} = React.useContext(Context);
+
+	const [displaySaveModal, setShowSaveModal] = React.useState(false);
+	const showSaveModal = React.useCallback(() => setShowSaveModal(true), [setShowSaveModal]);
+	const hideSaveModal = React.useCallback(() => setShowSaveModal(false), [setShowSaveModal]);
+
+	const [tmpValue, setTmpValue] = React.useState<Master>(master);
 
 	const onSubmitDraft = React.useCallback((value: Master) => {
 		onChange({type: "master", value});
-		setTmpValue(undefined);
+		setTmpValue(value);
 	}, [onChange, setTmpValue]);
 
-	const onSubmit = React.useCallback((value: Master) => {
-		onSave(value);
-		setTmpValue(undefined);
-	}, [onSave, setTmpValue]);
+	const onSaveChanges = React.useCallback(() => {
+		onSave(tmpValue);
+	}, [tmpValue, onSave]);
 
 	const onHideCheckForChanges = React.useCallback(() => {
-		tmpValue
-			&& confirm(translations["editor.json.confirmApply"])
-			&& onSubmit(tmpValue);
+		tmpValue !== master
+			&& confirm(translations["Editor.json.discard"])
+			|| onSubmitDraft(tmpValue);
 		onHide();
-	}, [tmpValue, translations, onSubmit, onHide]);
+	}, [tmpValue, master, translations, onSubmitDraft, onHide]);
 
 	return (
 		<GenericModal onHide={onHideCheckForChanges}>
 			<FormJSONEditor value={master}
-			                onSubmit={onSubmit}
+			                onSubmit={showSaveModal}
 			                onSubmitDraft={onSubmitDraft}
 			                onChange={setTmpValue} />
+			{displaySaveModal && <SaveModal master={tmpValue}
+					                            onSave={onSaveChanges}
+			                                onHide={hideSaveModal} />}
 		</GenericModal>
 	);
 });
@@ -706,23 +708,26 @@ const SaveModal = ({onSave, onHide, ...props}
 	: {onSave: () => void} & Pick<GenericModalProps, "onHide"> & DiffViewerProps) => {
 	const {translations} = React.useContext(Context);
 	return (
-		<GenericModal onHide={onHide} className={gnmspc("save-modal")}>
+		<GenericModal onHide={onHide} className={gnmspc("save-modal")} header={translations["Editor.save.header"]}>
+			<div className={gnmspc("mb-5")}>{translations["Editor.save.description"]}</div>
 			<DiffViewer {...props} />
 			<Button onClick={onSave} variant="primary">{translations.Save}</Button>
 		</GenericModal>
-	)
+	);
 };
 
 type GenericModalProps = {
 	onHide: () => void;
+	header?: string;
 } & HasChildren & Classable
 
-const GenericModal = ({onHide, children, className}: GenericModalProps) => {
+const GenericModal = ({onHide, children, header, className}: GenericModalProps) => {
 	const {theme} = React.useContext(Context);
 	const {Modal} = theme;
 	return (
 		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"), className)}>
 			<Modal.Header closeButton={true}>
+				{header}
 			</Modal.Header>
 			<Modal.Body>
 				{ children }

@@ -221,6 +221,11 @@ export type JSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) 
 	required?: string[];
 }
 
+export function isJSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
+(schema: JSONSchema<E>): schema is JSONSchemaObject {
+	return schema.type === "object";
+}
+
 export type JSONSchemaArray = JSONShemaTypeCommon<"array", unknown[]> & {
 	items: JSONSchema;
 	uniqueItems?: boolean;

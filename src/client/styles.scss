@@ -69,6 +69,7 @@ $neutral-separating: $neutral-7;
 
 $padding: 10px;
 $bRadius: 2px;
+$margin: 2px;
 
 :export {
 	padding: $padding;
@@ -206,10 +207,6 @@ $bRadius: 2px;
 				color: $neutral-separating;
 			}
 		}
-
-		#{$root}-ml {
-			margin-left: 2px;
-		}
 	}
 
 	&-editor-chooser {
@@ -253,19 +250,27 @@ $bRadius: 2px;
 		 }
 	}
 
-	&-options-editor-clear {
-		background: white;
-		border: 1px solid $hilight;
-		border-radius: $bRadius;
-		color: $hilight;
-		font-weight: bold;
-		padding: 0 $padding;
-		margin-right: -$padding;
-		margin-left: -$padding;
-		&:after {
-			content: "✖";
-			padding: 5px;
-		 }
+	&-options-editor {
+		&-toolbar {
+			background-color: $neutral-8;
+			border-bottom: 1px solid $neutral-separating;
+			padding: 2px;
+		}
+
+		&-clear {
+			background: white;
+			border: 1px solid $hilight;
+			border-radius: $bRadius;
+			color: $hilight;
+			font-weight: bold;
+			padding: 0 $padding;
+			margin-right: -$padding;
+			margin-left: -$padding;
+			&:after {
+				content: "✖";
+				padding: 5px;
+			}
+		}
 	}
 
 	&-picker-highlighter {
@@ -337,6 +342,21 @@ $bRadius: 2px;
 		}
 		&-new {
 			background-color: $success-1;
+		}
+	}
+
+	&-pretty-json {
+		margin: 0;
+		white-space: pre-wrap;
+	}
+
+
+	@for $factor from 1 to 6 {
+		&-ml-#{$factor} {
+			margin-left: $margin * $factor;
+		}
+		&-mb-#{$factor}{
+			margin-bottom: $margin * $factor;
 		}
 	}
 }

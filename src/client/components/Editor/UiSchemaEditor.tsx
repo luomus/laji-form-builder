@@ -195,7 +195,7 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 			[prependPrefix("ui:title")]: JSONSchemaBuilder.String(),
 			[prependPrefix("ui:description")]: JSONSchemaBuilder.String(),
 			[prependPrefix("ui:help")]: JSONSchemaBuilder.String(),
-			[prependPrefix("className")]: JSONSchemaBuilder.String()
+			[prependPrefix("ui:className")]: JSONSchemaBuilder.String()
 		}
 	}, schema);
 	let editorSchema;

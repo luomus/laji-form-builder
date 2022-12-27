@@ -2,7 +2,6 @@ import * as React from "react";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
 import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "../utils";
-import { ButtonProps } from "../themes/theme";
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -357,7 +356,6 @@ export function FormJSONEditor<T>(
 		onChange?.(json);
 		_setJSON(json);
 	}, [onChange, _setJSON]);
-
 
 	const [valid, setValid] = React.useState(false);
 	const onClickSubmit = React.useCallback(() => onSubmit(json as unknown as T), [json, onSubmit]);
