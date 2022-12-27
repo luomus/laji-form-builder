@@ -161,7 +161,6 @@ export class BuilderPO {
 		getDiff: async () => {
 			const diffNmspc = nmspc("diff");
 			const diffCnmspc = cnmspc(diffNmspc);
-			console.log("sdf", diffNmspc("new"));
 			const mapClassToKind = (className: string): Diff["kind"] => {
 				switch (className) {
 				case diffNmspc("new"):
@@ -175,7 +174,6 @@ export class BuilderPO {
 			};
 
 			const $container = $(diffCnmspc());
-			console.log(diffNmspc(), diffCnmspc(), await isDisplayed($container as ElementFinder));
 
 			return $container.$$("tr").reduce(async (rows: Diff[], $tr: ElementFinder) => {
 				const kind = mapClassToKind(await $tr.getAttribute("className"));
