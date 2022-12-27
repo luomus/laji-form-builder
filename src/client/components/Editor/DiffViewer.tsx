@@ -29,13 +29,25 @@ export default DiffViewerModal;
 type NonArrayDiff = DiffNew<JSON> | DiffEdit<JSON> | DiffDeleted<JSON>;
 
 const getDiff = memoize((obj1: JSON, obj2: JSON) => {
+	// The diff is used for JSON only. Undefined keys will be removed when the JSON is stringified,
+	// so we filter them out here.
+	const mapUndefined = (diff: NonArrayDiff): NonArrayDiff | undefined => {
+		if (diff.kind === "N" && diff.rhs === undefined) {
+			return undefined;
+		}
+		if (diff.kind === "E" && diff.rhs === undefined) {
+			return {...diff, kind: "D"};
+		}
+		return diff;
+	};
+
 	const flattenArrays = (diffs: Diff<JSON>[]): NonArrayDiff[] => {
 		return diffs.reduce((_diffs, d) => {
-			if (d.kind === "A") {
-				_diffs.push({...d.item, path: [...(d.path || []), d.index]} as NonArrayDiff);
-			} else {
-				_diffs.push(d);
-			}
+			const diff = mapUndefined(d.kind === "A"
+				?	{...d.item, path: [...(d.path || []), d.index]} as NonArrayDiff
+				: d);
+
+			diff && _diffs.push(diff);
 			return _diffs;
 		}, [] as NonArrayDiff[]);
 	};

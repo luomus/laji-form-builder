@@ -1,6 +1,6 @@
 import { $, protractor, browser, ElementFinder as _ElementFinder, by, element } from "protractor";
 import { classNames, gnmspc, nmspc } from "../../src/client/utils";
-import { lajiFormLocate, getLocatorForContextId } from "laji-form/test-export/test-utils";
+import { lajiFormLocate, getLocatorForContextId, Form } from "laji-form/test-export/test-utils";
 import { Lang } from "../../src/model";
 
 const { HOST, PORT } = process.env;
@@ -87,11 +87,13 @@ export class BuilderPO {
 	$rootFieldSelector = this.$fieldSelectorContainer.$(`:scope > ${gcnmspc("field")}`) as ElementFinder;
 	getFieldSelector = ($field: ElementFinder): FieldSelectorPO => ({
 		$field,
-		label: $field.$(`:scope > span > ${gcnmspc("field-label")}`).getText() as Promise<string>,
+		getLabel: () => $field.$(gcnmspc("field-label")).getText() as Promise<string>,
 		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then(
 			$es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))
 		))
 	});
+	getFieldSelectorByJSONPath = (path: string) =>
+		this.getFieldSelector($(`${gcnmspc("field")}${path.replace(/\//g, "-")}`) as ElementFinder);
 	getActiveField = () => this.getFieldSelector(
 		this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`) as ElementFinder
 	);
@@ -108,9 +110,25 @@ export class BuilderPO {
 	private $optionsEditorContainer = $(gcnmspc("options-editor"));
 	optionsEditor = {
 		$container: this.$optionsEditorContainer,
-		$spinner: this.$optionsEditorContainer.$(":scope > .react-spinner") as ElementFinder,
+		$spinner: this.$optionsEditorContainer.$(`${gcnmspc("field-editor")} > .react-spinner`) as ElementFinder,
 		$form: this.$optionsEditorContainer.$(".laji-form") as ElementFinder,
 		waitUntilLoaded: () => (browser.wait(EC.visibilityOf(this.optionsEditor.$form)) as Promise<void>)
+	}
+
+	async getEditorForm(): Promise<Form> {
+		const $root = this.$editor.$(".laji-form .rjsf > div");
+		const id = await $root.getAttribute("id");
+		const contextId = id.match(/\d+/)?.[0];
+		if (typeof contextId !== "string") {
+			throw "No form found for getEditorForm()";
+		}
+		const asNumber = +contextId;
+		if (typeof asNumber !== "number" || isNaN(asNumber)) {
+			throw "No form found for getEditorForm()";
+		}
+		const form = new Form();
+		form.contextId = asNumber;
+		return form;
 	}
 
 	async editorLocate(path: string): Promise<ElementFinder> {
@@ -196,7 +214,7 @@ export class BuilderPO {
 
 export interface FieldSelectorPO {
 	$field: ElementFinder;
-	label: Promise<string>;
+	getLabel: () => Promise<string>;
 	getFieldSelectors: () => Promise<FieldSelectorPO[]>;
 }
 

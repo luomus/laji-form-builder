@@ -41,7 +41,7 @@ describe("Editor", () => {
 	describe("tabs", () => {
 
 		const testFieldDisplaysEditor = async (field: FieldSelectorPO, parentPath: string) => {
-			const path = `${parentPath}/${await field.label}`;
+			const path = `${parentPath}/${await field.getLabel()}`;
 			await field.$field.click();
 			const fields = await field.getFieldSelectors();
 			expect(await isDisplayed(builder.$fieldEditor)).toBe(true, `Editor didn't display when selected ${path}`);
@@ -63,10 +63,39 @@ describe("Editor", () => {
 				expect(await isDisplayed(builder.$fieldEditor)).toBe(false);
 			});
 
+			it("adding excludeFromCopy to field with already existing options", async () => {
+				debugger;
+				const field = builder.getFieldSelectorByJSONPath("/document/secureLevel");
+				await field.$field.click();
+				debugger;
+
+				const $excludeFromCopy = (await builder.getEditorForm())
+					.getBooleanWidget("options.excludeFromCopy");
+				debugger;
+				await $excludeFromCopy.$false.click();
+				debugger;
+
+				await builder.waitUntilLoaded();
+				await builder.saveModal.open();
+
+				expect(await builder.saveModal.getDiff()).toEqual([
+					{kind: "new", rhs: false, path: "/fields/1/options/excludeFromCopy"}
+				]);
+
+				await builder.saveModal.close();
+				await $excludeFromCopy.$undefined.click(); // Bring back initial value.
+				await builder.saveModal.open();
+
+				expect(await builder.saveModal.getDiff()).toEqual([]);
+
+				await builder.saveModal.close();
+			});
+
 			it("field editor displayed for all forms", async () => {
 				let $field = builder.$rootFieldSelector;
 				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
 			});
+
 		});
 
 		describe("UI editor", () => {
@@ -197,6 +226,7 @@ describe("Editor", () => {
 
 			it("when empty adding when empty adds with all langs", async () => {
 				const $emptyStringField = (await builder.editorLocate("logo")).$("input");
+				// const $emptyStringField = (await builder.getEditorForm()).$getInputWidget("logo") as ElementFinder;
 				await updateValue($emptyStringField, "foo");
 
 				await builder.waitUntilLoaded();
@@ -242,7 +272,7 @@ describe("Editor", () => {
 		});
 
 		it("selects clicked field on editor", async (done) => {
-			expect(await builder.getActiveField().label).toBe("secureLevel");
+			expect(await builder.getActiveField().getLabel()).toBe("secureLevel");
 			done();
 		});
 

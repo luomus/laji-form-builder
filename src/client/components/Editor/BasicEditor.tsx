@@ -53,7 +53,6 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			<React.Fragment>
 				{this.renderAdder()}
 				{this.renderOptionsAndValidations()}
-				{"TODO (kenttien piilottaminen, järjestys?)"}
 			</React.Fragment>
 		);
 	}

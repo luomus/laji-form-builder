@@ -212,7 +212,6 @@ interface ClickableProps extends Classable, Stylable {
 	tag?: string;
 }
 
-
 interface ClickableElem extends Omit<ClickableProps, "tag"> {
 	role: "button"
 	tabIndex?: number;
