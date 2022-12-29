@@ -24,24 +24,17 @@ export default class MetadataService extends HasCache {
 		this.lang = lang;
 	}
 
-	getPropertyNameFromContext(property: PropertyContext | string) {
-		let propertyName = typeof property === "string"
-			? property
-			: property["@id"].replace("http://tun.fi/", "");
-		return propertyName;
-	}
-
 	getPropertiesContextFor = this.cache((context: string) => 
 		fetchJSON<{"@context": Record<string, PropertyContext>}>(`https://schema.laji.fi/context/${context}.jsonld`)
 			.then(result => result["@context"]))
 
 	getPropertiesForEmbeddedProperty = this.cache(
-		async (property: PropertyContext | string, lang = "multi"): Promise<Property[]> => {
-			return (await this.apiClient.fetchJSON(
-				`/metadata/classes/${unprefixProp(this.getPropertyNameFromContext(property))}/properties`,
+		async (property: string, lang = "multi"): Promise<Property[]> => 
+			(await this.apiClient.fetchJSON(
+				`/metadata/classes/${unprefixProp(property)}/properties`,
 				{lang})
-			).results as Property[];
-		})
+			).results as Property[]
+		, { length: 2 })
 
 	async getProperties(fields: Field[], property: Property) {
 		return fields
@@ -55,11 +48,11 @@ export default class MetadataService extends HasCache {
 			: {};
 	}
 
-	getRange = this.cache((property: PropertyContext | string): Promise<Range[]> => 
-		this.allRanges && Promise.resolve(this.allRanges[this.getPropertyNameFromContext(property)])
+	getRange = this.cache((property: string): Promise<Range[]> =>
+		this.allRanges && Promise.resolve(this.allRanges[property])
 		|| this.apiClient.fetchJSON(
 			// eslint-disable-next-line max-len
-			`/metadata/ranges/${unprefixProp(typeof property === "string" ? property : this.getPropertyNameFromContext(property))}`,
+			`/metadata/ranges/${unprefixProp(property)}`,
 			{lang: "multi"}
 		)
 	)

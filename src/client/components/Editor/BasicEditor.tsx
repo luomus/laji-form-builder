@@ -31,8 +31,8 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	componentDidMount() {
 		this.propertyContextPromise = makeCancellable(
-			this.getPropertyContextForPath(this.props.path).then(({"@container": container}) => {
-				if (container === "@set") {
+			this.getPropertyContextForPath(this.props.path).then(({"@container": container, "@type": type}) => {
+				if (container === "@set" || type === "@id") {
 					this.propertyChildsPromise = makeCancellable(
 						this.getProperties(this.props.path).then(properties => {
 							this.setState({childProps: properties});
@@ -112,18 +112,20 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 				"@container": "@set"
 			});
 		}
-		const propertyName = path.split("/").pop() as string;
+		const propertyName = checkForPropertyNameHacks(path.split("/").pop() as string);
 		return new Promise((resolve, reject) =>
 			this.context.metadataService.getPropertiesContextFor(unprefixProp(context))
-				.then((propertiesContext) => { // TODO why is any needed?
-					resolve(propertiesContext[propertyName]);
-				}, reject)
+				.then(propertiesContext => resolve(propertiesContext[propertyName]),
+					reject)
 		);
 	}
 
 	getProperties = (path: string): Promise<Property[]> =>
-		this.getPropertyContextForPath(path)
-			.then(context => this.context.metadataService.getPropertiesForEmbeddedProperty(context, this.context.lang));
+		this.getPropertyContextForPath(path).then(context =>
+			this.context.metadataService.getPropertiesForEmbeddedProperty(
+				getPropertyNameFromContext(context),
+				this.context.lang)
+		);
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
@@ -202,3 +204,22 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		(events.length) && this.props.onChange(events);
 	}
 }
+
+const getPropertyNameFromContext = (property: PropertyContext | string) => {
+	let propertyName = typeof property === "string"
+		? property
+		: property["@id"].replace("http://tun.fi/", "");
+	return propertyName;
+};
+
+
+// Not sure exactly why, why laji jsonld seems to have some kind of hacks for these fields...
+const checkForPropertyNameHacks = (name: string) => {
+	if (name === "gatherings") {
+		return "gathering";
+	}
+	if (name === "units") {
+		return "unit";
+	}
+	return name;
+};
