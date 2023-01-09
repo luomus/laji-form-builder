@@ -64,7 +64,7 @@ export default class UiSchemaService {
 
 	mapCommentToHelpText  = (options?: FormOptions, lang?: Lang) =>
 		(uiSchema: ExpandedMaster["uiSchema"] | undefined, property: Property) => {
-			if (options?.useSchemaCommmentsAsHelpTexts && isLang(lang)) {
+			if (options?.useSchemaCommentsAsHelpTexts && isLang(lang)) {
 				const comment = property.comment?.[lang];
 				if (comment) {
 					return {...(uiSchema || {}), "ui:help": comment};

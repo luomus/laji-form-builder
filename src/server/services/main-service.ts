@@ -51,7 +51,7 @@ export const exposedOptions = dictionarify([
 	"viewerType",
 	"disabled",
 	"shortTitleFromCollectionName",
-	"useSchemaCommmentsAsHelpTexts"
+	"useSchemaCommentsAsHelpTexts"
 ]);
 
 const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {

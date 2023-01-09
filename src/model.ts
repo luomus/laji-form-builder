@@ -44,7 +44,7 @@ export type Translations = Partial<CompleteTranslations>
 type KnownFormOptions = {
 	prepopulatedDocument?: Record<string, JSONObject>;
 	prepopulateWithInformalTaxonGroups?: string[];
-	useSchemaCommmentsAsHelpTexts?: boolean;
+	useSchemaCommentsAsHelpTexts?: boolean;
 }
 export type FormOptions = JSONObject & KnownFormOptions;
 
