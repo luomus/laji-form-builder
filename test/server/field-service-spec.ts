@@ -767,6 +767,42 @@ describe("fields", () => {
 					expect(jsonFormat.fields?.[0]?.options?.minItems).toBe(3);
 				});
 			});
+
+			describe("useSchemaCommentsAsHelpTexts", async () => {
+				it("sets schema comment as help text", async () => {
+					const form = {
+						context: "dataset",
+						fields: [{ name: "datasetName" }],
+						options: { useSchemaCommentsAsHelpTexts : true }
+					};
+					const jsonFormat = await fieldService.masterToSchemaFormat(form, "en");
+
+					expect((jsonFormat.uiSchema as any).datasetName["ui:help"]).toBe(
+						"Name of the dataset. This must be unique."
+					);
+				});
+
+				it("doesn't set help text if there is no comment in selected language", async () => {
+					const form = {
+						context: "dataset",
+						fields: [{ name: "datasetName" }],
+						options: { useSchemaCommentsAsHelpTexts : true }
+					};
+					const jsonFormat = await fieldService.masterToSchemaFormat(form, "fi");
+
+					expect((jsonFormat.uiSchema as any).datasetName["ui:help"]).toBe(undefined);
+				});
+
+				it("doesn't set help text without the option", async () => {
+					const form = {
+						context: "dataset",
+						fields: [{ name: "datasetName" }]
+					};
+					const jsonFormat = await fieldService.masterToSchemaFormat(form, "en");
+
+					expect((jsonFormat.uiSchema as any).datasetName["ui:help"]).toBe(undefined);
+				});
+			});
 		});
 
 		describe("hidden works", () => {
