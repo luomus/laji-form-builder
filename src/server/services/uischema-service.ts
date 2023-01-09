@@ -14,15 +14,15 @@ export default class UiSchemaService {
 		this.mapCommentToHelpText = this.mapCommentToHelpText.bind(this);
 	}
 
-	async expandUiSchema<T extends Pick<ExpandedMaster, "context" | "fields" | "uiSchema">>
-	(master: T, rootField: Field, rootProperty: Property, options?: FormOptions, lang?: Lang): Promise<T> {
+	async expandUiSchema<T extends Pick<ExpandedMaster, "context" | "fields" | "uiSchema" | "options">>
+	(master: T, rootField: Field, rootProperty: Property, lang?: Lang): Promise<T> {
 		if (!master.fields) {
 			return master;
 		}
 		const expandedUiSchema = await this.fieldToUiSchema(
 			{...rootField, fields: master.fields},
 			rootProperty,
-			options,
+			master.options,
 			lang
 		);
 		return expandedUiSchema
