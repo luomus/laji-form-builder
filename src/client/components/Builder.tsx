@@ -289,9 +289,9 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
 			const newExpandedMaster = await this.formLinkerService.expandMaster(newMaster);
 			this.setState({
-				master: newMaster,
+				tmpMaster: newMaster,
 				schemaFormat: newSchemaFormat,
-				expandedMaster: newExpandedMaster,
+				tmpExpandedMaster: newExpandedMaster,
 				loading: false,
 				edited: true
 			}, this.propagateState);
@@ -455,11 +455,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	propagateState() {
-		if (!this.state.master || !isValid(this.state.schemaFormat)) {
+		if (!this.state.tmpExpandedMaster || !isValid(this.state.schemaFormat)) {
 			return;
 		}
-		const {translations, fields, ...toTranslate} = this.state.master;
-		const translated = translate(toTranslate, this.state.master.translations?.[this.state.lang] || {});
+		const {translations, fields, ...toTranslate} = this.state.tmpExpandedMaster;
+		const translated = translate(toTranslate, this.state.tmpExpandedMaster.translations?.[this.state.lang] || {});
 		const updated = {
 			...this.state.schemaFormat,
 			...translated
@@ -491,9 +491,14 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	onCreate = async (master: Master, save = false) => {
 		if (save) {
 			this.onSave(master);
+			return;
 		}
-		this.setState({tmp: true}, async () => {
-			this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(master), {master});
+		const expandedMaster = await this.formLinkerService.expandMaster(master);
+		this.setState({tmp: true}, () => {
+			this.updateStateFromSchemaFormatPromise(
+				this.formService.masterToSchemaFormat(master),
+				{tmpMaster: master, tmpExpandedMaster: expandedMaster, edited: true}
+			);
 		});
 	}
 }
