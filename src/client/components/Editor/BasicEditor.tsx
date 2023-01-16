@@ -33,14 +33,14 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	componentDidMount() {
 		this.propertyContextPromise = makeCancellable(
-			this.getProperties(this.props.path).then(properties => 
+			this.getProperties(this.props.path).then(properties =>  
 				this.setState({childProps: properties.length ? properties : false})
 			)
 		);
 	}
 
 	async getProperties(path: string): Promise<Property[]> {
-		const _ = async (path: string, property: Property): Promise<Property> => {
+		const getPropertyFromSubPathAndProp = async (path: string, property: Property): Promise<Property> => {
 			const splitted = path.substr(1).split("/");
 			const [cur, ...rest] = splitted;
 			if (splitted.length === 1) {
@@ -54,9 +54,9 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			if (!nextProperty) {
 				throw new Error("Couldn't find property " + cur);
 			}
-			return _("/" + rest.join("/"), nextProperty);
+			return getPropertyFromSubPathAndProp("/" + rest.join("/"), nextProperty);
 		};
-		const property = await _(
+		const property = await getPropertyFromSubPathAndProp(
 			`/${this.props.context || "document"}${path.length === 1 ? "" : path}`,
 			getRootProperty(getRootField({context: this.props.context}))
 		);
@@ -86,12 +86,15 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		if (this.state.childProps) {
 			const existing = dictionarify(this.props.field.fields || [], (field: Field) => field.name);
 			const [enums, enumNames] = this.state.childProps
-				.filter(s => !existing[unprefixProp(s.property)])
+				.filter(p => !existing[unprefixProp(p.property)])
 				.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
 					_enums.push(prop.property);
-					_enumNames.push(`${prop.property} (${prop.label})`);
+					_enumNames.push(`${prop.property} (${prop.label[this.context.lang]})`);
 					return [_enums, _enumNames];
 				}, [[], []]);
+			if (enums.length === 0) {
+				return null;
+			}
 			const schema = JSONSchemaBuilder.enu(
 				{enum: enums, enumNames},
 				{title: this.context.translations.AddProperty}
