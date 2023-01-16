@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
-import { JSONSchema, JSONSchemaArray, JSONSchemaBoolean, JSONSchemaEnumOneOf, JSONSchemaInteger, JSONSchemaNumber,
-	JSONSchemaObject, JSONSchemaString, JSONSchemaV6Enum, Lang } from "./model";
+import { Field, JSONSchema, JSONSchemaArray, JSONSchemaBoolean, JSONSchemaEnumOneOf, JSONSchemaInteger,
+	JSONSchemaNumber, JSONSchemaObject, JSONSchemaString, JSONSchemaV6Enum, Lang, Master, Property } from "./model";
 
 export const translate = <T>(obj: T, translations: Record<string, string>): T => {
 	function translate(_any: any): any {
@@ -145,3 +145,22 @@ export const dictionarifyByKey = <T extends Record<string, unknown>>(objects: T[
 
 export const getPropertyContextName = (context?: string) =>
 	typeof context === "string" ? context : "MY.document";
+
+export const getRootField = (master: Pick<Master, "context">): Field => {
+	return {name: unprefixProp(getPropertyContextName(master.context))};
+}
+
+export const getRootProperty = (rootField: Field): Property => {
+	return {
+		property: rootField.name,
+		isEmbeddable: true,
+		range: [rootField.name],
+		label: {},
+		shortName: unprefixProp(rootField.name),
+		required: true,
+		minOccurs: "1",
+		maxOccurs: "1",
+		multiLanguage: false,
+		domain: []
+	};
+};

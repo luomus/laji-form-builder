@@ -3,7 +3,8 @@ import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, Property, SchemaFormat, Translations, Range, ExpandedMaster, ExpandedJSONFormat,
 	CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum, JSONObject } from "../../model";
-import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
+import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName, getRootField as _getRootField,
+	getRootProperty } from "../../utils";
 import merge from "deepmerge";
 import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
@@ -408,21 +409,6 @@ export const getRootField = (master: Pick<Master, "context">): Field => {
 	if (master.context && master.context.match(/[^.]+\..+/)) {
 		throw new UnprocessableError("Don't use namespace prefix for context");
 	}
-	return {name: unprefixProp(getPropertyContextName(master.context))};
-};
-
-export const getRootProperty = (rootField: Field): Property => {
-	return {
-		property: rootField.name,
-		isEmbeddable: true,
-		range: [rootField.name],
-		label: {},
-		shortName: unprefixProp(rootField.name),
-		required: true,
-		minOccurs: "1",
-		maxOccurs: "1",
-		multiLanguage: false,
-		domain: []
-	};
+	return _getRootField(master);
 };
 

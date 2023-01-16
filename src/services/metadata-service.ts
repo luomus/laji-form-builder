@@ -37,15 +37,13 @@ export default class MetadataService extends HasCache {
 		, { length: 2 })
 
 	async getProperties(fields: Field[], property: Property) {
-		return fields
-			? (await this.getPropertiesForEmbeddedProperty(property.range[0]))
-				.reduce<Record<string, Property>>((propMap, prop) => {
-					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
-						propMap[unprefixProp(prop.property)] = prop;
-					}
-					return propMap;
-				}, {})
-			: {};
+		return (await this.getPropertiesForEmbeddedProperty(property.range[0]))
+			.reduce<Record<string, Property>>((propMap, prop) => {
+				if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
+					propMap[unprefixProp(prop.property)] = prop;
+				}
+				return propMap;
+			}, {});
 	}
 
 	getRange = this.cache((property: string): Promise<Range[]> =>

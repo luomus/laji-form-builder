@@ -1,6 +1,8 @@
 import * as React from "react";
 import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
-import { unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getPropertyContextName } from "../../../utils";
+import {
+	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
+} from "../../../utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
 const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "../Context";
@@ -31,16 +33,39 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	componentDidMount() {
 		this.propertyContextPromise = makeCancellable(
-			this.getPropertyContextForPath(this.props.path).then(({"@container": container, "@type": type}) => {
-				if (container === "@set" || type === "@id") {
-					this.propertyChildsPromise = makeCancellable(
-						this.getProperties(this.props.path).then(properties => {
-							this.setState({childProps: properties});
-						}));
-				} else {
-					this.setState({childProps: false});
-				}
-			}));
+			this.getProperties(this.props.path).then(properties => 
+				this.setState({childProps: properties.length ? properties : false})
+			)
+		);
+	}
+
+	async getProperties(path: string): Promise<Property[]> {
+		const _ = async (path: string, property: Property): Promise<Property> => {
+			const splitted = path.substr(1).split("/");
+			const [cur, ...rest] = splitted;
+			if (splitted.length === 1) {
+				return property;
+			}
+			const properties = property.isEmbeddable
+				? await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0])
+				: [];
+
+			const nextProperty = properties?.find(p => unprefixProp(p.property) === rest[0]);
+			if (!nextProperty) {
+				throw new Error("Couldn't find property " + cur);
+			}
+			return _("/" + rest.join("/"), nextProperty);
+		};
+		const property = await _(
+			`/${this.props.context || "document"}${path.length === 1 ? "" : path}`,
+			getRootProperty(getRootField({context: this.props.context}))
+		);
+
+		if (property.isEmbeddable) {
+			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
+		} else {
+			return [];
+		}
 	}
 
 	componentWillUnmount() {
@@ -103,29 +128,6 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		}
 		return property;
 	}
-
-	getPropertyContextForPath(path: string): Promise<PropertyContext> {
-		const context = getPropertyContextName(this.props.context);
-		if (path === "/") {
-			return Promise.resolve({
-				"@id": `http://tun.fi/${context}`,
-				"@container": "@set"
-			});
-		}
-		const propertyName = checkForPropertyNameHacks(path.split("/").pop() as string);
-		return new Promise((resolve, reject) =>
-			this.context.metadataService.getPropertiesContextFor(unprefixProp(context))
-				.then(propertiesContext => resolve(propertiesContext[propertyName]),
-					reject)
-		);
-	}
-
-	getProperties = (path: string): Promise<Property[]> =>
-		this.getPropertyContextForPath(path).then(context =>
-			this.context.metadataService.getPropertiesForEmbeddedProperty(
-				getPropertyNameFromContext(context),
-				this.context.lang)
-		);
 
 	renderOptionsAndValidations = () => {
 		const {options, validators, warnings} = this.props.field;
@@ -204,22 +206,3 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		(events.length) && this.props.onChange(events);
 	}
 }
-
-const getPropertyNameFromContext = (property: PropertyContext | string) => {
-	let propertyName = typeof property === "string"
-		? property
-		: property["@id"].replace("http://tun.fi/", "");
-	return propertyName;
-};
-
-
-// Not sure exactly why, why laji jsonld seems to have some kind of hacks for these fields...
-const checkForPropertyNameHacks = (name: string) => {
-	if (name === "gatherings") {
-		return "gathering";
-	}
-	if (name === "units") {
-		return "unit";
-	}
-	return name;
-};
