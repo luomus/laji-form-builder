@@ -8,12 +8,12 @@ import {
 } from "../../utils";
 import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
-	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MaybeError, isValid } from "../Builder";
+	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MaybeError, isValid, MasterChangeEvent } from "../Builder";
 import { Context } from "../Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, Field as FieldOptions } from "../../../model";
+import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster } from "../../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer, { DiffViewerProps } from "./DiffViewer";
@@ -30,8 +30,10 @@ export type FieldEditorChangeEvent =
 
 export interface EditorProps extends Stylable, Classable {
 	master?: Master;
+	expandedMaster?: ExpandedMaster;
 	schemaFormat?: MaybeError<SchemaFormat>;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
+	onMasterChange: (event: MasterChangeEvent) => void;
 	onLangChange: (lang: Lang) => void;
 	height?: number;
 	onHeightChange?: (height: number) => void;
@@ -122,7 +124,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					</div>
 				)}
 				{errorMsg && <div className={gnmspc("error")}>{translations[errorMsg] || errorMsg}</div>}
-				{master.patch && <div className={gnmspc("warning")}>{translations["Editor.warning.patch"]}</div>}
 				<EditorToolbar active={this.state.activeEditorMode}
 				               onEditorChange={this.onActiveEditorChange}
 				               onLangChange={this.props.onLangChange}
@@ -160,9 +161,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			height: "100%",
 			width: "100%"
 		};
-		const {master, schemaFormat} = this.props;
+		const {master, expandedMaster, schemaFormat} = this.props;
 		const {activeEditorMode} = this.state;
-		if (!master || !schemaFormat) {
+		if (!master || !expandedMaster || !schemaFormat) {
 			return <Spinner size={100} />;
 		}
 		let content;
@@ -171,7 +172,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				<ActiveEditorErrorBoundary>
 					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} ref={this.fieldsRef}>
 						<Fields className={gnmspc("field-chooser")}
-						        fields={this.getFields(master)}
+						        fields={this.getFields(expandedMaster)}
 						        onSelected={this.onFieldSelected}
 						        onDeleted={this.onFieldDeleted}
 						        selected={this.state.selected}
@@ -183,7 +184,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{this.state.selected && isValid(schemaFormat) && 
 						<ActiveEditor key={this.state.selected}
 						              active={this.state.activeEditorMode}
-						              {...this.getFieldEditorProps(master, schemaFormat)}
+						              {...this.getFieldEditorProps(expandedMaster, schemaFormat)}
 						              className={gnmspc("field-editor")}
 						              style={fieldEditorContentStyle}
 						/>
@@ -191,8 +192,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				</ActiveEditorErrorBoundary>
 			);
 		} else if (activeEditorMode === "options") {
-			content = <OptionsEditor master={master}
-			                         translations={master.translations?.[this.context.editorLang as Lang] || {}}
+			content = <OptionsEditor master={expandedMaster}
+			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
 			                         className={gnmspc("options-editor")}
 			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
@@ -210,7 +211,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
 					                                                   onHide={this.hideJSONEditor}
 					                                                   onSave={this.onSave}
-					                                                   onChange={this.props.onChange} />}
+					                                                   onChange={this.props.onMasterChange} />}
 					{this.state.saveModalOpen && <SaveModal master={master}
 					                                        onSave={this.onSave}
 					                                        onHide={this.hideSaveConfirm} />}
@@ -222,7 +223,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		this.props.onHeightChange?.(height);
 	}
 
-	getFields = memoize((master: Master): any => ([{
+	getFields = memoize((master: ExpandedMaster): any => ([{
 		name: unprefixProp(getPropertyContextName(master.context)),
 		fields: master.fields
 	}]));
@@ -235,7 +236,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
 	}
 
-	getFieldEditorProps(master: Master, schemaFormat: SchemaFormat): FieldEditorProps {
+	getFieldEditorProps(expandedMaster: ExpandedMaster, schemaFormat: SchemaFormat): FieldEditorProps {
 		const { editorLang } = this.context;
 		const selected = this.getSelected();
 		const findField = (_field: FieldOptions, path: string): FieldOptions => {
@@ -250,15 +251,15 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		return {
 			schema: parseJSONPointer(schemaFormat.schema, fieldPointerToSchemaPointer(schemaFormat.schema, selected)),
 			uiSchema: parseJSONPointer(
-				master.uiSchema,
+				expandedMaster.uiSchema,
 				fieldPointerToUiSchemaPointer(schemaFormat.schema, selected),
 				!!"safely"
 			),
-			field: findField(this.getFields(master)[0], selected),
-			translations: master.translations?.[editorLang as Lang] || {},
+			field: findField(this.getFields(expandedMaster)[0], selected),
+			translations: expandedMaster.translations?.[editorLang as Lang] || {},
 			path: selected,
 			onChange: this.onEditorChange,
-			context: master.context
+			context: expandedMaster.context
 		};
 	}
 
@@ -656,7 +657,7 @@ const ActiveEditor = React.memo(function ActiveEditor(
 type FormJSONEditorProps = {
 	master: Master;
 	onHide: () => void;
-	onChange: EditorProps["onChange"];
+	onChange: EditorProps["onMasterChange"];
 	onSave: EditorProps["onSave"];
 }
 

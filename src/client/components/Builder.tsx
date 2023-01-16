@@ -7,13 +7,16 @@ import { fieldPointerToUiSchemaPointer, makeCancellable, CancellablePromise, gnm
 import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
-import { Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations } from "../../model";
+import { Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations, ExpandedMaster,
+	isFormExtensionField, JSON } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
 import ApiClient from "../../api-client";
 import { ApiClientImplementation } from "laji-form/lib/ApiClient";
+import FormExpanderService from "../../services/form-expander-service";
+import { getDiff } from "./Editor/DiffViewer";
 
 export interface BuilderProps {
 	lang: Lang;
@@ -34,6 +37,9 @@ export interface BuilderProps {
 export interface BuilderState {
 	id?: string;
 	master?: Master;
+	expandedMaster?: ExpandedMaster;
+	tmpMaster?: Master;
+	tmpExpandedMaster?: ExpandedMaster;
 	schemaFormat?: MaybeError<SchemaFormat>;
 	errorMsg?: string;
 	lang: Lang;
@@ -64,6 +70,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	formPromise: CancellablePromise<any>;
 	metadataService: MetadataService;
 	formService: FormService;
+	formLinkerService: FormExpanderService;
 	notifier: Notifier;
 
 	static defaultProps = {
@@ -81,6 +88,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
 		this.formService = new FormService(this.apiClient, props.lang, this.formApiClient);
+		this.formLinkerService = new FormExpanderService({getForm: this.formService.getMaster});
 		this.notifier = props.notifier
 			|| (["success", "info", "warning", "error"] as Array<keyof Notifier>).reduce((notifier, method) => {
 				notifier[method] = msg =>
@@ -114,13 +122,31 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		if (id === this.state.id) {
 			return;
 		}
-		this.setState({master: undefined, schemaFormat: undefined, id}, () => {
+		this.setState({
+			master: undefined,
+			tmpMaster: undefined,
+			tmpExpandedMaster: undefined,
+			expandedMaster: undefined,
+			schemaFormat: undefined,
+			id
+		}, () => {
 			this.formPromise?.cancel();
 			const formPromise = id
 				? this.formService.getMaster(id)
 				: Promise.resolve(undefined);
-			this.formPromise = makeCancellable(formPromise
-				.then((master) => this.setState({master})));
+			const promise = async () => {
+				const master = await formPromise;
+				const expandedMaster = master
+					? await this.formLinkerService.expandMaster(master)
+					: undefined;
+				this.setState({
+					master,
+					tmpMaster: master,
+					expandedMaster,
+					tmpExpandedMaster: expandedMaster,
+				});
+			};
+			this.formPromise = makeCancellable(promise());
 			this.updateSchemaFormat();
 		});
 	}
@@ -170,11 +196,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onLangChange = (lang: Lang) => {
 		this.setState({lang}, async () => {
+			const {tmpExpandedMaster} = this.state;
 			this.updateLang();
 			if (!this.state.tmp) {
 				this.updateSchemaFormat();
-			} else if (this.state.master) {
-				this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(this.state.master));
+			} else if (tmpExpandedMaster) {
+				this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(tmpExpandedMaster));
 			}
 			this.props.onLangChange(this.state.lang);
 		});
@@ -203,7 +230,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		return (
 			<Context.Provider value={context}>
 				{
-					this.props.id || this.state.master ? (
+					this.props.id || this.state.tmpExpandedMaster ? (
 						<React.Fragment>
 							{this.renderEditor()}
 							<div style={{height: this.state.editorHeight}} />
@@ -221,12 +248,14 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {schemaFormat, master, saving, loading, edited, errorMsg} = this.state;
+		const {schemaFormat, tmpExpandedMaster, tmpMaster, saving, loading, edited, errorMsg} = this.state;
 		return (
 			<Editor
-				master={master}
+				master={tmpMaster}
+				expandedMaster={tmpExpandedMaster}
 				schemaFormat={schemaFormat}
 				onChange={this.onEditorChange}
+				onMasterChange={this.onEditorMasterChange}
 				onSave={this.onSave}
 				onLangChange={this.onLangChange}
 				onHeightChange={this.onHeightChange}
@@ -246,14 +275,44 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.setState({editorHeight});
 	}
 
+	onEditorMasterChange = async (event: MasterChangeEvent) => {
+		const {tmpMaster} = this.state;
+
+		if (!tmpMaster) {
+			return;
+		}
+
+		this.setState({loading: true});
+
+		const newMaster = event.value;
+		try {
+			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
+			const newExpandedMaster = await this.formLinkerService.expandMaster(newMaster);
+			this.setState({
+				master: newMaster,
+				schemaFormat: newSchemaFormat,
+				expandedMaster: newExpandedMaster,
+				loading: false,
+				edited: true
+			}, this.propagateState);
+		} catch (e) {
+			this.setState({loading: false});
+		}
+	}
+
 	onEditorChange = async (events: ChangeEvent | ChangeEvent[]) => {
-		const {master, schemaFormat} = this.state;
-		if (!master) {
+		const eventsAsArray = (events instanceof Array ? events : [events]);
+
+		const {tmpMaster, schemaFormat, master, tmpExpandedMaster} = this.state;
+		if (!tmpMaster || !tmpExpandedMaster) {
 			return;
 		}
 
 		const sync = async () => {
-			this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(master), {master});
+			this.updateStateFromSchemaFormatPromise(
+				this.formService.masterToSchemaFormat(tmpMaster),
+				{tmpMaster}
+			);
 		};
 
 		const syncOnBadState = (schemaFormat?: MaybeError<SchemaFormat>): schemaFormat is "error" | undefined => {
@@ -264,16 +323,16 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			return false;
 		};
 
-		const expandTranslations = (master: Master) => ({
-			...master,
-			translations: {fi: {}, sv: {}, en: {}, ...(master.translations || {})} as CompleteTranslations
+		const expandTranslations = (translations: Master["translations"]): CompleteTranslations => ({
+			fi: {}, sv: {}, en: {}, ...(translations || {})
 		});
 
-		let newMaster = expandTranslations(master); 
-		for (const event of (events instanceof Array ? events : [events])) {
-			if (isMasterChangeEvent(event)) {
-				newMaster = expandTranslations(event.value);
-			} else if (isUiSchemaChangeEvent(event)) {
+		this.setState({loading: true});
+
+		let newMaster = {...tmpExpandedMaster} as Master;
+
+		for (const event of eventsAsArray) {
+			if (isUiSchemaChangeEvent(event)) {
 				if (syncOnBadState(schemaFormat)) {
 					return;
 				}
@@ -290,7 +349,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						...translations[lang],
 						[key]: value[lang]
 					}
-				}), newMaster.translations);
+				}), expandTranslations(newMaster.translations));
 			} else if (isTranslationsChangeEvent(event)) {
 				const {key, value} = event;
 				newMaster.translations = ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
@@ -301,12 +360,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 							? value
 							: (translations[lang][key] || value)
 					}
-				}), newMaster.translations);
+				}), expandTranslations(newMaster.translations));
 			} else if (isTranslationsDeleteEvent(event)) {
 				const {key} = event;
 				newMaster.translations = ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
 					...byLang,
-					[lang]: immutableDelete((newMaster.translations)[lang], key)
+					[lang]: immutableDelete(expandTranslations(newMaster.translations)[lang], key)
 				}), {} as CompleteTranslations);
 			} else if (event.type === "field") {
 				const splitted = event.selected.split("/").filter(s => s);
@@ -356,12 +415,37 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				newMaster = updateSafelyWithJSONPointer(newMaster, value, path);
 			}
 		}
-		this.setState({loading: true});
+
+		if (tmpMaster.baseFormID || tmpMaster.fields?.some(isFormExtensionField)) {
+			if (!master) {
+				return;
+			}
+
+			// newMaster = eventsToPatches(master, eventsAsArray);
+			const diff = getDiff(tmpExpandedMaster as JSON, newMaster as JSON);
+
+			const patches = diff.map(d => {
+				const path = "/" + (d.path || []).join("/");
+				switch (d.kind) {
+				case "N":
+					return {op: "add", path, value: d.rhs};
+				case "E":
+					return {op: "replace", path, value: d.rhs};
+				case "D":
+					return {op: "remove", path};
+				}
+			});
+
+			newMaster = {...master, patch: [...(master.patch || []), ...patches]};
+		}
+
 		try {
 			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
+			const newExpandedMaster = await this.formLinkerService.expandMaster(newMaster);
 			this.setState({
-				master: newMaster,
+				tmpMaster: newMaster,
 				schemaFormat: newSchemaFormat,
+				tmpExpandedMaster: newExpandedMaster,
 				loading: false,
 				edited: true
 			}, this.propagateState);
@@ -414,7 +498,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 }
 
-export interface UiSchemaChangeEvent {
+export type UiSchemaChangeEvent = {
 	type: "uiSchema";
 	value: any;
 	selected: string;
@@ -422,19 +506,19 @@ export interface UiSchemaChangeEvent {
 function isUiSchemaChangeEvent(event: ChangeEvent): event is UiSchemaChangeEvent {
 	return event.type === "uiSchema";
 }
-export interface TranslationsEvent {
+export type TranslationsEvent = {
 	type: "translations";
 	key: any;
 	op?: string;
 }
-export interface TranslationsAddEvent extends TranslationsEvent {
+export type TranslationsAddEvent = TranslationsEvent & {
 	value: {[lang in Lang]: string};
 	op: "add";
 }
-export interface TranslationsChangeEvent extends TranslationsEvent {
+export type TranslationsChangeEvent = TranslationsEvent & {
 	value: any;
 }
-export interface TranslationsDeleteEvent extends TranslationsEvent {
+export type TranslationsDeleteEvent = TranslationsEvent & {
 	op: "delete";
 }
 function isTranslationsAddEvent(event: ChangeEvent): event is TranslationsAddEvent {
@@ -446,19 +530,19 @@ function isTranslationsChangeEvent(event: ChangeEvent): event is TranslationsCha
 function isTranslationsDeleteEvent(event: ChangeEvent): event is TranslationsDeleteEvent {
 	return event.type === "translations" && event.op === "delete";
 }
-export interface FieldEvent {
+export type FieldEvent = {
 	type: "field";
 	selected: string;
 	op: string;
 }
-export interface FieldDeleteEvent extends FieldEvent {
+export type FieldDeleteEvent = FieldEvent & {
 	op: "delete";
 }
-export interface FieldAddEvent extends FieldEvent {
+export type FieldAddEvent = FieldEvent & {
 	op: "add";
 	value: Property;
 }
-export interface FieldUpdateEvent extends FieldEvent {
+export type FieldUpdateEvent =  FieldEvent & {
 	op: "update";
 	value: Field;
 }
@@ -472,7 +556,7 @@ function isFieldUpdateEvent(event: ChangeEvent): event is FieldUpdateEvent {
 	return event.type === "field" &&  event.op === "update";
 }
 
-export interface OptionChangeEvent {
+export type OptionChangeEvent = {
 	type: "options";
 	value: any;
 	path: string;
@@ -481,12 +565,9 @@ function isOptionChangeEvent(event: ChangeEvent): event is OptionChangeEvent {
 	return event.type === "options";
 }
 
-export interface MasterChangeEvent {
+export type MasterChangeEvent = {
 	type: "master";
 	value: Master;
-}
-function isMasterChangeEvent(event: ChangeEvent): event is MasterChangeEvent {
-	return event.type === "master";
 }
 
 export type ChangeEvent = UiSchemaChangeEvent
@@ -496,5 +577,4 @@ export type ChangeEvent = UiSchemaChangeEvent
 	| FieldDeleteEvent
 	| FieldAddEvent
 	| FieldUpdateEvent
-	| OptionChangeEvent
-	| MasterChangeEvent;
+	| OptionChangeEvent;

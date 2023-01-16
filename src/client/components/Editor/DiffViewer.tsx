@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Master } from "../../../model";
+import { Master, JSON } from "../../../model";
 import { Context } from "../Context";
 import { gnmspc, makeCancellable, nmspc } from "../../utils";
 import diff, { Diff, DiffDeleted, DiffEdit, DiffNew } from "deep-diff";
@@ -28,7 +28,7 @@ export default DiffViewerModal;
 
 type NonArrayDiff = DiffNew<JSON> | DiffEdit<JSON> | DiffDeleted<JSON>;
 
-const getDiff = memoize((obj1: JSON, obj2: JSON) => {
+export const getDiff = memoize((obj1: JSON, obj2: JSON) => {
 	// The diff is used for JSON only. Undefined keys will be removed when the JSON is stringified,
 	// so we filter them out here.
 	const mapUndefined = (diff: NonArrayDiff): NonArrayDiff | undefined => {

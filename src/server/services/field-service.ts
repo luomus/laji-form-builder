@@ -1,18 +1,16 @@
 import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
-import { Field, Lang, Master, Property, SchemaFormat, Translations, Range, ExpandedMaster, isFormExtensionField,
-	FormExtensionField, ExpandedJSONFormat, CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum,
-	JSONObject
-} from "../../model";
+import { Field, Lang, Master, Property, SchemaFormat, Translations, Range, ExpandedMaster, ExpandedJSONFormat,
+	CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum, JSONObject } from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName } from "../../utils";
 import merge from "deepmerge";
-import { applyPatch } from "fast-json-patch";
 import { UnprocessableError } from "./main-service";
 import ApiClient from "../../api-client";
 import StoreService from "./store-service";
 import ConverterService from "./converter-service";
 import UiSchemaService from "./uischema-service";
+import FormExpanderService from "../../services/form-expander-service";
 
 export default class FieldService {
 	private apiClient: ApiClient;
@@ -22,6 +20,7 @@ export default class FieldService {
 	private schemaServiceWithEnums: SchemaService<JSONSchemaV6Enum>;
 	private expandedJSONService: ExpandedJSONService;
 	private uiSchemaService: UiSchemaService;
+	private formExpanderService: FormExpanderService;
 
 	constructor(apiClient: ApiClient, metadataService: MetadataService, storeService: StoreService, lang: Lang) {
 		this.apiClient = apiClient;
@@ -31,6 +30,7 @@ export default class FieldService {
 		this.schemaServiceWithEnums = new SchemaService(metadataService, apiClient, lang, true);
 		this.expandedJSONService = new ExpandedJSONService(metadataService, lang);
 		this.uiSchemaService = new UiSchemaService(this.metadataService);
+		this.formExpanderService = new FormExpanderService(this.storeService);
 
 		this.addTaxonSets = this.addTaxonSets.bind(this);
 		this.masterToSchemaFormat = this.masterToSchemaFormat.bind(this);
@@ -59,7 +59,7 @@ export default class FieldService {
 	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang) : Promise<SchemaFormat<JSONSchemaV6Enum>>
 	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
 	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat> {
-		const expandedMaster = await this.expandMaster(master);
+		const expandedMaster = await this.formExpanderService.expandMaster(master);
 
 		const rootField = expandedMaster.fields
 			? getRootField(expandedMaster)
@@ -103,19 +103,7 @@ export default class FieldService {
 	}
 
 	linkMaster(master: Master) {
-		return reduceWith(
-			JSON.parse(JSON.stringify(master)) as Master,
-			undefined,
-			this.mapBaseForm,
-			this.mapBaseFormFromFields,
-		);
-	}
-
-	private async expandMaster(master: Master): Promise<ExpandedMaster> {
-		return reduceWith(await this.linkMaster(master), undefined,
-			this.applyPatches,
-			addEmptyUiSchema
-		);
+		return this.formExpanderService.linkMaster(master);
 	}
 
 	mapBaseFormFrom<T extends Pick<Master, "baseFormID" | "translations" | "uiSchema">>(form: T, baseForm: Master)
@@ -129,67 +117,6 @@ export default class FieldService {
 		};
 		delete form.baseFormID;
 		return form;
-	}
-
-	private mapBaseForm = async <T extends Pick<Master, "baseFormID" | "translations" | "uiSchema">>(master: T)
-	: Promise<Omit<T, "baseFormID">> => {
-		if (!master.baseFormID) {
-			return master;
-		}
-		const baseForm = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID));
-		return this.mapBaseFormFrom(master, baseForm);
-	}
-
-	mapBaseFormFromFields = async <T extends Pick<Master, "fields" | "translations" | "uiSchema" | "context">>
-	(master: T) : Promise<Omit<T, "fields"> & { fields?: Field[]; }> => {
-		if (!master.fields) {
-			return master as (T & { fields?: Field[]; });
-		}
-
-		for (const idx in master.fields) {
-			const f = master.fields[idx];
-			if (!isFormExtensionField(f)) {
-				continue;
-			}
-			const {formID} = f;
-			master.fields.splice(+idx, 1);
-			const {fields, uiSchema, translations, context} =
-				await this.expandMaster(await this.storeService.getForm(formID));
-			master.translations = merge(translations || {}, master.translations || {});
-			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
-			if (!master.context && context) {
-				master.context = context;
-			}
-			if (!fields) {
-				continue;
-			}
-			master.fields = mergeFields(master.fields, fields);
-		}
-		return master as (T & { fields?: Field[]; });
-
-		function mergeFields(fieldsFrom: (Field | FormExtensionField)[], fieldsTo: (Field | FormExtensionField)[])
-			: (Field | FormExtensionField)[] {
-			fieldsFrom.forEach(f => {
-				if (isFormExtensionField(f)) {
-					return;
-				}
-				const {name} = f;
-				const exists = fieldsTo.find(f => !isFormExtensionField(f) && f.name === name) as Field;
-				if (exists && f.fields && exists.fields) {
-					mergeFields(f.fields, exists.fields);
-				} else {
-					fieldsTo.push(f);
-				}
-			});
-			return fieldsTo;
-		}
-	}
-
-	private applyPatches<T extends Pick<Master, "patch">>(master: T): Omit<T, "patch"> {
-		const {patch, ..._master} = master;
-		return patch
-			? (applyPatch(_master, patch, undefined, false).newDocument as T)
-			: master;
 	}
 
 	private addExtra<T extends Record<string, unknown>>(field: Field) {
@@ -263,11 +190,6 @@ export default class FieldService {
 		}
 	}
 }
-
-const addEmptyUiSchema = <T extends Partial<Master>>(master: T): T & { uiSchema: JSONObject } =>
-	master.uiSchema
-		? master as T & { uiSchema: JSONObject }
-		: {...master, uiSchema: {}};
 
 const addLanguage = (language?: Lang) => <T>(obj: T) =>
 	language

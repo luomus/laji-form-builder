@@ -99,11 +99,6 @@
 		"sv": "Rensa filter ✖",
 		"en": "Clear filters ✖"
 	},
-	"editor.warning.patch": {
-		"fi": "Muokkaus toimii rajatusti lomakkeelle jolla on '$.patches'. Käytä JSON editoria.",
-		"sv": "Redigering av ett formulär med '$.patches' fungerar begränsat. Använd JSON-redigeraren",
-		"en": "Editing a form with '$.patches' works limitedly. Use the JSON editor."
-	},
 	"editor.warning.baseFormID": {
 		"fi": "Lomake perii lomakkeen %{baseFormID} ('$.baseFormID'), eli sen muokkaus rajoittuu ko. lomakkeen yliajamiseen",
 		"sv": "Form ärver %{baseFormID}, ('$.baseFormID') redigering är begränsad till att åsidosätta det formuläret",
