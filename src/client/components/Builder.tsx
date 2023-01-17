@@ -198,9 +198,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.setState({lang}, async () => {
 			const {tmpExpandedMaster} = this.state;
 			this.updateLang();
-			if (!this.state.tmp) {
-				this.updateSchemaFormat();
-			} else if (tmpExpandedMaster) {
+			if (tmpExpandedMaster) {
 				this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(tmpExpandedMaster));
 			}
 			this.props.onLangChange(this.state.lang);
@@ -417,26 +415,62 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		}
 
 		if (tmpMaster.baseFormID || tmpMaster.fields?.some(isFormExtensionField)) {
-			if (!master) {
-				return;
-			}
-
-			// newMaster = eventsToPatches(master, eventsAsArray);
 			const diff = getDiff(tmpExpandedMaster as JSON, newMaster as JSON);
 
-			const patches = diff.map(d => {
+			let patchedMaster = tmpMaster;
+
+			const patches: any[] = [];
+			diff.forEach(d => {
 				const path = "/" + (d.path || []).join("/");
-				switch (d.kind) {
-				case "N":
-					return {op: "add", path, value: d.rhs};
-				case "E":
-					return {op: "replace", path, value: d.rhs};
-				case "D":
-					return {op: "remove", path};
+				const editedProp: keyof Master = d.path[0];
+				if (["fields", "uiSchema", "options"].some(prop => prop === editedProp)) {
+					switch (d.kind) {
+					case "N":
+						patches.push({op: "add", path, value: d.rhs});
+						break;
+					case "E":
+						patches.push({op: "replace", path, value: d.rhs});
+						break;
+					case "D":
+						patches.push({op: "remove", path});
+					}
+				} else {
+					if (editedProp === "translations") {
+						if (d.kind === "N" || d.kind === "E") {
+							const lang: Lang = d.path[1];
+							const label: string = d.path[2];
+							const translations = expandTranslations(patchedMaster.translations);
+							patchedMaster = {
+								...patchedMaster,
+								translations: {
+									...translations,
+									[lang]: {...translations[lang], [label]: d.rhs}
+								}
+							};
+						} else if (d.kind === "D") {
+							const lang: Lang = d.path[1];
+							const label: string = d.path[2];
+							const translations = expandTranslations(patchedMaster.translations);
+							patchedMaster = {
+								...patchedMaster,
+								translations: {
+									...translations,
+									[lang]: immutableDelete(translations, label)
+								}
+							};
+						}
+					} else {
+						const pointer = `/${d.path.join("/")}`;
+						if (d.kind === "N" || d.kind === "E") {
+							patchedMaster = updateSafelyWithJSONPointer(patchedMaster, d.rhs, pointer);
+						} else {
+							patchedMaster = immutableDelete(patchedMaster, pointer);
+						}
+					}
 				}
 			});
 
-			newMaster = {...master, patch: [...(master.patch || []), ...patches]};
+			newMaster = {...patchedMaster, patch: [...(patchedMaster.patch || []), ...patches]};
 		}
 
 		try {

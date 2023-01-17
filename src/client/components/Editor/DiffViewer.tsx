@@ -2,7 +2,7 @@ import * as React from "react";
 import { Master, JSON } from "../../../model";
 import { Context } from "../Context";
 import { gnmspc, makeCancellable, nmspc } from "../../utils";
-import diff, { Diff, DiffDeleted, DiffEdit, DiffNew } from "deep-diff";
+import diff, { Diff, DiffDeleted, DiffEdit, DiffNew, DiffArray } from "deep-diff";
 import memoize from "memoizee";
 
 export type DiffViewerProps = {
@@ -26,7 +26,19 @@ const DiffViewerModal = React.memo(function DiffViewerModal({master}: DiffViewer
 
 export default DiffViewerModal;
 
-type NonArrayDiff = DiffNew<JSON> | DiffEdit<JSON> | DiffDeleted<JSON>;
+type HasPath = { path: string[] };
+
+// Patch diff typing to have path defined always. There should never be a case for a diff without a path.
+type PatchedDiffNew<RHS> = DiffNew<RHS> & HasPath;
+type PatchedDiffEdit<LHS, RHS = LHS> = DiffEdit<LHS, RHS> & HasPath;
+type PatchedDiffDeleted<LHS> = DiffDeleted<LHS> & HasPath;
+type PatchedDiffArray<LHS, RHS = LHS> = DiffArray<LHS, RHS> & HasPath;
+type PatchedDiff<LHS, RHS = LHS> = PatchedDiffNew<RHS>
+	| PatchedDiffDeleted<LHS>
+	| PatchedDiffEdit<LHS, RHS>
+	| PatchedDiffArray<LHS, RHS>;
+
+type NonArrayDiff = PatchedDiffNew<JSON> | PatchedDiffEdit<JSON> | PatchedDiffDeleted<JSON>;
 
 export const getDiff = memoize((obj1: JSON, obj2: JSON) => {
 	// The diff is used for JSON only. Undefined keys will be removed when the JSON is stringified,
@@ -41,7 +53,7 @@ export const getDiff = memoize((obj1: JSON, obj2: JSON) => {
 		return diff;
 	};
 
-	const flattenArrays = (diffs: Diff<JSON>[]): NonArrayDiff[] => {
+	const flattenArrays = (diffs: PatchedDiff<JSON>[]): NonArrayDiff[] => {
 		return diffs.reduce((_diffs, d) => {
 			const diff = mapUndefined(d.kind === "A"
 				?	{...d.item, path: [...(d.path || []), d.index]} as NonArrayDiff
@@ -51,7 +63,7 @@ export const getDiff = memoize((obj1: JSON, obj2: JSON) => {
 			return _diffs;
 		}, [] as NonArrayDiff[]);
 	};
-	const diffs =	diff(obj1, obj2);
+	const diffs =	diff(obj1, obj2) as PatchedDiff<JSON>[];
 	return diffs ? flattenArrays(diffs) : [];
 });
 
