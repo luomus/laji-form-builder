@@ -7,8 +7,9 @@ import {
 	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
 } from "../../utils";
 import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
+import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
-	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MaybeError, isValid, MasterChangeEvent } from "../Builder";
+	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
 import { Context } from "../Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";

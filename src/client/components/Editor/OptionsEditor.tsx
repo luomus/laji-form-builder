@@ -2,7 +2,7 @@ import * as React from "react";
 import LajiForm from "../LajiForm";
 import { Context } from "../Context";
 import { Spinner, Classable, Stylable, Button } from "../components";
-import {  OptionChangeEvent, TranslationsChangeEvent } from "../Builder";
+import {  OptionChangeEvent, TranslationsChangeEvent } from "../../services/change-handler-service";
 import {
 	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject
 } from "../../../model";
