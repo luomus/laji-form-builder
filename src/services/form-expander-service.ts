@@ -3,7 +3,7 @@ import { reduceWith } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
 
-type HasGetForm = {getForm: (id: string) => Promise<Master>};
+type HasGetForm = {getForm: (id: string, abort?: AbortSignal) => Promise<Master>};
 
 export default class FormExpanderService {
 	private storeService: HasGetForm;
@@ -12,21 +12,21 @@ export default class FormExpanderService {
 		this.storeService = storeService;
 	}
 
-	linkMaster(master: Master) {
+	linkMaster(master: Master, signal?: AbortSignal) {
 		return reduceWith(
 			JSON.parse(JSON.stringify(master)) as Master,
-			undefined,
+			signal,
 			this.mapBaseForm,
 			this.mapBaseFormFromFields,
 		);
 	}
 
-	private mapBaseForm = async <T extends Pick<Master, "baseFormID" | "translations" | "uiSchema">>(master: T)
-	: Promise<Omit<T, "baseFormID">> => {
+	private mapBaseForm = async <T extends Pick<Master, "baseFormID" | "translations" | "uiSchema">>
+	(master: T, signal?: AbortSignal): Promise<Omit<T, "baseFormID">> => {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID));
+		const baseForm = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID, signal), signal);
 		return this.mapBaseFormFrom(master, baseForm);
 	}
 
@@ -44,7 +44,7 @@ export default class FormExpanderService {
 	}
 
 	private mapBaseFormFromFields = async <T extends Pick<Master, "fields" | "translations" | "uiSchema" | "context">>
-	(master: T) : Promise<Omit<T, "fields"> & { fields?: Field[]; }> => {
+	(master: T, signal?: AbortSignal) : Promise<Omit<T, "fields"> & { fields?: Field[]; }> => {
 		if (!master.fields) {
 			return master as (T & { fields?: Field[]; });
 		}
@@ -57,7 +57,7 @@ export default class FormExpanderService {
 			const {formID} = f;
 			master.fields.splice(+idx, 1);
 			const {fields, uiSchema, translations, context} =
-				await this.expandMaster(await this.storeService.getForm(formID));
+				await this.expandMaster(await this.storeService.getForm(formID, signal), signal);
 			master.translations = merge(translations || {}, master.translations || {});
 			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
 			if (!master.context && context) {
@@ -88,8 +88,8 @@ export default class FormExpanderService {
 		}
 	}
 
-	async expandMaster(master: Master): Promise<ExpandedMaster> {
-		return reduceWith(await this.linkMaster(master), undefined,
+	async expandMaster(master: Master, signal?: AbortSignal): Promise<ExpandedMaster> {
+		return reduceWith(await this.linkMaster(master, signal), undefined,
 			this.applyPatches,
 			addEmptyUiSchema
 		);

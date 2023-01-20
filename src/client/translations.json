@@ -134,6 +134,11 @@
 		"sv": "Något gick fel när redigeringsgränssnittet byggdes. JSON-redigering bör vara säker att använda.",
 		"en": "Something went wrong when building the editor UI. JSON editing should be safe to use."
 	},
+	"editor.error.generic": {
+		"fi": "Lomakkeella on jotain pielessä. JSON muokkauksen pitäisi toimia.",
+		"sv": "Det är något fel på formuläret. JSON-redigering bör vara säker att använda.",
+		"en": "There's something wrong with the form. JSON editing should be safe to use."
+	},
 	"editor.json.discard": {
 		"fi": "Hylätäänkö tehdyt muutokset?",
 		"sv": "Vill du ignorera de ändringar som gjorts?",
@@ -153,5 +158,10 @@
 		"fi": "Vihreällä ovat uudet arvot, sinisellä muutokset ja punaisella poistot.",
 		"sv": "Gröna rader är nya värden, blå för ändringar och röda för raderingar",
 		"en": "Green rows are new values, blue for changes and red for deletions"
+	},
+	"editor.saveModal.error.master": {
+		"fi": "Lomakkeella on jotain pielessä.",
+		"sv": "Det är något fel på formuläret.",
+		"en": "There's something wrong with the form."
 	}
 }

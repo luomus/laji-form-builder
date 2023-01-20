@@ -9,8 +9,8 @@ import { Context } from "../Context";
 import LajiForm from "../LajiForm";
 import { Spinner } from "../components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { Property, PropertyContext, Field, JSONSchema } from "../../../model";
-import { CancellablePromise, detectChangePaths, makeCancellable } from "../../utils";
+import { Property, Field, JSONSchema } from "../../../model";
+import { detectChangePaths } from "../../utils";
 
 interface BasicEditorState {
 	childProps?: Property[] | false;
@@ -20,9 +20,7 @@ interface BasicEditorState {
 
 export default class BasicEditor extends React.PureComponent<FieldEditorProps, BasicEditorState> {
 	documentTree: any;
-	// TODO why is void required?
-	propertyContextPromise: CancellablePromise<PropertyContext | void>;
-	propertyChildsPromise: CancellablePromise<Property[] | void>;
+	propertyContextAbortController: AbortController;
 
 	static contextType = Context;
 	context!: React.ContextType<typeof Context>;
@@ -32,14 +30,13 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	} as BasicEditorState;
 
 	componentDidMount() {
-		this.propertyContextPromise = makeCancellable(
-			this.getProperties(this.props.path).then(properties =>  
-				this.setState({childProps: properties.length ? properties : false})
-			)
+		this.propertyContextAbortController = new AbortController();
+		this.getProperties(this.props.path, this.propertyContextAbortController.signal).then(properties =>  
+			this.setState({childProps: properties.length ? properties : false})
 		);
 	}
 
-	async getProperties(path: string): Promise<Property[]> {
+	async getProperties(path: string, signal: AbortSignal): Promise<Property[]> {
 		const getPropertyFromSubPathAndProp = async (path: string, property: Property): Promise<Property> => {
 			const splitted = path.substr(1).split("/");
 			const [cur, ...rest] = splitted;
@@ -47,7 +44,10 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 				return property;
 			}
 			const properties = property.isEmbeddable
-				? await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0])
+				? await this.context.metadataService.getPropertiesForEmbeddedProperty(
+					property.range[0],
+					undefined,
+					signal)
 				: [];
 
 			const nextProperty = properties?.find(p => unprefixProp(p.property) === rest[0]);
@@ -69,8 +69,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	}
 
 	componentWillUnmount() {
-		this.propertyContextPromise?.cancel();
-		this.propertyChildsPromise?.cancel();
+		this.propertyContextAbortController?.abort();
 	}
 
 	render() {
@@ -109,7 +108,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		} else if (this.state.childProps === false) {
 			return null;
 		} else {
-			return <Spinner />;
+			return <div><Spinner /></div>;
 		}
 	}
 

@@ -223,29 +223,6 @@ export const prefixUiSchemaDeeply = (uiSchema: any, schema: any, prefix?: string
 	return alterUiSchemaKeys(uiSchema, schema, (key => `${prefix}${key}`));
 };
 
-export interface CancellablePromise<T> {
-	promise: Promise<T>;
-	cancel: () => void;
-}
-
-export const makeCancellable = <T>(promise: Promise<T>): CancellablePromise<T> => {
-	let hasCancelled = false;
-
-	const wrappedPromise = new Promise<T>((resolve, reject) => {
-		promise.then(
-			val => hasCancelled ? reject({isCanceled: true}) : resolve(val),
-			error => hasCancelled ? reject({isCanceled: true}) : reject(error)
-		);
-	});
-
-	return {
-		promise: wrappedPromise,
-		cancel() {
-			hasCancelled = true;
-		},
-	};
-};
-
 export const unprefixer = (prefix = "") => (s: string) => s.startsWith(prefix) ? s.substr(prefix.length, s.length) : s;
 
 export const getTranslation = (key: string, translations: {[key: string]: string}): string | undefined => {

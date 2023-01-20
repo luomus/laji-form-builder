@@ -2,8 +2,8 @@ import * as React from "react";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { constructTranslations } from "laji-form/lib/utils";
-import { translate } from "../../utils";
-import { makeCancellable, CancellablePromise, gnmspc } from "../utils";
+import { isObject, translate } from "../../utils";
+import { gnmspc } from "../utils";
 import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
@@ -34,44 +34,80 @@ export interface BuilderProps {
 	onRemountLajiForm?: () => void;
 }
 export interface BuilderState {
+	lang: Lang;
+	editorHeight: number;
+	loading: number;
 	id?: string;
-	master?: Master;
-	expandedMaster?: ExpandedMaster;
-	tmpMaster?: Master;
-	tmpExpandedMaster?: ExpandedMaster;
+	master?: MaybeError<Master>;
+	expandedMaster?: MaybeError<ExpandedMaster>;
+	tmpMaster?: MaybeError<Master>;
+	tmpExpandedMaster?: MaybeError<ExpandedMaster>;
 	schemaFormat?: MaybeError<SchemaFormat>;
 	errorMsg?: string;
-	lang: Lang;
-	editorHeight?: number;
-	tmp?: boolean;
 	saving?: boolean
-	loading?: boolean;
 	edited?: boolean;
 }
 
-export type MaybeError<T> = T | "error";
+class BuilderError extends Error {
+	_builderError = true;
+}
+
+const otherThanSignalAbortAsBuilderError = (e: Error) => {
+	if (isSignalAbortError(e)) {
+		throw e;
+	}
+	(e as any)._builderError = true;
+	return e as BuilderError;
+};
+
+export type MaybeError<T> = T | BuilderError;
 
 export function isValid<T>(maybeError: MaybeError<T>): maybeError is T {
-	return maybeError !== "error";
+	return !isObject(maybeError) || !(maybeError as any)._builderError;
 }
+
+const isSignalAbortError = (e: any): e is DOMException => e instanceof DOMException && e.name === "AbortError";
 
 const EDITOR_HEIGHT = 400;
 
+type Ref<T> = { current?: T}
+const createRef = <T,>(value?: T): Ref<T> => ({current: value});
+
+const runAbortable = async <T,>(
+	fn: (signal: AbortSignal) => Promise<T>,
+	controllerRef: Ref<AbortController>
+): Promise<T | DOMException> => {
+	controllerRef.current?.abort();
+	const controller = new AbortController();
+	controllerRef.current = controller;
+	try {
+		return await fn(controller.signal);
+	} catch (e) {
+		if (!isSignalAbortError(e)) {
+			throw e;
+		}
+		return e;
+	}
+	// if (!controller.signal.aborted) {
+	// 	then?.(value!);
+	// }
+	// return fn(controllerRef.current.signal).catch(swallowSignalAbort);
+};
+
 export default class Builder extends React.PureComponent<BuilderProps, BuilderState> {
-	apiClient: ApiClient;
-	formApiClient?: ApiClient;
 	state: BuilderState = {
 		lang: this.props.lang,
-		editorHeight: EDITOR_HEIGHT
+		editorHeight: EDITOR_HEIGHT,
+		loading: 0
 	};
-	appTranslations: {[key: string]: {[lang in Lang]: string}};
-	schemaFormatPromise: CancellablePromise<any>;
-	formPromise: CancellablePromise<any>;
-	metadataService: MetadataService;
-	formService: FormService;
-	formLinkerService: FormExpanderService;
-	changeHandlerService: ChangeHandlerService;
-	notifier: Notifier;
+	private apiClient: ApiClient;
+	private formApiClient?: ApiClient;
+	private appTranslations: {[key: string]: {[lang in Lang]: string}};
+	private metadataService: MetadataService;
+	private formService: FormService;
+	private formLinkerService: FormExpanderService;
+	private changeHandlerService: ChangeHandlerService;
+	private notifier: Notifier;
 
 	static defaultProps = {
 		lang: "fi" as Lang,
@@ -106,18 +142,26 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	componentWillUnmount() {
-		this.formPromise?.cancel();
-		this.schemaFormatPromise?.cancel();
+		this.formAbortControllerRef.current?.abort();
+		this.masterAbortControllerRef.current?.abort();
 	}
 
-	componentDidUpdate({lang: prevLang}: BuilderProps) {
+	componentDidUpdate(
+		{lang: prevLang}: BuilderProps,
+		{schemaFormat: prevSchemaFormat, lang: prevStateLang}: BuilderState
+	) {
 		if (prevLang !== this.props.lang && this.state.lang === prevLang) {
 			this.setState({lang: this.props.lang}, () => {
-				this.updateLang();
+				this.setLangForServices();
 			});
 		}
 		this.updateFromId(this.props.id);
+		if (prevSchemaFormat !== this.state.schemaFormat || this.state.lang !== prevStateLang) {
+			this.propagateState();
+		}
 	}
+
+	formAbortControllerRef = createRef<AbortController>();
 
 	updateFromId(id?: string) {
 		if (id === this.state.id) {
@@ -131,24 +175,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			schemaFormat: undefined,
 			id
 		}, () => {
-			this.formPromise?.cancel();
-			const formPromise = id
-				? this.formService.getMaster(id)
-				: Promise.resolve(undefined);
-			const promise = async () => {
-				const master = await formPromise;
-				const expandedMaster = master
-					? await this.formLinkerService.expandMaster(master)
+			runAbortable(async (signal: AbortSignal) => {
+				const master = id
+					? await this.formService.getMaster(id, signal)
 					: undefined;
-				this.setState({
-					master,
-					tmpMaster: master,
-					expandedMaster,
-					tmpExpandedMaster: expandedMaster,
-				});
-			};
-			this.formPromise = makeCancellable(promise());
-			this.updateSchemaFormat();
+				this.updateMaster(master);
+			}, this.formAbortControllerRef);
 		});
 	}
 
@@ -156,57 +188,90 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.props.onSelected?.(id);
 	}
 
-	updateSchemaFormat() {
-		this.schemaFormatPromise?.cancel();
-		const {id} = this.state;
-		if (typeof id !== "string") {
-			this.setState({schemaFormat: undefined, errorMsg: undefined});
-			this.propagateState();
-		}
-		this.schemaFormatPromise = makeCancellable(
-			this.updateStateFromSchemaFormatPromise(this.formService.getSchemaFormat(id as string))
-		);
+	masterToExpandedMaster = async (master?: MaybeError<Master>, signal?: AbortSignal) =>
+		master
+			? isValid(master)
+				? await this.formLinkerService.expandMaster(master, signal).catch(otherThanSignalAbortAsBuilderError)
+				: new BuilderError("Couldn't be derived from invalid master")
+			: undefined;
+
+	expandedMasterToSchemaFormat = async (expandedMaster?: MaybeError<ExpandedMaster>, signal?: AbortSignal) =>
+		expandedMaster
+			? isValid(expandedMaster)
+				? await this.formService.masterToSchemaFormat(expandedMaster, signal)
+					.catch(otherThanSignalAbortAsBuilderError)
+				: new BuilderError("Couldn't be derived from invalid expanded master")
+			: undefined;
+
+	getDerivatedStateFromMaster = async (master?: MaybeError<Master>, signal?: AbortSignal)
+	: Promise<Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">> => {
+		const expandedMaster = await this.masterToExpandedMaster(master, signal);
+		return {master, ...(await this.getDerivatedStateFromExpandedMaster(expandedMaster, signal))};
 	}
 
-	private async updateStateFromSchemaFormatPromise(
-		schemaUpdatePromise: Promise<SchemaFormat>,
-		additionalState: Partial<BuilderState> = {})
-	: Promise<void> {
-		this.setState(
-			await this.getStateFromSchemaFormatPromise(schemaUpdatePromise, additionalState) as BuilderState,
-			this.propagateState
-		);
+	getDerivatedStateFromExpandedMaster = async (expandedMaster?: MaybeError<ExpandedMaster>, signal?: AbortSignal)
+	: Promise<Pick<BuilderState, "expandedMaster" | "schemaFormat">> => {
+		const schemaFormat = await this.expandedMasterToSchemaFormat(expandedMaster, signal);
+		return {expandedMaster, schemaFormat};
 	}
 
-	private async getStateFromSchemaFormatPromise(schemaUpdatePromise: Promise<SchemaFormat>,
-		additionalState: Partial<BuilderState> = {}): Promise<Partial<BuilderState>> {
-		let schemaFormat: SchemaFormat;
-		try {
-			schemaFormat = await schemaUpdatePromise;
-			return {schemaFormat, errorMsg: undefined, ...(additionalState as any)};
-		} catch (e) {
-			let msg;
-			try {
-				msg = (await e.json()).error;
-			} catch (e) {
-				msg = "get.error";
+	masterAbortControllerRef = createRef<AbortController>();
+
+	updateMaster(master?: MaybeError<Master>) {
+		runAbortable(async (signal: AbortSignal) => {
+			const state = await this.getDerivatedStateFromMaster(master, signal);
+			this.setState({...state, tmpMaster: state.master, tmpExpandedMaster: state.expandedMaster});
+		}, this.masterAbortControllerRef);
+	}
+
+	tmpMasterAbortControllerRef = createRef<AbortController>();
+
+	updateTmpMaster(tmpMaster?: Master) {
+		runAbortable(async (signal: AbortSignal) => {
+			const state = await this.getDerivatedStateFromMaster(tmpMaster, signal);
+			this.setState({
+				tmpMaster: state.master,
+				tmpExpandedMaster: state.expandedMaster,
+				schemaFormat: state.schemaFormat
+			});
+		}, this.tmpMasterAbortControllerRef);
+	}
+
+	pushLoading() {
+		this.setState(({loading}) => ({loading: loading + 1}));
+	}
+
+	popLoading() {
+		this.setState(({loading}) => {
+			if (loading === 0) {
+				throw new Error("Popped loader when it was 0");
 			}
-			return {schemaFormat: "error", errorMsg: msg, ...(additionalState as any)};
-		}
-	}
-
-	onLangChange = (lang: Lang) => {
-		this.setState({lang}, async () => {
-			const {tmpExpandedMaster} = this.state;
-			this.updateLang();
-			if (tmpExpandedMaster) {
-				this.updateStateFromSchemaFormatPromise(this.formService.masterToSchemaFormat(tmpExpandedMaster));
-			}
-			this.props.onLangChange(this.state.lang);
+			return {loading: loading - 1};
 		});
 	}
 
-	private updateLang() {
+
+	langChangeAbortControllerRef = createRef<AbortController>();
+
+	onLangChange = (lang: Lang) => {
+		this.pushLoading();
+		this.setState({lang}, async () => {
+			const {tmpExpandedMaster} = this.state;
+			this.setLangForServices();
+			const schemaFormat = await runAbortable(
+				signal => this.expandedMasterToSchemaFormat(tmpExpandedMaster, signal),
+				this.langChangeAbortControllerRef);
+			if (isSignalAbortError(schemaFormat)) {
+				this.popLoading();
+				return;
+			}
+			this.props.onLangChange(this.state.lang);
+			this.setState({schemaFormat});
+			this.popLoading();
+		});
+	}
+
+	private setLangForServices() {
 		this.apiClient.setLang(this.state.lang);
 		this.formApiClient?.setLang(this.state.lang);
 		this.metadataService.setLang(this.state.lang);
@@ -282,67 +347,46 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			return;
 		}
 
-		this.setState({loading: true});
+		this.pushLoading();
 
 		const newMaster = event.value;
 		try {
-			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
-			const newExpandedMaster = await this.formLinkerService.expandMaster(newMaster);
-			this.setState({
-				tmpMaster: newMaster,
-				schemaFormat: newSchemaFormat,
-				tmpExpandedMaster: newExpandedMaster,
-				loading: false,
-				edited: true
-			}, this.propagateState);
-		} catch (e) {
-			this.setState({loading: false});
+			this.updateMaster(newMaster);
+			this.setState({edited: true});
+		} finally {
+			this.popLoading();
 		}
 	}
 
 	onEditorChange = async (events: ChangeEvent | ChangeEvent[]) => {
 		const {tmpMaster, schemaFormat, tmpExpandedMaster} = this.state;
-		if (!tmpMaster || !tmpExpandedMaster) {
+		if (!tmpMaster || !tmpExpandedMaster || !isValid(tmpMaster) || !isValid(tmpExpandedMaster)) {
 			return;
 		}
-
-		const sync = async () => {
-			this.updateStateFromSchemaFormatPromise(
-				this.formService.masterToSchemaFormat(tmpMaster),
-				{tmpMaster}
-			);
-		};
 
 		if (!schemaFormat || !isValid(schemaFormat)) {
-			sync();
+			this.updateTmpMaster(this.state.tmpMaster);
 			return;
 		}
 
-		this.setState({loading: true});
+		this.pushLoading();
 
 		const newMaster = this.changeHandlerService.apply(tmpMaster, tmpExpandedMaster, schemaFormat, events);
-
 		try {
-			const newSchemaFormat = await this.formService.masterToSchemaFormat(newMaster);
-			const newExpandedMaster = await this.formLinkerService.expandMaster(newMaster);
-			this.setState({
-				tmpMaster: newMaster,
-				schemaFormat: newSchemaFormat,
-				tmpExpandedMaster: newExpandedMaster,
-				loading: false,
-				edited: true
-			}, this.propagateState);
-		} catch (e) {
-			this.setState({loading: false});
+			this.updateTmpMaster(newMaster);
+			this.setState({edited: true});
+		} finally {
+			this.popLoading();
 		}
 	}
 
 	propagateState() {
-		if (!this.state.tmpExpandedMaster || !isValid(this.state.schemaFormat)) {
+		const {tmpExpandedMaster} = this.state;
+		if (!tmpExpandedMaster || !isValid(tmpExpandedMaster) || !isValid(this.state.schemaFormat)) {
 			return;
 		}
-		const {translations, fields, ...toTranslate} = this.state.tmpExpandedMaster;
-		const translated = translate(toTranslate, this.state.tmpExpandedMaster.translations?.[this.state.lang] || {});
+		const {translations, fields, ...toTranslate} = tmpExpandedMaster;
+		const translated = translate(toTranslate, tmpExpandedMaster.translations?.[this.state.lang] || {});
 		const updated = {
 			...this.state.schemaFormat,
 			...translated
@@ -361,7 +405,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				this.setState({saving: false, id: master.id});
 			} else {
 				const masterResponse = await this.formService.create(master);
-				this.setState({master: masterResponse, saving: false}, this.propagateState);
+				this.setState({master: masterResponse, saving: false});
 				this.onSelected(masterResponse.id);
 			}
 			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
@@ -376,13 +420,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			this.onSave(master);
 			return;
 		}
-		const expandedMaster = await this.formLinkerService.expandMaster(master);
-		this.setState({tmp: true}, () => {
-			this.updateStateFromSchemaFormatPromise(
-				this.formService.masterToSchemaFormat(master),
-				{tmpMaster: master, tmpExpandedMaster: expandedMaster, edited: true}
-			);
-		});
+		this.updateMaster(master);
 	}
 }
-

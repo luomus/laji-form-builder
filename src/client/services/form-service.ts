@@ -23,16 +23,16 @@ export default class FormService extends HasCache {
 			: this.apiClient.fetchJSON(`/forms/${path}`, query as any, options);
 	}
 
-	getMaster = this.cache((id: string): Promise<Master> => {
+	getMaster = this.cache((id: string, signal?: AbortSignal): Promise<Master> => {
 		const query: any = {format: "json"};
 		if (!this.formApiClient) {
 			query.lang = "multi";
 		}
 		query.expand = false;
-		return this.fetchJSON(`/${id}`, query);
+		return this.fetchJSON(`/${id}`, query, {signal});
 	});
 
-	private getSchemaFormatCache = this.cache((id: string) => this.cache((lang: Lang): Promise<SchemaFormat> => 
+	private getSchemaFormatCache = this.cache((id: string) => this.cache((lang: Lang): Promise<SchemaFormat> =>
 		this.fetchJSON(`/${id}`, {format: "schema", lang})
 	));
 
@@ -67,11 +67,11 @@ export default class FormService extends HasCache {
 		return this.formApiClient ? response.forms : response.results;
 	});
 
-	masterToSchemaFormat(master: Master): Promise<SchemaFormat> {
+	masterToSchemaFormat(master: Master, signal?: AbortSignal): Promise<SchemaFormat> {
 		return this.fetchJSON("/transform", {lang: this.lang, personToken: this.personToken},
 			{method: "POST", body: JSON.stringify(master), headers: {
 				"Content-Type": "application/json"
-			}});
+			}, signal});
 	}
 
 	setLang(lang: Lang) {

@@ -22,7 +22,7 @@ export default class ApiClient {
 				} else {
 					resolve(response);
 				}
-			});
+			}, reject);
 		});
 	}
 

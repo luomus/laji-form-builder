@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Master, JSON } from "../../../model";
 import { Context } from "../Context";
-import { gnmspc, makeCancellable, nmspc } from "../../utils";
+import { gnmspc, nmspc } from "../../utils";
 import diff, { Diff, DiffDeleted, DiffEdit, DiffNew, DiffArray } from "deep-diff";
 import memoize from "memoizee";
 
@@ -16,8 +16,9 @@ const DiffViewerModal = React.memo(function DiffViewerModal({master}: DiffViewer
 		if (!master.id) {
 			return;
 		}
-		const promise = makeCancellable(formService.getMaster(master.id).then(setRemoteMaster));
-		return promise.cancel;
+		const abortController = new AbortController();
+		formService.getMaster(master.id, abortController.signal).then(setRemoteMaster);
+		return () => abortController.abort();
 	}, [formService, master.id]);
 	return (
 		<DiffsViewer diffs={getDiff(remoteMaster as JSON, master as JSON)} />

@@ -17,7 +17,7 @@ import OptionsEditor from "./OptionsEditor";
 import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster } from "../../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { translate as translateKey } from "laji-form/lib/utils";
-import DiffViewer, { DiffViewerProps } from "./DiffViewer";
+import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
 
 export type FieldEditorChangeEvent =
@@ -30,19 +30,19 @@ export type FieldEditorChangeEvent =
 	| Omit<FieldUpdateEvent, "selected">;
 
 export interface EditorProps extends Stylable, Classable {
-	master?: Master;
-	expandedMaster?: ExpandedMaster;
-	schemaFormat?: MaybeError<SchemaFormat>;
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
 	onMasterChange: (event: MasterChangeEvent) => void;
 	onLangChange: (lang: Lang) => void;
+	onSave: (master: Master) => void;
+	displaySchemaTabs: boolean;
+	loading: number;
+	master?: MaybeError<Master>;
+	expandedMaster?: MaybeError<ExpandedMaster>;
+	schemaFormat?: MaybeError<SchemaFormat>;
 	height?: number;
 	onHeightChange?: (height: number) => void;
-	onSave: (master: Master) => void;
 	saving?: boolean;
-	loading?: boolean;
 	edited?: boolean;
-	displaySchemaTabs: boolean;
 	errorMsg?: string;
 	onRemountLajiForm?: () => void;
 }
@@ -119,7 +119,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		const {translations} = this.context;
 		return (
 			<div style={fieldEditorStyle}>
-				{master.baseFormID && (
+				{isValid(master) && master.baseFormID && (
 					<div className={gnmspc("warning")}>
 						{translateKey(translations, "Editor.warning.baseFormID", {baseFormID: master.baseFormID})}
 					</div>
@@ -168,8 +168,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			return <Spinner size={100} />;
 		}
 		let content;
-		if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
-			content =  (
+		if (!isValid(master) || !isValid(expandedMaster) || !isValid(schemaFormat)) {
+			content = <div className={gnmspc("error")}>{this.context.translations["Editor.error.generic"]}</div>;
+		} else if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
+			content = (
 				<ActiveEditorErrorBoundary>
 					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} ref={this.fieldsRef}>
 						<Fields className={gnmspc("field-chooser")}
@@ -209,7 +211,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			? (
 				<div style={containerStyle} ref={this.containerRef}>
 					{content}
-					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master}
+					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master || {} as Master}
 					                                                   onHide={this.hideJSONEditor}
 					                                                   onSave={this.onSave}
 					                                                   onChange={this.props.onMasterChange} />}
@@ -331,7 +333,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	}
 
 	onSave = () => {
-		this.props.master && this.props.onSave(this.props.master);
+		const {master} = this.props;
+		master && isValid(master) && this.props.onSave(master);
 	}
 }
 
@@ -537,11 +540,11 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	onEditorChange: EditorChooserProps["onChange"];
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
-	saving?: boolean;
-	loading?: boolean;
-	edited?: boolean;
 	containerRef: React.RefObject<HTMLDivElement>;
 	openJSONEditor: () => void;
+	loading: number;
+	saving?: boolean;
+	edited?: boolean;
 	onRemountLajiForm?: () => void;
 }
 
@@ -585,7 +588,7 @@ const EditorToolbar = ({
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
 			<div style={{marginLeft: "auto", display: "flex"}}>
-				{ loading && <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> }
+				{ loading ? <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> : null }
 				<EditorToolbarSeparator />
 				<Button id={gnmspc("open-save-view")}
 				        small
@@ -656,7 +659,7 @@ const ActiveEditor = React.memo(function ActiveEditor(
 });
 
 type FormJSONEditorProps = {
-	master: Master;
+	master: MaybeError<Master>;
 	onHide: () => void;
 	onChange: EditorProps["onMasterChange"];
 	onSave: EditorProps["onSave"];
@@ -675,7 +678,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	const showSaveModal = React.useCallback(() => setShowSaveModal(true), [setShowSaveModal]);
 	const hideSaveModal = React.useCallback(() => setShowSaveModal(false), [setShowSaveModal]);
 
-	const [tmpValue, setTmpValue] = React.useState<Master>(master);
+	const [tmpValue, setTmpValue] = React.useState<Master>(isValid(master) ? master : {} as Master);
 
 	const onSubmitDraft = React.useCallback((value: Master) => {
 		onChange({type: "master", value});
@@ -695,7 +698,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 
 	return (
 		<GenericModal onHide={onHideCheckForChanges}>
-			<FormJSONEditor value={master}
+			<FormJSONEditor value={isValid(master) ? master : {}}
 			                onSubmit={showSaveModal}
 			                onSubmitDraft={onSubmitDraft}
 			                onChange={setTmpValue} />
@@ -706,14 +709,17 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	);
 });
 
-const SaveModal = ({onSave, onHide, ...props}
-	: {onSave: () => void} & Pick<GenericModalProps, "onHide"> & DiffViewerProps) => {
+const SaveModal = ({onSave, onHide, master}
+	: {onSave: () => void, master: MaybeError<Master>} & Pick<GenericModalProps, "onHide">) => {
 	const {translations} = React.useContext(Context);
 	return (
 		<GenericModal onHide={onHide} className={gnmspc("save-modal")} header={translations["Editor.save.header"]}>
 			<div className={gnmspc("mb-5")}>{translations["Editor.save.description"]}</div>
-			<DiffViewer {...props} />
-			<Button onClick={onSave} variant="primary">{translations.Save}</Button>
+			{isValid(master)
+				? <DiffViewer master={master} />
+				: <div className={gnmspc("error")}>{translations["Editor.saveModal.error.master"]}</div>
+			}
+			<Button onClick={onSave} variant="primary" disabled={isValid(master)} >{translations.Save}</Button>
 		</GenericModal>
 	);
 };

@@ -64,16 +64,12 @@ describe("Editor", () => {
 			});
 
 			it("adding excludeFromCopy to field with already existing options", async () => {
-				debugger;
 				const field = builder.getFieldSelectorByJSONPath("/document/secureLevel");
 				await field.$field.click();
-				debugger;
 
 				const $excludeFromCopy = (await builder.getEditorForm())
 					.getBooleanWidget("options.excludeFromCopy");
-				debugger;
 				await $excludeFromCopy.$false.click();
-				debugger;
 
 				await builder.waitUntilLoaded();
 				await builder.saveModal.open();
@@ -91,7 +87,7 @@ describe("Editor", () => {
 				await builder.saveModal.close();
 			});
 
-			it("field editor displayed for all forms", async () => {
+			it("field editor displayed for all fields", async () => {
 				let $field = builder.$rootFieldSelector;
 				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
 			});
@@ -108,7 +104,7 @@ describe("Editor", () => {
 				expect(await isDisplayed(builder.$fieldSelectorContainer)).toBe(true);
 			});
 
-			it("field editor displayed for all forms", async () => {
+			it("field editor displayed for all fields", async () => {
 				let $field = builder.$rootFieldSelector;
 				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
 			});

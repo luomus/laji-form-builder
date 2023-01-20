@@ -29,21 +29,24 @@ export default class MetadataService extends HasCache {
 			.then(result => result["@context"]))
 
 	getPropertiesForEmbeddedProperty = this.cache(
-		async (property: string, lang = "multi"): Promise<Property[]> => 
+		async (property: string, lang = "multi", signal?: AbortSignal): Promise<Property[]> => 
 			(await this.apiClient.fetchJSON(
 				`/metadata/classes/${unprefixProp(property)}/properties`,
-				{lang})
+				{lang},
+				{signal})
 			).results as Property[]
 		, { length: 2 })
 
-	async getProperties(fields: Field[], property: Property) {
-		return (await this.getPropertiesForEmbeddedProperty(property.range[0]))
-			.reduce<Record<string, Property>>((propMap, prop) => {
-				if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
-					propMap[unprefixProp(prop.property)] = prop;
-				}
-				return propMap;
-			}, {});
+	async getProperties(fields: Field[], property: Property, signal?: AbortSignal) {
+		return fields
+			? (await this.getPropertiesForEmbeddedProperty(property.range[0], undefined, signal))
+				.reduce<Record<string, Property>>((propMap, prop) => {
+					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
+						propMap[unprefixProp(prop.property)] = prop;
+					}
+					return propMap;
+				}, {})
+			: {};
 	}
 
 	getRange = this.cache((property: string): Promise<Range[]> =>
