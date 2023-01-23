@@ -719,7 +719,7 @@ const SaveModal = ({onSave, onHide, master}
 				? <DiffViewer master={master} />
 				: <div className={gnmspc("error")}>{translations["Editor.saveModal.error.master"]}</div>
 			}
-			<Button onClick={onSave} variant="primary" disabled={isValid(master)} >{translations.Save}</Button>
+			<Button onClick={onSave} variant="primary" disabled={!isValid(master)} >{translations.Save}</Button>
 		</GenericModal>
 	);
 };
