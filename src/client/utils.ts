@@ -284,9 +284,9 @@ export const getScrollPositionForScrollIntoViewIfNeeded = (
 	if (elemTop < containerTop) {
 		return toTop();
 	} else if (elemBottom > containerBottom) {
-		// Priorize scrolling to top if scrolling to bottom would obscure top.
+		// If scrolling to bottom would obscure top, don't scroll.
 		return elemTop < toBottom() + topOffset
-			? toTop()
+			? container.scrollTop
 			: toBottom();
 	}
 	return container.scrollTop;
