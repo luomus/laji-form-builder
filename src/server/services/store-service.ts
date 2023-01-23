@@ -45,7 +45,7 @@ const isStoreError = (response: any): response is StoreErrorModel =>
 	isObject(response) && response.status > 400;
 
 export default class StoreService extends HasCache {
-	private forms: Record<string, RemoteMaster>;
+	private forms: Record<string, RemoteMaster> = {};
 
 	getForms = this.cache(async (): Promise<RemoteMaster[]> => {
 		const response = await formFetch<ListResponse<RemoteMaster[]>>("/", {page_size: 10000});
@@ -105,5 +105,10 @@ export default class StoreService extends HasCache {
 		delete this.forms[id];
 		this.getForms.clear();
 		return response;
+	}
+
+	flush() {
+		this.forms = {};
+		super.flush();
 	}
 }
