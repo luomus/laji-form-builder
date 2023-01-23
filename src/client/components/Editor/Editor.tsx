@@ -213,7 +213,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master || {} as Master}
 					                                                   onHide={this.hideJSONEditor}
-					                                                   onSave={this.onSave}
+					                                                   onSave={this.props.onSave}
 					                                                   onChange={this.props.onMasterChange} />}
 					{this.state.saveModalOpen && <SaveModal master={master}
 					                                        onSave={this.onSave}
@@ -690,7 +690,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	}, [tmpValue, onSave]);
 
 	const onHideCheckForChanges = React.useCallback(() => {
-		tmpValue !== master
+		JSON.stringify(tmpValue) !== JSON.stringify(master)
 			&& confirm(translations["Editor.json.discard"])
 			|| onSubmitDraft(tmpValue);
 		onHide();

@@ -12,14 +12,15 @@ export type DiffViewerProps = {
 const DiffViewerModal = React.memo(function DiffViewerModal({master}: DiffViewerProps) {
 	const {formService} = React.useContext(Context);
 	const [remoteMaster, setRemoteMaster] = React.useState<Master | undefined>(undefined);
+	const {id} = master;
 	React.useEffect(() => {
-		if (!master.id) {
+		if (id === undefined) {
 			return;
 		}
 		const abortController = new AbortController();
-		formService.getMaster(master.id, abortController.signal).then(setRemoteMaster);
+		formService.getMaster(id, abortController.signal).then(setRemoteMaster);
 		return () => abortController.abort();
-	}, [formService, master.id]);
+	}, [formService, id]);
 	return (
 		<DiffsViewer diffs={getDiff(remoteMaster as JSON, master as JSON)} />
 	);

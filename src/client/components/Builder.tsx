@@ -3,7 +3,7 @@ import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { constructTranslations } from "laji-form/lib/utils";
 import { isObject, translate } from "../../utils";
-import { gnmspc } from "../utils";
+import { createRef, gnmspc, isSignalAbortError, runAbortable } from "../utils";
 import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
@@ -66,33 +66,7 @@ export function isValid<T>(maybeError: MaybeError<T>): maybeError is T {
 	return !isObject(maybeError) || !(maybeError as any)._builderError;
 }
 
-const isSignalAbortError = (e: any): e is DOMException => e instanceof DOMException && e.name === "AbortError";
-
 const EDITOR_HEIGHT = 400;
-
-type Ref<T> = { current?: T}
-const createRef = <T,>(value?: T): Ref<T> => ({current: value});
-
-const runAbortable = async <T,>(
-	fn: (signal: AbortSignal) => Promise<T>,
-	controllerRef: Ref<AbortController>
-): Promise<T | DOMException> => {
-	controllerRef.current?.abort();
-	const controller = new AbortController();
-	controllerRef.current = controller;
-	try {
-		return await fn(controller.signal);
-	} catch (e) {
-		if (!isSignalAbortError(e)) {
-			throw e;
-		}
-		return e;
-	}
-	// if (!controller.signal.aborted) {
-	// 	then?.(value!);
-	// }
-	// return fn(controllerRef.current.signal).catch(swallowSignalAbort);
-};
 
 export default class Builder extends React.PureComponent<BuilderProps, BuilderState> {
 	state: BuilderState = {

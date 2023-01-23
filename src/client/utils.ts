@@ -341,3 +341,26 @@ export function handleTranslationChange<T>(
 		}
 	}
 }
+
+type Ref<T> = { current?: T}
+export const createRef = <T,>(value?: T): Ref<T> => ({current: value});
+
+export const isSignalAbortError = (e: any): e is DOMException => e instanceof DOMException && e.name === "AbortError";
+
+export const runAbortable = async <T,>(
+	fn: (signal: AbortSignal) => Promise<T>,
+	controllerRef: Ref<AbortController>
+): Promise<T | DOMException> => {
+	controllerRef.current?.abort();
+	const controller = new AbortController();
+	controllerRef.current = controller;
+	try {
+		return await fn(controller.signal);
+	} catch (e) {
+		if (!isSignalAbortError(e)) {
+			throw e;
+		}
+		return e;
+	}
+};
+
