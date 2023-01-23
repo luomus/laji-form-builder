@@ -1,4 +1,4 @@
-import { ExpandedMaster, Field, FormExtensionField, isFormExtensionField, JSONObject, Master } from "../model";
+import { ExpandedMaster, JSONObject, Master } from "../model";
 import { reduceWith } from "../utils";
 import merge from "deepmerge";
 import { applyPatch } from "fast-json-patch";
@@ -17,7 +17,7 @@ export default class FormExpanderService {
 			JSON.parse(JSON.stringify(master)) as Master,
 			signal,
 			this.mapBaseForm,
-			this.mapBaseFormFromFields,
+			this.mapFieldsFormID,
 		);
 	}
 
@@ -43,50 +43,28 @@ export default class FormExpanderService {
 		return form;
 	}
 
-	private mapBaseFormFromFields = async <T extends Pick<Master, "fields" | "translations" | "uiSchema" | "context">>
-	(master: T, signal?: AbortSignal) : Promise<Omit<T, "fields"> & { fields?: Field[]; }> => {
-		if (!master.fields) {
-			return master as (T & { fields?: Field[]; });
+	mapFieldsFormID =
+	async <T extends Pick<Master, "fields" | "translations" | "uiSchema" | "context" | "fieldsFormID">>
+	(master: T) : Promise<Omit<T, "fieldsFormID">> => {
+		if (!master.fieldsFormID) {
+			return master;
 		}
+		const {fieldsFormID, ...masterWithoutFieldsFormID} = master;
 
-		for (const idx in master.fields) {
-			const f = master.fields[idx];
-			if (!isFormExtensionField(f)) {
-				continue;
-			}
-			const {formID} = f;
-			master.fields.splice(+idx, 1);
-			const {fields, uiSchema, translations, context} =
-				await this.expandMaster(await this.storeService.getForm(formID, signal), signal);
-			master.translations = merge(translations || {}, master.translations || {});
-			master.uiSchema = merge(master.uiSchema || {}, uiSchema || {});
-			if (!master.context && context) {
-				master.context = context;
-			}
-			if (!fields) {
-				continue;
-			}
-			master.fields = mergeFields(master.fields, fields);
+		const {fields, uiSchema, translations, context} =
+			await this.expandMaster(await this.storeService.getForm(fieldsFormID));
+		const _master: Omit<T, "fieldsFormID"> = {
+			...masterWithoutFieldsFormID,
+			fields,
+			translations: merge(translations || {}, master.translations || {}),
+			uiSchema: merge(master.uiSchema || {}, uiSchema || {}),
+		};
+		if (!master.context && context) {
+			_master.context = context;
 		}
-		return master as (T & { fields?: Field[]; });
-
-		function mergeFields(fieldsFrom: (Field | FormExtensionField)[], fieldsTo: (Field | FormExtensionField)[])
-			: (Field | FormExtensionField)[] {
-			fieldsFrom.forEach(f => {
-				if (isFormExtensionField(f)) {
-					return;
-				}
-				const {name} = f;
-				const exists = fieldsTo.find(f => !isFormExtensionField(f) && f.name === name) as Field;
-				if (exists && f.fields && exists.fields) {
-					mergeFields(f.fields, exists.fields);
-				} else {
-					fieldsTo.push(f);
-				}
-			});
-			return fieldsTo;
-		}
+		return _master;
 	}
+
 
 	async expandMaster(master: Master, signal?: AbortSignal): Promise<ExpandedMaster> {
 		return reduceWith(await this.linkMaster(master, signal), undefined,

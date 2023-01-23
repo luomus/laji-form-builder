@@ -1,8 +1,9 @@
 import { updateSafelyWithJSONPointer, immutableDelete } from "laji-form/lib/utils";
 import { unprefixProp } from "../../utils";
 import { fieldPointerToUiSchemaPointer } from "../utils";
-import { Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations, ExpandedMaster,
-	isFormExtensionField, JSON } from "../../model";
+import {
+	Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations, ExpandedMaster, JSON
+} from "../../model";
 import { getDiff } from "../components/Editor/DiffViewer";
 
 const expandTranslations = (translations: Master["translations"]): CompleteTranslations => ({
@@ -111,7 +112,7 @@ export default class ChangeHandlerService {
 			}
 		}
 
-		if (tmpMaster.baseFormID || tmpMaster.fields?.some(isFormExtensionField)) {
+		if (tmpMaster.baseFormID || tmpMaster.fieldsFormID) {
 			const diff = getDiff(tmpExpandedMaster as JSON, newMaster as JSON);
 
 			let patchedMaster = tmpMaster;

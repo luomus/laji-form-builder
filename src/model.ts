@@ -75,8 +75,9 @@ export type JSON = string | number | boolean | JSONObject | JSON[];
 export type JSONObject = { [prop: string]: JSON };
 
 export type Master = CommonExpanded & {
-	fields?: (Field | FormExtensionField)[];
+	fields?: Field[];
 	baseFormID?: string;
+	fieldsFormID?: string;
 	patch?: any[];
 	"@type"?: string;
 	"@context"?: string;
@@ -112,10 +113,6 @@ export type ExpandedMaster = Omit<Master, "baseFormID" | "patch"> & {
 }
 
 export type RemoteMaster = Master & {id: string};
-
-export function isFormExtensionField(field: Field | FormExtensionField): field is FormExtensionField {
-	return !!(field as any).formID;
-}
 
 export type FieldOptions = {
 	excludeFromCopy?: boolean;
@@ -160,10 +157,6 @@ export type ExpandedField = Omit<Field, "type" | "fields"> & {
 	type?: "hidden" | "collection" | ExpandedFieldType;
 	fields?: ExpandedField[];
 	options?: ExpandedFieldOptions;
-}
-
-export type FormExtensionField = {
-	formID: string;
 }
 
 export type AltTreeParent = {
