@@ -49,7 +49,6 @@ export interface BuilderState {
 }
 
 class BuilderError extends Error {
-	_builderError = true;
 }
 
 const otherThanSignalAbortAsBuilderError = (e: Error) => {
@@ -63,7 +62,7 @@ const otherThanSignalAbortAsBuilderError = (e: Error) => {
 export type MaybeError<T> = T | BuilderError;
 
 export function isValid<T>(maybeError: MaybeError<T>): maybeError is T {
-	return !isObject(maybeError) || !(maybeError as any)._builderError;
+	return typeof maybeError !== "object" || maybeError === null || !(maybeError as any)._builderError;
 }
 
 const EDITOR_HEIGHT = 400;
@@ -192,9 +191,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	masterAbortControllerRef = createRef<AbortController>();
 
 	updateMaster(master?: MaybeError<Master>) {
-		runAbortable(async (signal: AbortSignal) => {
+		return runAbortable(async (signal: AbortSignal) => {
 			const state = await this.getDerivatedStateFromMaster(master, signal);
-			this.setState({...state, tmpMaster: state.master, tmpExpandedMaster: state.expandedMaster});
+			this.setState(this.getStateFromMasterUpdate(state));
+			return state.master;
 		}, this.masterAbortControllerRef);
 	}
 
@@ -210,6 +210,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			});
 		}, this.tmpMasterAbortControllerRef);
 	}
+
+	getStateFromMasterUpdate = (state: Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">) => ({
+		...state,
+		tmpMaster: state.master,
+		tmpExpandedMaster: state.expandedMaster,
+	})
 
 	pushLoading() {
 		this.setState(({loading}) => ({loading: loading + 1}));
@@ -314,6 +320,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.setState({editorHeight});
 	}
 
+	onEditorMasterChangeAbortControllerRef = createRef<AbortController>();
+
 	onEditorMasterChange = async (event: MasterChangeEvent) => {
 		const {tmpMaster} = this.state;
 
@@ -325,8 +333,31 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 		const newMaster = event.value;
 		try {
-			this.updateMaster(newMaster);
-			this.setState({edited: true});
+			const newState = await runAbortable(
+				signal => this.getDerivatedStateFromMaster(newMaster, signal),
+				this.onEditorMasterChangeAbortControllerRef
+			);
+
+			if (isSignalAbortError(newState)) {
+				return;
+			}
+
+			if (isValid(newState)) {
+				this.setState({edited: true});
+			}
+			const rootErrorProp = (["master", "expandedMaster", "schemaFormat"] as
+				(keyof Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">)[])
+				.find(prop => !isValid(newState[prop]));
+			if (rootErrorProp) {
+				const rootError = this.state[rootErrorProp] as BuilderError;
+				const {translations} = this.getContext(this.props.lang, this.state.lang);
+				this.notifier.error(
+					`${translations["Builder.masterChange.fail"]}\n${rootError.message}\n${rootError.stack}`
+				);
+				console.error(rootError);
+			} else {
+				this.setState({...this.getStateFromMasterUpdate(newState), edited: true});
+			}
 		} finally {
 			this.popLoading();
 		}

@@ -163,5 +163,10 @@
 		"fi": "Lomakkeella on jotain pielessä.",
 		"sv": "Det är något fel på formuläret.",
 		"en": "There's something wrong with the form."
+	},
+	"builder.masterChange.fail": {
+		"fi": "JSONissa on jotain vikaa. Muutoksia ei tehty lomakkeen esikatseluun.",
+		"sv": "Det är något fel med JSON. Ändringarna tillämpades inte på förhandsgranskningen av formuläret.",
+		"en": "There's something wrong with the JSON. The changes weren't applied to the preview of the form."
 	}
 }
