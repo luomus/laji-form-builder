@@ -26,7 +26,7 @@ export default class FormExpanderService {
 		if (!master.baseFormID) {
 			return master;
 		}
-		const baseForm = await this.mapBaseForm(await this.storeService.getForm(master.baseFormID, signal), signal);
+		const baseForm = await this.expandMaster(await this.storeService.getForm(master.baseFormID, signal), signal);
 		return this.mapBaseFormFrom(master, baseForm);
 	}
 
@@ -64,7 +64,6 @@ export default class FormExpanderService {
 		}
 		return _master;
 	}
-
 
 	async expandMaster(master: Master, signal?: AbortSignal): Promise<ExpandedMaster> {
 		return reduceWith(await this.linkMaster(master, signal), undefined,
