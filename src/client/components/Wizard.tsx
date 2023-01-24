@@ -1,9 +1,9 @@
 import React from "react";
 import LajiForm from "./LajiForm";
 import _LajiForm from "laji-form/lib/components/LajiForm";
-import { FormJSONEditor, HasChildren, Spinner, Stylable, Button } from "./components";
+import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button } from "./components";
 import { Context } from "./Context";
-import { FormListing, Master, FormDeleteResult } from "../../model";
+import { FormListing, Master, FormDeleteResult, isMaster } from "../../model";
 import { JSONSchemaBuilder } from "../../utils";
 import { classNames, gnmspc, nmspc } from "../utils";
 import { translate as translateKey } from "laji-form/lib/utils";
@@ -178,7 +178,10 @@ function FormCreatorJSON({onCreate}: WizardStepProps) {
 	);
 	const onSubmit = useOnSubmit(true);
 	const onSubmitDraft = useOnSubmit(false);
-	return <FormJSONEditor onSubmit={onSubmit} onSubmitDraft={onSubmitDraft} className={wizardNmspc("json")} />;
+	return <SubmittableJSONEditor onSubmit={onSubmit}
+	                              onSubmitDraft={onSubmitDraft}
+	                              className={wizardNmspc("json")}
+	                              validator={isMaster} />;
 }
 
 interface FormCreatorDatabankProps extends WizardStepProps {

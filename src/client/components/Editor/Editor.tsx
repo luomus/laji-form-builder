@@ -1,8 +1,7 @@
 import * as React from "react";
 import memoize from "memoizee";
-import {
-	DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, FormJSONEditor, HasChildren
-} from "../components";
+import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
+	HasChildren, JSONEditorProps } from "../components";
 import {
 	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
 } from "../../utils";
@@ -14,7 +13,7 @@ import { Context } from "../Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster } from "../../../model";
+import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster } from "../../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
@@ -188,7 +187,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 						<ActiveEditor key={this.state.selected}
 						              active={this.state.activeEditorMode}
 						              {...this.getFieldEditorProps(expandedMaster, schemaFormat)}
-						              className={gnmspc("field-editor")}
+						              className={classNames(gnmspc("field-editor"), editorContentNmspc())}
 						              style={fieldEditorContentStyle}
 						/>
 					}
@@ -197,7 +196,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={expandedMaster}
 			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
-			                         className={gnmspc("options-editor")}
+			                         className={classNames(gnmspc("options-editor"), editorContentNmspc())}
 			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
 			                         lajiFormRef={this.optionsEditorLajiFormRef}
@@ -211,7 +210,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			? (
 				<div style={containerStyle} ref={this.containerRef}>
 					{content}
-					{this.state.jsonEditorOpen && <FormJSONEditorModal master={master || {} as Master}
+					{this.state.jsonEditorOpen && <FormJSONEditorModal value={master}
 					                                                   onHide={this.hideJSONEditor}
 					                                                   onSave={this.props.onSave}
 					                                                   onChange={this.props.onMasterChange} />}
@@ -658,15 +657,58 @@ const ActiveEditor = React.memo(function ActiveEditor(
 	);
 });
 
-type FormJSONEditorProps = {
-	master: MaybeError<Master>;
-	onHide: () => void;
-	onChange: EditorProps["onMasterChange"];
-	onSave: EditorProps["onSave"];
-}
+
+type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "value" | "onChange" | "onSubmit" | "validator"> &
+	{
+		value: MaybeError<Master>;
+		onChange: EditorProps["onMasterChange"];
+		onSave: EditorProps["onSave"];
+	};
 
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
-	{master, onHide, onSave, onChange}: FormJSONEditorProps)
+	{onSave, onChange, ...props}: FormJSONEditorProps)
+{
+
+	const [displaySaveModal, setShowSaveModal] = React.useState(false);
+	const showSaveModal = React.useCallback(() => setShowSaveModal(true), [setShowSaveModal]);
+	const hideSaveModal = React.useCallback(() => setShowSaveModal(false), [setShowSaveModal]);
+
+	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(
+		isValid(props.value) ? props.value : undefined
+	);
+
+	const onSaveChanges = React.useCallback(() => {
+		tmpValue && onSave(tmpValue);
+	}, [tmpValue, onSave]);
+
+	const onSubmitDraft = React.useCallback(value =>
+		onChange({type: "master", value}),
+	[onChange]);
+
+	return (
+		<React.Fragment>
+			<JSONEditorModal {...props}
+			                 value={isValid(props.value) ? props.value : undefined}
+											 validator={isMaster}
+			                 onSubmit={showSaveModal}
+			                 onSubmitDraft={onSubmitDraft}
+			                 onChange={setTmpValue} />
+			{displaySaveModal && tmpValue && <SaveModal master={tmpValue}
+					                                        onSave={onSaveChanges}
+			                                            onHide={hideSaveModal} />}
+		</React.Fragment>
+	);
+});
+
+type JSONEditorModalProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
+	& {
+	onHide: () => void;
+	onSubmit: (value: T) => void;
+	onSubmitDraft?: (value: T) => void;
+}
+
+const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
+	{value, onHide, onSubmit, onSubmitDraft, validator, onChange}: JSONEditorModalProps<T>)
 {
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
@@ -674,37 +716,27 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 
 	const {translations} = React.useContext(Context);
 
-	const [displaySaveModal, setShowSaveModal] = React.useState(false);
-	const showSaveModal = React.useCallback(() => setShowSaveModal(true), [setShowSaveModal]);
-	const hideSaveModal = React.useCallback(() => setShowSaveModal(false), [setShowSaveModal]);
+	const [tmpValue, setTmpValue] = React.useState<T | undefined>(value);
 
-	const [tmpValue, setTmpValue] = React.useState<Master>(isValid(master) ? master : {} as Master);
-
-	const onSubmitDraft = React.useCallback((value: Master) => {
-		onChange({type: "master", value});
+	const _onChange = React.useCallback(value => {
 		setTmpValue(value);
-	}, [onChange, setTmpValue]);
-
-	const onSaveChanges = React.useCallback(() => {
-		onSave(tmpValue);
-	}, [tmpValue, onSave]);
+		onChange?.(value);
+	}, [onChange]);
 
 	const onHideCheckForChanges = React.useCallback(() => {
-		JSON.stringify(tmpValue) !== JSON.stringify(master)
+		tmpValue !== undefined && onSubmitDraft && JSON.stringify(tmpValue) !== JSON.stringify(value)
 			&& confirm(translations["Editor.json.discard"])
-			|| onSubmitDraft(tmpValue);
+			|| tmpValue !== undefined && onSubmitDraft?.(tmpValue);
 		onHide();
-	}, [tmpValue, master, translations, onSubmitDraft, onHide]);
+	}, [tmpValue, value, translations, onSubmitDraft, onHide]);
 
 	return (
 		<GenericModal onHide={onHideCheckForChanges}>
-			<FormJSONEditor value={isValid(master) ? master : {}}
-			                onSubmit={showSaveModal}
-			                onSubmitDraft={onSubmitDraft}
-			                onChange={setTmpValue} />
-			{displaySaveModal && <SaveModal master={tmpValue}
-					                            onSave={onSaveChanges}
-			                                onHide={hideSaveModal} />}
+			<SubmittableJSONEditor value={isValid(value) ? value : undefined}
+			                       validator={validator}
+			                       onSubmit={onSubmit}
+			                       onSubmitDraft={onSubmitDraft}
+			                       onChange={_onChange} />
 		</GenericModal>
 	);
 });
@@ -741,5 +773,18 @@ const GenericModal = ({onHide, children, header, className}: GenericModalProps) 
 				{ children }
 			</Modal.Body>
 		</Modal>
+	);
+};
+
+const editorContentNmspc = nmspc("inner-editor");
+
+type EditorContentToolbarProps = {
+} & HasChildren;
+
+export const EditorContentToolbar = ({children}: EditorContentToolbarProps) => {
+	return (
+		<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")}>
+			{children}
+		</div>
 	);
 };

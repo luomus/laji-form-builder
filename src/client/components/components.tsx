@@ -2,6 +2,7 @@ import * as React from "react";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
 import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "../utils";
+import { JSON } from "../../model";
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -260,20 +261,21 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 	return val;
 };
 
-interface JSONEditorProps extends Classable, Stylable {
-	value: any;
-	onChange: (value: any) => void;
+export type JSONEditorProps<T extends JSON> = {
+	value?: T;
+	onChange?: ((value?: T) => void) | React.Dispatch<React.SetStateAction<T | undefined>>;
+	validator: (value: JSON) => value is T;
 	rows?: number;
 	minRows?: number;
 	maxRows?: number;
 	resizable?: boolean;
 	onValidChange?: (valid: boolean) => void;
 	live?: boolean;
-}
+} & Classable & Stylable;
 
-export const JSONEditor = React.forwardRef((
-	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className, style = {}}
-	: JSONEditorProps,
+export const JSONEditor = React.forwardRef(<T extends JSON>(
+	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className, style = {}, validator}
+	: JSONEditorProps<T>,
 	ref: React.Ref<HTMLTextAreaElement>) => {
 	const stringValue = JSON.stringify(value, undefined, 2);
 	const [tmpValue, setTmpValue] = React.useState<string>(stringValue);
@@ -283,18 +285,17 @@ export const JSONEditor = React.forwardRef((
 	const tryOnChange = React.useCallback(() => {
 		if (tmpValue === "" || tmpValue === undefined) {
 			setValid(true);
-			onChange(undefined);
+			onChange?.(undefined);
 			return;
 		}
 		try {
-			onChange(JSON.parse(tmpValue));
-			if (!valid) {
-				setValid(true);
-			}
+			const valid = validator(JSON.parse(tmpValue));
+			onChange?.(JSON.parse(tmpValue));
+			setValid(valid);
 		} catch (e) {
 			setValid(false);
 		}
-	}, [onChange, valid, tmpValue]);
+	}, [onChange, tmpValue, validator]);
 
 	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
 	React.useEffect(() => {
@@ -338,16 +339,15 @@ export const JSONEditor = React.forwardRef((
 	);
 });
 
-interface FormJSONEditorProps<T> extends Classable {
+type SubmittableJSONEditorProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
+	& {
 	onSubmit: (value: T) => void;
-	onSubmitDraft: (value: T) => void;
-	onChange?: (value: T) => void;
-	value?: T;
+	onSubmitDraft?: (value: T) => void;
 	submitLabel?: string;
-}
+} & Classable;
 
-export function FormJSONEditor<T>(
-	{value, onSubmit, onSubmitDraft, onChange, className}: FormJSONEditorProps<T>
+export function SubmittableJSONEditor<T extends JSON>(
+	{value, onSubmit, validator, onSubmitDraft, onChange, className}: SubmittableJSONEditorProps<T>
 ) {
 	const {translations} = React.useContext(Context);
 	const [json, _setJSON] = React.useState(value);
@@ -358,7 +358,7 @@ export function FormJSONEditor<T>(
 
 	const [valid, setValid] = React.useState(false);
 	const onClickSubmit = React.useCallback(() => onSubmit(json as unknown as T), [json, onSubmit]);
-	const onClickSubmitDraft = React.useCallback(() => onSubmitDraft(json as unknown as T), [json, onSubmitDraft]);
+	const onClickSubmitDraft = React.useCallback(() => onSubmitDraft?.(json as unknown as T), [json, onSubmitDraft]);
 
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
@@ -367,23 +367,29 @@ export function FormJSONEditor<T>(
 	return (
 		<div className={className}>
 			<JSONEditor value={json} 
+			            validator={validator}
 			            onChange={setJSON}
 			            onValidChange={setValid}
 			            live={true}
 			            ref={ref}
 			            style={{height: "80vh"}} />
-			<Button onClick={onClickSubmitDraft}
-			        disabled={!json || !valid}
-			        variant={"default"}
-			        className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
-			>{translations["Wizard.option.json.import.draft"]}
-			</Button>
+			{onSubmitDraft && (
+				<Button onClick={onClickSubmitDraft}
+			          disabled={json === undefined || !valid}
+			          variant={"default"}
+			          className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
+				>{translations["Wizard.option.json.import.draft"]}
+				</Button>
+			)}
 			<Button onClick={onClickSubmit}
 			        variant="primary"
-			        disabled={!json || !valid}
+			        disabled={json === undefined || !valid}
 			>{translations["Save"]}
 			</Button>
 		</div>
 	);
 }
 
+const bypassValidator = (v: JSON): v is JSON => true;
+export const AnyJSONEditor = (props: Omit<JSONEditorProps<JSON>, "validator">) =>
+	<JSONEditor {...props} validator={bypassValidator} />;

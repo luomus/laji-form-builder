@@ -14,7 +14,7 @@ import LajiFormTitle from "laji-form/lib/components/templates/TitleField";
 import {
 	parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions
 } from "laji-form/lib/utils";
-import { JSONEditor } from "../components";
+import { AnyJSONEditor } from "../components";
 import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
 
@@ -353,7 +353,7 @@ export const TextareaEditorField = (props: FieldProps) => {
 	return (
 		<React.Fragment>
 			<Label label={label} />
-			<JSONEditor
+			<AnyJSONEditor
 				value={filterLajiFormId(value)}
 				onChange={onChange}
 				resizable={isObject(value) || Array.isArray(value)}

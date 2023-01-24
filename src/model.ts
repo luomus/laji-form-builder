@@ -1,3 +1,4 @@
+import {isObject} from "./utils";
 
 export enum PropertyRange {
 	Int = "xsd:integer",
@@ -71,7 +72,7 @@ export type CommonExpanded = CommonFormat & {
 	uiSchema?: JSONObject;
 }
 
-export type JSON = string | number | boolean | JSONObject | JSON[];
+export type JSON = string | number | boolean | JSONObject | JSON[] | null;
 export type JSONObject = { [prop: string]: JSON };
 
 export type Master = CommonExpanded & {
@@ -83,6 +84,10 @@ export type Master = CommonExpanded & {
 	"@context"?: string;
 	context?: string;
 	extra?: Record<string, {altParent: AltParentMap}>;
+}
+
+export function isMaster(master: any): master is Master {
+	return isObject(master);
 }
 
 export type SchemaFormat<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum = JSONSchemaEnumOneOf> = CommonExpanded & {

@@ -250,12 +250,15 @@ $margin: 2px;
 		 }
 	}
 
-	&-options-editor {
+	&-inner-editor {
 		&-toolbar {
 			background-color: $neutral-8;
 			border-bottom: 1px solid $neutral-separating;
 			padding: 2px;
 		}
+	}
+
+	&-options-editor {
 
 		&-clear {
 			background: white;
