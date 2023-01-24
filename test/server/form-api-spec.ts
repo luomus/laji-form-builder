@@ -8,8 +8,10 @@ import { formFetch } from "../../src/server/services/store-service";
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
 
 const TEST_FORM_ID = "MHL.119";
-const TEST_FORM_WITH_BASE_ID = "MHL.70";
-const TEST_FORM_WITH_BASE_ID_BASE = "MHL.70";
+const TEST_FORM_WITH_BASE_ID = "MHL.89";
+const TEST_FORM_WITH_BASE_EXTENDS = "MHL.59";
+const TEST_FORM_WITH_FIELDS_ID = "MHL.32";
+const TEST_FORM_WITH_FIELDS_ID_EXTENDS = "MHL.36";
 
 const commonProps = [
 	"name", "description", "language", "title", "shortDescription",
@@ -134,8 +136,8 @@ describe("/api", () => {
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect(response => {
 					forms = response.body.forms;
-					const form = response.body.forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_ID);
-					const baseForm = response.body.forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_ID_BASE);
+					const form = forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_ID);
+					const baseForm = forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_EXTENDS);
 					expect(form.options).toEqual(baseForm.options);
 				})
 				.end(finish(done));
@@ -247,6 +249,33 @@ describe("/api", () => {
 				})
 				.end(finish(done));
 		});
+	});
+
+	it("extends fields from fieldsFromID", (done) => {
+		console.log(TEST_FORM_WITH_FIELDS_ID);
+		request(app)
+			.get(`/api/${TEST_FORM_WITH_FIELDS_ID}`)
+			.expect(200)
+			.expect("Content-Type", "application/json; charset=utf-8")
+			.end((err, response) => {
+				if (err) {
+					return finish(done)(err);
+				}
+				const form = response.body;
+				request(app)
+					.get(`/api/${TEST_FORM_WITH_FIELDS_ID_EXTENDS}`)
+					.expect(200)
+					.expect("Content-Type", "application/json; charset=utf-8")
+					.expect(response => {
+						const fieldsFromForm = response.body;
+						// Test that field somewhat match - they are partly patched by the extending form so
+						// an equal match can't be checked.
+						fieldsFromForm.fields.forEach((f: any, i: number) => {
+							expect(fieldsFromForm.fields[i].name).toEqual(form.fields[i].name);
+						});
+					})
+					.end(finish(done));
+			});
 	});
 
 	describe("/transform", () => {
