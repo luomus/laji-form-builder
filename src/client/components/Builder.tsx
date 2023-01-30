@@ -2,7 +2,7 @@ import * as React from "react";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { constructTranslations } from "laji-form/lib/utils";
-import { isObject, translate } from "../../utils";
+import { translate } from "../../utils";
 import { createRef, gnmspc, isSignalAbortError, runAbortable } from "../utils";
 import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
+import { FieldEditorProps, FieldEditorChangeEvent, EditorContentToolbar } from "./Editor";
 import {
 	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
 } from "../../../utils";
@@ -18,6 +18,8 @@ interface BasicEditorState {
 	lajiFormToucher: number;
 }
 
+type RelevantFields = Pick<Field, "validators" | "warnings">;
+
 export default class BasicEditor extends React.PureComponent<FieldEditorProps, BasicEditorState> {
 	documentTree: any;
 	propertyContextAbortController: AbortController;
@@ -28,6 +30,12 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	state = {
 		lajiFormToucher: 0
 	} as BasicEditorState;
+
+	constructor(props: FieldEditorProps) {
+		super(props);
+		this.getFormDataFromProps = this.getFormDataFromProps.bind(this);
+		this.onLajiFormChange = this.onLajiFormChange.bind(this);
+	}
 
 	componentDidMount() {
 		this.propertyContextAbortController = new AbortController();
@@ -75,8 +83,11 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	render() {
 		return (
 			<React.Fragment>
-				{this.renderAdder()}
-				{this.renderOptionsAndValidations()}
+				<EditorContentToolbar getJSON={this.getFormDataFromProps} onJSONChange={this.onLajiFormChange} />
+				<div className={this.props.className}>
+					{this.renderAdder()}
+					{this.renderOptionsAndValidations()}
+				</div>
 			</React.Fragment>
 		);
 	}
@@ -131,8 +142,21 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		return property;
 	}
 
+	getFormData({options, validators, warnings}: Pick<Field, "options" | "validators" | "warnings">) {
+		return (Object.keys({ options, validators, warnings }) as (keyof RelevantFields)[])
+			.reduce<RelevantFields>((formData, key) => {
+				if (this.props.field[key] !== undefined) {
+					formData[key] = this.props.field[key];
+				}
+				return formData;
+			}, {});
+	}
+
+	getFormDataFromProps() {
+		return this.getFormData(this.props.field);
+	}
+
 	renderOptionsAndValidations = () => {
-		const {options, validators, warnings} = this.props.field;
 		const schemaTypeToJSONSchemaUtilType = (type: string) =>
 			type === "boolean" && "Boolean"
 			|| type === "string" && "String"
@@ -170,7 +194,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		if ((schema as any)?.properties.options.properties.default.type === "object") {
 			uiSchema.options = {default: itemUiSchema};
 		}
-		const formData = { options, validators, warnings };
+		const formData = this.getFormData(this.props.field);
 		return (
 			<EditorLajiForm
 				schema={schema}
@@ -183,8 +207,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	onLajiFormChange = (viewFormData: any) => {
 		const events: FieldEditorChangeEvent[] = [];
-		const {options, validators, warnings} = this.props.field;
-		const formData = { options, validators, warnings };
+		const formData = this.getFormDataFromProps();
 		let newFormData = formData;
 		const changedPaths = detectChangePaths(viewFormData, newFormData);
 		changedPaths.forEach(changedPath => {

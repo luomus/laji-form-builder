@@ -11,7 +11,7 @@ export interface Classable {
 	className?: string;
 }
 export interface HasChildren {
-	children?: React.ReactNode;
+	children: React.ReactNode;
 }
 
 type Position = "bottom";
@@ -278,7 +278,7 @@ export const JSONEditor = React.forwardRef(<T extends JSON>(
 	: JSONEditorProps<T>,
 	ref: React.Ref<HTMLTextAreaElement>) => {
 	const stringValue = JSON.stringify(value, undefined, 2);
-	const [tmpValue, setTmpValue] = React.useState<string>(stringValue);
+	const [tmpValue, setTmpValue] = React.useState(stringValue);
 	const [valid, setValid] = React.useState(true);
 	const [touched, setTouched] = React.useState(false);
 
@@ -339,7 +339,7 @@ export const JSONEditor = React.forwardRef(<T extends JSON>(
 	);
 });
 
-type SubmittableJSONEditorProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
+export type SubmittableJSONEditorProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
 	& {
 	onSubmit: (value: T) => void;
 	onSubmitDraft?: (value: T) => void;
@@ -347,7 +347,7 @@ type SubmittableJSONEditorProps<T extends JSON> = Pick<JSONEditorProps<T>, "valu
 } & Classable;
 
 export function SubmittableJSONEditor<T extends JSON>(
-	{value, onSubmit, validator, onSubmitDraft, onChange, className}: SubmittableJSONEditorProps<T>
+	{value, onSubmit, validator, onSubmitDraft, onChange, className, submitLabel}: SubmittableJSONEditorProps<T>
 ) {
 	const {translations} = React.useContext(Context);
 	const [json, _setJSON] = React.useState(value);
@@ -384,7 +384,7 @@ export function SubmittableJSONEditor<T extends JSON>(
 			<Button onClick={onClickSubmit}
 			        variant="primary"
 			        disabled={json === undefined || !valid}
-			>{translations["Save"]}
+			>{submitLabel || "OK"}
 			</Button>
 		</div>
 	);

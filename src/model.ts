@@ -75,6 +75,10 @@ export type CommonExpanded = CommonFormat & {
 export type JSON = string | number | boolean | JSONObject | JSON[] | null;
 export type JSONObject = { [prop: string]: JSON };
 
+export function isJSONObject(json: JSON): json is JSONObject {
+	return isObject(json);
+}
+
 export type Master = CommonExpanded & {
 	fields?: Field[];
 	baseFormID?: string;
@@ -92,8 +96,8 @@ export function isMaster(master: any): master is Master {
 
 export type SchemaFormat<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum = JSONSchemaEnumOneOf> = CommonExpanded & {
 	schema: JSONSchema<T>;
-	validators: Record<string, JSONObject | boolean>;
-	warnings: Record<string, JSONObject | boolean>;
+	validators: {[prop: string]: (JSONObject | boolean)};
+	warnings: {[prop: string]: (JSONObject | boolean)};
 	excludeFromCopy: string[];
 	uiSchema: JSONObject;
 	attributes?: {

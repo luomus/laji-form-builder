@@ -180,6 +180,7 @@ function FormCreatorJSON({onCreate}: WizardStepProps) {
 	const onSubmitDraft = useOnSubmit(false);
 	return <SubmittableJSONEditor onSubmit={onSubmit}
 	                              onSubmitDraft={onSubmitDraft}
+					                      submitLabel={translations["Save"]}
 	                              className={wizardNmspc("json")}
 	                              validator={isMaster} />;
 }

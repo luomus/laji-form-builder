@@ -1,7 +1,7 @@
 import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
-import { FieldEditorProps, FieldEditorChangeEvent } from "./Editor";
+import { FieldEditorProps, FieldEditorChangeEvent, EditorContentToolbar } from "./Editor";
 import LajiFormInterface from "../../LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
@@ -11,9 +11,8 @@ import { parseJSONPointer, JSONSchemaBuilder } from "../../../utils";
 import LajiForm from "../LajiForm";
 import { Label as LajiFormLabel } from "laji-form/lib/components/components";
 import LajiFormTitle from "laji-form/lib/components/templates/TitleField";
-import {
-	parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions
-} from "laji-form/lib/utils";
+import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, getInnerUiSchema, getUiOptions,
+	immutableDelete } from "laji-form/lib/utils";
 import { AnyJSONEditor } from "../components";
 import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
@@ -32,6 +31,13 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	static defaultProps = {
 		uiSchema: {}
 	};
+
+	constructor(props: FieldEditorProps) {
+		super(props);
+		this.getJSONEditorFormData = this.getJSONEditorFormData.bind(this);
+		this.onEditorLajiFormChange = this.onEditorLajiFormChange.bind(this);
+	}
+
 	getEditorSchema = memoize(getEditorSchema);
 	getEditorUiSchema = memoize((uiSchema: any, schemaForUiSchema: any): any => {
 		const registry = LajiFormInterface.getRegistry();
@@ -112,26 +118,45 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			rootUiSchema: this.props.uiSchema
 		};
 		return (
-			<EditorLajiForm
-				schema={schema}
-				uiSchema={uiSchema}
-				formData={formData}
-				onChange={this.onEditorLajiFormChange}
-				formContext={formContext}
-			/>
+			<React.Fragment>
+				<EditorContentToolbar getJSON={this.getJSONEditorFormData} onJSONChange={this.onEditorLajiFormChange} />
+				<EditorLajiForm
+					schema={schema}
+					uiSchema={uiSchema}
+					formData={formData}
+					onChange={this.onEditorLajiFormChange}
+					formContext={formContext}
+					className={this.props.className}
+				/>
+			</React.Fragment>
 		);
 	}
 
-	onEditorLajiFormChange = (eventUiSchema: any) => {
-		eventUiSchema = unprefixDeeply(eventUiSchema, PREFIX);
-		const viewUiSchema = this.normalizeUiSchema(
-			getTranslatedUiSchema(this.props.uiSchema, this.props.translations)
-		);
+	getJSONEditorFormData() {
+		let uiSchema = this.normalizeUiSchema(this.props.uiSchema);
+		const {schema} = this.props;
+		if (schema.type === "object") {
+			Object.keys(schema.properties).forEach(prop => {
+				uiSchema = immutableDelete(uiSchema, prop);
+			});
+		} else if (schema.type === "array" && schema.items.type === "object" && uiSchema.items) {
+			Object.keys(schema.items.properties).forEach(prop => {
+				uiSchema = immutableDelete(uiSchema, `/items/${prop}`);
+			});
+		}
+		return getTranslatedUiSchema(uiSchema, this.props.translations);
+	}
+
+	onJSONEditorChange(uiSchema: JSON) {
+		this.onUiSchemaChange(uiSchema, this.getJSONEditorFormData());
+	}
+
+	onUiSchemaChange(eventUiSchema: JSON, oldUiSchema: JSON) {
 		const { schema, uiSchema } = this.props;
-		const changedPaths = detectChangePaths(eventUiSchema, viewUiSchema);
+		const changedPaths = detectChangePaths(eventUiSchema, oldUiSchema);
 		const events: FieldEditorChangeEvent[] = [];
-		let newUiSchema = this.normalizeUiSchema(uiSchema);
-		changedPaths.forEach(changedPath => {
+
+		const newUiSchema = changedPaths.reduce((newUiSchema, changedPath) => {
 			const schemaForUiSchema = parseSchemaFromFormDataPointer(
 				unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX),
 				changedPath
@@ -140,7 +165,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			const newValue = parseJSONPointer(eventUiSchema, changedPath);
 
 			if (schemaForUiSchema?.type === "string" && !schemaForUiSchema?.enum) {
-				newUiSchema = handleTranslationChange(
+				return handleTranslationChange(
 					newUiSchema,
 					events,
 					this.props.path,
@@ -150,13 +175,21 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 					newValue
 				);
 			} else {
-				newUiSchema = updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
+				return updateSafelyWithJSONPointer(newUiSchema, newValue, changedPath);
 			}
-		});
+		}, this.normalizeUiSchema(uiSchema));
 		if (newUiSchema !== uiSchema) {
 			events.push({type: "uiSchema", value: unprefixDeeply(newUiSchema, PREFIX)});
 		}
 		(events.length) && this.props.onChange(events);
+	}
+
+	onEditorLajiFormChange = (eventUiSchema: JSON) => {
+		eventUiSchema = unprefixDeeply(eventUiSchema, PREFIX);
+		const viewUiSchema = this.normalizeUiSchema(
+			getTranslatedUiSchema(this.props.uiSchema, this.props.translations)
+		);
+		this.onUiSchemaChange(eventUiSchema, viewUiSchema);
 	}
 }
 

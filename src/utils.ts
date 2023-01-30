@@ -148,7 +148,7 @@ export const getPropertyContextName = (context?: string) =>
 
 export const getRootField = (master: Pick<Master, "context">): Field => {
 	return {name: unprefixProp(getPropertyContextName(master.context))};
-}
+};
 
 export const getRootProperty = (rootField: Field): Property => {
 	return {

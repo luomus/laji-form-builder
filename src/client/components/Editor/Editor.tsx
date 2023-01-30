@@ -1,10 +1,9 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, JSONEditorProps } from "../components";
-import {
-	classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded
-} from "../../utils";
+	HasChildren, SubmittableJSONEditorProps } from "../components";
+import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded,
+	useBooleanSetter } from "../../utils";
 import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
@@ -13,7 +12,9 @@ import { Context } from "../Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster } from "../../../model";
+import {
+	Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject
+} from "../../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
@@ -172,25 +173,26 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
 			content = (
 				<ActiveEditorErrorBoundary>
-					<DraggableWidth style={fieldsBlockStyle} className={gnmspc("editor-nav-bar")} ref={this.fieldsRef}>
-						<Fields className={gnmspc("field-chooser")}
-						        fields={this.getFields(expandedMaster)}
-						        onSelected={this.onFieldSelected}
-						        onDeleted={this.onFieldDeleted}
-						        selected={this.state.selected}
-						        pointer=""
-						        expanded={true}
-						        fieldsContainerElem={this.fieldsRef.current}
-						/>
-					</DraggableWidth>
-					{this.state.selected && isValid(schemaFormat) && 
-						<ActiveEditor key={this.state.selected}
-						              active={this.state.activeEditorMode}
-						              {...this.getFieldEditorProps(expandedMaster, schemaFormat)}
-						              className={classNames(gnmspc("field-editor"), editorContentNmspc())}
-						              style={fieldEditorContentStyle}
-						/>
-					}
+					<ActiveEditor key={this.state.selected}
+					              selected={this.state.selected}
+					              contentValid={isValid(schemaFormat)}
+					              active={this.state.activeEditorMode}
+					              {...this.getFieldEditorProps(expandedMaster, schemaFormat)}
+					              className={gnmspc("field-editor")}
+					              style={fieldEditorContentStyle} >
+						<DraggableWidth style={fieldsBlockStyle}
+						                className={gnmspc("editor-nav-bar")}
+						                ref={this.fieldsRef} >
+							<Fields className={gnmspc("field-chooser")}
+							        fields={this.getFields(expandedMaster)}
+							        onSelected={this.onFieldSelected}
+							        onDeleted={this.onFieldDeleted}
+							        selected={this.state.selected}
+							        pointer=""
+							        expanded={true}
+							        fieldsContainerElem={this.fieldsRef.current} />
+						</DraggableWidth>
+					</ActiveEditor>
 				</ActiveEditorErrorBoundary>
 			);
 		} else if (activeEditorMode === "options") {
@@ -643,20 +645,28 @@ const EditorChooserTab = React.memo(function EditorChooserTab(
 	);
 });
 
-interface ActiveEditorProps extends FieldEditorProps {
+type ActiveEditorProps = FieldEditorProps & HasChildren & Classable & Stylable & {
 	active: ActiveEditorMode;
+	selected?: string;
+	contentValid: boolean;
 }
+
 const ActiveEditor = React.memo(function ActiveEditor(
-	{active, style, className, ...props}: ActiveEditorProps & Classable & Stylable) {
+	{active, style, className, contentValid, selected, children, ...props}: ActiveEditorProps) {
+	const editorProps = {...props, className: classNames(className, editorContentNmspc())};
 	return (
-		<div style={style} className={className}>{
-			active === "uiSchema" && <UiSchemaEditor {...props} />
-			|| active === "basic" && <BasicEditor {...props} />
-			|| null
-		}</div>
+		<React.Fragment>
+			{children}
+			{selected && contentValid && (
+				<div style={style}>
+					{active === "uiSchema" && <UiSchemaEditor {...editorProps} />
+					|| active === "basic" && <BasicEditor {...editorProps} />
+					|| null
+					}</div>
+			)}
+		</React.Fragment>
 	);
 });
-
 
 type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "value" | "onChange" | "onSubmit" | "validator"> &
 	{
@@ -668,10 +678,9 @@ type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "value" | "onChang
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	{onSave, onChange, ...props}: FormJSONEditorProps)
 {
+	const {translations} = React.useContext(Context);
 
-	const [displaySaveModal, setShowSaveModal] = React.useState(false);
-	const showSaveModal = React.useCallback(() => setShowSaveModal(true), [setShowSaveModal]);
-	const hideSaveModal = React.useCallback(() => setShowSaveModal(false), [setShowSaveModal]);
+	const [displaySaveModal, showSaveModal, hideSaveModal] = useBooleanSetter(false);
 
 	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(
 		isValid(props.value) ? props.value : undefined
@@ -692,7 +701,8 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 											 validator={isMaster}
 			                 onSubmit={showSaveModal}
 			                 onSubmitDraft={onSubmitDraft}
-			                 onChange={setTmpValue} />
+			                 onChange={setTmpValue}
+			                 submitLabel={translations["Save"]} />
 			{displaySaveModal && tmpValue && <SaveModal master={tmpValue}
 					                                        onSave={onSaveChanges}
 			                                            onHide={hideSaveModal} />}
@@ -700,7 +710,11 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	);
 });
 
-type JSONEditorModalProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
+type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
+	"value"
+	| "validator"
+	| "onChange"
+	| "submitLabel">
 	& {
 	onHide: () => void;
 	onSubmit: (value: T) => void;
@@ -708,7 +722,7 @@ type JSONEditorModalProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "
 }
 
 const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
-	{value, onHide, onSubmit, onSubmitDraft, validator, onChange}: JSONEditorModalProps<T>)
+	{value, onHide, onSubmitDraft, onChange, onSubmit, ...props}: JSONEditorModalProps<T>)
 {
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
@@ -724,18 +738,18 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
 	}, [onChange]);
 
 	const onHideCheckForChanges = React.useCallback(() => {
-		tmpValue !== undefined && onSubmitDraft && JSON.stringify(tmpValue) !== JSON.stringify(value)
+		tmpValue !== undefined && JSON.stringify(tmpValue) !== JSON.stringify(value)
 			&& confirm(translations["Editor.json.discard"])
-			|| tmpValue !== undefined && onSubmitDraft?.(tmpValue);
+			|| tmpValue !== undefined && (onSubmitDraft ? onSubmitDraft(tmpValue) : onSubmit(tmpValue));
 		onHide();
-	}, [tmpValue, value, translations, onSubmitDraft, onHide]);
+	}, [tmpValue, value, translations, onSubmitDraft, onSubmit, onHide]);
 
 	return (
 		<GenericModal onHide={onHideCheckForChanges}>
-			<SubmittableJSONEditor value={isValid(value) ? value : undefined}
-			                       validator={validator}
-			                       onSubmit={onSubmit}
+			<SubmittableJSONEditor  {...props}
+			                       value={isValid(value) ? value : undefined}
 			                       onSubmitDraft={onSubmitDraft}
+			                       onSubmit={onSubmit}
 			                       onChange={_onChange} />
 		</GenericModal>
 	);
@@ -778,13 +792,34 @@ const GenericModal = ({onHide, children, header, className}: GenericModalProps) 
 
 const editorContentNmspc = nmspc("inner-editor");
 
-type EditorContentToolbarProps = {
-} & HasChildren;
+type EditorContentToolbarProps<T extends JSONObject> = {
+	getJSON: () => T | undefined;
+	onJSONChange: (value: T) => void;
+} & Partial<HasChildren>;
 
-export const EditorContentToolbar = ({children}: EditorContentToolbarProps) => {
+export const EditorContentToolbar =
+<T extends JSONObject>({getJSON, onJSONChange, children}: EditorContentToolbarProps<T>) => {
+	const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
+	const [json, setJSON] = React.useState<T>();
+	const openJSONEditor = React.useCallback(() => {
+		setJSON(getJSON());
+		_openJSONEditor();
+	}, [_openJSONEditor, setJSON, getJSON]);
+	const onLocalJSONChange = React.useCallback((value: T) => {
+		onJSONChange(value);
+		setJSON(value);
+	}, [onJSONChange, setJSON]);
+	
 	return (
 		<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")}>
+			<Button onClick={openJSONEditor} small>JSON</Button>
 			{children}
+			{jsonEditorOpen && (
+				<JSONEditorModal onHide={closeJSONEditor}
+				                 validator={isJSONObject}
+				                 onSubmit={onLocalJSONChange}
+				                 value={json} />
+			)}
 		</div>
 	);
 };

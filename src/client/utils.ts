@@ -310,7 +310,8 @@ export function handleTranslationChange<T>(
 	currentValue: string,
 	newValue: string,
 ) {
-	const doConfirm = () => !confirm(context.translations["editor.confirmDontTranslate"]);
+	const doConfirm = (translationKey: string, value: string) =>
+		!confirm(`${context.translations["editor.confirmDontTranslate"]}\n${translationKey}: ${value}`);
 
 	if (newValue === undefined) {
 		if (currentValue?.[0] === "@") {
@@ -324,7 +325,7 @@ export function handleTranslationChange<T>(
 		const translationKey =  `@${path}${changedPath}`;
 		if (isEmptyString(currentValue)) {
 			return updateSafelyWithJSONPointer(obj, newValue, changedPath);
-		} else if (doConfirm()) {
+		} else if (doConfirm(changedPath, currentValue)) {
 			events.push(
 				{
 					type: "translations",
@@ -363,4 +364,12 @@ export const runAbortable = async <T,>(
 		return e;
 	}
 };
+
+export function useBooleanSetter(value: boolean): [boolean, () => void, () => void] {
+	const [open, setOpen] = React.useState(value);
+	// (complains even though inside a custom hook).
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	const openStateToCallback = (v: boolean) => React.useCallback(() => setOpen(v), [v]);
+	return [open, openStateToCallback(true), openStateToCallback(false)];
+}
 

@@ -7,7 +7,7 @@ import {
 	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject
 } from "../../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
-import { detectChangePaths, gnmspc, handleTranslationChange, nmspc } from "../../utils";
+import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
 import { isDefaultData, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
@@ -146,7 +146,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 	const { metadataService, translations: appTranslations, editorLang } = context;
 	const [schema, setModelSchema] = React.useState<SchemaFormat>();
 	const [uiSchema, setModelUiSchema] = React.useState<JSONObject>();
-	const [displayOnlyUsed, setDisplayOnlyUsed] = React.useState<boolean>(false);
+	const [displayOnlyUsed, setDisplayOnlyUsed] = React.useState(false);
 	const toggleSetDisplayOnlyUsed = React.useCallback(
 		() => setDisplayOnlyUsed(!displayOnlyUsed),
 		[displayOnlyUsed, setDisplayOnlyUsed]
@@ -218,9 +218,11 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			: <LajiForm {...props} />
 	);
 
+	const getJSON = React.useCallback(() => _master, [_master]);
+
 	return (
 		<div className={className}  ref={ref} style={{width: "100%"}}>
-			<EditorContentToolbar>
+			<EditorContentToolbar getJSON={getJSON} onJSONChange={onLajiFormChange}>
 				<Button onClick={toggleSetDisplayOnlyUsed} active={displayOnlyUsed} small>
 					{appTranslations["Editor.options.displayOnlyUsed"]}
 				</Button>
