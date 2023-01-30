@@ -158,18 +158,43 @@ export default class MainService extends HasCache {
 			throw error;
 		}
 		const remoteForm = this.storeService.updateForm(id, form);
+		(await this.getExtendingForms(id)).forEach(id => {
+			this.getFormCache(id).clear();
+		});
 		this.getFormCache(id).clear();
 		this.getForms.clear();
 		return remoteForm;
 	}
 
 	async deleteForm(id: string) {
+		const extendingForms = await this.getExtendingForms(id);
+		if (extendingForms.length) {
+			// eslint-disable-next-line max-len
+			throw new UnprocessableError(`Can't delete form that is extended by other forms. The form ${id} is extended by forms ${extendingForms.join(", ")}`);
+		}
 		const response = await this.storeService.deleteForm(id);
 		if (response.affected > 0) {
 			this.getFormCache(id).clear();
 			this.getForms.clear();
 		}
 		return response;
+	}
+
+	private async getExtendingForms(id: string) {
+		const forms = (await this.storeService.getForms()).filter(f => f.baseFormID || f.fieldsFormID);
+
+		const getList = async (id: string) => {
+			return forms.reduce<Promise<string[]>>(async (_list, f) => {
+				const list = await _list;
+				if (f.baseFormID === id || f.fieldsFormID === id) {
+					list.push(f.id);
+					list.push(...(await getList(f.id)));
+				}
+				return list;
+			}, Promise.resolve([]));
+		};
+
+		return getList(id);
 	}
 
 	transform(form: Master, lang?: Lang) {
