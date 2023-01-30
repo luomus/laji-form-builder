@@ -5,8 +5,8 @@ import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchIn
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult, isMaster } from "../../model";
 import { JSONSchemaBuilder } from "../../utils";
-import { classNames, gnmspc, nmspc } from "../utils";
-import { translate as translateKey } from "laji-form/lib/utils";
+import { classNames, gnmspc, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "../utils";
+import { immutableDelete, translate as translateKey } from "laji-form/lib/utils";
 import { ButtonProps, ButtonGroupProps } from "../themes/theme";
 
 interface WizardStep {
@@ -29,9 +29,107 @@ const wizardCreateStep: WizardStep = {
 		databank: {
 			label: "Wizard.option.databank",
 			component: FormCreatorDatabank,
+		},
+		extend: {
+			label: "Wizard.option.extend",
+			component: GenericWizardStepChooser,
+			children: {
+				copy: {
+					label: "Wizard.option.extend.copy",
+					component: FormCreatorExtendWithMethod("copy")
+				},
+				extendFully: {
+					label: "Wizard.option.extend.extendFully",
+					component: FormCreatorExtendWithMethod("fully")
+				},
+				extendFields: {
+					label: "Wizard.option.extend.extendFields",
+					component: FormCreatorExtendWithMethod("fields")
+				},
+			}
+			// component: FormCreatorDatabank,
 		}
 	}
 };
+
+type Method = "copy"  | "fully" | "fields";
+
+const extendForm = (form: Master, method: Method): Master => {
+	switch (method) {
+	case "copy":
+		return immutableDelete(form, "id");
+	case "fully":
+		return { baseFormID: form.id };
+	case "fields":
+		return { fieldsFormID: form.id };
+	}
+};
+
+type FormCreatorExtendProps = WizardStepProps & {method: Method};
+function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
+	const {theme, translations, formService} = React.useContext(Context);
+	const [chosen, onChoose] = React.useState<string>();
+	const [form, setForm] = React.useState<Master>();
+	const [loading, setLoading] = React.useState(false);
+	const [displayModal, showModal, hideModal] = useBooleanSetter(false);
+
+	const onSubmit = React.useCallback((form: Master, save: boolean) => {
+		setLoading(true);
+		onCreate(extendForm(form, method), save);
+	}, [onCreate, method]);
+	const onSubmitAndSave = React.useCallback(() => form && onSubmit(form, true), [onSubmit, form]);
+	const onSubmitDraft = React.useCallback(() => form && onSubmit(form, false), [onSubmit, form]);
+
+	const abortRef = React.useRef<AbortController>();
+	React.useEffect(() => {
+		const doAsync = async () => {
+			if (!chosen) {
+				abortRef.current?.abort();
+				setLoading(false);
+				return;
+			}
+			setLoading(true);
+			let form: Master | DOMException;
+			try {
+				form = await runAbortable(signal => formService.getMaster(chosen, signal), abortRef);
+			} finally {
+				setLoading(false);
+			}
+			if (isSignalAbortError(form)) {
+				return;
+			}
+			setForm(form);
+			showModal();
+		};
+
+		doAsync();
+	}, [chosen, formService, setLoading, showModal]);
+
+	const {Modal} = theme;
+	return (
+		<React.Fragment>
+			<FormList onChoose={onChoose} />
+			{displayModal && (
+				<Modal show={true} onHide={hideModal} >
+					<Modal.Body>
+						<p>{translations["Wizard.option.extend.saveOrPreview"]}</p>
+						<Button onClick={onSubmitAndSave}
+						        variant="primary"
+						        disabled={loading}>{translations["Save"]}</Button>
+						<Button onClick={onSubmitDraft} variant="default"  disabled={loading}>
+							{translations["Wizard.option.json.import.draft"]}
+						</Button>
+					</Modal.Body>
+				</Modal>
+			)}
+		</React.Fragment>
+	);
+}
+
+function FormCreatorExtendWithMethod(method: Method) {
+	return (props: Omit<FormCreatorExtendProps, "method">) => 
+		<FormCreatorExtend {...props} method={method} />;
+}
 
 const wizardCreateOrListStep: WizardStep = {
 	label: "Wizard.createOrList",
@@ -230,7 +328,7 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
-			<Button onClick={onSubmit} variant={"primary"}>{translations["Save"]}</Button>
+			<Button onClick={onSubmit} variant="primary">{translations["Save"]}</Button>
 			<Button onClick={onSubmitDraft} variant="default">
 				{translations["Wizard.option.json.import.draft"]}
 			</Button>
