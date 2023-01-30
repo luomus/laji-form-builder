@@ -1,7 +1,7 @@
 import React from "react";
 import LajiForm from "./LajiForm";
 import _LajiForm from "laji-form/lib/components/LajiForm";
-import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button } from "./components";
+import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchInput } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult, isMaster } from "../../model";
 import { JSONSchemaBuilder } from "../../utils";
@@ -230,7 +230,7 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
-			<Button onClick={onSubmit}>{translations["Save"]}</Button>
+			<Button onClick={onSubmit} variant={"primary"}>{translations["Save"]}</Button>
 			<Button onClick={onSubmitDraft} variant="default">
 				{translations["Wizard.option.json.import.draft"]}
 			</Button>
@@ -272,7 +272,7 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 		setActiveIdx(activeIdx);
 	}, [activeIdx, setActiveIdx, setDisplayedForms]);
 
-	const {Panel, FormControl, ListGroup, Glyphicon} = theme;
+	const {Panel, ListGroup} = theme;
 	const onSelected = React.useCallback((f: FormListing) => onChoose(f.id), [onChoose]);
 
 	const setFormLoading = React.useCallback((id: string, loading: boolean) => {
@@ -341,25 +341,13 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 
 	React.useEffect(filterForms, [searchValue, forms, filterForms]);
 
-	const onSearchChange = React.useCallback((e) => {
-		setSearchValue(e.target.value);
-	}, []);
-
-	const search = (
-		<div className={formSelectNmscp("input")} onKeyDown={onKeyDown}>
-			<FormControl placeholder={translations["Wizard.list.search.placeholder"]}
-			             autoFocus={true}
-			             onChange={onSearchChange}
-			             value={searchValue} />
-			<Glyphicon glyph="search" />
-		</div>
-	);
-
 	return (
 		<Panel>
 			<Panel.Heading>
 				<h4>{translations["Wizard.list.header"]}</h4>
-				{search}
+				<SearchInput onChange={setSearchValue}
+				             onKeyDown={onKeyDown}
+				             autoFocus={true} />
 			</Panel.Heading>
 			{list}
 		</Panel>

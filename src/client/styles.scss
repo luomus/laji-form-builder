@@ -286,15 +286,6 @@ $margin: 2px;
 	}
 
 	&-form-select {
-		&-input {
-			position: relative;
-			.glyphicon {
-				position: absolute;
-				right: 10px;
-				top: 10px;
-			}
-		}
-
 		&-list {
 			max-height: 50vh;
 			overflow: auto;
@@ -353,6 +344,15 @@ $margin: 2px;
 		white-space: pre-wrap;
 	}
 
+
+	&-search-input {
+		position: relative;
+		.glyphicon {
+			position: absolute;
+			right: 10px;
+			top: 10px;
+		}
+	}
 
 	@for $factor from 1 to 6 {
 		&-ml-#{$factor} {

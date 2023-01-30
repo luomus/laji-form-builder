@@ -373,6 +373,11 @@ export function SubmittableJSONEditor<T extends JSON>(
 			            live={true}
 			            ref={ref}
 			            style={{height: "80vh"}} />
+			<Button onClick={onClickSubmit}
+			        variant="primary"
+			        disabled={json === undefined || !valid}
+			>{submitLabel || "OK"}
+			</Button>
 			{onSubmitDraft && (
 				<Button onClick={onClickSubmitDraft}
 			          disabled={json === undefined || !valid}
@@ -381,11 +386,6 @@ export function SubmittableJSONEditor<T extends JSON>(
 				>{translations["Wizard.option.json.import.draft"]}
 				</Button>
 			)}
-			<Button onClick={onClickSubmit}
-			        variant="primary"
-			        disabled={json === undefined || !valid}
-			>{submitLabel || "OK"}
-			</Button>
 		</div>
 	);
 }
@@ -393,3 +393,29 @@ export function SubmittableJSONEditor<T extends JSON>(
 const bypassValidator = (v: JSON): v is JSON => true;
 export const AnyJSONEditor = (props: Omit<JSONEditorProps<JSON>, "validator">) =>
 	<JSONEditor {...props} validator={bypassValidator} />;
+
+type SearchInputProps = {
+	onChange: (v: string) => void;
+	onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>
+	autoFocus?: boolean;
+}
+
+export const SearchInput = ({onChange, onKeyDown, autoFocus}: SearchInputProps) => {
+	const {theme, translations} = React.useContext(Context);
+	const {FormControl, Glyphicon} = theme;
+	const [value, setValue] = React.useState("");
+	const onSearchChange = React.useCallback((e) => {
+		const {value} = e.target;
+		setValue(value);
+		onChange(value);
+	}, [setValue, onChange]);
+	return (
+		<div className={gnmspc("search-input")} onKeyDown={onKeyDown}>
+			<FormControl placeholder={translations["Wizard.list.search.placeholder"]}
+			             autoFocus={autoFocus}
+			             onChange={onSearchChange}
+			             value={value} />
+			<Glyphicon glyph="search" />
+		</div>
+	);
+};

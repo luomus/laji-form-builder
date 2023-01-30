@@ -1,7 +1,7 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps } from "../components";
+	HasChildren, SubmittableJSONEditorProps, SearchInput } from "../components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded,
 	useBooleanSetter } from "../../utils";
 import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
@@ -795,10 +795,11 @@ const editorContentNmspc = nmspc("inner-editor");
 type EditorContentToolbarProps<T extends JSONObject> = {
 	getJSON: () => T | undefined;
 	onJSONChange: (value: T) => void;
+	onSearchChange?: (value: string) => void;
 } & Partial<HasChildren>;
 
 export const EditorContentToolbar =
-<T extends JSONObject>({getJSON, onJSONChange, children}: EditorContentToolbarProps<T>) => {
+<T extends JSONObject>({getJSON, onJSONChange, onSearchChange, children}: EditorContentToolbarProps<T>) => {
 	const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
 	const [json, setJSON] = React.useState<T>();
 	const openJSONEditor = React.useCallback(() => {
@@ -809,10 +810,11 @@ export const EditorContentToolbar =
 		onJSONChange(value);
 		setJSON(value);
 	}, [onJSONChange, setJSON]);
-	
+
 	return (
 		<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")}>
 			<Button onClick={openJSONEditor} small>JSON</Button>
+			{onSearchChange && <SearchInput onChange={onSearchChange} />}
 			{children}
 			{jsonEditorOpen && (
 				<JSONEditorModal onHide={closeJSONEditor}
