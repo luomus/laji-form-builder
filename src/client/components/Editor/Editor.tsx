@@ -173,8 +173,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
 			content = (
 				<ActiveEditorErrorBoundary>
-					<ActiveEditor key={this.state.selected}
-					              selected={this.state.selected}
+					<ActiveEditor selected={this.state.selected}
 					              contentValid={isValid(schemaFormat)}
 					              active={this.state.activeEditorMode}
 					              {...this.getFieldEditorProps(expandedMaster, schemaFormat)}
