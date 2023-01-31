@@ -36,6 +36,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		super(props);
 		this.getJSONEditorFormData = this.getJSONEditorFormData.bind(this);
 		this.onEditorLajiFormChange = this.onEditorLajiFormChange.bind(this);
+		this.onJSONEditorChange = this.onJSONEditorChange.bind(this);
 	}
 
 	getEditorSchema = memoize(getEditorSchema);
@@ -119,7 +120,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		};
 		return (
 			<React.Fragment>
-				<EditorContentToolbar getJSON={this.getJSONEditorFormData} onJSONChange={this.onEditorLajiFormChange} />
+				<EditorContentToolbar getJSON={this.getJSONEditorFormData} onJSONChange={this.onJSONEditorChange} />
 				<EditorLajiForm
 					schema={schema}
 					uiSchema={uiSchema}
@@ -145,10 +146,6 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			});
 		}
 		return getTranslatedUiSchema(uiSchema, this.props.translations);
-	}
-
-	onJSONEditorChange(uiSchema: JSON) {
-		this.onUiSchemaChange(uiSchema, this.getJSONEditorFormData());
 	}
 
 	onUiSchemaChange(eventUiSchema: JSON, oldUiSchema: JSON) {
@@ -191,6 +188,11 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		);
 		this.onUiSchemaChange(eventUiSchema, viewUiSchema);
 	}
+
+	onJSONEditorChange(uiSchema: JSON) {
+		this.onUiSchemaChange(uiSchema, this.getJSONEditorFormData());
+	}
+
 }
 
 const prefixer = (prefix?: string) => (key: string) => prefix ? `${prefix}${key}` : key;
