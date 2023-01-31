@@ -16,6 +16,7 @@ import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, 
 import { AnyJSONEditor } from "../components";
 import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
+import { JSONObject, JSONSchema } from "../../../model";
 
 const PREFIX = "$";
 
@@ -28,10 +29,6 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	static contextType = Context;
 	context!: React.ContextType<typeof Context>;
 
-	static defaultProps = {
-		uiSchema: {}
-	};
-
 	constructor(props: FieldEditorProps) {
 		super(props);
 		this.getJSONEditorFormData = this.getJSONEditorFormData.bind(this);
@@ -40,10 +37,11 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	}
 
 	getEditorSchema = memoize(getEditorSchema);
-	getEditorUiSchema = memoize((uiSchema: any, schemaForUiSchema: any): any => {
+	getEditorUiSchema = memoize((uiSchema: JSONObject | undefined, schemaForUiSchema: JSONSchema): any => {
 		const registry = LajiFormInterface.getRegistry();
-		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
-		const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
+		const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema || {};
+		const component = typeof uiField === "string" && registry.fields[uiField]
+			|| typeof uiWidget === "string" && registry.widgets[uiWidget];
 		const componentPropTypes = component && parsePropTypes(component);
 		const propTypesForUiSchema = (propTypes: any): any => {
 			const name = propTypes.name || (propTypes.type || {}).name;
@@ -81,14 +79,14 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		);
 	});
 
-	normalizeUiSchema(uiSchema: any, prefix = ""): any {
+	normalizeUiSchema(uiSchema?: JSONObject, prefix = ""): any {
 		const key = `${prefix}ui:title`;
 		const getFieldName = () => {
 			const {field} = this.props;
 			if (!field) {
 				return "";
 			}
-			const uiTitle = uiSchema[key];
+			const uiTitle = uiSchema?.[key];
 			return (uiTitle ?? (field.label ?? undefined)) || undefined;
 		};
 		const uiTitle = getFieldName();
@@ -197,11 +195,12 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 
 const prefixer = (prefix?: string) => (key: string) => prefix ? `${prefix}${key}` : key;
 
-const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
+const getEditorSchema = (uiSchema: JSONObject | undefined, schema: JSONSchema, prefix?: string): any => {
 	const prependPrefix = prefixer(prefix);
 	const registry = LajiFormInterface.getRegistry();
-	const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema;
-	const component = uiField && registry.fields[uiField] || uiWidget && registry.widgets[uiWidget];
+	const {"ui:field": uiField, "ui:widget": uiWidget} = uiSchema || {};
+	const component = typeof uiField === "string" && registry.fields[uiField]
+		|| typeof uiWidget === "string" && registry.widgets[uiWidget];
 	const componentPropTypes = getComponentPropTypes(component);
 	const forBoth = {
 		[prependPrefix("ui:field")]: JSONSchemaBuilder.String(),
@@ -247,7 +246,7 @@ const getEditorSchema = (uiSchema: any, schema: any, prefix?: string): any => {
 		editorSchema = customize(defaultProps, schema, prefix);
 	}
 	if (schema.type === "array") {
-		const itemsEditorSchema = getEditorSchema(uiSchema.items || {}, schema.items, prefix);
+		const itemsEditorSchema = getEditorSchema(uiSchema?.items as JSONObject, schema.items, prefix);
 		if (itemsEditorSchema) {
 			editorSchema = {
 				...editorSchema,

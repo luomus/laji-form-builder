@@ -1,4 +1,4 @@
-import {isObject} from "./utils";
+import { isObject } from "./utils";
 
 export enum PropertyRange {
 	Int = "xsd:integer",
@@ -37,7 +37,7 @@ export type Lang = "fi" | "sv" | "en";
 
 export const LANGS: Lang[] = ["fi", "en", "sv"];
 
-export const isLang = (lang: any): lang is Lang => typeof lang === "string" && LANGS.includes(lang as any);
+export const isLang = (lang: unknown): lang is Lang => typeof lang === "string" && LANGS.includes(lang as any);
 
 export type CompleteTranslations = Record<Lang, Record<string, string>>;
 export type Translations = Partial<CompleteTranslations>
@@ -90,7 +90,7 @@ export type Master = CommonExpanded & {
 	extra?: Record<string, {altParent: AltParentMap}>;
 }
 
-export function isMaster(master: any): master is Master {
+export function isMaster(master: unknown): master is Master {
 	return isObject(master);
 }
 
@@ -243,6 +243,10 @@ export type JSONSchemaString = JSONShemaTypeCommon<"string", string>;
 
 export type JSONSchemaEnumOneOf = JSONSchemaString & {
 	oneOf: {const: string, title: string}[];
+}
+
+export function isJSONSchemaEnumOneOf(jsonSchema: JSONSchema): jsonSchema is JSONSchemaEnumOneOf {
+	return !!(jsonSchema as any).oneOf;
 }
 
 export type JSONSchemaV6Enum = JSONSchemaString & {

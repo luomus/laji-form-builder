@@ -9,7 +9,7 @@ import { Context } from "../Context";
 import LajiForm from "../LajiForm";
 import { Spinner } from "../components";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { Property, Field, JSONSchema } from "../../../model";
+import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
 import { detectChangePaths } from "../../utils";
 
 interface BasicEditorState {
@@ -173,8 +173,8 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 			excludeFromCopy: JSONSchemaBuilder.Boolean(),
 			default: _default
 		};
-		const {oneOf} = this.props.schema;
-		if (oneOf) {
+		if (isJSONSchemaEnumOneOf(this.props.schema)) {
+			const {oneOf} = this.props.schema; 
 			const list = JSONSchemaBuilder.array(JSONSchemaBuilder.String({oneOf}), {uniqueItems: true});
 			optionsProps.whitelist = list;
 			optionsProps.blacklist = list;

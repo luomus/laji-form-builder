@@ -13,7 +13,7 @@ import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
 import {
-	Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject
+	Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject, JSONSchema, Translations
 } from "../../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { translate as translateKey } from "laji-form/lib/utils";
@@ -339,10 +339,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 }
 
 export interface FieldEditorProps extends Classable {
-	uiSchema: any;
-	schema: any;
+	uiSchema?: JSONObject;
+	schema: JSONSchema;
 	field: FieldOptions;
-	translations: any;
+	translations: Record<string, string>;
 	path: string;
 	onChange: (changed: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => void;
 	context?: string
