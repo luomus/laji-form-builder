@@ -738,8 +738,8 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
 
 	const onHideCheckForChanges = React.useCallback(() => {
 		tmpValue !== undefined && JSON.stringify(tmpValue) !== JSON.stringify(value)
-			&& confirm(translations["Editor.json.discard"])
-			|| tmpValue !== undefined && (onSubmitDraft ? onSubmitDraft(tmpValue) : onSubmit(tmpValue));
+			&& confirm(translations["Editor.json.confirm"])
+			&& tmpValue !== undefined && (onSubmitDraft ? onSubmitDraft(tmpValue) : onSubmit(tmpValue));
 		onHide();
 	}, [tmpValue, value, translations, onSubmitDraft, onSubmit, onHide]);
 

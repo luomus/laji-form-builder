@@ -139,10 +139,10 @@
 		"sv": "Det är något fel på formuläret. JSON-redigering bör vara säker att använda.",
 		"en": "There's something wrong with the form. JSON editing should be safe to use."
 	},
-	"editor.json.discard": {
-		"fi": "Hylätäänkö tehdyt muutokset?",
-		"sv": "Vill du ignorera de ändringar som gjorts?",
-		"en": "Do you want to discard the changes made?"
+	"editor.json.confirm": {
+		"fi": "Asetetaanko tehdyt muutokset voimaan?",
+		"sv": "Vill du tillämpa de ändringar som gjorts?",
+		"en": "Do you want to apply the changes made?"
 	},
 	"editor.options.displayOnlyUsed": {
 		"fi": "Näytä vain käytetyt ominaisuudet",
