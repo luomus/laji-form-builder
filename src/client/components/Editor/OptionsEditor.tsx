@@ -218,7 +218,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			: <LajiForm {...props} />
 	);
 
-	const getJSON = React.useCallback(() => _master, [_master]);
+	const getJSON = React.useCallback(() => formData, [formData]);
 
 	return (
 		<div className={className}  ref={ref} style={{width: "100%"}}>

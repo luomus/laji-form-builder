@@ -325,7 +325,7 @@ export function handleTranslationChange<T>(
 		const translationKey =  `@${path}${changedPath}`;
 		if (isEmptyString(currentValue)) {
 			return updateSafelyWithJSONPointer(obj, newValue, changedPath);
-		} else if (doConfirm(changedPath, currentValue)) {
+		} else if (doConfirm(changedPath, newValue)) {
 			events.push(
 				{
 					type: "translations",
