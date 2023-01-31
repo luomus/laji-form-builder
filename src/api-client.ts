@@ -27,7 +27,7 @@ export default class ApiClient {
 	}
 
 	async fetchJSON(path: string, query?: any, options?: any) {
-		return (await this.fetch(path, query, options)).json()
+		return (await this.fetch(path, query, options)).json();
 	}
 }
 
