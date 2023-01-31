@@ -252,7 +252,6 @@ describe("/api", () => {
 	});
 
 	it("extends fields from fieldsFromID", (done) => {
-		console.log(TEST_FORM_WITH_FIELDS_ID);
 		request(app)
 			.get(`/api/${TEST_FORM_WITH_FIELDS_ID}`)
 			.expect(200)
