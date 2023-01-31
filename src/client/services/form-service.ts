@@ -38,13 +38,14 @@ export default class FormService extends HasCache {
 
 	getSchemaFormat = (id: string) => this.getSchemaFormatCache(id)(this.lang);
 
-	async update(form: any): Promise<void> {
-		await this.fetchJSON(`/${form.id}`, {personToken: this.personToken},
+	async update(form: any): Promise<RemoteMaster> {
+		const remoteForm = await this.fetchJSON(`/${form.id}`, {personToken: this.personToken},
 			{method: "PUT", body: JSON.stringify(form), headers: {
 				"Content-Type": "application/json"
 			}});
 		this.getMaster.delete(form.id);
 		this.getSchemaFormatCache(form.id).clear();
+		return remoteForm;
 	}
 
 	create(form: any): Promise<RemoteMaster> {

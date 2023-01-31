@@ -406,11 +406,14 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		try {
 			this.setState({saving: true});
 			if (master.id) {
-				await this.formService.update(master);
+				const updatedMaster = await this.formService.update(master);
 				this.setState({saving: false, id: master.id});
+				if (master.id === updatedMaster.id) { // else componentDidUpdate() will handle updating from changed id.
+					this.updateMaster(updatedMaster);
+				}
 			} else {
 				const masterResponse = await this.formService.create(master);
-				this.setState({master: masterResponse, saving: false});
+				this.setState({master: masterResponse, saving: false, id: masterResponse.id});
 				this.onSelected(masterResponse.id);
 			}
 			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
