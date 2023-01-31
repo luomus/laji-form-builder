@@ -116,7 +116,7 @@ export class BuilderPO {
 	}
 
 	async getEditorForm(): Promise<Form> {
-		const $root = this.$editor.$(".laji-form .rjsf > div");
+		const $root = this.$editor.$(".laji-form form > div");
 		const id = await $root.getAttribute("id");
 		const contextId = id.match(/\d+/)?.[0];
 		if (typeof contextId !== "string") {
@@ -132,7 +132,7 @@ export class BuilderPO {
 	}
 
 	async editorLocate(path: string): Promise<ElementFinder> {
-		const $root = this.$editor.$(".laji-form .rjsf > div");
+		const $root = this.$editor.$(".laji-form form > div");
 		const id = await $root.getAttribute("id");
 		const contextId = id.match(/\d+/)?.[0];
 		if (typeof contextId !== "string") {
