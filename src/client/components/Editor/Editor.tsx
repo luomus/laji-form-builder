@@ -12,9 +12,8 @@ import { Context } from "../Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import {
-	Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject, JSONSchema, Translations
-} from "../../../model";
+import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject,
+	JSONSchema } from "../../../model";
 import LajiForm from "laji-form/lib/components/LajiForm";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
