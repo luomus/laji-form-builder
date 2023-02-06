@@ -41,7 +41,7 @@ export interface EditorProps extends Stylable, Classable {
 	height?: number;
 	onHeightChange?: (height: number) => void;
 	saving?: boolean;
-	edited?: boolean;
+	submitDisabled?: boolean;
 	errorMsg?: string;
 	onRemountLajiForm?: () => void;
 }
@@ -133,7 +133,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				               containerRef={this.containerRef}
 				               saving={this.props.saving}
 				               loading={this.props.loading}
-				               edited={this.props.edited}
+				               submitDisabled={this.props.submitDisabled}
 				               openJSONEditor={this.openJSONEditor}
 				               displaySchemaTabs={this.props.displaySchemaTabs}
 				               onRemountLajiForm={this.props.onRemountLajiForm} />
@@ -543,7 +543,7 @@ interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
 	openJSONEditor: () => void;
 	loading: number;
 	saving?: boolean;
-	edited?: boolean;
+	submitDisabled?: boolean;
 	onRemountLajiForm?: () => void;
 }
 
@@ -562,7 +562,7 @@ const EditorToolbar = ({
 	onSelectedOptions,
 	saving,
 	loading,
-	edited,
+	submitDisabled,
 	containerRef,
 	displaySchemaTabs,
 	openJSONEditor,
@@ -592,7 +592,7 @@ const EditorToolbar = ({
 				<Button id={gnmspc("open-save-view")}
 				        small
 				        variant="primary"
-				        disabled={!edited || saving}
+				        disabled={!submitDisabled || saving}
 				        onClick={onSave}>{translations.Save}</Button>
 			</div>
 		</div>

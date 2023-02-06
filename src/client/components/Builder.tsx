@@ -45,7 +45,6 @@ export interface BuilderState {
 	schemaFormat?: MaybeError<SchemaFormat>;
 	errorMsg?: string;
 	saving?: boolean
-	edited?: boolean;
 }
 
 class BuilderError extends Error {
@@ -293,7 +292,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {schemaFormat, tmpExpandedMaster, tmpMaster, saving, loading, edited, errorMsg} = this.state;
+		const {master, schemaFormat, tmpExpandedMaster, tmpMaster, saving, loading, errorMsg} = this.state;
 		return (
 			<Editor
 				master={tmpMaster}
@@ -307,7 +306,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				height={EDITOR_HEIGHT}
 				saving={saving}
 				loading={loading}
-				edited={edited}
+				submitDisabled={!isValid(master) || !isValid(tmpMaster) || master !== tmpMaster || !master?.id}
 				displaySchemaTabs={this.props.displaySchemaTabs ?? true}
 				className={gnmspc("")}
 				errorMsg={errorMsg}
@@ -342,9 +341,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				return;
 			}
 
-			if (isValid(newState)) {
-				this.setState({edited: true});
-			}
 			const rootErrorProp = (["master", "expandedMaster", "schemaFormat"] as
 				(keyof Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">)[])
 				.find(prop => !isValid(newState[prop]));
@@ -356,7 +352,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				);
 				console.error(rootError);
 			} else {
-				this.setState({...this.getStateFromMasterUpdate(newState), edited: true});
+				this.setState(this.getStateFromMasterUpdate(newState));
 			}
 		} finally {
 			this.popLoading();
@@ -379,7 +375,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		const newMaster = this.changeHandlerService.apply(tmpMaster, tmpExpandedMaster, schemaFormat, events);
 		try {
 			this.updateTmpMaster(newMaster);
-			this.setState({edited: true});
 		} finally {
 			this.popLoading();
 		}
