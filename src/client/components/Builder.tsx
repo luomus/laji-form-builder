@@ -83,7 +83,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	static defaultProps = {
 		lang: "fi" as Lang,
-		displaySchemaTabs: true
+		displaySchemaTabs: true,
+		allowList: true
 	};
 
 	constructor(props: BuilderProps) {
