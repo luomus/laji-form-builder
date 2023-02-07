@@ -175,13 +175,20 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				: new BuilderError("Couldn't be derived from invalid expanded master")
 			: undefined;
 
-	getDerivatedStateFromMaster = async (master?: MaybeError<Master>, signal?: AbortSignal)
+	getDerivedStateFromMaster = async (master?: MaybeError<Master>, signal?: AbortSignal)
 	: Promise<Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">> => {
 		const expandedMaster = await this.masterToExpandedMaster(master, signal);
-		return {master, ...(await this.getDerivatedStateFromExpandedMaster(expandedMaster, signal))};
+		return {master, ...(await this.getDerivedStateFromExpandedMaster(expandedMaster, signal))};
 	}
 
-	getDerivatedStateFromExpandedMaster = async (expandedMaster?: MaybeError<ExpandedMaster>, signal?: AbortSignal)
+	getDerivedStateFromTmpMaster = async (tmpMaster?: MaybeError<Master>, signal?: AbortSignal)
+	: Promise<Pick<BuilderState, "tmpMaster" | "tmpExpandedMaster" | "schemaFormat">> => {
+		const tmpExpandedMaster = await this.masterToExpandedMaster(tmpMaster, signal);
+		const {schemaFormat} = await this.getDerivedStateFromExpandedMaster(tmpExpandedMaster, signal);
+		return {tmpMaster, tmpExpandedMaster, schemaFormat};
+	}
+
+	getDerivedStateFromExpandedMaster = async (expandedMaster?: MaybeError<ExpandedMaster>, signal?: AbortSignal)
 	: Promise<Pick<BuilderState, "expandedMaster" | "schemaFormat">> => {
 		const schemaFormat = await this.expandedMasterToSchemaFormat(expandedMaster, signal);
 		return {expandedMaster, schemaFormat};
@@ -191,7 +198,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	updateMaster(master?: MaybeError<Master>) {
 		return runAbortable(async (signal: AbortSignal) => {
-			const state = await this.getDerivatedStateFromMaster(master, signal);
+			const state = await this.getDerivedStateFromMaster(master, signal);
 			this.setState(this.getStateFromMasterUpdate(state));
 			return state.master;
 		}, this.masterAbortControllerRef);
@@ -201,7 +208,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	updateTmpMaster(tmpMaster?: Master) {
 		runAbortable(async (signal: AbortSignal) => {
-			const state = await this.getDerivatedStateFromMaster(tmpMaster, signal);
+			const state = await this.getDerivedStateFromMaster(tmpMaster, signal);
 			this.setState({
 				tmpMaster: state.master,
 				tmpExpandedMaster: state.expandedMaster,
@@ -333,7 +340,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		const newMaster = event.value;
 		try {
 			const newState = await runAbortable(
-				signal => this.getDerivatedStateFromMaster(newMaster, signal),
+				signal => this.getDerivedStateFromTmpMaster(newMaster, signal),
 				this.onEditorMasterChangeAbortControllerRef
 			);
 
@@ -341,8 +348,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				return;
 			}
 
-			const rootErrorProp = (["master", "expandedMaster", "schemaFormat"] as
-				(keyof Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">)[])
+			const rootErrorProp = (["tmpMaster", "tmpExpandedMaster", "schemaFormat"] as
+				(keyof Pick<BuilderState, "tmpMaster" | "tmpExpandedMaster" | "schemaFormat">)[])
 				.find(prop => !isValid(newState[prop]));
 			if (rootErrorProp) {
 				const rootError = this.state[rootErrorProp] as BuilderError;
@@ -352,7 +359,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				);
 				console.error(rootError);
 			} else {
-				this.setState(this.getStateFromMasterUpdate(newState));
+				this.setState(newState);
 			}
 		} finally {
 			this.popLoading();

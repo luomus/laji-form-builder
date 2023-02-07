@@ -53,7 +53,7 @@ export interface EditorState {
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
 	jsonEditorOpen?: boolean;
-	saveModalOpen?: boolean;
+	saveModalOpen?: Master | false;
 }
 
 class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
@@ -127,7 +127,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 				<EditorToolbar active={this.state.activeEditorMode}
 				               onEditorChange={this.onActiveEditorChange}
 				               onLangChange={this.props.onLangChange}
-				               onSave={this.confirmSave} 
+				               onSave={this.onWantsToSaveCurrent} 
 				               onSelectedField={this.onPickerSelectedField}
 				               onSelectedOptions={this.onPickerSelectedOptions}
 				               containerRef={this.containerRef}
@@ -212,13 +212,42 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal value={master}
 					                                                   onHide={this.hideJSONEditor}
-					                                                   onSave={this.props.onSave}
+					                                                   onSave={this.onWantsToSave}
 					                                                   onChange={this.props.onMasterChange} />}
-					{this.state.saveModalOpen && <SaveModal master={master}
-					                                        onSave={this.onSave}
+					{this.state.saveModalOpen && <SaveModal master={this.state.saveModalOpen}
+					                                        onSave={this.onSaveCurrent}
 					                                        onHide={this.hideSaveConfirm} />}
 				</div>
 			) : null;
+	}
+
+	onWantsToSave = (master: Master) => {
+		master.id
+			? this.openSaveConfirm(master)
+			: this.onSave(master);
+	}
+
+	onWantsToSaveCurrent = () => {
+		const {master} = this.props;
+		master && this.onWantsToSave(master);
+	}
+
+	onSaveCurrent = () => {
+		const master = this.state.saveModalOpen;
+		master && this.onSave(master);
+	}
+
+	onSave = (master: Master) => {
+		this.props.onSave(master);
+	}
+
+	openSaveConfirm = (master: Master) => {
+		console.log(master);
+		this.setState({saveModalOpen: master});
+	}
+
+	hideSaveConfirm = () => {
+		this.setState({saveModalOpen: false});
 	}
 
 	onHeightChange = ({height}: {height: number}) => {
@@ -317,23 +346,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	hideJSONEditor = () => {
 		this.setState({jsonEditorOpen: false});
-	}
-
-	openSaveConfirm = () => {
-		this.setState({saveModalOpen: true});
-	}
-
-	hideSaveConfirm = () => {
-		this.setState({saveModalOpen: false});
-	}
-
-	confirmSave = () => {
-		this.openSaveConfirm();
-	}
-
-	onSave = () => {
-		const {master} = this.props;
-		master && isValid(master) && this.props.onSave(master);
 	}
 }
 
@@ -678,8 +690,6 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 {
 	const {translations} = React.useContext(Context);
 
-	const [displaySaveModal, showSaveModal, hideSaveModal] = useBooleanSetter(false);
-
 	const [tmpValue, setTmpValue] = React.useState<Master | undefined>(
 		isValid(props.value) ? props.value : undefined
 	);
@@ -697,13 +707,10 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 			<JSONEditorModal {...props}
 			                 value={isValid(props.value) ? props.value : undefined}
 											 validator={isMaster}
-			                 onSubmit={showSaveModal}
+			                 onSubmit={onSaveChanges}
 			                 onSubmitDraft={onSubmitDraft}
 			                 onChange={setTmpValue}
 			                 submitLabel={translations["Save"]} />
-			{displaySaveModal && tmpValue && <SaveModal master={tmpValue}
-					                                        onSave={onSaveChanges}
-			                                            onHide={hideSaveModal} />}
 		</React.Fragment>
 	);
 });
