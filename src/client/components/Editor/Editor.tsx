@@ -243,7 +243,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	}
 
 	openSaveConfirm = (master: Master) => {
-		console.log(master);
 		this.setState({saveModalOpen: master});
 	}
 
