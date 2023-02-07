@@ -403,7 +403,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onSave = async (master: Master) => {
 		if (!master) {
-			return;
+			return false;
 		}
 		try {
 			this.setState({saving: true});
@@ -419,9 +419,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				this.onSelected(masterResponse.id);
 			}
 			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
+			return true;
 		} catch (e) {
 			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["Save.error"]);
 			this.setState({saving: false});
+			return false;
 		}
 	}
 

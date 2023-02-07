@@ -32,7 +32,7 @@ export interface EditorProps extends Stylable, Classable {
 	onChange: (changed: ChangeEvent | ChangeEvent[]) => void;
 	onMasterChange: (event: MasterChangeEvent) => void;
 	onLangChange: (lang: Lang) => void;
-	onSave: (master: Master) => void;
+	onSave: (master: Master) => Promise<boolean>;
 	displaySchemaTabs: boolean;
 	loading: number;
 	master?: MaybeError<Master>;
@@ -237,8 +237,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		master && this.onSave(master);
 	}
 
-	onSave = (master: Master) => {
-		this.props.onSave(master);
+	onSave = async (master: Master) => {
+		const saved = await this.props.onSave(master);
+		saved && this.setState({saveModalOpen: false});
 	}
 
 	openSaveConfirm = (master: Master) => {
@@ -678,11 +679,11 @@ const ActiveEditor = React.memo(function ActiveEditor(
 	);
 });
 
-type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "value" | "onChange" | "onSubmit" | "validator"> &
+type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "onChange" | "onSubmit" | "validator"> &
 	{
 		value: MaybeError<Master>;
 		onChange: EditorProps["onMasterChange"];
-		onSave: EditorProps["onSave"];
+		onSave: (master: Master) => void
 	};
 
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
