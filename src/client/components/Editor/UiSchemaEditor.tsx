@@ -1,7 +1,7 @@
 import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
-import { FieldEditorProps, FieldEditorChangeEvent, EditorContentToolbar } from "./Editor";
+import { FieldEditorProps, FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
 import LajiFormInterface from "../../LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
@@ -34,6 +34,7 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		this.getJSONEditorFormData = this.getJSONEditorFormData.bind(this);
 		this.onEditorLajiFormChange = this.onEditorLajiFormChange.bind(this);
 		this.onJSONEditorChange = this.onJSONEditorChange.bind(this);
+		this.renderUI = this.renderUI.bind(this);
 	}
 
 	getEditorSchema = memoize(getEditorSchema);
@@ -99,6 +100,14 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 	}
 
 	render() {
+		return (
+			<GenericEditorContent json={this.getJSONEditorFormData()}
+			                      onJSONChange={this.onJSONEditorChange}
+			                      renderUI={this.renderUI} />
+		);
+	}
+
+	renderUI() {
 		if (!this.props.schema) {
 			return null;
 		}
@@ -118,7 +127,6 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 		};
 		return (
 			<React.Fragment>
-				<EditorContentToolbar getJSON={this.getJSONEditorFormData} onJSONChange={this.onJSONEditorChange} />
 				<EditorLajiForm
 					schema={schema}
 					uiSchema={uiSchema}

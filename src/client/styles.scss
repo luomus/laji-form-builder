@@ -221,7 +221,7 @@ $margin: 2px;
 		}
 		&-button#{$root}-active {
 			border-bottom: 2px solid $accent;
-			background-color: $neutral-7;
+			background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
 		}
 	}
 

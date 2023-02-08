@@ -12,7 +12,7 @@ import { isDefaultData, updateSafelyWithJSONPointer } from "laji-form/lib/utils"
 import { TextareaEditorField } from "./UiSchemaEditor";
 import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
 import MetadataService from "../../../services/metadata-service";
-import { EditorContentToolbar } from "./Editor";
+import { EditorContentTab, EditorContentToolbar, EditorToolbar, GenericEditorContent } from "./Editor";
 
 export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
 	const range = property.range[0];
@@ -195,16 +195,14 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		onChange(events);
 	}, [formData, onChange, _master, context]);
 
-	let props: LajiFormProps & { ref?: React.Ref<_LajiForm> } = {
+	let props: LajiFormProps & { ref?: React.Ref<_LajiForm> } = React.useMemo(() => ({
 		schema,
 		uiSchema,
 		formData,
 		onChange: onLajiFormChange,
-		fields: {TextareaEditorField}
-	};
-	if (lajiFormRef) {
-		props.ref = lajiFormRef;
-	}
+		fields: {TextareaEditorField},
+		ref: lajiFormRef
+	}), [schema, uiSchema, formData, onLajiFormChange, lajiFormRef]);
 
 	React.useEffect(() => {
 		if (schema && onLoaded) {
@@ -212,17 +210,13 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		}
 	}, [schema, onLoaded]);
 
-	const content = (
+	const content = React.useCallback(() => {
+		const _content = 
 		!schema
 			? <Spinner />
-			: <LajiForm {...props} />
-	);
-
-	const getJSON = React.useCallback(() => formData, [formData]);
-
-	return (
-		<div className={className}  ref={ref} style={{width: "100%"}}>
-			<EditorContentToolbar getJSON={getJSON} onJSONChange={onLajiFormChange}>
+			: <div style={{height: "100%", overflow: "auto"}}><LajiForm {...props} /></div>;
+		return <>
+			<EditorToolbar>
 				<Button onClick={toggleSetDisplayOnlyUsed} active={displayOnlyUsed} small>
 					{appTranslations["Editor.options.displayOnlyUsed"]}
 				</Button>
@@ -230,10 +224,25 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 				                           variant="danger"
 				                           onClick={clearFilters}
 				>{appTranslations["Editor.options.clear"]}</Button>}
-			</EditorContentToolbar>
-			<div className={gnmspc("field-editor")} style={style}>
-				{content}
-			</div>
+			</EditorToolbar>
+			{_content}
+		</>;
+	}, [schema, props, toggleSetDisplayOnlyUsed, displayOnlyUsed, appTranslations, filter?.length, clearFilters]);
+
+	const getJSON = React.useCallback(() => formData, [formData]);
+
+	const [activeTab, setActiveTab] = React.useState<EditorContentTab>("JSON");
+
+	React.useEffect(() => setActiveTab("UI"), [filter]);
+
+	return  (
+		<div className={className} ref={ref} style={{width: "100%"}}>
+			<GenericEditorContent json={getJSON()}
+			                      onJSONChange={onLajiFormChange}
+			                      renderUI={content}
+			                      activeTab={activeTab}
+			                      onTabChange={setActiveTab}
+			                      overflowUIContent={false} />
 		</div>
 	);
 }));

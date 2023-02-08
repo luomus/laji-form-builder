@@ -169,27 +169,27 @@
 		"sv": "Det är något fel med JSON. Ändringarna tillämpades inte på förhandsgranskningen av formuläret.",
 		"en": "There's something wrong with the JSON. The changes weren't applied to the preview of the form."
 	},
-	"Wizard.option.extend": {
+	"wizard.option.extend": {
 		"fi": "Käytä olemassaolevaa lomaketta pohjana",
 		"sv": "Använd ett befintligt formulär som bas",
 		"en": "Use an existing form as the base"
 	},
-	"Wizard.option.extend.copy": {
+	"wizard.option.extend.copy": {
 		"fi": "Kopioi lomake perimättä",
 		"sv": "Kopiera formuläret utan arv",
 		"en": "Copy the form without heritance"
 	},
-	"Wizard.option.extend.extendFully": {
+	"wizard.option.extend.extendFully": {
 		"fi": "Kopioi lomake perien se kokonaan",
 		"sv": "Använd ett befintligt formulär som bas",
 		"en": "Kopiera formuläret arv, det helt"
 	},
-	"Wizard.option.extend.extendFields": {
+	"wizard.option.extend.extendFields": {
 		"fi": "Kopioi lomake perien vain sen kentät",
 		"sv": "Kopiera formulärets arv, bara det är fält",
 		"en": "Copy the form heriting, only it's fields"
 	},
-	"Wizard.option.extend.saveOrPreview": {
+	"wizard.option.extend.saveOrPreview": {
 		"fi": "Haluatko tallentaa uuden lomakkeen vai vain esikatsella sitä?",
 		"sv": "Ska vi spara det nya formuläret eller bara förhandsgranska det nu?",
 		"en": "Shall we save the new form, or just preview it for now?"

@@ -1,5 +1,7 @@
 import * as React from "react";
-import { FieldEditorProps, FieldEditorChangeEvent, EditorContentToolbar } from "./Editor";
+import {
+	FieldEditorProps, FieldEditorChangeEvent, GenericEditorContent
+} from "./Editor";
 import {
 	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
 } from "../../../utils";
@@ -12,11 +14,11 @@ import { EditorLajiForm } from "./UiSchemaEditor";
 import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
 import { detectChangePaths } from "../../utils";
 
-interface BasicEditorState {
+type BasicEditorState = {
 	childProps?: Property[] | false;
 	// Resets LajiForm so we get empty formData upon change.
 	lajiFormToucher: number;
-}
+};
 
 type RelevantFields = Pick<Field, "validators" | "warnings">;
 
@@ -35,6 +37,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		super(props);
 		this.getFormDataFromProps = this.getFormDataFromProps.bind(this);
 		this.onLajiFormChange = this.onLajiFormChange.bind(this);
+		this.renderUI = this.renderUI.bind(this);
 	}
 
 	componentDidMount() {
@@ -82,13 +85,18 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	render() {
 		return (
-			<React.Fragment>
-				<EditorContentToolbar getJSON={this.getFormDataFromProps} onJSONChange={this.onLajiFormChange} />
-				<div className={this.props.className}>
-					{this.renderAdder()}
-					{this.renderOptionsAndValidations()}
-				</div>
-			</React.Fragment>
+			<GenericEditorContent json={this.getFormDataFromProps()}
+			                      onJSONChange={this.onLajiFormChange}
+			                      renderUI={this.renderUI} />
+		);
+	}
+
+	renderUI() {
+		return (
+			<div className={this.props.className}>
+				{this.renderAdder()}
+				{this.renderOptionsAndValidations()}
+			</div>
 		);
 	}
 

@@ -1,7 +1,7 @@
 import * as React from "react";
 import memoize from "memoizee";
 import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps, SearchInput } from "../components";
+	HasChildren, SubmittableJSONEditorProps, JSONEditor } from "../components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded,
 	useBooleanSetter } from "../../utils";
 import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
@@ -124,19 +124,19 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					</div>
 				)}
 				{errorMsg && <div className={gnmspc("error")}>{translations[errorMsg] || errorMsg}</div>}
-				<EditorToolbar active={this.state.activeEditorMode}
-				               onEditorChange={this.onActiveEditorChange}
-				               onLangChange={this.props.onLangChange}
-				               onSave={this.onWantsToSaveCurrent} 
-				               onSelectedField={this.onPickerSelectedField}
-				               onSelectedOptions={this.onPickerSelectedOptions}
-				               containerRef={this.containerRef}
-				               saving={this.props.saving}
-				               loading={this.props.loading}
-				               submitDisabled={this.props.submitDisabled}
-				               openJSONEditor={this.openJSONEditor}
-				               displaySchemaTabs={this.props.displaySchemaTabs}
-				               onRemountLajiForm={this.props.onRemountLajiForm} />
+				<EditorMainToolbar active={this.state.activeEditorMode}
+				                   onEditorChange={this.onActiveEditorChange}
+				                   onLangChange={this.props.onLangChange}
+				                   onSave={this.onWantsToSaveCurrent} 
+				                   onSelectedField={this.onPickerSelectedField}
+				                   onSelectedOptions={this.onPickerSelectedOptions}
+				                   containerRef={this.containerRef}
+				                   saving={this.props.saving}
+				                   loading={this.props.loading}
+				                   submitDisabled={this.props.submitDisabled}
+				                   openJSONEditor={this.openJSONEditor}
+				                   displaySchemaTabs={this.props.displaySchemaTabs}
+				                   onRemountLajiForm={this.props.onRemountLajiForm} />
 				{this.renderActiveEditor()}
 			</div>
 		);
@@ -157,8 +157,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			paddingBottom: 27
 		};
 		const fieldEditorContentStyle: React.CSSProperties = {
-			overflow: "auto",
-			height: "100%",
+			// overflow: "auto",
+			// height: "100%",
 			width: "100%"
 		};
 		const {master, expandedMaster, schemaFormat} = this.props;
@@ -545,7 +545,7 @@ const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange,
 	);
 });
 
-interface ToolbarEditorProps extends Omit<EditorChooserProps, "onChange">,
+interface EditorMainToolbarProps extends Omit<EditorChooserProps, "onChange">,
                                      Omit<LangChooserProps, "onChange">,
                                      Pick<ElemPickerProps, "onSelectedField" | "onSelectedOptions"> {
 	onEditorChange: EditorChooserProps["onChange"];
@@ -565,7 +565,7 @@ const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() {
 	return <span className={toolbarNmspc("separator")}></span>;
 });
 
-const EditorToolbar = ({
+const EditorMainToolbar = ({
 	active,
 	onEditorChange,
 	onLangChange,
@@ -579,7 +579,7 @@ const EditorToolbar = ({
 	displaySchemaTabs,
 	openJSONEditor,
 	onRemountLajiForm
-}: ToolbarEditorProps) => {
+}: EditorMainToolbarProps) => {
 	const {translations} = React.useContext(Context);
 	const {Glyphicon, ButtonGroup} = React.useContext(Context).theme;
 	return (
@@ -628,25 +628,25 @@ const EditorChooser = React.memo(function EditorChooser(
 	return (
 		<div className={editorNmspc()} style={{display: "flex"}}>{
 			Object.keys(_tabs).map((_active: ActiveEditorMode) =>
-				<EditorChooserTab key={_active}
-				                  active={active === _active}
-				                  tab={_active}
-				                  translationKey={tabs[_active]}
-				                  onActivate={onChange} />
+				<EditorTab key={_active}
+				           active={active === _active}
+				           tab={_active}
+				           translationKey={tabs[_active]}
+				           onActivate={onChange} />
 			)
 		}</div>
 	);
 });
 
-const EditorChooserTab = React.memo(function EditorChooserTab(
+const EditorTab = React.memo(function EditorTab<T>(
 	{tab, translationKey, active, onActivate}
 	: {
-		tab: ActiveEditorMode,
+		tab: T,
 		translationKey: string,
 		active: boolean,
-		onActivate: (active: ActiveEditorMode) => void
+		onActivate: (active: T) => void
 	}) {
-	const translation = (React.useContext(Context).translations as any)[translationKey];
+	const translation = (React.useContext(Context).translations as any)[translationKey] ?? translationKey;
 	return (
 		<Clickable className={classNames(editorNmspc("button"), active && gnmspc("active"))}
 		           onClick={React.useCallback(() => onActivate(tab), [tab, onActivate])} >
@@ -722,8 +722,8 @@ type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
 	| "submitLabel">
 	& {
 	onHide: () => void;
-	onSubmit: (value: T) => void;
-	onSubmitDraft?: (value: T) => void;
+	onSubmit: React.Dispatch<React.SetStateAction<T | undefined>>;
+	onSubmitDraft?: React.Dispatch<React.SetStateAction<T | undefined>>;
 }
 
 const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
@@ -797,36 +797,99 @@ const GenericModal = ({onHide, children, header, className}: GenericModalProps) 
 
 const editorContentNmspc = nmspc("inner-editor");
 
-type EditorContentToolbarProps<T extends JSONObject> = {
-	getJSON: () => T | undefined;
-	onJSONChange: (value: T) => void;
-	onSearchChange?: (value: string) => void;
+type EditorContentToolbarProps = {
+	activeTab?: EditorContentTab;
+	onTabChange: (tab: EditorContentTab) => void;
 } & Partial<HasChildren>;
 
-export const EditorContentToolbar =
-<T extends JSONObject>({getJSON, onJSONChange, onSearchChange, children}: EditorContentToolbarProps<T>) => {
-	const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
-	const [json, setJSON] = React.useState<T>();
-	const openJSONEditor = React.useCallback(() => {
-		setJSON(getJSON());
-		_openJSONEditor();
-	}, [_openJSONEditor, setJSON, getJSON]);
-	const onLocalJSONChange = React.useCallback((value: T) => {
-		onJSONChange(value);
-		setJSON(value);
-	}, [onJSONChange, setJSON]);
+export type EditorContentTab = "JSON" | "UI";
+const editorContentTabs: EditorContentTab[] = ["JSON", "UI"];
 
+export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
+	: EditorContentToolbarProps) => {
 	return (
-		<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")}>
-			<Button onClick={openJSONEditor} small>JSON</Button>
-			{onSearchChange && <SearchInput onChange={onSearchChange} />}
+		<EditorToolbar>
+			{editorContentTabs.map(tab =>
+				<EditorTab key={tab}
+				           active={activeTab === tab}
+				           tab={tab}
+				           translationKey={tab}
+				           onActivate={onTabChange} />
+			 )}
 			{children}
-			{jsonEditorOpen && (
-				<JSONEditorModal onHide={closeJSONEditor}
-				                 validator={isJSONObject}
-				                 onSubmit={onLocalJSONChange}
-				                 value={json} />
+		</EditorToolbar>
+	);
+};
+
+export const EditorToolbar = ({children}: HasChildren) => (
+	<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")}>
+		{children}
+	</div>
+);
+
+type EditorContentJSONTabProps<T> = {
+  json?: T;
+  onJSONChange: (value: T) => void;
+}
+type EditorContentUITabProps = {renderUI: () => React.ReactElement | null, overflow?: boolean};
+
+export const EditorContent = {
+	Toolbar: EditorContentToolbar,
+	Tab: {
+		JSON: <T extends JSON>({onJSONChange, json}: EditorContentJSONTabProps<T>) => {
+			const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
+
+			const {Glyphicon} = React.useContext(Context).theme;
+
+			const buttonStyle = {position: "absolute", right: 20, top: 5};
+			return (
+				<div style={{position: "relative", height: "100%", overflow: "auto"}}>
+					<JSONEditor validator={isJSONObject}
+					            onChange={onJSONChange}
+					            value={json} />
+					{jsonEditorOpen && (
+						<JSONEditorModal onHide={closeJSONEditor}
+						                 validator={isJSONObject}
+						                 onSubmit={onJSONChange}
+						                 value={json} />
+					)}
+					<Button onClick={_openJSONEditor} small style={buttonStyle}><Glyphicon glyph="new-window"/></Button>
+				</div>
+			);
+		},
+		UI: ({renderUI, overflow = true}: EditorContentUITabProps) =>
+			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}>{renderUI()}</div>
+	}
+};
+
+type GenericEditorContentProps<T extends JSON> = {
+	initialActiveTab?: EditorContentTab
+	overflowUIContent?: boolean;
+} & Partial<Pick<EditorContentToolbarProps, "activeTab" | "onTabChange">>
+	& EditorContentJSONTabProps<T>
+	& EditorContentUITabProps
+
+/**
+ * If @param activeTab is given, then it is a controlled prop. Otherwise, the active tab is stateful.
+ */
+export const GenericEditorContent = <T extends JSON>(
+	{initialActiveTab = "UI", activeTab, onTabChange, json, onJSONChange, renderUI, overflowUIContent = true}
+	: GenericEditorContentProps<T>) => {
+	const [stateActiveTab, onStateTabChange] = React.useState(initialActiveTab);
+	const _activeTab = activeTab ?? stateActiveTab;
+	const _onTabChange = React.useCallback((tab) => {
+		onTabChange?.(tab);
+		onStateTabChange(tab);
+	}, [onTabChange, onStateTabChange]);
+	return (
+		<React.Fragment>
+			<EditorContent.Toolbar activeTab={_activeTab} onTabChange={_onTabChange} />
+			{_activeTab === "JSON" && (
+				<EditorContent.Tab.JSON json={json} onJSONChange={onJSONChange} />
 			)}
-		</div>
+			{_activeTab === "UI" && (
+				<EditorContent.Tab.UI renderUI={renderUI} overflow={overflowUIContent} />
+			)}
+		</React.Fragment>
 	);
 };
