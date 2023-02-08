@@ -18,36 +18,35 @@ interface WizardStep {
 type WizardStepChildren = Record<string, WizardStep>;
 
 const wizardCreateStep: WizardStep = {
-	label: "Wizard.header",
+	label: "wizard.header",
 	component: GenericWizardStepChooser,
 	variant: "primary",
 	children: {
 		json: {
-			label: "Wizard.option.json",
+			label: "wizard.option.json",
 			component: FormCreatorJSON,
 		},
 		databank: {
-			label: "Wizard.option.databank",
+			label: "wizard.option.databank",
 			component: FormCreatorDatabank,
 		},
 		extend: {
-			label: "Wizard.option.extend",
+			label: "wizard.option.extend",
 			component: GenericWizardStepChooser,
 			children: {
 				copy: {
-					label: "Wizard.option.extend.copy",
+					label: "wizard.option.extend.copy",
 					component: FormCreatorExtendWithMethod("copy")
 				},
 				extendFully: {
-					label: "Wizard.option.extend.extendFully",
+					label: "wizard.option.extend.extendFully",
 					component: FormCreatorExtendWithMethod("fully")
 				},
 				extendFields: {
-					label: "Wizard.option.extend.extendFields",
+					label: "wizard.option.extend.extendFields",
 					component: FormCreatorExtendWithMethod("fields")
 				},
 			}
-			// component: FormCreatorDatabank,
 		}
 	}
 };
@@ -111,12 +110,12 @@ function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 		{displayModal && (
 			<Modal show={true} onHide={hideModal} >
 				<Modal.Body>
-					<p>{translations["Wizard.option.extend.saveOrPreview"]}</p>
+					<p>{translations["wizard.option.extend.saveOrPreview"]}</p>
 					<Button onClick={onSubmitAndSave}
 					        variant="primary"
-					        disabled={loading}>{translations["Save"]}</Button>
+					        disabled={loading}>{translations["save"]}</Button>
 					<Button onClick={onSubmitDraft} variant="default"  disabled={loading}>
-						{translations["Wizard.option.json.import.draft"]}
+						{translations["wizard.option.json.import.draft"]}
 					</Button>
 				</Modal.Body>
 			</Modal>
@@ -130,7 +129,7 @@ function FormCreatorExtendWithMethod(method: Method) {
 }
 
 const wizardCreateOrListStep: WizardStep = {
-	label: "Wizard.createOrList",
+	label: "wizard.createOrList",
 	component: WizardCreateOrList,
 	children: {
 		create: wizardCreateStep,
@@ -255,7 +254,7 @@ interface WizardStepProps extends FormCreatorProps {
 }
 
 const prepareImportedJSON = (json: any, translations: Record<string, string>) => {
-	const removeId = json.id && confirm(translations["Wizard.option.json.removeId"]);
+	const removeId = json.id && confirm(translations["wizard.option.json.removeId"]);
 	if (removeId) {
 		const _json = JSON.parse(JSON.stringify(json));
 		delete _json.id;
@@ -274,7 +273,7 @@ function FormCreatorJSON({onCreate}: WizardStepProps) {
 	const onSubmitDraft = useOnSubmit(false);
 	return <SubmittableJSONEditor onSubmit={onSubmit}
 	                              onSubmitDraft={onSubmitDraft}
-					                      submitLabel={translations["Save"]}
+					                      submitLabel={translations["save"]}
 	                              className={wizardNmspc("json")}
 	                              validator={isMaster} />;
 }
@@ -289,9 +288,9 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 	const submitRef = React.useRef<_LajiForm>(null);
 	const [saveOnSubmit, setSubmitType] = React.useState<boolean>(false);
 	const schema = JSONSchemaBuilder.object({
-		name: JSONSchemaBuilder.String({title: translations["Wizard.databank.form.name"]}),
-		collectionID: JSONSchemaBuilder.String({title: translations["Wizard.databank.form.collectionID"]}),
-		primary: JSONSchemaBuilder.Boolean({title: translations["Wizard.databank.form.primary"], default: true})
+		name: JSONSchemaBuilder.String({title: translations["wizard.databank.form.name"]}),
+		collectionID: JSONSchemaBuilder.String({title: translations["wizard.databank.form.collectionID"]}),
+		primary: JSONSchemaBuilder.Boolean({title: translations["wizard.databank.form.primary"], default: true})
 	}, {required: ["name", "collectionID"]});
 	const uiSchema = {
 		primary: {
@@ -324,9 +323,9 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 
 	return (
 		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
-			<Button onClick={onSubmit} variant="primary">{translations["Save"]}</Button>
+			<Button onClick={onSubmit} variant="primary">{translations["save"]}</Button>
 			<Button onClick={onSubmitDraft} variant="default">
-				{translations["Wizard.option.json.import.draft"]}
+				{translations["wizard.option.json.import.draft"]}
 			</Button>
 		</LajiForm>
 	);
@@ -379,11 +378,11 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 		try {
 			result = await formService.delete(id);
 		} catch (e) {
-			notifier.error(translations["Delete.error"]);
+			notifier.error(translations["delete.error"]);
 		} finally {
 			setFormLoading(id, false);
 			if (result && result.affected > 0 && forms) {
-				notifier.success(translations["Delete.success"]);
+				notifier.success(translations["delete.success"]);
 				setForms(forms.filter(f => f.id !== id));
 			}
 		}
@@ -438,7 +437,7 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 	return (
 		<Panel>
 			<Panel.Heading>
-				<h4>{translations["Wizard.list.header"]}</h4>
+				<h4>{translations["wizard.list.header"]}</h4>
 				<SearchInput onChange={setSearchValue}
 				             onKeyDown={onKeyDown}
 				             autoFocus={true} />

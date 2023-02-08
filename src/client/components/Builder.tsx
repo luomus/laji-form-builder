@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
-import { constructTranslations } from "laji-form/lib/utils";
 import { translate } from "../../utils";
 import { createRef, gnmspc, isSignalAbortError, runAbortable } from "../utils";
 import { Editor } from "./Editor/Editor";
@@ -74,7 +73,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	};
 	private apiClient: ApiClient;
 	private formApiClient?: ApiClient;
-	private appTranslations: {[key: string]: {[lang in Lang]: string}};
 	private metadataService: MetadataService;
 	private formService: FormService;
 	private formLinkerService: FormExpanderService;
@@ -93,8 +91,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		if (props.formApiClient) {
 			this.formApiClient = new ApiClient(props.formApiClient);
 		}
-
-		this.appTranslations = constructTranslations(appTranslations) as any;
 		this.metadataService = new MetadataService(this.apiClient, props.lang);
 		this.formService = new FormService(this.apiClient, props.lang, this.formApiClient);
 		this.formLinkerService = new FormExpanderService({getForm: this.formService.getMaster});
@@ -270,7 +266,11 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		apiClient: this.apiClient,
 		lang,
 		editorLang,
-		translations: this.appTranslations[lang],
+		translations: (Object.keys(appTranslations) as (keyof typeof appTranslations)[])
+			.reduce<Record<string, string>>((trans, key) => {
+				trans[key] = appTranslations[key][lang];
+				return trans;
+			}, {}),
 		metadataService: this.metadataService,
 		formService: this.formService,
 		theme: this.props.theme,
@@ -354,7 +354,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				const rootError = this.state[rootErrorProp] as BuilderError;
 				const {translations} = this.getContext(this.props.lang, this.state.lang);
 				this.notifier.error(
-					`${translations["Builder.masterChange.fail"]}\n${rootError.message}\n${rootError.stack}`
+					`${translations["builder.masterChange.fail"]}\n${rootError.message}\n${rootError.stack}`
 				);
 				console.error(rootError);
 			} else {
@@ -417,10 +417,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				this.setState({master: masterResponse, saving: false, id: masterResponse.id});
 				this.onSelected(masterResponse.id);
 			}
-			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["Save.success"]);
+			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["save.success"]);
 			return true;
 		} catch (e) {
-			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["Save.error"]);
+			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["save.error"]);
 			this.setState({saving: false});
 			return false;
 		}

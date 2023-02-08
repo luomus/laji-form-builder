@@ -10,7 +10,7 @@ export interface ContextProps {
 	apiClient: ApiClient;
 	lang: Lang;
 	editorLang: Lang;
-	translations: {[key: string]: string};
+	translations: Record<string, string>;
 	metadataService: MetadataService;
 	formService: FormService;
 	theme: Theme;

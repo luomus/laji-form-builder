@@ -65,7 +65,7 @@ class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: 
 	}
 	render() {
 		return this.state.hasError
-			? <div className={gnmspc("error")}>{this.context.translations["Editor.error.ui"]}</div>
+			? <div className={gnmspc("error")}>{this.context.translations["editor.error.ui"]}</div>
 			: this.props.children;
 	}
 }
@@ -120,7 +120,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			<div style={fieldEditorStyle}>
 				{isValid(master) && master.baseFormID && (
 					<div className={gnmspc("warning")}>
-						{translateKey(translations, "Editor.warning.baseFormID", {baseFormID: master.baseFormID})}
+						{translateKey(translations, "editor.warning.baseFormID", {baseFormID: master.baseFormID})}
 					</div>
 				)}
 				{errorMsg && <div className={gnmspc("error")}>{translations[errorMsg] || errorMsg}</div>}
@@ -168,7 +168,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		}
 		let content;
 		if (!isValid(master) || !isValid(expandedMaster) || !isValid(schemaFormat)) {
-			content = <div className={gnmspc("error")}>{this.context.translations["Editor.error.generic"]}</div>;
+			content = <div className={gnmspc("error")}>{this.context.translations["editor.error.generic"]}</div>;
 		} else if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
 			content = (
 				<ActiveEditorErrorBoundary>
@@ -605,7 +605,7 @@ const EditorMainToolbar = ({
 				        small
 				        variant="primary"
 				        disabled={!submitDisabled || saving}
-				        onClick={onSave}>{translations.Save}</Button>
+				        onClick={onSave}>{translations["save"]}</Button>
 			</div>
 		</div>
 	);
@@ -620,7 +620,7 @@ interface EditorChooserProps {
 const editorNmspc = nmspc("editor-chooser");
 
 type ActiveEditorMode = "uiSchema" | "basic" | "options";
-const tabs = {options: "Editor.tab.options", basic: "Editor.tab.basic", uiSchema: "Editor.tab.uiSchema"};
+const tabs = {options: "editor.tab.options", basic: "editor.tab.basic", uiSchema: "editor.tab.uiSchema"};
 const EditorChooser = React.memo(function EditorChooser(
 	{active, onChange, displaySchemaTabs}
 	: EditorChooserProps) {
@@ -707,7 +707,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 		                 onSubmit={onSaveChanges}
 		                 onSubmitDraft={onSubmitDraft}
 		                 onChange={setTmpValue}
-		                 submitLabel={translations["Save"]} />
+		                 submitLabel={translations["save"]} />
 	</>;
 });
 
@@ -740,7 +740,7 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
 
 	const onHideCheckForChanges = React.useCallback(() => {
 		tmpValue !== undefined && JSON.stringify(tmpValue) !== JSON.stringify(value)
-			&& confirm(translations["Editor.json.confirm"])
+			&& confirm(translations["editor.json.confirm"])
 			&& tmpValue !== undefined && (onSubmitDraft ? onSubmitDraft(tmpValue) : onSubmit(tmpValue));
 		onHide();
 	}, [tmpValue, value, translations, onSubmitDraft, onSubmit, onHide]);
@@ -760,13 +760,13 @@ const SaveModal = ({onSave, onHide, master}
 	: {onSave: () => void, master: MaybeError<Master>} & Pick<GenericModalProps, "onHide">) => {
 	const {translations} = React.useContext(Context);
 	return (
-		<GenericModal onHide={onHide} className={gnmspc("save-modal")} header={translations["Editor.save.header"]}>
-			<div className={gnmspc("mb-5")}>{translations["Editor.save.description"]}</div>
+		<GenericModal onHide={onHide} className={gnmspc("save-modal")} header={translations["editor.save.header"]}>
+			<div className={gnmspc("mb-5")}>{translations["editor.save.description"]}</div>
 			{isValid(master)
 				? <DiffViewer master={master} />
-				: <div className={gnmspc("error")}>{translations["Editor.saveModal.error.master"]}</div>
+				: <div className={gnmspc("error")}>{translations["editor.saveModal.error.master"]}</div>
 			}
-			<Button onClick={onSave} variant="primary" disabled={!isValid(master)} >{translations.Save}</Button>
+			<Button onClick={onSave} variant="primary" disabled={!isValid(master)} >{translations["save"]}</Button>
 		</GenericModal>
 	);
 };
