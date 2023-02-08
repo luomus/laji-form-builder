@@ -131,11 +131,12 @@ export const fetchJSON = <T>(path: string, options?: any) => fetch(path, options
  * Example:
  * dictionary(["a", "b"]); // returns { a: true, b: true }
  **/
-export const dictionarify = <T extends (string | number | symbol) = string>(arr: T[]): Record<T, true> =>
-	arr.reduce((dict, key) => {
-		dict[key] = true;
-		return dict;
-	}, {} as Record<T, true>) ;
+export const dictionarify = <T, K extends string | number | symbol>
+	(arr: T[], operator?: (item: T) => K): Record<K, true> =>
+		arr.reduce((dict, key) => {
+			dict[(operator ? operator(key) : key) as K] = true;
+			return dict;
+		}, {} as Record<K, true>) ;
 
 export const dictionarifyByKey = <T extends Record<string, unknown>>(objects: T[], key: keyof T) =>
 	objects.reduce<Record<string, T>>((map, obj) => {

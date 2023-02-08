@@ -6,10 +6,8 @@ import {
 	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
 } from "../../../utils";
 import * as LajiFormUtils from "laji-form/lib/utils";
-const { dictionarify, updateSafelyWithJSONPointer } = LajiFormUtils;
+const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "../Context";
-import LajiForm from "../LajiForm";
-import { Spinner } from "../components";
 import { EditorLajiForm } from "./UiSchemaEditor";
 import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
 import { detectChangePaths } from "../../utils";
@@ -94,53 +92,9 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	renderUI() {
 		return (
 			<div className={this.props.className}>
-				{this.renderAdder()}
 				{this.renderOptionsAndValidations()}
 			</div>
 		);
-	}
-
-	renderAdder = () => {
-		if (this.state.childProps) {
-			const existing = dictionarify(this.props.field.fields || [], (field: Field) => field.name);
-			const [enums, enumNames] = this.state.childProps
-				.filter(p => !existing[unprefixProp(p.property)])
-				.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
-					_enums.push(prop.property);
-					_enumNames.push(`${prop.property} (${prop.label[this.context.lang]})`);
-					return [_enums, _enumNames];
-				}, [[], []]);
-			if (enums.length === 0) {
-				return null;
-			}
-			const schema = JSONSchemaBuilder.enu(
-				{enum: enums, enumNames},
-				{title: this.context.translations.AddProperty}
-			);
-			return (
-				<LajiForm
-					key={this.state.lajiFormToucher}
-					schema={schema}
-					onChange={this.onAddProperty}
-				/>
-			);
-		} else if (this.state.childProps === false) {
-			return null;
-		} else {
-			return <div><Spinner /></div>;
-		}
-	}
-
-	onAddProperty = (property: string): void => {
-		if (!property) {
-			return;
-		}
-		const propertyModel = (this.state.childProps as Property[])
-			.find(childProp => childProp.property === property);
-		if (propertyModel) {
-			this.setState({lajiFormToucher: this.state.lajiFormToucher + 1});
-			this.props.onChange([{type: "field", op: "add", value: propertyModel}]);
-		}
 	}
 
 	propertyModelToField(property?: Property) {

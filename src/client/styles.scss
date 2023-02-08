@@ -130,6 +130,18 @@ $margin: 2px;
 				color: $danger;
 			}
 		}
+		&-add {
+			margin-left: 5px;
+
+			&:before {
+				content: "+";
+				font-weight: bold;
+				color: $success-3;
+			}
+			&:hover:before {
+				color: $success;
+			}
+		}
 		&-item {
 			display: flex;
 
@@ -253,8 +265,11 @@ $margin: 2px;
 	&-inner-editor {
 		&-toolbar {
 			background-color: $neutral-8;
-			border-bottom: 1px solid $neutral-separating;
+			border-bottom: 1px solid darken($neutral-separating, 20%);
 			padding: 2px;
+		}
+		&-tabs {
+			padding: 0;
 		}
 	}
 

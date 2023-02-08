@@ -4,20 +4,21 @@ import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable
 	HasChildren, SubmittableJSONEditorProps, JSONEditor } from "../components";
 import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded,
 	useBooleanSetter } from "../../utils";
-import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
+import { dictionarify, getPropertyContextName, getRootField, getRootProperty, JSONSchemaBuilder, parseJSONPointer,
+	unprefixProp } from "../../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
-	FieldDeleteEvent, FieldAddEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
+	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
 import { Context } from "../Context";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
 import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject,
-	JSONSchema } from "../../../model";
-import LajiForm from "laji-form/lib/components/LajiForm";
+	JSONSchema, Property} from "../../../model";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
+import LajiForm from "../LajiForm";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -25,7 +26,6 @@ export type FieldEditorChangeEvent =
 	| TranslationsDeleteEvent
 	| Omit<UiSchemaChangeEvent, "selected">
 	| Omit<FieldDeleteEvent, "selected">
-	| Omit<FieldAddEvent, "selected">
 	| Omit<FieldUpdateEvent, "selected">;
 
 export interface EditorProps extends Stylable, Classable {
@@ -77,7 +77,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		pointerChoosingActive: false
 	};
 	containerRef = React.createRef<HTMLDivElement>();
-	optionsEditorLajiFormRef = React.createRef<LajiForm>();
+	optionsEditorLajiFormRef = React.createRef<typeof LajiForm>();
 	optionsEditorRef = React.createRef<HTMLDivElement>();
 	highlightedLajiFormElem?: HTMLElement;
 	fieldsRef = React.createRef<HTMLDivElement>();
@@ -185,6 +185,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 							        fields={this.getFields(expandedMaster)}
 							        onSelected={this.onFieldSelected}
 							        onDeleted={this.onFieldDeleted}
+							        onAdded={this.onFieldAdded}
 							        selected={this.state.selected}
 							        pointer=""
 							        expanded={true}
@@ -199,7 +200,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			                         className={classNames(gnmspc("options-editor"), editorContentNmspc())}
 			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
-			                         lajiFormRef={this.optionsEditorLajiFormRef}
 			                         ref={this.optionsEditorRef}
 			                         onLoaded={this.state.optionsEditorLoadedCallback}
 			                         filter={this.state.optionsEditorFilter}
@@ -265,6 +265,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	onFieldDeleted = (field: string) => {
 		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
+	}
+
+	onFieldAdded = (field: string, property: Property) => {
+		this.props.onChange([{type: "field", op: "add" as const, selected: this.getFieldPath(field), value: property}]);
 	}
 
 	getFieldEditorProps(expandedMaster: ExpandedMaster, schemaFormat: SchemaFormat): FieldEditorProps {
@@ -365,6 +369,7 @@ const Fields = React.memo(function _Fields({
 	fields = [],
 	onSelected,
 	onDeleted,
+	onAdded,
 	selected,
 	pointer,
 	style = {},
@@ -375,6 +380,7 @@ const Fields = React.memo(function _Fields({
 	fields: FieldProps[],
 	onSelected: OnSelectedCB,
 	onDeleted: OnSelectedCB,
+	onAdded: (field: string, property: Property) => void;
 	selected?: string,
 	pointer: string,
 	expanded?: boolean,
@@ -387,6 +393,7 @@ const Fields = React.memo(function _Fields({
 				       {...f}
 				       onSelected={onSelected}
 				       onDeleted={onDeleted}
+				       onAdded={onAdded}
 				       selected={selected}
 				       pointer={`${pointer}/${f.name}`}
 				       expanded={expanded}
@@ -402,22 +409,29 @@ interface FieldProps extends FieldOptions {
 	selected?: string;
 	onSelected: OnSelectedCB;
 	onDeleted: OnSelectedCB;
-	fields: FieldProps[];
+	onAdded: (field: string, property: Property) => void;
+	fields?: FieldProps[];
 	expanded?: boolean;
 	fieldsContainerElem: HTMLDivElement | null;
+	context: string;
 }
 interface FieldState {
 	expanded: boolean;
 	prevSelected?: string;
 	prevExpanded?: boolean;
+	addOpen: boolean
+	properties?: Property[] | false;
 }
 class Field extends React.PureComponent<FieldProps, FieldState> {
-	state = {
+	state: FieldState = {
 		expanded: this.props.expanded || Field.isSelected(this.props.selected, this.props.pointer) ||  false,
+		addOpen: false
 	};
 	private fieldRef = React.createRef<HTMLDivElement>();
 	private nmspc = nmspc("field");
+	private propertyContextAbortController: AbortController;
 
+	context!: React.ContextType<typeof Context>;
 	static contextType = Context;
 
 	static getDerivedStateFromProps(nextProps: FieldProps, prevState: FieldState) {
@@ -436,6 +450,11 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 
 	componentDidMount() {
 		this.scrollToIfNeeded();
+
+		this.propertyContextAbortController = new AbortController();
+		this.getProperties(this.props.pointer, this.propertyContextAbortController.signal).then(properties =>  
+			this.setState({properties: properties.length ? properties : false})
+		);
 	}
 
 	scrollToIfNeeded(prevProps?: FieldProps) {
@@ -476,6 +495,46 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		this.props.onDeleted(pointer);
 	}
 
+	onOpenAdd = () => {
+		this.setState({addOpen: true});
+	}
+
+	onCloseAdd = () => {
+		this.setState({addOpen: false});
+	}
+
+	async getProperties(path: string, signal: AbortSignal): Promise<Property[]> {
+		const getPropertyFromSubPathAndProp = async (path: string, property: Property): Promise<Property> => {
+			const splitted = path.substr(1).split("/");
+			const [cur, ...rest] = splitted;
+			if (splitted.length === 1) {
+				return property;
+			}
+			const properties = property.isEmbeddable
+				? await this.context.metadataService.getPropertiesForEmbeddedProperty(
+					property.range[0],
+					undefined,
+					signal)
+				: [];
+
+			const nextProperty = properties?.find(p => unprefixProp(p.property) === rest[0]);
+			if (!nextProperty) {
+				throw new Error("Couldn't find property " + cur);
+			}
+			return getPropertyFromSubPathAndProp("/" + rest.join("/"), nextProperty);
+		};
+		const property = await getPropertyFromSubPathAndProp(
+			`${path.length === 1 ? "" : path}`,
+			getRootProperty(getRootField({context: this.props.context}))
+		);
+
+		if (property.isEmbeddable) {
+			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
+		} else {
+			return [];
+		}
+	}
+
 	render() {
 		const {name, fields = [], selected, pointer} = this.props;
 		const expandClassName = this.nmspc(fields.length
@@ -499,6 +558,12 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 					           onClick={fields.length ? this.toggleExpand : undefined}
 					           key="expand" />
 					<Clickable className={this.nmspc("label")}>{name}</Clickable>
+					{this.state.properties === false
+						? null
+						: this.state.properties?.length
+							? <Clickable className={this.nmspc("add")} onClick={this.onOpenAdd} />
+							: <Spinner color="white" size={15} />
+					}
 					<Clickable className={this.nmspc("delete")} onClick={this.onThisDeleted} />
 				</Clickable>
 				{this.state.expanded && (
@@ -506,13 +571,60 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 						fields={fields}
 						onSelected={this.onChildSelected}
 						onDeleted={this.onChildDeleted}
+						onAdded={this.props.onAdded}
 						selected={selected}
 						pointer={pointer}
 						fieldsContainerElem={this.props.fieldsContainerElem}
 					/>
 				)}
+				{this.state.addOpen && (
+					<GenericModal onHide={this.onCloseAdd}>
+						{this.renderAdder()}
+					</GenericModal>
+				)}
 			</div>
 		);
+	}
+
+	renderAdder = () => {
+		if (!this.state.properties) {
+			return null;
+		}
+
+		const existing = dictionarify(this.props.fields || [], (field: FieldOptions) => field.name);
+		const [enums, enumNames] = this.state.properties
+			.filter(p => !existing[unprefixProp(p.property)])
+			.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
+				_enums.push(prop.property);
+				_enumNames.push(`${prop.property} (${prop.label[this.context.lang]})`);
+				return [_enums, _enumNames];
+			}, [[], []]);
+		if (enums.length === 0) {
+			return null;
+		}
+		const schema = JSONSchemaBuilder.enu(
+			{enum: enums, enumNames},
+			{title: this.context.translations["addProperty"]}
+		);
+		return (
+			<LajiForm
+				schema={schema}
+				onChange={this.onAddProperty}
+				autoFocus={true}
+			/>
+		);
+	}
+
+	onAddProperty = (property: string): void => {
+		if (!property) {
+			return;
+		}
+		const propertyModel = (this.state.properties as Property[])
+			.find(childProp => childProp.property === property);
+		if (propertyModel) {
+			this.props.onAdded(this.props.pointer, propertyModel);
+			this.onCloseAdd();
+		}
 	}
 }
 
@@ -804,7 +916,7 @@ const editorContentTabs: EditorContentTab[] = ["JSON", "UI"];
 export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 	: EditorContentToolbarProps) => {
 	return (
-		<EditorToolbar>
+		<EditorToolbar className={editorContentNmspc("tabs")}>
 			{editorContentTabs.map(tab =>
 				<EditorTab key={tab}
 				           active={activeTab === tab}
@@ -817,8 +929,8 @@ export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 	);
 };
 
-export const EditorToolbar = ({children}: HasChildren) => (
-	<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")}>
+export const EditorToolbar = ({children, className}: HasChildren & Classable) => (
+	<div style={{marginLeft: "auto", display: "flex"}} className={classNames(editorContentNmspc("toolbar"), className)}>
 		{children}
 	</div>
 );

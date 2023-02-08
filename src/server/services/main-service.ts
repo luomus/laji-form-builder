@@ -29,11 +29,11 @@ const apiClient = new ApiClient(
 	DEFAULT_LANG
 );
 
-export const exposedProps = dictionarify<keyof FormListing>([
+export const exposedProps = dictionarify([
 	"id", "logo", "title", "description", "shortDescription",
 	"supportedLanguage", "category", "collectionID", "options",
 	"name"
-]);
+] as (keyof FormListing)[]);
 
 export const exposedOptions = dictionarify([
 	"allowExcel",

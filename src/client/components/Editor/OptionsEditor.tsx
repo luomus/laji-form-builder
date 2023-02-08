@@ -7,12 +7,12 @@ import {
 	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject
 } from "../../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
-import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
+import { detectChangePaths, handleTranslationChange } from "../../utils";
 import { isDefaultData, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
-import _LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
+import { LajiFormProps } from "laji-form/lib/components/LajiForm";
 import MetadataService from "../../../services/metadata-service";
-import { EditorContentTab, EditorContentToolbar, EditorToolbar, GenericEditorContent } from "./Editor";
+import { EditorContentTab, EditorToolbar, GenericEditorContent } from "./Editor";
 
 export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
 	const range = property.range[0];
@@ -43,7 +43,6 @@ interface FormOptionsEditorProps extends Classable, Stylable {
 	master: Master;
 	translations: {[key: string]: string};
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
-	lajiFormRef?: React.Ref<_LajiForm>;
 	onLoaded?: () => void;
 	filter?: string[];
 	clearFilters: () => void;
@@ -140,7 +139,7 @@ const prepareMaster = (master: Master) => {
 };
 
 export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor(
-	{master, onChange, translations, className, style, lajiFormRef, onLoaded, filter, clearFilters}
+	{master, onChange, translations, className, onLoaded, filter, clearFilters}
 	: FormOptionsEditorProps, ref) {
 	const context = React.useContext(Context);
 	const { metadataService, translations: appTranslations, editorLang } = context;
@@ -195,14 +194,13 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		onChange(events);
 	}, [formData, onChange, _master, context]);
 
-	let props: LajiFormProps & { ref?: React.Ref<_LajiForm> } = React.useMemo(() => ({
+	let props: LajiFormProps = React.useMemo(() => ({
 		schema,
 		uiSchema,
 		formData,
 		onChange: onLajiFormChange,
 		fields: {TextareaEditorField},
-		ref: lajiFormRef
-	}), [schema, uiSchema, formData, onLajiFormChange, lajiFormRef]);
+	}), [schema, uiSchema, formData, onLajiFormChange]);
 
 	React.useEffect(() => {
 		if (schema && onLoaded) {
@@ -218,12 +216,12 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		return <>
 			<EditorToolbar>
 				<Button onClick={toggleSetDisplayOnlyUsed} active={displayOnlyUsed} small>
-					{appTranslations["Editor.options.displayOnlyUsed"]}
+					{appTranslations["editor.options.displayOnlyUsed"]}
 				</Button>
 				{filter?.length && <Button small
 				                           variant="danger"
 				                           onClick={clearFilters}
-				>{appTranslations["Editor.options.clear"]}</Button>}
+				>{appTranslations["editor.options.clear"]}</Button>}
 			</EditorToolbar>
 			{_content}
 		</>;
@@ -233,7 +231,9 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 
 	const [activeTab, setActiveTab] = React.useState<EditorContentTab>("JSON");
 
-	React.useEffect(() => setActiveTab("UI"), [filter]);
+	React.useEffect(() => {
+		filter?.length && setActiveTab("UI");
+	} , [filter]);
 
 	return  (
 		<div className={className} ref={ref} style={{width: "100%"}}>

@@ -383,7 +383,7 @@ export function SubmittableJSONEditor<T extends JSON>(
 			          disabled={json === undefined || !valid}
 			          variant={"default"}
 			          className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
-				>{translations["Wizard.option.json.import.draft"]}
+				>{translations["wizard.option.json.import.draft"]}
 				</Button>
 			)}
 		</div>
@@ -411,7 +411,7 @@ export const SearchInput = ({onChange, onKeyDown, autoFocus}: SearchInputProps) 
 	}, [setValue, onChange]);
 	return (
 		<div className={gnmspc("search-input")} onKeyDown={onKeyDown}>
-			<FormControl placeholder={translations["Wizard.list.search.placeholder"]}
+			<FormControl placeholder={translations["wizard.list.search.placeholder"]}
 			             autoFocus={autoFocus}
 			             onChange={onSearchChange}
 			             value={value} />
