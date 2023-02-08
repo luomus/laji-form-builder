@@ -125,18 +125,16 @@ export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps
 			rootSchema: this.props.schema,
 			rootUiSchema: this.props.uiSchema
 		};
-		return (
-			<React.Fragment>
-				<EditorLajiForm
-					schema={schema}
-					uiSchema={uiSchema}
-					formData={formData}
-					onChange={this.onEditorLajiFormChange}
-					formContext={formContext}
-					className={this.props.className}
-				/>
-			</React.Fragment>
-		);
+		return <>
+			<EditorLajiForm
+				schema={schema}
+				uiSchema={uiSchema}
+				formData={formData}
+				onChange={this.onEditorLajiFormChange}
+				formContext={formContext}
+				className={this.props.className}
+			/>
+		</>;
 	}
 
 	getJSONEditorFormData() {
@@ -392,19 +390,17 @@ export const TextareaEditorField = (props: FieldProps) => {
 	)), [_onChange, _lajiFormId]);
 	const { minRows, maxRows, rows } = getUiOptions(props.uiSchema);
 	const Label = props.formContext.Label as any;
-	return (
-		<React.Fragment>
-			<Label label={label} />
-			<AnyJSONEditor
-				value={filterLajiFormId(value)}
-				onChange={onChange}
-				resizable={isObject(value) || Array.isArray(value)}
-				rows={rows}
-				minRows={minRows}
-				maxRows={maxRows}
-			/>
-		</React.Fragment>
-	);
+	return <>
+		<Label label={label} />
+		<AnyJSONEditor
+			value={filterLajiFormId(value)}
+			onChange={onChange}
+			resizable={isObject(value) || Array.isArray(value)}
+			rows={rows}
+			minRows={minRows}
+			maxRows={maxRows}
+		/>
+	</>;
 };
 
 const UiFieldEditor = (props: any) => {

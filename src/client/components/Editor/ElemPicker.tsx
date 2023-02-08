@@ -106,17 +106,15 @@ const ElemPicker = React.memo(function ElemPicker({
 	const start = React.useCallback(() => setActive(true), [setActive]);
 	const stop = React.useCallback(() => setActive(false), [setActive]);
 	const {Button, Glyphicon} = React.useContext(Context).theme;
-	return (
-		<React.Fragment>
-			<Button active={isActive}
-			        onClick={isActive ? stop : start}
-			        small
-			        className={classNames(gnmspc("elem-picker"), className)}>
-				<Glyphicon glyph="magnet" className={classNames(isActive && "active")} />
-			</Button>
-			<Highlighter highlightedElem={highlightedElem} active={isActive} onElemHighlighted={onElemHighlighted} />
-		</React.Fragment>
-	);
+	return <>
+		<Button active={isActive}
+		        onClick={isActive ? stop : start}
+		        small
+		        className={classNames(gnmspc("elem-picker"), className)}>
+			<Glyphicon glyph="magnet" className={classNames(isActive && "active")} />
+		</Button>
+		<Highlighter highlightedElem={highlightedElem} active={isActive} onElemHighlighted={onElemHighlighted} />
+	</>;
 });
 
 export default ElemPicker;

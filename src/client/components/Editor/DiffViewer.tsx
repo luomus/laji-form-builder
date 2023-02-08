@@ -85,21 +85,17 @@ const DiffKindMapper = (diff: Diff<JSON>) => {
 };
 
 const prettyJSONClassName = gnmspc("pretty-json");
-const PrettyJSON = ({json}: {json: JSON}) => (
-	<React.Fragment>{
-		JSON.stringify(json, undefined, 2).split("\n").map((v, i) => <p key={i} className={prettyJSONClassName}>{v}</p>)
-	}</React.Fragment>
-);
+const PrettyJSON = ({json}: {json: JSON}) => <>{
+	JSON.stringify(json, undefined, 2).split("\n").map((v, i) => <p key={i} className={prettyJSONClassName}>{v}</p>)
+}</>;
 
 const DiffNewViewer = (diff: DiffNew<JSON>) => <PrettyJSON json={diff.rhs} />;
 
 const DiffDeletedViewer = (diff: DiffDeleted<JSON>) => <PrettyJSON json={diff.lhs} />;
 
-const DiffEditViewer = (diff: DiffEdit<JSON>) => (
-	<React.Fragment>
-		<PrettyJSON json={diff.lhs} />{" ➞ "}<PrettyJSON json={diff.rhs} />
-	</React.Fragment>
-);
+const DiffEditViewer = (diff: DiffEdit<JSON>) => <>
+	<PrettyJSON json={diff.lhs} />{" ➞ "}<PrettyJSON json={diff.rhs} />
+</>;
 
 const diffNmspc = nmspc("diff");
 

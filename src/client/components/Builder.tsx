@@ -282,12 +282,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		return (
 			<Context.Provider value={context}>
 				{
-					this.props.id || this.state.tmpExpandedMaster ? (
-						<React.Fragment>
-							{this.renderEditor()}
-							<div style={{height: this.state.editorHeight}} />
-						</React.Fragment>
-					) : (
+					this.props.id || this.state.tmpExpandedMaster ? <>
+						{this.renderEditor()}
+						<div style={{height: this.state.editorHeight}} />
+					</> : (
 						<FormCreatorWizard onCreate={this.onCreate}
 						                   onChoose={this.onSelected}
 						                   primaryDataBankFormID={this.props.primaryDataBankFormID}

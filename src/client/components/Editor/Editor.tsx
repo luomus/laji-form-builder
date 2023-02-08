@@ -664,18 +664,16 @@ type ActiveEditorProps = FieldEditorProps & HasChildren & Classable & Stylable &
 const ActiveEditor = React.memo(function ActiveEditor(
 	{active, style, className, contentValid, selected, children, ...props}: ActiveEditorProps) {
 	const editorProps = {...props, className: classNames(className, editorContentNmspc())};
-	return (
-		<React.Fragment>
-			{children}
-			{selected && contentValid && (
-				<div style={style}>
-					{active === "uiSchema" && <UiSchemaEditor {...editorProps} />
-					|| active === "basic" && <BasicEditor {...editorProps} />
-					|| null
-					}</div>
-			)}
-		</React.Fragment>
-	);
+	return <>
+		{children}
+		{selected && contentValid && (
+			<div style={style}>
+				{active === "uiSchema" && <UiSchemaEditor {...editorProps} />
+				|| active === "basic" && <BasicEditor {...editorProps} />
+				|| null
+				}</div>
+		)}
+	</>;
 });
 
 type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "onChange" | "onSubmit" | "validator"> &
@@ -702,17 +700,15 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 		onChange({type: "master", value}),
 	[onChange]);
 
-	return (
-		<React.Fragment>
-			<JSONEditorModal {...props}
-			                 value={isValid(props.value) ? props.value : undefined}
-											 validator={isMaster}
-			                 onSubmit={onSaveChanges}
-			                 onSubmitDraft={onSubmitDraft}
-			                 onChange={setTmpValue}
-			                 submitLabel={translations["Save"]} />
-		</React.Fragment>
-	);
+	return <>
+		<JSONEditorModal {...props}
+		                 value={isValid(props.value) ? props.value : undefined}
+										 validator={isMaster}
+		                 onSubmit={onSaveChanges}
+		                 onSubmitDraft={onSubmitDraft}
+		                 onChange={setTmpValue}
+		                 submitLabel={translations["Save"]} />
+	</>;
 });
 
 type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
@@ -881,15 +877,13 @@ export const GenericEditorContent = <T extends JSON>(
 		onTabChange?.(tab);
 		onStateTabChange(tab);
 	}, [onTabChange, onStateTabChange]);
-	return (
-		<React.Fragment>
-			<EditorContent.Toolbar activeTab={_activeTab} onTabChange={_onTabChange} />
-			{_activeTab === "JSON" && (
-				<EditorContent.Tab.JSON json={json} onJSONChange={onJSONChange} />
-			)}
-			{_activeTab === "UI" && (
-				<EditorContent.Tab.UI renderUI={renderUI} overflow={overflowUIContent} />
-			)}
-		</React.Fragment>
-	);
+	return <>
+		<EditorContent.Toolbar activeTab={_activeTab} onTabChange={_onTabChange} />
+		{_activeTab === "JSON" && (
+			<EditorContent.Tab.JSON json={json} onJSONChange={onJSONChange} />
+		)}
+		{_activeTab === "UI" && (
+			<EditorContent.Tab.UI renderUI={renderUI} overflow={overflowUIContent} />
+		)}
+	</>;
 };

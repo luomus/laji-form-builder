@@ -106,24 +106,22 @@ function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 	}, [chosen, formService, setLoading, showModal]);
 
 	const {Modal} = theme;
-	return (
-		<React.Fragment>
-			<FormList onChoose={onChoose} />
-			{displayModal && (
-				<Modal show={true} onHide={hideModal} >
-					<Modal.Body>
-						<p>{translations["Wizard.option.extend.saveOrPreview"]}</p>
-						<Button onClick={onSubmitAndSave}
-						        variant="primary"
-						        disabled={loading}>{translations["Save"]}</Button>
-						<Button onClick={onSubmitDraft} variant="default"  disabled={loading}>
-							{translations["Wizard.option.json.import.draft"]}
-						</Button>
-					</Modal.Body>
-				</Modal>
-			)}
-		</React.Fragment>
-	);
+	return <>
+		<FormList onChoose={onChoose} />
+		{displayModal && (
+			<Modal show={true} onHide={hideModal} >
+				<Modal.Body>
+					<p>{translations["Wizard.option.extend.saveOrPreview"]}</p>
+					<Button onClick={onSubmitAndSave}
+					        variant="primary"
+					        disabled={loading}>{translations["Save"]}</Button>
+					<Button onClick={onSubmitDraft} variant="default"  disabled={loading}>
+						{translations["Wizard.option.json.import.draft"]}
+					</Button>
+				</Modal.Body>
+			</Modal>
+		)}
+	</>;
 }
 
 function FormCreatorExtendWithMethod(method: Method) {
@@ -225,12 +223,10 @@ function GenericWizardStepChooser(
 function WizardCreateOrList(props: WizardStepProps) {
 	const steps = wizardCreateOrListStep.children as WizardStepChildren;
 	const {create} = steps;
-	return (
-		<React.Fragment>
-			<GenericWizardStepChooser {...props} steps={{create}} style={{}} buttonGroupProps={{block: true}} />
-			<FormList onChoose={props.onChoose} />
-		</React.Fragment>
-	);
+	return <>
+		<GenericWizardStepChooser {...props} steps={{create}} style={{}} buttonGroupProps={{block: true}} />
+		<FormList onChoose={props.onChoose} />
+	</>;
 }
 
 interface FormCreatorWizardOptionButtonProps extends HasChildren {
