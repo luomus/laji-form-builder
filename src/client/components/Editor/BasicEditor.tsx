@@ -10,7 +10,7 @@ const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "../Context";
 import { EditorLajiForm } from "./UiSchemaEditor";
 import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
-import { detectChangePaths } from "../../utils";
+import { detectChangePaths, handleTranslationChange } from "../../utils";
 
 type BasicEditorState = {
 	childProps?: Property[] | false;
@@ -83,7 +83,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 
 	render() {
 		return (
-			<GenericEditorContent json={this.getFormDataFromProps()}
+			<GenericEditorContent json={this.getJSONEditorFormData()}
 			                      onJSONChange={this.onLajiFormChange}
 			                      renderUI={this.renderUI} />
 		);
@@ -112,6 +112,10 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 				}
 				return formData;
 			}, {});
+	}
+
+	getJSONEditorFormData() {
+		return translate(this.getFormDataFromProps(), this.props.translations);
 	}
 
 	getFormDataFromProps() {
@@ -170,23 +174,24 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 	onLajiFormChange = (viewFormData: any) => {
 		const events: FieldEditorChangeEvent[] = [];
 		const formData = this.getFormDataFromProps();
-		let newFormData = formData;
-		const changedPaths = detectChangePaths(viewFormData, newFormData);
-		changedPaths.forEach(changedPath => {
-			const currentValue = parseJSONPointer(newFormData, changedPath);
+		const changedPaths = detectChangePaths(viewFormData, formData);
+		const newFormData = changedPaths.reduce((newFormData, changedPath) => {
+			const currentValue = parseJSONPointer(formData, changedPath);
 			const newValue = parseJSONPointer(viewFormData, changedPath);
-			if (typeof currentValue === "string") {
-				if (currentValue[0] === "@") {
-					events.push({type: "translations", key: currentValue, value: newValue});
-				} else {
-					const translationKey =  `@${this.props.path}${changedPath}`;
-					newFormData = updateSafelyWithJSONPointer(newFormData, translationKey, changedPath);
-					events.push({type: "translations", key: translationKey, value: newValue});
-				}
+			if (typeof currentValue === "string" || typeof newValue === "string") {
+				return handleTranslationChange(
+					newFormData,
+					events,
+					"",
+					changedPath,
+					this.context,
+					currentValue,
+					newValue,
+				);
 			} else {
-				newFormData = updateSafelyWithJSONPointer(newFormData, newValue, changedPath);
+				return updateSafelyWithJSONPointer(newFormData, newValue, changedPath);
 			}
-		});
+		}, formData);
 		if (newFormData !== formData) {
 			events.push({type: "field", op: "update", value: {...this.props.field, ...newFormData}});
 		}
