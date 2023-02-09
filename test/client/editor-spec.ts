@@ -89,6 +89,7 @@ describe("Editor", () => {
 
 			it("field editor displayed for all fields", async () => {
 				let $field = builder.$rootFieldSelector;
+				debugger;
 				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
 			});
 
