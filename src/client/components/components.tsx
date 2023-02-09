@@ -430,7 +430,7 @@ export const GenericModal = ({onHide, children, header, className}: GenericModal
 	return (
 		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"), className)}>
 			<Modal.Header closeButton={true}>
-				{header}
+				<h4>{header}</h4>
 			</Modal.Header>
 			<Modal.Body>
 				{ children }

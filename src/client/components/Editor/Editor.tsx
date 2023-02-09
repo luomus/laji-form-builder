@@ -328,7 +328,7 @@ const EditorMainToolbar = ({
 				        small
 				        variant="primary"
 				        disabled={!submitDisabled || saving}
-				        onClick={onSave}>{translations["save"]}</Button>
+				        onClick={onSave}>{translations["editor.save.button"]}</Button>
 			</div>
 		</div>
 	);
@@ -417,6 +417,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 		                 onSubmit={onSaveChanges}
 		                 onSubmitDraft={onSubmitDraft}
 		                 onChange={setTmpValue}
+										 header={translations["editor.json.modal.header"]}
 		                 submitLabel={translations["save"]} />
 	</>;
 });
@@ -426,6 +427,7 @@ type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
 	| "validator"
 	| "onChange"
 	| "submitLabel">
+	& Pick<GenericModalProps, "header">
 	& {
 	onHide: () => void;
 	onSubmit: React.Dispatch<React.SetStateAction<T | undefined>>;
@@ -433,7 +435,7 @@ type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
 }
 
 const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
-	{value, onHide, onSubmitDraft, onChange, onSubmit, ...props}: JSONEditorModalProps<T>)
+	{value, onHide, onSubmitDraft, onChange, onSubmit, header, ...props}: JSONEditorModalProps<T>)
 {
 	// Focus on mount.
 	const ref = React.useRef<HTMLTextAreaElement>(null);
@@ -459,7 +461,7 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
 	const _onSubmitDraft = useChain(onSubmitDraft, onHide);
 
 	return (
-		<GenericModal onHide={onHideCheckForChanges}>
+		<GenericModal onHide={onHideCheckForChanges} header={header}>
 			<SubmittableJSONEditor {...props}
 			                       value={isValid(value) ? value : undefined}
 			                       onSubmitDraft={onSubmitDraft && _onSubmitDraft}

@@ -164,6 +164,11 @@
 		"sv": "Visa endast använda funktioner",
 		"en": "Display only used features"
 	},
+	"editor.save.button": {
+		"fi": "Tarkista ja tallenna",
+		"sv": "Revidera och spara",
+		"en": "Revise and save"
+	},
 	"editor.save.header": {
 		"fi": "Tallenna muutokset",
 		"sv": "Spara ändringar",
@@ -208,5 +213,10 @@
 		"fi": "Haluatko tallentaa uuden lomakkeen vai vain esikatsella sitä?",
 		"sv": "Ska vi spara det nya formuläret eller bara förhandsgranska det nu?",
 		"en": "Shall we save the new form, or just preview it for now?"
+	},
+	"editor.json.modal.header":  {
+		"fi": "Lomakkeen raaka JSON",
+		"sv": "Formuläret rå json",
+		"en": "Form raw JSON"
 	}
 }
