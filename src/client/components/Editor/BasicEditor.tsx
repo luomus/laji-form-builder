@@ -10,6 +10,7 @@ import { EditorLajiForm } from "./UiSchemaEditor";
 import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
 import { detectChangePaths, handleTranslationChange } from "../../utils";
 import { GenericFieldEditorProps } from "./FieldEditor";
+import { immutableDelete } from "laji-form/lib/utils";
 
 type BasicEditorState = {
 	childProps?: Property[] | false;
@@ -17,7 +18,8 @@ type BasicEditorState = {
 	lajiFormToucher: number;
 };
 
-type RelevantFields = Pick<Field, "validators" | "warnings">;
+type RelevantFields = Pick<Field, "options" | "validators" | "warnings">;
+const relevantFields: (keyof RelevantFields)[] = ["options", "validators", "warnings"];
 
 export default class BasicEditor extends React.PureComponent<GenericFieldEditorProps, BasicEditorState> {
 	documentTree: any;
@@ -105,12 +107,15 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 
 	getFormData({options, validators, warnings}: Pick<Field, "options" | "validators" | "warnings">) {
 		return (Object.keys({ options, validators, warnings }) as (keyof RelevantFields)[])
-			.reduce<RelevantFields>((formData, key) => {
+			.reduce<Partial<RelevantFields> | undefined>((formData, key) => {
 				if (this.props.field[key] !== undefined) {
-					formData[key] = this.props.field[key];
+					if (!formData) {
+						formData = {};
+					}
+					(formData as any)[key] = this.props.field[key];
 				}
 				return formData;
-			}, {});
+			}, undefined);
 	}
 
 	getJSONEditorFormData() {
@@ -192,7 +197,12 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 			}
 		}, formData);
 		if (newFormData !== formData) {
-			events.push({type: "field", op: "update", value: {...this.props.field, ...newFormData}});
+			if (!newFormData) {
+				const cleared = relevantFields.reduce((field, prop) => immutableDelete(field, prop), this.props.field);
+				events.push({type: "field", op: "update", value: cleared});
+			} else {
+				events.push({type: "field", op: "update", value: {...this.props.field, ...newFormData}});
+			}
 		}
 		(events.length) && this.props.onChange(events);
 	}
