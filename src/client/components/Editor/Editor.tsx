@@ -535,7 +535,8 @@ export const EditorContent = {
 
 			const buttonStyle = {position: "absolute", right: 20, top: 5};
 			return (
-				<div style={{position: "relative", height: "100%", overflow: "auto"}}>
+				<div style={{position: "relative", height: "100%", overflow: "auto"}}
+				     className={editorContentNmspc("padding-bottom-hack")}>
 					<JSONEditor validator={isJSONObject}
 					            onChange={onJSONChange}
 					            value={json}
@@ -551,7 +552,8 @@ export const EditorContent = {
 			);
 		},
 		UI: ({renderUI, overflow = true}: EditorContentUITabProps) =>
-			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}>{renderUI()}</div>
+			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}
+		       className={editorContentNmspc("padding-bottom-hack")}>{renderUI()}</div>
 	}
 };
 

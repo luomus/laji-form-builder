@@ -269,6 +269,10 @@ $margin: 2px;
 		&-tabs {
 			padding: 0;
 		}
+
+		&-padding-bottom-hack {
+			padding-bottom: 54px;
+		}
 	}
 
 	&-options-editor {
