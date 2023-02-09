@@ -954,7 +954,8 @@ export const EditorContent = {
 				<div style={{position: "relative", height: "100%", overflow: "auto"}}>
 					<JSONEditor validator={isJSONObject}
 					            onChange={onJSONChange}
-					            value={json} />
+					            value={json}
+					            style={{height: "100%"}}/>
 					{jsonEditorOpen && (
 						<JSONEditorModal onHide={closeJSONEditor}
 						                 validator={isJSONObject}
