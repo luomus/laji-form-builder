@@ -289,12 +289,11 @@ export const JSONEditor = React.forwardRef(<T extends JSON>(
 			return;
 		}
 		try {
-			const valid = validator(JSON.parse(tmpValue));
-			onChange?.(JSON.parse(tmpValue));
-			setValid(valid);
+			setValid(validator(JSON.parse(tmpValue)));
 		} catch (e) {
 			setValid(false);
 		}
+		onChange?.(JSON.parse(tmpValue));
 	}, [onChange, tmpValue, validator]);
 
 	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
