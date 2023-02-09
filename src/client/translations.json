@@ -9,6 +9,16 @@
 		"sv": "Fält",
 		"en": "Fields"
 	},
+	"editor.tab.fields.json": {
+		"fi": "Muokkaa JSONia",
+		"sv": "Muokkaa JSONia",
+		"en": "Edit field's JSON"
+	},
+	"editor.tab.fields.ui": {
+		"fi": "Muokkaa käyttöliittymällä",
+		"sv": "Muokkaa käyttöliittymällä",
+		"en": "Edit field with UI"
+	},
 	"editor.tab.fields.basic": {
 		"fi": "Kentän tiedot",
 		"sv": "Kentän tiedot",

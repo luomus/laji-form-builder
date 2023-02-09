@@ -61,7 +61,8 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		const active = this.state.tab;
 
 		const fieldEditorContentStyle: React.CSSProperties = {
-			width: "100%"
+			width: "100%",
+			height: "100%"
 		};
 
 		const fieldsStyle: React.CSSProperties = {

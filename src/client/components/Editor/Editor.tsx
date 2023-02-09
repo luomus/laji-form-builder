@@ -489,17 +489,20 @@ type EditorContentToolbarProps = {
 } & Partial<HasChildren>;
 
 export type EditorContentTab = "JSON" | "UI";
-const editorContentTabs: EditorContentTab[] = ["JSON", "UI"];
+const editorContentTabs: Record<EditorContentTab, string> = {
+	"JSON": "editor.tab.fields.json",
+	"UI": "editor.tab.fields.ui"
+};
 
 export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 	: EditorContentToolbarProps) => {
 	return (
 		<EditorToolbar className={editorContentNmspc("tabs")}>
-			{editorContentTabs.map(tab =>
+			{Object.keys(editorContentTabs).map((tab: EditorContentTab) =>
 				<EditorTab key={tab}
 				           active={activeTab === tab}
 				           tab={tab}
-				           translationKey={tab}
+				           translationKey={editorContentTabs[tab]}
 				           onActivate={onTabChange} />
 			 )}
 			{children}
