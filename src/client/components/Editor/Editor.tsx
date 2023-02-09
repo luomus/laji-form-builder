@@ -1,24 +1,18 @@
 import * as React from "react";
-import memoize from "memoizee";
-import { DraggableHeight, DraggableWidth, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps, JSONEditor } from "../components";
-import { classNames, nmspc, gnmspc, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, scrollIntoViewIfNeeded,
-	useBooleanSetter } from "../../utils";
-import { dictionarify, getPropertyContextName, getRootField, getRootProperty, JSONSchemaBuilder, parseJSONPointer,
-	unprefixProp } from "../../../utils";
+import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
+	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps } from "../components";
+import { classNames, nmspc, gnmspc, useBooleanSetter } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
 import { Context } from "../Context";
-import UiSchemaEditor from "./UiSchemaEditor";
-import BasicEditor from "./BasicEditor";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, Field as FieldOptions, ExpandedMaster, JSON, isMaster, isJSONObject, JSONObject,
-	JSONSchema, Property} from "../../../model";
+import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster, isJSONObject } from "../../../model";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
 import LajiForm from "../LajiForm";
+import FieldEditor from "./FieldEditor";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -49,42 +43,27 @@ export interface EditorProps extends Stylable, Classable {
 export interface EditorState {
 	activeEditorMode: ActiveEditorMode;
 	pointerChoosingActive: boolean;
-	selected?: string;
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
 	jsonEditorOpen?: boolean;
 	saveModalOpen?: Master | false;
-}
-
-class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
-	static contextType = Context;
-	context!: React.ContextType<typeof Context>;
-	state = {hasError: false}
-	static getDerivedStateFromError() {
-		return {hasError: true};
-	}
-	render() {
-		return this.state.hasError
-			? <div className={gnmspc("error")}>{this.context.translations["editor.error.ui"]}</div>
-			: this.props.children;
-	}
+	selectedField?: string;
 }
 
 export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	static contextType = Context;
 	state: EditorState = {
-		activeEditorMode: this.props.displaySchemaTabs ? "basic" as ActiveEditorMode : "options" as ActiveEditorMode,
+		activeEditorMode: this.props.displaySchemaTabs ? "fields" as ActiveEditorMode : "options" as ActiveEditorMode,
 		pointerChoosingActive: false
 	};
 	containerRef = React.createRef<HTMLDivElement>();
 	optionsEditorLajiFormRef = React.createRef<typeof LajiForm>();
 	optionsEditorRef = React.createRef<HTMLDivElement>();
 	highlightedLajiFormElem?: HTMLElement;
-	fieldsRef = React.createRef<HTMLDivElement>();
 
 	static getDerivedStateFromProps(props: EditorProps) {
 		if (!props.displaySchemaTabs) {
-			return {activeEditorMode: "options"};
+			return {activeEditorMode: "options" as ActiveEditorMode};
 		}
 		return {};
 	}
@@ -143,23 +122,12 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	}
 
 	renderActiveEditor() {
-		const fieldsBlockStyle: React.CSSProperties = {
-			display: "flex",
-			flexDirection: "column",
-			height: "100%",
-			overflowY: "auto"
-		};
 		const containerStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "row",
 			position: "relative",
 			height: "100%",
 			paddingBottom: 27
-		};
-		const fieldEditorContentStyle: React.CSSProperties = {
-			// overflow: "auto",
-			// height: "100%",
-			width: "100%"
 		};
 		const {master, expandedMaster, schemaFormat} = this.props;
 		const {activeEditorMode} = this.state;
@@ -169,36 +137,15 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		let content;
 		if (!isValid(master) || !isValid(expandedMaster) || !isValid(schemaFormat)) {
 			content = <div className={gnmspc("error")}>{this.context.translations["editor.error.generic"]}</div>;
-		} else if (activeEditorMode ===  "uiSchema" || activeEditorMode === "basic") {
-			content = (
-				<ActiveEditorErrorBoundary>
-					<ActiveEditor selected={this.state.selected}
-					              contentValid={isValid(schemaFormat)}
-					              active={this.state.activeEditorMode}
-					              {...this.getFieldEditorProps(expandedMaster, schemaFormat)}
-					              className={gnmspc("field-editor")}
-					              style={fieldEditorContentStyle} >
-						<DraggableWidth style={fieldsBlockStyle}
-						                className={gnmspc("editor-nav-bar")}
-						                ref={this.fieldsRef} >
-							<Fields className={gnmspc("field-chooser")}
-							        fields={this.getFields(expandedMaster)}
-							        onSelected={this.onFieldSelected}
-							        onDeleted={this.onFieldDeleted}
-							        onAdded={this.onFieldAdded}
-							        selected={this.state.selected}
-							        pointer=""
-							        expanded={true}
-							        fieldsContainerElem={this.fieldsRef.current} />
-						</DraggableWidth>
-					</ActiveEditor>
-				</ActiveEditorErrorBoundary>
-			);
+		} else if (activeEditorMode ===  "fields") {
+			content = <FieldEditor {...this.props}
+			                       expandedMaster={expandedMaster}
+														 schemaFormat={schemaFormat}
+														 selectedField={this.state.selectedField} />;
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={expandedMaster}
 			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
 			                         className={classNames(gnmspc("options-editor"), editorContentNmspc())}
-			                         style={fieldEditorContentStyle}
 			                         onChange={this.props.onChange}
 			                         ref={this.optionsEditorRef}
 			                         onLoaded={this.state.optionsEditorLoadedCallback}
@@ -254,76 +201,14 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		this.props.onHeightChange?.(height);
 	}
 
-	getFields = memoize((master: ExpandedMaster): any => ([{
-		name: unprefixProp(getPropertyContextName(master.context)),
-		fields: master.fields
-	}]));
-
-	onFieldSelected = (field: string) => {
-		this.setState({selected: field});
-	}
-
-	onFieldDeleted = (field: string) => {
-		this.props.onChange([{type: "field", op: "delete", selected: this.getFieldPath(field)}]);
-	}
-
-	onFieldAdded = (field: string, property: Property) => {
-		this.props.onChange([{type: "field", op: "add" as const, selected: this.getFieldPath(field), value: property}]);
-	}
-
-	getFieldEditorProps(expandedMaster: ExpandedMaster, schemaFormat: SchemaFormat): FieldEditorProps {
-		const { editorLang } = this.context;
-		const selected = this.getSelected();
-		const findField = (_field: FieldOptions, path: string): FieldOptions => {
-			const [next, ...rest] = path.split("/").filter(s => s);
-			if (next === undefined) {
-				return _field;
-			}
-			const child  = (_field.fields as FieldOptions[])
-				.find(_child => _child.name === next) as FieldOptions;
-			return findField(child, rest.join("/"));
-		};
-		return {
-			schema: parseJSONPointer(schemaFormat.schema, fieldPointerToSchemaPointer(schemaFormat.schema, selected)),
-			uiSchema: parseJSONPointer(
-				expandedMaster.uiSchema,
-				fieldPointerToUiSchemaPointer(schemaFormat.schema, selected),
-				!!"safely"
-			),
-			field: findField(this.getFields(expandedMaster)[0], selected),
-			translations: expandedMaster.translations?.[editorLang as Lang] || {},
-			path: selected,
-			onChange: this.onEditorChange,
-			context: expandedMaster.context
-		};
-	}
-
-	onEditorChange = (events: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => {
-		events = (events instanceof Array ? events : [events]).map(event => {
-			return { ...event, selected: this.getSelected() };
-		});
-
-		this.props.onChange(events as ChangeEvent[]);
-	}
-
 	onActiveEditorChange = (newActive: ActiveEditorMode) => {
 		this.setState({activeEditorMode: newActive});
 	}
 
-	getSelected = () => this.getFieldPath(this.state.selected || "");
-
-	getFieldPath = (path: string) => {
-		const globalSlashRegexp = /\//g;
-		const firstSlashSeparatedPathPart = /\/[^/]*/;
-		const slashMatch = path.match(globalSlashRegexp);
-		const isRootField = slashMatch && slashMatch.length === 1;
-		return isRootField ? "/" : path.replace(firstSlashSeparatedPathPart, "");
-	}
-
-	onPickerSelectedField = (selected: string) => {
-		const state: Partial<EditorState> = {selected};
-		if (!["basic", "uiSchema"].includes(this.state.activeEditorMode)) {
-			state.activeEditorMode = "basic";
+	onPickerSelectedField = (selectedField: string) => {
+		const state: Partial<EditorState> = {selectedField};
+		if (this.state.activeEditorMode !== "fields") {
+			state.activeEditorMode = "fields";
 		}
 		this.setState(state as EditorState);
 	}
@@ -350,281 +235,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	hideJSONEditor = () => {
 		this.setState({jsonEditorOpen: false});
-	}
-}
-
-export interface FieldEditorProps extends Classable {
-	uiSchema?: JSONObject;
-	schema: JSONSchema;
-	field: FieldOptions;
-	translations: Record<string, string>;
-	path: string;
-	onChange: (changed: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => void;
-	context?: string
-}
-
-type OnSelectedCB = (field: string) => void;
-
-const Fields = React.memo(function _Fields({
-	fields = [],
-	onSelected,
-	onDeleted,
-	onAdded,
-	selected,
-	pointer,
-	style = {},
-	className,
-	expanded,
-	fieldsContainerElem
-} : {
-	fields: FieldProps[],
-	onSelected: OnSelectedCB,
-	onDeleted: OnSelectedCB,
-	onAdded: (field: string, property: Property) => void;
-	selected?: string,
-	pointer: string,
-	expanded?: boolean,
-	fieldsContainerElem: HTMLDivElement | null
-} & Stylable & Classable) {
-	return (
-		<div style={{...style, display: "flex", flexDirection: "column"}} className={className}>
-			{fields.map((f: FieldProps) => (
-				<Field key={f.name}
-				       {...f}
-				       onSelected={onSelected}
-				       onDeleted={onDeleted}
-				       onAdded={onAdded}
-				       selected={selected}
-				       pointer={`${pointer}/${f.name}`}
-				       expanded={expanded}
-				       fieldsContainerElem={fieldsContainerElem}
-				/>
-			))}
-		</div>
-	);
-});
-
-interface FieldProps extends FieldOptions {
-	pointer: string;
-	selected?: string;
-	onSelected: OnSelectedCB;
-	onDeleted: OnSelectedCB;
-	onAdded: (field: string, property: Property) => void;
-	fields?: FieldProps[];
-	expanded?: boolean;
-	fieldsContainerElem: HTMLDivElement | null;
-	context: string;
-}
-interface FieldState {
-	expanded: boolean;
-	prevSelected?: string;
-	prevExpanded?: boolean;
-	addOpen: boolean
-	properties?: Property[] | false;
-}
-class Field extends React.PureComponent<FieldProps, FieldState> {
-	state: FieldState = {
-		expanded: this.props.expanded || Field.isSelected(this.props.selected, this.props.pointer) ||  false,
-		addOpen: false
-	};
-	private fieldRef = React.createRef<HTMLDivElement>();
-	private nmspc = nmspc("field");
-	private propertyContextAbortController: AbortController;
-
-	context!: React.ContextType<typeof Context>;
-	static contextType = Context;
-
-	static getDerivedStateFromProps(nextProps: FieldProps, prevState: FieldState) {
-		if (nextProps.selected !== prevState.prevSelected
-			&& !Field.isChildSelected(prevState.prevSelected, nextProps.pointer)
-			&& Field.isChildSelected(nextProps.selected, nextProps.pointer)
-		) {
-			return {expanded: true};
-		}
-		return {};
-	}
-
-	componentDidUpdate(prevProps: FieldProps) {
-		this.scrollToIfNeeded(prevProps);
-	}
-
-	componentDidMount() {
-		this.scrollToIfNeeded();
-
-		this.propertyContextAbortController = new AbortController();
-		this.getProperties(this.props.pointer, this.propertyContextAbortController.signal).then(properties =>  
-			this.setState({properties: properties.length ? properties : false})
-		);
-	}
-
-	scrollToIfNeeded(prevProps?: FieldProps) {
-		if ((!prevProps || !Field.isSelected(prevProps.selected, prevProps.pointer))
-			&& Field.isSelected(this.props.selected, this.props.pointer)
-			&& this.fieldRef.current && this.props.fieldsContainerElem
-		) {
-			scrollIntoViewIfNeeded(this.fieldRef.current, 0, 0, this.props.fieldsContainerElem);
-		}
-	}
-
-	static isSelected(selected: string | undefined, pointer: string): boolean {
-		return selected === pointer;
-	}
-
-	static isChildSelected(selected = "", pointer: string): boolean {
-		return selected.startsWith(pointer);
-	}
-
-	toggleExpand = (e: React.MouseEvent<HTMLElement>) => {
-		e.stopPropagation();
-		this.setState({expanded: !this.state.expanded});
-	}
-
-	onThisSelected = () => {
-		this.props.onSelected(this.props.pointer);
-	}
-
-	onChildSelected = (pointer: string) => {
-		this.props.onSelected(pointer);
-	}
-
-	onThisDeleted = () => {
-		this.props.onDeleted(this.props.pointer);
-	}
-
-	onChildDeleted = (pointer: string) => {
-		this.props.onDeleted(pointer);
-	}
-
-	onOpenAdd = () => {
-		this.setState({addOpen: true});
-	}
-
-	onCloseAdd = () => {
-		this.setState({addOpen: false});
-	}
-
-	async getProperties(path: string, signal: AbortSignal): Promise<Property[]> {
-		const getPropertyFromSubPathAndProp = async (path: string, property: Property): Promise<Property> => {
-			const splitted = path.substr(1).split("/");
-			const [cur, ...rest] = splitted;
-			if (splitted.length === 1) {
-				return property;
-			}
-			const properties = property.isEmbeddable
-				? await this.context.metadataService.getPropertiesForEmbeddedProperty(
-					property.range[0],
-					undefined,
-					signal)
-				: [];
-
-			const nextProperty = properties?.find(p => unprefixProp(p.property) === rest[0]);
-			if (!nextProperty) {
-				throw new Error("Couldn't find property " + cur);
-			}
-			return getPropertyFromSubPathAndProp("/" + rest.join("/"), nextProperty);
-		};
-		const property = await getPropertyFromSubPathAndProp(
-			`${path.length === 1 ? "" : path}`,
-			getRootProperty(getRootField({context: this.props.context}))
-		);
-
-		if (property.isEmbeddable) {
-			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
-		} else {
-			return [];
-		}
-	}
-
-	render() {
-		const {name, fields = [], selected, pointer} = this.props;
-		const expandClassName = this.nmspc(fields.length
-			? this.state.expanded
-				? "expanded"
-				: "contracted"
-			: "nonexpandable");
-		const isSelected = Field.isSelected(this.props.selected, this.props.pointer);
-		const containerClassName = classNames(
-			this.nmspc("item"),
-			this.nmspc(pointer.substr(1).replace(/\//g, "-")),
-			isSelected && this.nmspc("item-selected")
-		);
-		return (
-			<div className={classNames(this.nmspc(), isSelected && this.nmspc("selected"))} ref={this.fieldRef}>
-				<Clickable
-					className={containerClassName}
-					onClick={this.onThisSelected}
-				>
-					<Clickable className={expandClassName}
-					           onClick={fields.length ? this.toggleExpand : undefined}
-					           key="expand" />
-					<Clickable className={this.nmspc("label")}>{name}</Clickable>
-					{this.state.properties === false
-						? null
-						: this.state.properties?.length
-							? <Clickable className={this.nmspc("add")} onClick={this.onOpenAdd} />
-							: <Spinner color="white" size={15} />
-					}
-					<Clickable className={this.nmspc("delete")} onClick={this.onThisDeleted} />
-				</Clickable>
-				{this.state.expanded && (
-					<Fields
-						fields={fields}
-						onSelected={this.onChildSelected}
-						onDeleted={this.onChildDeleted}
-						onAdded={this.props.onAdded}
-						selected={selected}
-						pointer={pointer}
-						fieldsContainerElem={this.props.fieldsContainerElem}
-					/>
-				)}
-				{this.state.addOpen && (
-					<GenericModal onHide={this.onCloseAdd}>
-						{this.renderAdder()}
-					</GenericModal>
-				)}
-			</div>
-		);
-	}
-
-	renderAdder = () => {
-		if (!this.state.properties) {
-			return null;
-		}
-
-		const existing = dictionarify(this.props.fields || [], (field: FieldOptions) => field.name);
-		const [enums, enumNames] = this.state.properties
-			.filter(p => !existing[unprefixProp(p.property)])
-			.reduce<[string[], string[]]>(([_enums, _enumNames], prop) => {
-				_enums.push(prop.property);
-				_enumNames.push(`${prop.property} (${prop.label[this.context.lang]})`);
-				return [_enums, _enumNames];
-			}, [[], []]);
-		if (enums.length === 0) {
-			return null;
-		}
-		const schema = JSONSchemaBuilder.enu(
-			{enum: enums, enumNames},
-			{title: this.context.translations["addProperty"]}
-		);
-		return (
-			<LajiForm
-				schema={schema}
-				onChange={this.onAddProperty}
-				autoFocus={true}
-			/>
-		);
-	}
-
-	onAddProperty = (property: string): void => {
-		if (!property) {
-			return;
-		}
-		const propertyModel = (this.state.properties as Property[])
-			.find(childProp => childProp.property === property);
-		if (propertyModel) {
-			this.props.onAdded(this.props.pointer, propertyModel);
-			this.onCloseAdd();
-		}
 	}
 }
 
@@ -657,9 +267,10 @@ const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange,
 	);
 });
 
-interface EditorMainToolbarProps extends Omit<EditorChooserProps, "onChange">,
-                                     Omit<LangChooserProps, "onChange">,
-                                     Pick<ElemPickerProps, "onSelectedField" | "onSelectedOptions"> {
+type EditorMainToolbarProps = Omit<EditorChooserProps, "onChange">
+	& Omit<LangChooserProps, "onChange">
+	& Pick<ElemPickerProps, "onSelectedField" | "onSelectedOptions">
+	& {
 	onEditorChange: EditorChooserProps["onChange"];
 	onLangChange: LangChooserProps["onChange"];
 	onSave: () => void;
@@ -695,7 +306,7 @@ const EditorMainToolbar = ({
 	const {translations} = React.useContext(Context);
 	const {Glyphicon, ButtonGroup} = React.useContext(Context).theme;
 	return (
-		<div style={{display: "flex", width: "100%"}} className={toolbarNmspc()}>
+		<div style={{display: "flex", alignItems: "center"}} className={toolbarNmspc()}>
 			<LangChooser onChange={onLangChange} />
 			<ButtonGroup className={gnmspc("ml-1")}>
 				<ElemPicker onSelectedField={onSelectedField}
@@ -723,24 +334,32 @@ const EditorMainToolbar = ({
 	);
 };
 
-interface EditorChooserProps { 
-	active: ActiveEditorMode;
-	onChange: (activeEditorMode: ActiveEditorMode) => void;
+type EditorChooserProps = { 
 	displaySchemaTabs: boolean;
-}
+} & Omit<TabChooserProps<ActiveEditorMode>, "tabs">;
 
-const editorNmspc = nmspc("editor-chooser");
-
-type ActiveEditorMode = "uiSchema" | "basic" | "options";
-const tabs = {options: "editor.tab.options", basic: "editor.tab.basic", uiSchema: "editor.tab.uiSchema"};
+type ActiveEditorMode =  "fields" | "options";
+const mainTabs = {options: "editor.tab.options", fields: "editor.tab.fields"};
 const EditorChooser = React.memo(function EditorChooser(
-	{active, onChange, displaySchemaTabs}
+	{displaySchemaTabs, ...props}
 	: EditorChooserProps) {
-	const _tabs = displaySchemaTabs ? tabs : {options: tabs.options};
+	const _tabs = displaySchemaTabs ? mainTabs : {options: mainTabs.options};
+	return <TabChooser {...props} tabs={_tabs} />;
+});
+
+type TabChooserProps<T extends string> = {
+	tabs: Record<T, string>;
+	active: T;
+	onChange: (tab: T) => void;
+} & Classable;
+
+export const TabChooser = React.memo(function TabChooser<T extends string>(
+	{active, onChange, tabs, className}:  TabChooserProps<T>
+) {
 	return (
-		<div className={editorNmspc()} style={{display: "flex"}}>{
-			Object.keys(_tabs).map((_active: ActiveEditorMode) =>
-				<EditorTab key={_active}
+		<div className={classNames(gnmspc("tabs"), className)} style={{display: "flex"}}>{
+			(Object.keys(tabs) as T[]).map(_active =>
+				<EditorTab key={_active as string}
 				           active={active === _active}
 				           tab={_active}
 				           translationKey={tabs[_active]}
@@ -760,32 +379,11 @@ const EditorTab = React.memo(function EditorTab<T>(
 	}) {
 	const translation = (React.useContext(Context).translations as any)[translationKey] ?? translationKey;
 	return (
-		<Clickable className={classNames(editorNmspc("button"), active && gnmspc("active"))}
+		<Clickable className={classNames(gnmspc("tab"), active && gnmspc("active"))}
 		           onClick={React.useCallback(() => onActivate(tab), [tab, onActivate])} >
 			{translation}
 		</Clickable>
 	);
-});
-
-type ActiveEditorProps = FieldEditorProps & HasChildren & Classable & Stylable & {
-	active: ActiveEditorMode;
-	selected?: string;
-	contentValid: boolean;
-}
-
-const ActiveEditor = React.memo(function ActiveEditor(
-	{active, style, className, contentValid, selected, children, ...props}: ActiveEditorProps) {
-	const editorProps = {...props, className: classNames(className, editorContentNmspc())};
-	return <>
-		{children}
-		{selected && contentValid && (
-			<div style={style}>
-				{active === "uiSchema" && <UiSchemaEditor {...editorProps} />
-				|| active === "basic" && <BasicEditor {...editorProps} />
-				|| null
-				}</div>
-		)}
-	</>;
 });
 
 type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "onChange" | "onSubmit" | "validator"> &
@@ -880,26 +478,6 @@ const SaveModal = ({onSave, onHide, master}
 			}
 			<Button onClick={onSave} variant="primary" disabled={!isValid(master)} >{translations["save"]}</Button>
 		</GenericModal>
-	);
-};
-
-type GenericModalProps = {
-	onHide: () => void;
-	header?: string;
-} & HasChildren & Classable
-
-const GenericModal = ({onHide, children, header, className}: GenericModalProps) => {
-	const {theme} = React.useContext(Context);
-	const {Modal} = theme;
-	return (
-		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"), className)}>
-			<Modal.Header closeButton={true}>
-				{header}
-			</Modal.Header>
-			<Modal.Body>
-				{ children }
-			</Modal.Body>
-		</Modal>
 	);
 };
 

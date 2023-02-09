@@ -210,7 +210,7 @@ $margin: 2px;
 	&-editor-toolbar {
 		background-color: $neutral-6;
 		border-bottom: 1px solid $neutral-separating;
-		padding: 2px;
+		padding: 0px 2px;
 
 		&-separator {
 			padding: 0px 4px;
@@ -221,17 +221,13 @@ $margin: 2px;
 		}
 	}
 
-	&-editor-chooser {
-		margin: -2px;
-
-		&-button {
+	&-tab {
 			padding: 2px 6px;
-
-			&:hover {
-				border-bottom: 2px solid $accent;
-			}
+		&:hover {
+			border-bottom: 2px solid $accent;
 		}
-		&-button#{$root}-active {
+
+		&#{$root}-active {
 			border-bottom: 2px solid $accent;
 			background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
 		}
@@ -263,9 +259,11 @@ $margin: 2px;
 	}
 
 	&-inner-editor {
-		&-toolbar {
+		&-controller, &-toolbar {
 			background-color: $neutral-8;
 			border-bottom: 1px solid darken($neutral-separating, 20%);
+		}
+		&-toolbar {
 			padding: 2px;
 		}
 		&-tabs {

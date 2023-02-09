@@ -4,15 +4,20 @@
 		"sv": "Lisää kenttä",
 		"en": "Add property"
 	},
-	"editor.tab.basic": {
-		"fi": "Perus",
-		"sv": "Perus",
-		"en": "Basic"
+	"editor.tab.fields": {
+		"fi": "Kentät",
+		"sv": "Fält",
+		"en": "Fields"
 	},
-	"editor.tab.uiSchema": {
-		"fi": "UI",
-		"sv": "UI",
-		"en": "UI"
+	"editor.tab.fields.basic": {
+		"fi": "Kentän tiedot",
+		"sv": "Kentän tiedot",
+		"en": "Field options"
+	},
+	"editor.tab.fields.uiSchema": {
+		"fi": "Kentän uiSchema",
+		"sv": "Kentän uiSchema",
+		"en": "Field uiSchema"
 	},
 	"editor.tab.options": {
 		"fi": "Ominaisuudet",

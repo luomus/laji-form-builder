@@ -1,7 +1,7 @@
 import * as React from "react";
 import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
-import { FieldEditorProps, FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
+import { FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
 import LajiFormInterface from "../../LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
@@ -17,6 +17,7 @@ import { AnyJSONEditor } from "../components";
 import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
 import { JSONObject, JSONSchema } from "../../../model";
+import { GenericFieldEditorProps } from "./FieldEditor";
 
 const PREFIX = "$";
 
@@ -25,11 +26,11 @@ const unprefix = unprefixer(PREFIX);
 const LabelWithoutPrefix = React.memo((props: any) => <LajiFormLabel {...props} label={unprefix(props.label ?? "")} />);
 const TitleWithoutPrefix = React.memo((props: any) => <LajiFormTitle {...props} title={unprefix(props.title ?? "")} />);
 
-export default class UiSchemaEditor extends React.PureComponent<FieldEditorProps> {
+export default class UiSchemaEditor extends React.PureComponent<GenericFieldEditorProps> {
 	static contextType = Context;
 	context!: React.ContextType<typeof Context>;
 
-	constructor(props: FieldEditorProps) {
+	constructor(props: GenericFieldEditorProps) {
 		super(props);
 		this.getJSONEditorFormData = this.getJSONEditorFormData.bind(this);
 		this.onEditorLajiFormChange = this.onEditorLajiFormChange.bind(this);

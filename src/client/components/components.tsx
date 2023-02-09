@@ -419,3 +419,24 @@ export const SearchInput = ({onChange, onKeyDown, autoFocus}: SearchInputProps) 
 		</div>
 	);
 };
+
+export type GenericModalProps = {
+	onHide: () => void;
+	header?: string;
+} & HasChildren & Classable
+
+export const GenericModal = ({onHide, children, header, className}: GenericModalProps) => {
+	const {theme} = React.useContext(Context);
+	const {Modal} = theme;
+	return (
+		<Modal show={true} onHide={onHide} dialogClassName={classNames(gnmspc(), gnmspc("wide-modal"), className)}>
+			<Modal.Header closeButton={true}>
+				{header}
+			</Modal.Header>
+			<Modal.Body>
+				{ children }
+			</Modal.Body>
+		</Modal>
+	);
+};
+

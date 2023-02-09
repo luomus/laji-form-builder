@@ -1,7 +1,5 @@
 import * as React from "react";
-import {
-	FieldEditorProps, FieldEditorChangeEvent, GenericEditorContent
-} from "./Editor";
+import { FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
 import {
 	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
 } from "../../../utils";
@@ -11,6 +9,7 @@ import { Context } from "../Context";
 import { EditorLajiForm } from "./UiSchemaEditor";
 import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
 import { detectChangePaths, handleTranslationChange } from "../../utils";
+import { GenericFieldEditorProps } from "./FieldEditor";
 
 type BasicEditorState = {
 	childProps?: Property[] | false;
@@ -20,7 +19,7 @@ type BasicEditorState = {
 
 type RelevantFields = Pick<Field, "validators" | "warnings">;
 
-export default class BasicEditor extends React.PureComponent<FieldEditorProps, BasicEditorState> {
+export default class BasicEditor extends React.PureComponent<GenericFieldEditorProps, BasicEditorState> {
 	documentTree: any;
 	propertyContextAbortController: AbortController;
 
@@ -31,7 +30,7 @@ export default class BasicEditor extends React.PureComponent<FieldEditorProps, B
 		lajiFormToucher: 0
 	} as BasicEditorState;
 
-	constructor(props: FieldEditorProps) {
+	constructor(props: GenericFieldEditorProps) {
 		super(props);
 		this.getFormDataFromProps = this.getFormDataFromProps.bind(this);
 		this.onLajiFormChange = this.onLajiFormChange.bind(this);
