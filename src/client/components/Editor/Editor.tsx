@@ -1,7 +1,7 @@
 import * as React from "react";
 import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
 	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps } from "../components";
-import { classNames, nmspc, gnmspc, useBooleanSetter } from "../../utils";
+import { classNames, nmspc, gnmspc, useBooleanSetter, useChain } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
@@ -455,12 +455,15 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
 		onHide();
 	}, [tmpValue, value, translations, onSubmitDraft, onSubmit, onHide]);
 
+
+	const _onSubmitDraft = useChain(onSubmitDraft, onHide);
+
 	return (
 		<GenericModal onHide={onHideCheckForChanges}>
-			<SubmittableJSONEditor  {...props}
+			<SubmittableJSONEditor {...props}
 			                       value={isValid(value) ? value : undefined}
-			                       onSubmitDraft={onSubmitDraft}
-			                       onSubmit={onSubmit}
+			                       onSubmitDraft={onSubmitDraft && _onSubmitDraft}
+			                       onSubmit={useChain(onSubmit, onHide)}
 			                       onChange={_onChange} />
 		</GenericModal>
 	);

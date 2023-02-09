@@ -263,6 +263,9 @@ export const detectChangePaths = (eventObject: any, translatedObj: any): string[
 		}
 		return [];
 	};
+	if (!eventObject && translatedObj || eventObject && !translatedObj) {
+		return ["/"];
+	}
 	return detectChangePaths(eventObject, translatedObj, "");
 };
 
@@ -373,3 +376,12 @@ export function useBooleanSetter(value: boolean): [boolean, () => void, () => vo
 	return [open, openStateToCallback(true), openStateToCallback(false)];
 }
 
+/**
+ * Chain two function calls.
+ */
+export function useChain<T>(fn1: ((...params: T[]) => void) | undefined, fn2: () => void): (...params: T[]) => void  {
+	return React.useCallback((...params: T[]) => {
+		fn1?.(...params);
+		fn2();
+	}, [fn1, fn2]);
+}
