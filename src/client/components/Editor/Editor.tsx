@@ -490,8 +490,8 @@ type EditorContentToolbarProps = {
 
 export type EditorContentTab = "JSON" | "UI";
 const editorContentTabs: Record<EditorContentTab, string> = {
-	"JSON": "editor.tab.fields.json",
-	"UI": "editor.tab.fields.ui"
+	"UI": "editor.tab.fields.ui",
+	"JSON": "editor.tab.fields.json"
 };
 
 export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
