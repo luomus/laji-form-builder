@@ -261,10 +261,10 @@ const getMinMaxed = (val: number, min?: number, max?: number) => {
 	return val;
 };
 
-export type JSONEditorProps<T extends JSON> = {
+export type JSONEditorProps<T extends JSON | undefined> = {
 	value?: T;
 	onChange?: ((value?: T) => void) | React.Dispatch<React.SetStateAction<T | undefined>>;
-	validator: (value: JSON) => value is T;
+	validator: (value?: JSON) => value is T;
 	rows?: number;
 	minRows?: number;
 	maxRows?: number;
@@ -273,7 +273,7 @@ export type JSONEditorProps<T extends JSON> = {
 	live?: boolean;
 } & Classable & Stylable;
 
-export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON>(
+export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON | undefined>(
 	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className, style = {}, validator}
 	: JSONEditorProps<T>,
 	ref: React.Ref<HTMLTextAreaElement>) {
@@ -284,16 +284,22 @@ export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON>(
 
 	const tryOnChange = React.useCallback(() => {
 		if (tmpValue === "" || tmpValue === undefined) {
-			setValid(true);
-			onChange?.(undefined);
+			const isValid = validator(undefined);
+			isValid && onChange?.(undefined);
+			setValid(isValid);
 			return;
 		}
+		let parsed: T | undefined;
+		let isValid = false;
 		try {
-			setValid(validator(JSON.parse(tmpValue)));
+			parsed = JSON.parse(tmpValue);
+			isValid = validator(parsed);
 		} catch (e) {
-			setValid(false);
+			isValid = false;
 		}
-		onChange?.(JSON.parse(tmpValue));
+		console.log(isValid, parsed);
+		setValid(isValid ?? false);
+		isValid && onChange?.(parsed);
 	}, [onChange, tmpValue, validator]);
 
 	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
@@ -338,7 +344,8 @@ export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON>(
 	);
 });
 
-export type SubmittableJSONEditorProps<T extends JSON> = Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
+export type SubmittableJSONEditorProps<T extends JSON | undefined> =
+	Pick<JSONEditorProps<T>, "value" | "validator" | "onChange">
 	& {
 	onSubmit: (value: T) => void;
 	onSubmitDraft?: (value: T) => void;

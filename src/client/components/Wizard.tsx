@@ -462,7 +462,7 @@ function FormListItem(
 	}, [f, onSelected]);
 	const _onDelete = React.useCallback(async (e) => {
 		e.stopPropagation();
-		if (confirm(translateKey(translations, "Wizard.list.delete.confirm", {name: f.name, id: f.id}))) {
+		if (confirm(translateKey(translations, "wizard.list.delete.confirm", {name: f.name, id: f.id}))) {
 			onDelete(f.id);
 		}
 	}, [f, onDelete, translations]);

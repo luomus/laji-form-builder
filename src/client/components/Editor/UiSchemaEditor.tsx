@@ -16,7 +16,7 @@ import { parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, isObject, 
 import { AnyJSONEditor } from "../components";
 import { Context } from "../Context";
 import { FieldProps } from "laji-form/lib/components/LajiForm";
-import { JSONObject, JSONSchema } from "../../../model";
+import { isJSONObjectOrUndefined, JSONObject, JSONSchema } from "../../../model";
 import { GenericFieldEditorProps } from "./FieldEditor";
 
 const PREFIX = "$";
@@ -104,6 +104,7 @@ export default class UiSchemaEditor extends React.PureComponent<GenericFieldEdit
 		return (
 			<GenericEditorContent json={this.getJSONEditorFormData()}
 			                      onJSONChange={this.onJSONEditorChange}
+			                      validator={isJSONObjectOrUndefined}
 			                      renderUI={this.renderUI} />
 		);
 	}

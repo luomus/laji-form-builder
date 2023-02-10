@@ -7,7 +7,7 @@ import * as LajiFormUtils from "laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "../Context";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf } from "../../../model";
+import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf, isJSONObjectOrUndefined } from "../../../model";
 import { detectChangePaths, handleTranslationChange } from "../../utils";
 import { GenericFieldEditorProps } from "./FieldEditor";
 import { immutableDelete } from "laji-form/lib/utils";
@@ -86,6 +86,7 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 		return (
 			<GenericEditorContent json={this.getJSONEditorFormData()}
 			                      onJSONChange={this.onLajiFormChange}
+			                      validator={isJSONObjectOrUndefined}
 			                      renderUI={this.renderUI} />
 		);
 	}

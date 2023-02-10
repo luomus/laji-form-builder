@@ -1,13 +1,14 @@
 import * as React from "react";
 import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps } from "../components";
+	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps
+} from "../components";
 import { classNames, nmspc, gnmspc, useBooleanSetter, useChain } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
 import { Context } from "../Context";
 import OptionsEditor from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster, isJSONObject } from "../../../model";
+import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster } from "../../../model";
 import { translate as translateKey } from "laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
@@ -421,7 +422,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 	</>;
 });
 
-type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
+type JSONEditorModalProps<T extends JSON | undefined> = Pick<SubmittableJSONEditorProps<T>,
 	"value"
 	| "validator"
 	| "onChange"
@@ -433,7 +434,7 @@ type JSONEditorModalProps<T extends JSON> = Pick<SubmittableJSONEditorProps<T>,
 	onSubmitDraft?: React.Dispatch<React.SetStateAction<T | undefined>>;
 }
 
-const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON>(
+const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON | undefined>(
 	{value, onHide, onSubmitDraft, onChange, onSubmit, header, ...props}: JSONEditorModalProps<T>)
 {
 	// Focus on mount.
@@ -514,8 +515,8 @@ export const EditorToolbar = ({children, className}: HasChildren & Classable) =>
 	</div>
 );
 
-type EditorContentJSONTabProps<T> = {
-  json?: T;
+type EditorContentJSONTabProps<T extends JSON | undefined> = Pick<JSONEditorProps<T>, "validator"> & {
+  json: T;
   onJSONChange: (value: T) => void;
 }
 type EditorContentUITabProps = {renderUI: () => React.ReactElement | null, overflow?: boolean};
@@ -523,7 +524,7 @@ type EditorContentUITabProps = {renderUI: () => React.ReactElement | null, overf
 export const EditorContent = {
 	Toolbar: EditorContentToolbar,
 	Tab: {
-		JSON: <T extends JSON>({onJSONChange, json}: EditorContentJSONTabProps<T>) => {
+		JSON: <T extends JSON | undefined>({onJSONChange, json, validator}: EditorContentJSONTabProps<T>) => {
 			const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
 
 			const {Glyphicon} = React.useContext(Context).theme;
@@ -532,30 +533,36 @@ export const EditorContent = {
 			return (
 				<div style={{position: "relative", height: "100%", overflow: "auto"}}
 				     className={editorContentNmspc("padding-bottom-hack")}>
-					<JSONEditor validator={isJSONObject}
+					<JSONEditor validator={validator}
 					            onChange={onJSONChange}
 					            value={json}
-					            style={{height: "100%"}}/>
+					            style={{height: "100%"}} />
 					{jsonEditorOpen && (
 						<JSONEditorModal onHide={closeJSONEditor}
-						                 validator={isJSONObject}
+						                 validator={validator}
 						                 onSubmit={onJSONChange}
 						                 value={json} />
 					)}
-					<Button onClick={_openJSONEditor} small style={buttonStyle}><Glyphicon glyph="new-window"/></Button>
+					<Button onClick={_openJSONEditor}
+					        small
+					        style={buttonStyle} >
+						<Glyphicon glyph="new-window" />
+					</Button>
 				</div>
 			);
 		},
 		UI: ({renderUI, overflow = true}: EditorContentUITabProps) =>
-			<div style={{height: "100%", overflow: overflow ? "auto" : undefined, padding: 10}}
-		       className={editorContentNmspc("padding-bottom-hack")}>{renderUI()}</div>
+			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}
+			     className={classNames(editorContentNmspc(), editorContentNmspc("padding-bottom-hack"))} >
+			 {renderUI()}
+		 </div>
 	}
 };
 (Object.keys(editorContentTabs) as EditorContentTab[]).forEach(name =>
 	(EditorContent.Tab[name] as any).displayName = `EditorContent.Tab.${name}`
 );
 
-type GenericEditorContentProps<T extends JSON> = {
+type GenericEditorContentProps<T extends JSON | undefined> = {
 	initialActiveTab?: EditorContentTab
 	overflowUIContent?: boolean;
 } & Partial<Pick<EditorContentToolbarProps, "activeTab" | "onTabChange">>
@@ -565,8 +572,8 @@ type GenericEditorContentProps<T extends JSON> = {
 /**
  * If @param activeTab is given, then it is a controlled prop. Otherwise, the active tab is stateful.
  */
-export const GenericEditorContent = <T extends JSON>(
-	{initialActiveTab = "UI", activeTab, onTabChange, json, onJSONChange, renderUI, overflowUIContent = true}
+export const GenericEditorContent = <T extends JSON | undefined>(
+	{initialActiveTab = "UI", activeTab, onTabChange, json, onJSONChange, validator, renderUI, overflowUIContent = true}
 	: GenericEditorContentProps<T>) => {
 	const [stateActiveTab, onStateTabChange] = React.useState(initialActiveTab);
 	const _activeTab = activeTab ?? stateActiveTab;
@@ -577,7 +584,7 @@ export const GenericEditorContent = <T extends JSON>(
 	return <>
 		<EditorContent.Toolbar activeTab={_activeTab} onTabChange={_onTabChange} />
 		{_activeTab === "JSON" && (
-			<EditorContent.Tab.JSON json={json} onJSONChange={onJSONChange} />
+			<EditorContent.Tab.JSON json={json} onJSONChange={onJSONChange} validator={validator} />
 		)}
 		{_activeTab === "UI" && (
 			<EditorContent.Tab.UI renderUI={renderUI} overflow={overflowUIContent} />

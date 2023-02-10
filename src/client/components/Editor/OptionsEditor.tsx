@@ -1,10 +1,10 @@
 import * as React from "react";
 import LajiForm from "../LajiForm";
 import { Context } from "../Context";
-import { Spinner, Classable, Stylable, Button } from "../components";
+import { Spinner, Stylable, Button } from "../components";
 import {  OptionChangeEvent, TranslationsChangeEvent } from "../../services/change-handler-service";
 import {
-	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject
+	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject, isJSONObject
 } from "../../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
 import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
@@ -239,6 +239,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		<div className={gnmspc("options-editor")} ref={ref} style={{width: "100%"}}>
 			<GenericEditorContent json={getJSON()}
 			                      onJSONChange={onLajiFormChange}
+			                      validator={isJSONObject}
 			                      renderUI={content}
 			                      activeTab={activeTab}
 			                      onTabChange={setActiveTab}

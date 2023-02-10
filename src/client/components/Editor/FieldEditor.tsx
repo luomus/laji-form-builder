@@ -98,7 +98,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 					<TabChooser tabs={tabs}
 					            active={this.state.tab}
 					            onChange={this.onTabChange}
-					            className={this.nmspc("controller")} />
+					            className={this.nmspc("toolbar")} />
 					<div style={fieldEditorContentStyle} className={this.nmspc("content")}>{
 						active === "uiSchema" && <UiSchemaEditor {...editorProps} />
 						|| active === "basic" && <BasicEditor {...editorProps} />
