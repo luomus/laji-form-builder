@@ -7,7 +7,7 @@ import { classNames, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer,
 import { isValid } from "../Builder";
 import { Classable, DraggableWidth, HasChildren } from "../components";
 import { Context } from "../Context";
-import { EditorProps, EditorState, FieldEditorChangeEvent, TabChooser } from "./Editor";
+import { editorContentNmspc, EditorProps, EditorState, FieldEditorChangeEvent, TabChooser } from "./Editor";
 import memoize from "memoizee";
 import Fields from "./Fields";
 import UiSchemaEditor from "./UiSchemaEditor";
@@ -37,8 +37,6 @@ type State = {
 
 type ActiveEditorFieldMode = "uiSchema" | "basic";
 const tabs = {basic: "editor.tab.fields.basic", uiSchema: "editor.tab.fields.uiSchema"};
-
-const editorContentNmspc = nmspc("inner-editor");
 
 export default class FieldEditor extends React.PureComponent<Props, State> {
 

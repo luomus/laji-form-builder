@@ -486,7 +486,7 @@ const SaveModal = ({onSave, onHide, master}
 	);
 };
 
-const editorContentNmspc = nmspc("inner-editor");
+export const editorContentNmspc = nmspc("editor-content");
 
 type EditorContentToolbarProps = {
 	activeTab?: EditorContentTab;
@@ -558,6 +558,9 @@ export const EditorContent = {
 		       className={editorContentNmspc("padding-bottom-hack")}>{renderUI()}</div>
 	}
 };
+(Object.keys(editorContentTabs) as EditorContentTab[]).forEach(name =>
+	(EditorContent.Tab[name] as any).displayName = `EditorContent.Tab.${name}`
+);
 
 type GenericEditorContentProps<T extends JSON> = {
 	initialActiveTab?: EditorContentTab

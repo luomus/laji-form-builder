@@ -273,11 +273,11 @@ export type JSONEditorProps<T extends JSON> = {
 	live?: boolean;
 } & Classable & Stylable;
 
-export const JSONEditor = React.forwardRef(<T extends JSON>(
+export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON>(
 	{value, onChange, rows, minRows, maxRows, resizable = true, onValidChange, live, className, style = {}, validator}
 	: JSONEditorProps<T>,
-	ref: React.Ref<HTMLTextAreaElement>) => {
-	const stringValue = JSON.stringify(value, undefined, 2);
+	ref: React.Ref<HTMLTextAreaElement>) {
+	const stringValue = JSON.stringify(value, undefined, 2) ?? "";
 	const [tmpValue, setTmpValue] = React.useState(stringValue);
 	const [valid, setValid] = React.useState(true);
 	const [touched, setTouched] = React.useState(false);
@@ -438,4 +438,3 @@ export const GenericModal = ({onHide, children, header, className}: GenericModal
 		</Modal>
 	);
 };
-
