@@ -12,7 +12,7 @@ import { isDefaultData, updateSafelyWithJSONPointer } from "laji-form/lib/utils"
 import { TextareaEditorField } from "./UiSchemaEditor";
 import { LajiFormProps } from "laji-form/lib/components/LajiForm";
 import MetadataService from "../../../services/metadata-service";
-import { EditorContentTab, EditorToolbar, GenericEditorContent } from "./Editor";
+import { editorContentNmspc, EditorContentTab, EditorToolbar, GenericEditorContent } from "./Editor";
 
 export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
 	const range = property.range[0];
@@ -212,7 +212,12 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 		const _content = 
 		!schema
 			? <Spinner />
-			: <div style={{height: "100%", overflow: "auto"}}><LajiForm {...props} /></div>;
+			: (
+				<div style={{height: "100%", overflow: "auto"}}
+				     className={editorContentNmspc("ui")} >
+					<LajiForm {...props} />
+				</div>
+			);
 		return <>
 			<EditorToolbar>
 				<Button onClick={toggleSetDisplayOnlyUsed} active={displayOnlyUsed} small>

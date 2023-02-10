@@ -77,7 +77,8 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 			selected: this.state.selected,
 			contentValid: isValid(schemaFormat),
 			active,
-			...this.getFieldEditorChildProps(expandedMaster, schemaFormat)
+			...this.getFieldEditorChildProps(expandedMaster, schemaFormat),
+			className: editorContentNmspc("ui")
 		};
 
 		return <>

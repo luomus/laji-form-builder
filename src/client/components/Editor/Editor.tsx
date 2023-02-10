@@ -554,7 +554,7 @@ export const EditorContent = {
 		},
 		UI: ({renderUI, overflow = true}: EditorContentUITabProps) =>
 			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}
-			     className={classNames(editorContentNmspc(), editorContentNmspc("padding-bottom-hack"))} >
+			     className={classNames(editorContentNmspc("padding-bottom-hack"))} >
 			 {renderUI()}
 		 </div>
 	}
