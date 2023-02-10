@@ -54,6 +54,8 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		}
 	}
 
+	nmspc = nmspc("field-editor");
+
 	render() {
 		const {expandedMaster, schemaFormat} = this.props;
 		const active = this.state.tab;
@@ -74,7 +76,6 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 			selected: this.state.selected,
 			contentValid: isValid(schemaFormat),
 			active,
-			className: classNames(gnmspc("field-editor"), editorContentNmspc()),
 			...this.getFieldEditorChildProps(expandedMaster, schemaFormat)
 		};
 
@@ -97,8 +98,8 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 					<TabChooser tabs={tabs}
 					            active={this.state.tab}
 					            onChange={this.onTabChange}
-					            className={editorContentNmspc("controller")} />
-					<div style={fieldEditorContentStyle}>{
+					            className={this.nmspc("controller")} />
+					<div style={fieldEditorContentStyle} className={this.nmspc("content")}>{
 						active === "uiSchema" && <UiSchemaEditor {...editorProps} />
 						|| active === "basic" && <BasicEditor {...editorProps} />
 						|| null
@@ -138,7 +139,6 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 			path: selected,
 			onChange: this.onEditorChange,
 			context: expandedMaster.context,
-			className: classNames(gnmspc("field-editor"), editorContentNmspc()),
 		};
 	}
 

@@ -145,7 +145,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={expandedMaster}
 			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
-			                         className={classNames(gnmspc("options-editor"), editorContentNmspc())}
 			                         onChange={this.props.onChange}
 			                         ref={this.optionsEditorRef}
 			                         onLoaded={this.state.optionsEditorLoadedCallback}
@@ -155,7 +154,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		}
 		return content
 			? (
-				<div style={containerStyle} ref={this.containerRef}>
+				<div style={containerStyle} ref={this.containerRef} className={editorContentNmspc()}>
 					{content}
 					{this.state.jsonEditorOpen && <FormJSONEditorModal value={master}
 					                                                   onHide={this.hideJSONEditor}
@@ -351,13 +350,13 @@ type TabChooserProps<T extends string> = {
 	tabs: Record<T, string>;
 	active: T;
 	onChange: (tab: T) => void;
-} & Classable;
+} & Classable & Stylable;
 
 export const TabChooser = React.memo(function TabChooser<T extends string>(
-	{active, onChange, tabs, className}:  TabChooserProps<T>
+	{active, onChange, tabs, className, style}:  TabChooserProps<T>
 ) {
 	return (
-		<div className={classNames(gnmspc("tabs"), className)} style={{display: "flex"}}>{
+		<div className={classNames(gnmspc("tabs"), className)} style={{display: "flex", ...(style || {})}}>{
 			(Object.keys(tabs) as T[]).map(_active =>
 				<EditorTab key={_active as string}
 				           active={active === _active}
@@ -503,13 +502,7 @@ export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 	: EditorContentToolbarProps) => {
 	return (
 		<EditorToolbar className={editorContentNmspc("tabs")}>
-			{Object.keys(editorContentTabs).map((tab: EditorContentTab) =>
-				<EditorTab key={tab}
-				           active={activeTab === tab}
-				           tab={tab}
-				           translationKey={editorContentTabs[tab]}
-				           onActivate={onTabChange} />
-			 )}
+			<TabChooser tabs={editorContentTabs} active={activeTab} onChange={onTabChange} style={{width: "100%"}} />
 			{children}
 		</EditorToolbar>
 	);
@@ -554,7 +547,7 @@ export const EditorContent = {
 			);
 		},
 		UI: ({renderUI, overflow = true}: EditorContentUITabProps) =>
-			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}
+			<div style={{height: "100%", overflow: overflow ? "auto" : undefined, padding: 10}}
 		       className={editorContentNmspc("padding-bottom-hack")}>{renderUI()}</div>
 	}
 };

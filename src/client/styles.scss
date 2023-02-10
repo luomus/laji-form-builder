@@ -259,7 +259,7 @@ $margin: 2px;
 	}
 
 	&-editor-content {
-		&-controller, &-toolbar {
+		#{$root}-tabs, #{$root}-toolbar {
 			background-color: $neutral-8;
 			border-bottom: 1px solid darken($neutral-separating, 20%);
 		}

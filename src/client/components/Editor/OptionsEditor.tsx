@@ -7,7 +7,7 @@ import {
 	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject
 } from "../../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
-import { detectChangePaths, handleTranslationChange } from "../../utils";
+import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
 import { isDefaultData, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import { LajiFormProps } from "laji-form/lib/components/LajiForm";
@@ -39,7 +39,7 @@ export const mapPropertyToUiSchema =
 		mapComment(multiLang(property.comment, lang), await mapRangeToUiSchema(property, metadataService, lang));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
-interface FormOptionsEditorProps extends Classable, Stylable {
+type FormOptionsEditorProps = Stylable & {
 	master: Master;
 	translations: {[key: string]: string};
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
@@ -139,7 +139,7 @@ const prepareMaster = (master: Master) => {
 };
 
 export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor(
-	{master, onChange, translations, className, onLoaded, filter, clearFilters}
+	{master, onChange, translations, onLoaded, filter, clearFilters}
 	: FormOptionsEditorProps, ref) {
 	const context = React.useContext(Context);
 	const { metadataService, translations: appTranslations, editorLang } = context;
@@ -236,7 +236,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 	} , [filter]);
 
 	return  (
-		<div className={className} ref={ref} style={{width: "100%"}}>
+		<div className={gnmspc("options-editor")} ref={ref} style={{width: "100%"}}>
 			<GenericEditorContent json={getJSON()}
 			                      onJSONChange={onLajiFormChange}
 			                      renderUI={content}
