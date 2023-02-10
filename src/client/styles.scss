@@ -52,6 +52,7 @@ $dark-6: darken($dark, 1 * 10%);
 $dark-7: darken($dark, 2 * 10%);
 $dark-8: darken($dark, 3 * 10%);
 $dark-9: darken($dark, 4 * 10%);
+$dark-10: darken($dark, 5 * 10%);
 
 $accent: #337ab7;
 $accent-1: lighten($accent, 4 * 10%);
@@ -65,7 +66,17 @@ $accent-8: darken($accent, 3 * 10%);
 $accent-9: darken($accent, 4 * 10%);
 
 $hilight: $danger;
+
 $neutral-separating: $neutral-7;
+$neutral-separating-1: lighten($neutral-separating, 4 * 10%);
+$neutral-separating-2: lighten($neutral-separating, 3 * 10%);
+$neutral-separating-3: lighten($neutral-separating, 2 * 10%);
+$neutral-separating-4: lighten($neutral-separating, 1 * 10%);
+$neutral-separating-5: $neutral-separating;
+$neutral-separating-6: darken($neutral-separating, 1 * 10%);
+$neutral-separating-7: darken($neutral-separating, 2 * 10%);
+$neutral-separating-8: darken($neutral-separating, 3 * 10%);
+$neutral-separating-9: darken($neutral-separating, 4 * 10%);
 
 $padding: 10px;
 $bRadius: 2px;
@@ -88,7 +99,11 @@ $margin: 2px;
 }
 
 .ljb {
+
 	$root: &;
+
+	font-size: 13px;
+
 	&-field {
 
 		padding-left: $padding;
@@ -209,7 +224,7 @@ $margin: 2px;
 
 	&-editor-toolbar {
 		background-color: $neutral-6;
-		border-bottom: 1px solid $neutral-separating;
+		border-bottom: 1px solid $neutral-separating-7;
 		padding: 0px 2px;
 
 		&-separator {
@@ -219,16 +234,24 @@ $margin: 2px;
 				color: $neutral-separating;
 			}
 		}
+		& #{$root}-tab {
+			padding: 2px 6px;
+		}
 	}
 
+	&-tabs {
+			color: $dark-5;
+	}
 	&-tab {
-			padding: 2px 6px;
-		&:hover {
+		padding: 0px 6px;
+
+		&:hover, &#{$root}-active {
 			border-bottom: 2px solid $accent;
+			margin-bottom: -1px;
+			color: $dark-9;
 		}
 
 		&#{$root}-active {
-			border-bottom: 2px solid $accent;
 			background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
 		}
 	}
@@ -260,20 +283,26 @@ $margin: 2px;
 
 	&-editor-content {
 		#{$root}-tabs, &-toolbar {
-			background-color: $neutral-8;
-			border-bottom: 1px solid darken($neutral-separating, 20%);
+			color: $dark-6;
+			background-color: $neutral-7;
+			border-bottom: 1px solid $neutral-8;
 		}
+
+		#{$root}-tab {
+			padding: 1px 6px;
+
+			&:hover, &#{$root}-active {
+				color: $dark-10;
+				border-bottom: 2px solid $accent-6;
+			}
+		}
+
 		&-toolbar {
 			padding: 2px;
-		}
-		&-tabs {
-			padding: 0;
 		}
 		&-ui {
 			padding: $padding;
 		}
-
-		&-padding-bottom-hack {		}
 
 		&-padding-bottom-hack {
 			padding-bottom: 54px;

@@ -502,16 +502,14 @@ const editorContentTabs: Record<EditorContentTab, string> = {
 
 export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 	: EditorContentToolbarProps) => {
-	return (
-		<EditorToolbar className={editorContentNmspc("tabs")}>
-			<TabChooser tabs={editorContentTabs} active={activeTab} onChange={onTabChange} style={{width: "100%"}} />
-			{children}
-		</EditorToolbar>
-	);
+	return <>
+		<TabChooser tabs={editorContentTabs} active={activeTab} onChange={onTabChange} style={{width: "100%"}} />
+		{children}
+	</>;
 };
 
-export const EditorToolbar = ({children, className}: HasChildren & Classable) => (
-	<div style={{marginLeft: "auto", display: "flex"}} className={classNames(editorContentNmspc("toolbar"), className)}>
+export const EditorToolbar = ({children}: HasChildren) => (
+	<div style={{marginLeft: "auto", display: "flex"}}>
 		{children}
 	</div>
 );
