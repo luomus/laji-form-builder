@@ -46,13 +46,14 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		tab: "basic"
 	}
 
-	private fieldsRef = React.createRef<HTMLDivElement>();
-
-	componentDidUpdate(prevProps: Props) {
-		if (prevProps.selectedField !== this.props.selectedField) {
-			this.setState({selected: this.props.selectedField});
+	static getDerivedStateFromProps = (props: Props) => {
+		if (props.selectedField) {
+			return {selected: props.selectedField};
 		}
+		return null;
 	}
+
+	private fieldsRef = React.createRef<HTMLDivElement>();
 
 	nmspc = nmspc("field-editor");
 

@@ -68,14 +68,24 @@ export class BuilderPO {
 		}
 	};
 
-	private $tabsContainer = this.$toolbar.$(this.nmspc("chooser"));
-	private $$tabs = this.$tabsContainer.$$(this.nmspc("chooser-button"));
-	tabs = {
-		$options: this.$$tabs.get(0),
-		$basic: this.$$tabs.get(1),
-		$ui: this.$$tabs.get(2),
+	private $tabsContainer = this.$toolbar.$(gcnmspc("tabs"));
+	private $$mainTabs = this.$tabsContainer.$$(gcnmspc("tab"));
+	mainTabs = {
+		$options: this.$$mainTabs.get(0),
+		$fields: this.$$mainTabs.get(1),
 		$active: this.$tabsContainer.$(gcnmspc("active"))
 	};
+
+	$fieldToolbar = $(gnmspc("field-editor-toolbar"));
+
+	private $fieldTabsContainer = $(gcnmspc("field-editor-toolbar") + gcnmspc("tabs"));
+	private $$fieldTabs = this.$fieldTabsContainer.$$(gcnmspc("tab"));
+	fieldTabs = {
+		$basic: this.$$fieldTabs.get(0),
+		$ui: this.$$fieldTabs.get(1),
+		$active: this.$fieldTabsContainer.$(gcnmspc("active"))
+	}
+
 	formPreview = {
 		$container: $("#app > .laji-form") as ElementFinder,
 		$rjsf: $("#app > .laji-form form") as ElementFinder,
@@ -112,7 +122,12 @@ export class BuilderPO {
 		$container: this.$optionsEditorContainer,
 		$spinner: this.$optionsEditorContainer.$(`${gcnmspc("field-editor")} > .react-spinner`) as ElementFinder,
 		$form: this.$optionsEditorContainer.$(".laji-form") as ElementFinder,
-		waitUntilLoaded: () => (browser.wait(EC.visibilityOf(this.optionsEditor.$form)) as Promise<void>)
+		waitUntilLoaded: () => (browser.wait(EC.visibilityOf(this.optionsEditor.$form)) as Promise<void>),
+		tabs: {
+			$UI: this.$optionsEditorContainer.$$(gcnmspc("tab")).get(0),
+			$JSON: this.$optionsEditorContainer.$$(gcnmspc("tab")).get(1),
+			$active: this.$optionsEditorContainer.$(gcnmspc("tabs")).$(gcnmspc("active"))
+		}
 	}
 
 	async getEditorForm(): Promise<Form> {

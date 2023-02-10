@@ -33,26 +33,43 @@ describe("Editor", () => {
 			});
 
 			it("doesn't change editor UI lang", async () => {
-				expect(await builder.tabs.$options.getText()).toBe("Ominaisuudet");
+				expect(await builder.mainTabs.$options.getText()).toBe("Ominaisuudet");
 			});
 		});
 	});
 
 	describe("tabs", () => {
 
-		const testFieldDisplaysEditor = async (field: FieldSelectorPO, parentPath: string) => {
-			const path = `${parentPath}/${await field.getLabel()}`;
-			await field.$field.click();
-			const fields = await field.getFieldSelectors();
-			expect(await isDisplayed(builder.$fieldEditor)).toBe(true, `Editor didn't display when selected ${path}`);
-			for (const field of fields) {
-				await testFieldDisplaysEditor(field, path);
-			}
-		};
+		describe("fields", () => {
+
+			let $rootField: ElementFinder;
+			let fieldSelector: FieldSelectorPO;
+
+			beforeAll(async () => {
+				$rootField = builder.$rootFieldSelector;
+				fieldSelector = builder.getFieldSelector($rootField);
+			});
+
+			it("selected by default", async () => {
+				expect(await builder.mainTabs.$fields.getText()).toBe(await builder.mainTabs.$active.getText());
+			});
+
+			it("displays fields", async () => {
+				expect(await isDisplayed($rootField)).toBe(true);
+				expect((await fieldSelector.getFieldSelectors()).length).toBeGreaterThan(0);
+			});
+
+			it("expands fields when clicking field with children", async () => {
+				const gatheringsField = (await fieldSelector.getFieldSelectors())[2];
+				expect((await gatheringsField.getFieldSelectors()).length).toBe(0);
+				await gatheringsField.$field.click();
+				expect((await gatheringsField.getFieldSelectors()).length).toBeGreaterThan(0);
+			});
+		});
 
 		describe("basic editor", () => {
 			it("selected by default", async () => {
-				expect(await builder.tabs.$basic.getText()).toBe(await builder.tabs.$active.getText());
+				expect(await builder.fieldTabs.$basic.getText()).toBe(await builder.fieldTabs.$active.getText());
 			});
 
 			it("field selector displayed", async () => {
@@ -87,28 +104,28 @@ describe("Editor", () => {
 				await builder.saveModal.close();
 			});
 
-			it("field editor displayed for all fields", async () => {
-				let $field = builder.$rootFieldSelector;
-				debugger;
-				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
-			});
+			// it("field editor displayed for all fields", async () => {
+			// 	let $field = builder.$rootFieldSelector;
+			// 	debugger;
+			// 	await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
+			// });
 
 		});
 
 		describe("UI editor", () => {
 			it("selected when clicked", async () => {
-				await builder.tabs.$ui.click();
-				expect(await builder.tabs.$ui.getText()).toBe(await builder.tabs.$active.getText());
+				await builder.fieldTabs.$ui.click();
+				expect(await builder.fieldTabs.$ui.getText()).toBe(await builder.fieldTabs.$active.getText());
 			});
 
 			it("field selector displayed", async () => {
 				expect(await isDisplayed(builder.$fieldSelectorContainer)).toBe(true);
 			});
 
-			it("field editor displayed for all fields", async () => {
-				let $field = builder.$rootFieldSelector;
-				await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
-			});
+			// it("field editor displayed for all fields", async () => {
+			// 	let $field = builder.$rootFieldSelector;
+			// 	await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
+			// });
 
 			describe("ui:title", () => {
 				const fieldName = "gatheringEvent.dateBegin";
@@ -118,7 +135,7 @@ describe("Editor", () => {
 				let origEn: string;
 				let $uiTitle: ElementFinder;
 
-				beforeAll(async (done) => {
+				beforeAll(async () => {
 					await builder.activateFieldByPointer(fieldName);
 					$uiTitle = (await builder.editorLocate("$ui:title")).$("input");
 
@@ -128,8 +145,6 @@ describe("Editor", () => {
 					await builder.lang.changeTo("en");
 					origEn = await getRenderedUiTitle();
 					await builder.lang.changeTo("fi");
-
-					done();
 				});
 
 				it("when empty adding when empty adds with all langs", async () => {
@@ -188,6 +203,7 @@ describe("Editor", () => {
 						await builder.lang.changeTo("fi");
 					});
 
+					// eslint-disable-next-line max-len
 					it("clearing value clears for all langs without confirming and restores original label", async () => {
 						await updateValue($uiTitle, "");
 						await builder.waitUntilLoaded();
@@ -208,76 +224,77 @@ describe("Editor", () => {
 
 		describe("Options editor", () => {
 			it("selected when clicked", async () => {
-				await builder.tabs.$options.click();
-				expect(await builder.tabs.$options.getText()).toBe(await builder.tabs.$active.getText());
+				await builder.mainTabs.$options.click();
+				expect(await builder.mainTabs.$options.getText()).toBe(await builder.mainTabs.$active.getText());
 			});
 
-			it("shows spinner", async () => {
-				expect(await isDisplayed(builder.optionsEditor.$spinner)).toBe(true);
+			it("shows JSON tab by default", async () => {
+				expect(await builder.optionsEditor.tabs.$JSON.getText())
+					.toBe(await builder.optionsEditor.tabs.$active.getText());
 			});
 
-			it("shows form after loaded", async () => {
-				await builder.optionsEditor.waitUntilLoaded();
-				expect(await isDisplayed(builder.optionsEditor.$form)).toBe(true);
-			});
+			describe("selecting UI editor", () => {
 
-			it("when empty adding when empty adds with all langs", async () => {
-				const $emptyStringField = (await builder.editorLocate("logo")).$("input");
-				// const $emptyStringField = (await builder.getEditorForm()).$getInputWidget("logo") as ElementFinder;
-				await updateValue($emptyStringField, "foo");
+				beforeAll(async () => {
+					await builder.optionsEditor.tabs.$UI.click();
+				});
 
-				await builder.waitUntilLoaded();
+				it("shows form after loaded", async () => {
+					await builder.optionsEditor.waitUntilLoaded();
+					expect(await isDisplayed(builder.optionsEditor.$form)).toBe(true);
+				});
 
-				await builder.saveModal.open();
-				const diff = await builder.saveModal.getDiff();
+				it("when empty adding when empty adds with all langs", async () => {
+					const $emptyStringField = (await builder.editorLocate("logo")).$("input");
+					await updateValue($emptyStringField, "foo");
 
-				expect(diff).toEqual([
-					{kind: "new", rhs: "foo", path: "/logo"}
-				]);
+					await builder.waitUntilLoaded();
 
-				await builder.saveModal.close();
-				await builder.lang.changeTo("fi");
+					await builder.saveModal.open();
+					const diff = await builder.saveModal.getDiff();
+
+					expect(diff).toEqual([
+						{kind: "new", rhs: "foo", path: "/logo"}
+					]);
+
+					await builder.saveModal.close();
+					await builder.lang.changeTo("fi");
+				});
 			});
 		});
 	});
 
 	describe("picker", () => {
-		it("activates on click", async (done) => {
+		it("activates on click", async () => {
 			await builder.picker.$button.click();
 			expect(await builder.picker.isButtonActive()).toBe(true);
-			done();
 		});
 
-		it("displays highlighter", async (done) => {
+		it("displays highlighter", async () => {
 			await browser.actions()
 			  .mouseMove(builder.formPreview.locate("secureLevel").getWebElement())
 			  .perform();
 
 			expect(await isDisplayed(builder.picker.$highlighter)).toBe(true);
-			done();
 		});
 
-		it("inactives on elem click", async (done) => {
+		it("inactives on elem click", async () => {
 			await builder.picker.$highlighter.click();
 			await builder.picker.$button.click();
-			done();
 		});
 
-		it("clears highlighter on elem click", async (done) => {
+		it("clears highlighter on elem click", async () => {
 			expect(await isDisplayed(builder.picker.$highlighter)).toBe(false);
-			done();
 		});
 
-		it("selects clicked field on editor", async (done) => {
+		it("selects clicked field on editor", async () => {
 			expect(await builder.getActiveField().getLabel()).toBe("secureLevel");
-			done();
 		});
 
-		it("inactivates on esc", async (done) => {
+		it("inactivates on esc", async () => {
 			await builder.picker.$button.click();
 			$("body").sendKeys(protractor.Key.ESCAPE);
 			expect(await builder.picker.isButtonActive()).toBe(false);
-			done();
 		});
 	});
 

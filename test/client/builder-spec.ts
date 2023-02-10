@@ -91,7 +91,7 @@ describe("Builder", () => {
 			});
 
 			it("doesn't change editor UI lang", async () => {
-				expect(await builder.tabs.$options.getText()).toBe("Ominaisuudet");
+				expect(await builder.mainTabs.$options.getText()).toBe("Ominaisuudet");
 			});
 		});
 	});
