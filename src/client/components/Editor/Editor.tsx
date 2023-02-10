@@ -309,7 +309,7 @@ const EditorMainToolbar = ({
 }: EditorMainToolbarProps) => {
 	const {translations} = React.useContext(Context);
 	const {Glyphicon, ButtonGroup} = React.useContext(Context).theme;
-	const saveTranslationsKey = master && isValid(master)
+	const saveTranslationsKey = master && isValid(master) && master.id
 		? "editor.save.button"
 		: "save";
 	const infoClassNames = classNames(toolbarNmspc("info"), gnmspc("mr-1"));
