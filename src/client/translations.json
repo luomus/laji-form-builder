@@ -218,5 +218,10 @@
 		"fi": "Lomakkeen raaka JSON",
 		"sv": "Formuläret rå json",
 		"en": "Form raw JSON"
+	},
+	"editor.info.unsaved": {
+		"fi": "tallentamaton",
+		"sv": "tallentamaton",
+		"en": "unsaved"
 	}
 }

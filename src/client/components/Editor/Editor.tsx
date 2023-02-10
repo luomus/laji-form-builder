@@ -104,7 +104,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 					</div>
 				)}
 				{errorMsg && <div className={gnmspc("error")}>{translations[errorMsg] || errorMsg}</div>}
-				<EditorMainToolbar active={this.state.activeEditorMode}
+				<EditorMainToolbar master={master}
+				                   active={this.state.activeEditorMode}
 				                   onEditorChange={this.onActiveEditorChange}
 				                   onLangChange={this.props.onLangChange}
 				                   onSave={this.onWantsToSaveCurrent} 
@@ -271,6 +272,7 @@ const LangChooserByLang = React.memo(function LangChooserByLang({lang, onChange,
 type EditorMainToolbarProps = Omit<EditorChooserProps, "onChange">
 	& Omit<LangChooserProps, "onChange">
 	& Pick<ElemPickerProps, "onSelectedField" | "onSelectedOptions">
+	& Pick<EditorProps, "master">
 	& {
 	onEditorChange: EditorChooserProps["onChange"];
 	onLangChange: LangChooserProps["onChange"];
@@ -290,6 +292,7 @@ const EditorToolbarSeparator = React.memo(function EditorToolbarSeparator() {
 });
 
 const EditorMainToolbar = ({
+	master,
 	active,
 	onEditorChange,
 	onLangChange,
@@ -306,6 +309,16 @@ const EditorMainToolbar = ({
 }: EditorMainToolbarProps) => {
 	const {translations} = React.useContext(Context);
 	const {Glyphicon, ButtonGroup} = React.useContext(Context).theme;
+	const saveTranslationsKey = master && isValid(master)
+		? "editor.save.button"
+		: "save";
+	const infoClassNames = classNames(toolbarNmspc("info"), gnmspc("mr-1"));
+	const info  = master && isValid(master) && (
+		<span className={infoClassNames}>
+			{`${master.name ?? ""} (${master.id ? master?.id : translations["editor.info.unsaved"]})`}
+		</span>
+	);
+
 	return (
 		<div style={{display: "flex", alignItems: "center"}} className={toolbarNmspc()}>
 			<LangChooser onChange={onLangChange} />
@@ -322,14 +335,15 @@ const EditorMainToolbar = ({
 			</ButtonGroup>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
-			<div style={{marginLeft: "auto", display: "flex"}}>
+			<div style={{marginLeft: "auto", display: "flex", alignItems: "inherit"}}>
 				{ loading ? <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> : null }
 				<EditorToolbarSeparator />
+				{info}
 				<Button id={gnmspc("open-save-view")}
 				        small
 				        variant="primary"
 				        disabled={!submitDisabled || saving}
-				        onClick={onSave}>{translations["editor.save.button"]}</Button>
+				        onClick={onSave}>{translations[saveTranslationsKey]}</Button>
 			</div>
 		</div>
 	);

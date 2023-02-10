@@ -230,12 +230,16 @@ $margin: 2px;
 		&-separator {
 			padding: 0px 4px;
 			&:before {
-				content: "|";
-				color: $neutral-separating;
+				content: " ";
+				border: 1px solid $neutral-separating;
 			}
 		}
 		& #{$root}-tab {
 			padding: 2px 6px;
+		}
+
+		&-info {
+			color: $dark-5;
 		}
 	}
 
@@ -408,6 +412,9 @@ $margin: 2px;
 	@for $factor from 1 to 6 {
 		&-ml-#{$factor} {
 			margin-left: $margin * $factor;
+		}
+		&-mr-#{$factor}{
+			margin-right: $margin * $factor;
 		}
 		&-mb-#{$factor}{
 			margin-bottom: $margin * $factor;
