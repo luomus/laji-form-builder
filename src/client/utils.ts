@@ -4,6 +4,7 @@ import memoize from "memoizee";
 import { isObject, parseJSONPointer } from "../utils";
 import { ContextProps } from "./components/Context";
 import { immutableDelete, isEmptyString, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
+import { JSONObject, JSON, isJSONObject } from "../model";
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");
 
@@ -63,26 +64,27 @@ export const propTypesToSchema = (propTypes: any, propPrefix?: string): any => {
 	}
 };
 
-export const getTranslatedUiSchema = memoize(
-	(uiSchema: any, translations: {[key: string]: string}, prefix?: string, schemaForUiSchema?: any): any => {
-		function translate(obj: any, schemaForUiSchema?: any): any {
-			if (isObject(obj)) {
-				return Object.keys(obj).reduce<any>((translated, key) => {
-					const propSchemaForUiSchema = schemaForUiSchema?.properties?.[key];
-					const _key = propSchemaForUiSchema && prefix ? `${prefix}${key}` : key;
-					translated[_key] = translate(obj[key], propSchemaForUiSchema);
-					return translated;
-				}, {});
-			} else if (Array.isArray(obj)) {
-				return obj.map(item => translate(item, schemaForUiSchema?.items));
-			}
-			if (typeof obj === "string" && obj[0] === "@") {
-				return translations[obj];
-			}
-			return obj;
+export const getTranslatedUiSchema = memoize(<T extends JSONObject | undefined>
+	(uiSchema: T, translations: {[key: string]: string}, prefix?: string, schemaForUiSchema?: any)
+	: T => {
+	function translate<T extends JSON | undefined>(obj: T, schemaForUiSchema?: any): any {
+		if (isJSONObject(obj)) {
+			return Object.keys(obj).reduce((translated, key) => {
+				const propSchemaForUiSchema = schemaForUiSchema?.properties?.[key];
+				const _key = propSchemaForUiSchema && prefix ? `${prefix}${key}` : key;
+				(translated as any)[_key] = translate((obj as any)[key], propSchemaForUiSchema);
+				return translated;
+			}, {} as T);
+		} else if (Array.isArray(obj)) {
+			return obj.map(item => translate(item, schemaForUiSchema?.items));
 		}
-		return translate(uiSchema, schemaForUiSchema);
-	});
+		if (typeof obj === "string" && obj[0] === "@") {
+			return translations[obj];
+		}
+		return obj;
+	}
+	return translate(uiSchema, schemaForUiSchema);
+});
 
 
 export const fieldPointerToSchemaPointer = (schema: any, pointer: string): string => {

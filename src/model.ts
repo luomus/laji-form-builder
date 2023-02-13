@@ -75,7 +75,7 @@ export type CommonExpanded = CommonFormat & {
 export type JSON = string | number | boolean | JSONObject | JSON[] | null;
 export type JSONObject = { [prop: string]: JSON };
 
-export const isJSONObject = (json: JSON): json is JSONObject => isObject(json);
+export const isJSONObject = (json?: JSON): json is JSONObject => isObject(json);
 
 export const isJSONObjectOrUndefined = (v?: JSON): v is (undefined | JSON) => v === undefined || isJSONObject(v);
 
