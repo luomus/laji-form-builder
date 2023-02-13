@@ -160,9 +160,6 @@ export default class UiSchemaEditor extends React.PureComponent<GenericFieldEdit
 		const events: FieldEditorChangeEvent[] = [];
 
 		const newUiSchema = changedPaths.reduce((newUiSchema, changedPath) => {
-			console.log(unprefixSchemaDeeply(this.getEditorSchema(newUiSchema, schema), PREFIX), changedPath);
-
-
 			// Try to dig the schema for UiSchema.
 			// Might not work, if we don't have the typings from laji-form react prop types.
 			let schemaForUiSchema: Record<string, unknown> | undefined;

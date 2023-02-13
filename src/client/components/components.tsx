@@ -297,7 +297,6 @@ export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON | 
 		} catch (e) {
 			isValid = false;
 		}
-		console.log(isValid, parsed);
 		setValid(isValid ?? false);
 		isValid && onChange?.(parsed);
 	}, [onChange, tmpValue, validator]);
