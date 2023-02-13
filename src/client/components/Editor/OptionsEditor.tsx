@@ -134,7 +134,7 @@ const prepareUiSchema = (
 };
 
 const prepareMaster = (master: Master) => {
-	const {fields, uiSchema: _uiSchema, translations, ..._master} = master;
+	const {fields, uiSchema, translations, id, "@context": storeContext, "@type": storeType, ..._master} = master;
 	return _master;
 };
 
