@@ -522,7 +522,7 @@ export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 };
 
 export const EditorToolbar = ({children}: HasChildren) => (
-	<div style={{marginLeft: "auto", display: "flex"}}>
+	<div style={{marginLeft: "auto", display: "flex"}} className={editorContentNmspc("toolbar")} >
 		{children}
 	</div>
 );
