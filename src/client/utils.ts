@@ -385,3 +385,5 @@ export function useChain<T>(fn1: ((...params: T[]) => void) | undefined, fn2: ()
 		fn2();
 	}, [fn1, fn2]);
 }
+
+export const fullHeightWithOffset = (offset: number) => `calc(100% - ${offset}px)`;

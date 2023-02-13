@@ -444,3 +444,17 @@ export const GenericModal = ({onHide, children, header, className}: GenericModal
 		</Modal>
 	);
 };
+
+export class ErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
+	static contextType = Context;
+	context!: React.ContextType<typeof Context>;
+	state = {hasError: false}
+	static getDerivedStateFromError() {
+		return {hasError: true};
+	}
+	render() {
+		return this.state.hasError
+			? <div className={gnmspc("error")}>{this.context.translations["editor.error.ui"]}</div>
+			: this.props.children;
+	}
+}

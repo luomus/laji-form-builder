@@ -1,8 +1,8 @@
 import * as React from "react";
 import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps
+	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps, ErrorBoundary
 } from "../components";
-import { classNames, nmspc, gnmspc, useBooleanSetter, useChain } from "../../utils";
+import { classNames, nmspc, gnmspc, useBooleanSetter, useChain, fullHeightWithOffset } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
@@ -128,8 +128,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			display: "flex",
 			flexDirection: "row",
 			position: "relative",
-			height: "100%",
-			paddingBottom: 27
+			height: "100%"
 		};
 		const {master, expandedMaster, schemaFormat} = this.props;
 		const {activeEditorMode} = this.state;
@@ -527,28 +526,35 @@ export const EditorToolbar = ({children}: HasChildren) => (
 	</div>
 );
 
-type EditorContentJSONTabProps<T extends JSON | undefined> = Pick<JSONEditorProps<T>, "validator"> & {
+type EditorContentCommon = {
+	topOffset: number;
+};
+
+type EditorContentJSONTabProps<T extends JSON | undefined> = Pick<JSONEditorProps<T>, "validator">
+	& EditorContentCommon & {
   json: T;
   onJSONChange: (value: T) => void;
 }
-type EditorContentUITabProps = {renderUI: () => React.ReactElement | null, overflow?: boolean};
+type EditorContentUITabProps = {renderUI: () => React.ReactElement | null, overflow?: boolean} & EditorContentCommon;
 
 export const EditorContent = {
 	Toolbar: EditorContentToolbar,
 	Tab: {
-		JSON: <T extends JSON | undefined>({onJSONChange, json, validator}: EditorContentJSONTabProps<T>) => {
+		JSON: <T extends JSON | undefined>({onJSONChange, json, validator, topOffset}
+		: EditorContentJSONTabProps<T>) => {
 			const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
 
 			const {Glyphicon} = React.useContext(Context).theme;
 
 			const buttonStyle = {position: "absolute", right: 20, top: 5};
 			return (
-				<div style={{position: "relative", height: "100%", overflow: "auto"}}
+				<div style={{position: "relative", height: fullHeightWithOffset(topOffset), overflow: "auto"}}
 				     className={editorContentNmspc("padding-bottom-hack")}>
 					<JSONEditor validator={validator}
 					            onChange={onJSONChange}
 					            value={json}
-					            style={{height: "100%"}} />
+					            style={{height: "100%"}}
+					            resizable={false} />
 					{jsonEditorOpen && (
 						<JSONEditorModal onHide={closeJSONEditor}
 						                 validator={validator}
@@ -563,8 +569,8 @@ export const EditorContent = {
 				</div>
 			);
 		},
-		UI: ({renderUI, overflow = true}: EditorContentUITabProps) =>
-			<div style={{height: "100%", overflow: overflow ? "auto" : undefined}}
+		UI: ({renderUI, overflow = true, topOffset}: EditorContentUITabProps) =>
+			<div style={{height: fullHeightWithOffset(topOffset), overflow: overflow ? "auto" : undefined}}
 			     className={classNames(editorContentNmspc("padding-bottom-hack"))} >
 			 {renderUI()}
 		 </div>
@@ -577,6 +583,7 @@ export const EditorContent = {
 type GenericEditorContentProps<T extends JSON | undefined> = {
 	initialActiveTab?: EditorContentTab
 	overflowUIContent?: boolean;
+	topOffset: number;
 } & Partial<Pick<EditorContentToolbarProps, "activeTab" | "onTabChange">>
 	& EditorContentJSONTabProps<T>
 	& EditorContentUITabProps
@@ -585,7 +592,8 @@ type GenericEditorContentProps<T extends JSON | undefined> = {
  * If @param activeTab is given, then it is a controlled prop. Otherwise, the active tab is stateful.
  */
 export const GenericEditorContent = <T extends JSON | undefined>(
-	{initialActiveTab = "UI", activeTab, onTabChange, json, onJSONChange, validator, renderUI, overflowUIContent = true}
+	{initialActiveTab = "UI", activeTab, onTabChange, json, onJSONChange, validator, renderUI, overflowUIContent = true,
+		topOffset}
 	: GenericEditorContentProps<T>) => {
 	const [stateActiveTab, onStateTabChange] = React.useState(initialActiveTab);
 	const _activeTab = activeTab ?? stateActiveTab;
@@ -596,10 +604,17 @@ export const GenericEditorContent = <T extends JSON | undefined>(
 	return <>
 		<EditorContent.Toolbar activeTab={_activeTab} onTabChange={_onTabChange} />
 		{_activeTab === "JSON" && (
-			<EditorContent.Tab.JSON json={json} onJSONChange={onJSONChange} validator={validator} />
+			<ErrorBoundary>
+				<EditorContent.Tab.JSON json={json}
+				                        onJSONChange={onJSONChange}
+				                        validator={validator}
+				                        topOffset={topOffset} />
+			</ErrorBoundary>
 		)}
 		{_activeTab === "UI" && (
-			<EditorContent.Tab.UI renderUI={renderUI} overflow={overflowUIContent} />
+			<ErrorBoundary>
+				<EditorContent.Tab.UI renderUI={renderUI} overflow={overflowUIContent} topOffset={topOffset} />
+			</ErrorBoundary>
 		)}
 	</>;
 };

@@ -248,7 +248,8 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			                      renderUI={content}
 			                      activeTab={activeTab}
 			                      onTabChange={setActiveTab}
-			                      overflowUIContent={false} />
+			                      overflowUIContent={false}
+			                      topOffset={activeTab === "JSON" ? 46 : 68} />
 		</div>
 	);
 }));

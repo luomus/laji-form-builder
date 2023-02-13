@@ -3,9 +3,9 @@ import {
 	ExpandedMaster, Field as FieldOptions, JSONObject, JSONSchema, Lang, Property, SchemaFormat
 } from "../../../model";
 import { getPropertyContextName, parseJSONPointer } from "../../../utils";
-import { fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, gnmspc, nmspc } from "../../utils";
+import { fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fullHeightWithOffset, gnmspc, nmspc } from "../../utils";
 import { isValid } from "../Builder";
-import { Classable, DraggableWidth, HasChildren } from "../components";
+import { Classable, DraggableWidth, ErrorBoundary } from "../components";
 import { Context } from "../Context";
 import { editorContentNmspc, EditorProps, EditorState, FieldEditorChangeEvent, TabChooser } from "./Editor";
 import memoize from "memoizee";
@@ -69,7 +69,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		const fieldsStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "column",
-			height: "100%",
+			height: fullHeightWithOffset(25),
 			overflowY: "auto"
 		};
 
@@ -82,7 +82,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		};
 
 		return <>
-			<ActiveEditorErrorBoundary>
+			<ErrorBoundary>
 				<DraggableWidth style={fieldsStyle}
 				                className={gnmspc("editor-nav-bar")}
 				                ref={this.fieldsRef} >
@@ -108,7 +108,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 						|| null
 					}</div>
 				</div>}
-			</ActiveEditorErrorBoundary>
+			</ErrorBoundary>
 		</>;
 	}
 
@@ -176,19 +176,5 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		});
 
 		this.props.onChange(events as ChangeEvent[]);
-	}
-}
-
-class ActiveEditorErrorBoundary extends React.Component<HasChildren, {hasError: boolean}> {
-	static contextType = Context;
-	context!: React.ContextType<typeof Context>;
-	state = {hasError: false}
-	static getDerivedStateFromError() {
-		return {hasError: true};
-	}
-	render() {
-		return this.state.hasError
-			? <div className={gnmspc("error")}>{this.context.translations["editor.error.ui"]}</div>
-			: this.props.children;
 	}
 }
