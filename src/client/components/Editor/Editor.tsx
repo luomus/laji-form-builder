@@ -364,13 +364,15 @@ type TabChooserProps<T extends string> = {
 	tabs: Record<T, string>;
 	active: T;
 	onChange: (tab: T) => void;
+	pills?: boolean;
 } & Classable & Stylable;
 
 export const TabChooser = React.memo(function TabChooser<T extends string>(
-	{active, onChange, tabs, className, style}:  TabChooserProps<T>
+	{active, onChange, tabs, className, style, pills}: TabChooserProps<T>
 ) {
+	const _className = classNames(gnmspc("tabs"), pills && gnmspc("pills"), className);
 	return (
-		<div className={classNames(gnmspc("tabs"), className)} style={{display: "flex", ...(style || {})}}>{
+		<div className={_className} style={{display: "flex", ...(style || {})}}>{
 			(Object.keys(tabs) as T[]).map(_active =>
 				<EditorTab key={_active as string}
 				           active={active === _active}
@@ -515,7 +517,7 @@ const editorContentTabs: Record<EditorContentTab, string> = {
 export const EditorContentToolbar = ({children, onTabChange, activeTab = "UI"}
 	: EditorContentToolbarProps) => {
 	return <>
-		<TabChooser tabs={editorContentTabs} active={activeTab} onChange={onTabChange} style={{width: "100%"}} />
+		<TabChooser tabs={editorContentTabs} active={activeTab} onChange={onTabChange} style={{width: "100%"}} pills />
 		{children}
 	</>;
 };
