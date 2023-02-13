@@ -2,8 +2,8 @@ import * as React from "react";
 import {
 	ExpandedMaster, Field as FieldOptions, JSONObject, JSONSchema, Lang, Property, SchemaFormat
 } from "../../../model";
-import { getPropertyContextName, parseJSONPointer, unprefixProp } from "../../../utils";
-import { classNames, fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, gnmspc, nmspc } from "../../utils";
+import { getPropertyContextName, parseJSONPointer } from "../../../utils";
+import { fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, gnmspc, nmspc } from "../../utils";
 import { isValid } from "../Builder";
 import { Classable, DraggableWidth, HasChildren } from "../components";
 import { Context } from "../Context";
@@ -94,7 +94,8 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 					        selected={this.state.selected}
 					        pointer=""
 					        expanded={true}
-					        fieldsContainerElem={this.fieldsRef.current} />
+					        fieldsContainerElem={this.fieldsRef.current}
+					        context={expandedMaster.context} />
 				</DraggableWidth>
 				{this.state.selected && <div style={{display: "flex", flexDirection: "column", width: "100%"}}>
 					<TabChooser tabs={tabs}
@@ -145,7 +146,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 	}
 
 	getFields = memoize((master: ExpandedMaster): any => ([{
-		name: unprefixProp(getPropertyContextName(master.context)),
+		name: getPropertyContextName(master.context),
 		fields: master.fields
 	}]));
 

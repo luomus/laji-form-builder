@@ -8,7 +8,7 @@ import LajiForm from "../LajiForm";
 
 type OnSelectedCB = (field: string) => void;
 
-const Fields = React.memo(function _Fields({
+const Fields = React.memo(function Fields({
 	fields = [],
 	onSelected,
 	onDeleted,
@@ -18,7 +18,8 @@ const Fields = React.memo(function _Fields({
 	style = {},
 	className,
 	expanded,
-	fieldsContainerElem
+	fieldsContainerElem,
+	context
 } : {
 	fields: FieldProps[];
 	onSelected: OnSelectedCB;
@@ -28,6 +29,7 @@ const Fields = React.memo(function _Fields({
 	pointer: string;
 	expanded?: boolean;
 	fieldsContainerElem: HTMLDivElement | null;
+	context?: string
 } & Stylable & Classable) {
 	return (
 		<div style={{...style, display: "flex", flexDirection: "column"}} className={className}>
@@ -41,6 +43,7 @@ const Fields = React.memo(function _Fields({
 				       pointer={`${pointer}/${f.name}`}
 				       expanded={expanded}
 				       fieldsContainerElem={fieldsContainerElem}
+				       context={context}
 				/>
 			))}
 		</div>
@@ -58,7 +61,7 @@ interface FieldProps extends FieldOptions {
 	fields?: FieldProps[];
 	expanded?: boolean;
 	fieldsContainerElem: HTMLDivElement | null;
-	context: string;
+	context?: string;
 }
 interface FieldState {
 	expanded: boolean;
@@ -220,6 +223,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 						selected={selected}
 						pointer={pointer}
 						fieldsContainerElem={this.props.fieldsContainerElem}
+						context={this.props.context}
 					/>
 				)}
 				{this.state.addOpen && (

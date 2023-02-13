@@ -181,6 +181,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 	}
 
 	render() {
+		console.log('render field');
 		const {name, fields = [], selected, pointer} = this.props;
 		const expandClassName = this.nmspc(fields.length
 			? this.state.expanded

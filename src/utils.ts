@@ -145,7 +145,7 @@ export const dictionarifyByKey = <T extends Record<string, unknown>>(objects: T[
 	}, {});
 
 export const getPropertyContextName = (context?: string) =>
-	typeof context === "string" ? context : "MY.document";
+	typeof context === "string" ? context : "document";
 
 export const getRootField = (master: Pick<Master, "context">): Field => {
 	return {name: unprefixProp(getPropertyContextName(master.context))};

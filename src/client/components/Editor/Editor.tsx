@@ -211,7 +211,6 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		if (this.state.activeEditorMode !== "fields") {
 			state.activeEditorMode = "fields";
 		}
-		console.log(state);
 		this.setState(state as EditorState);
 	}
 

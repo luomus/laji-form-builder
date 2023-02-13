@@ -318,7 +318,7 @@ const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
 };
 
 const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "translations" | "context">>(master: T): T  => {
-	const contextDefaultValidators = defaultValidators[unprefixProp(getPropertyContextName(master.context))];
+	const contextDefaultValidators = defaultValidators[getPropertyContextName(master.context)];
 	if (!contextDefaultValidators) {
 		return master;
 	}
