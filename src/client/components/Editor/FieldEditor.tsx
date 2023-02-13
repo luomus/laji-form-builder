@@ -3,7 +3,9 @@ import {
 	ExpandedMaster, Field as FieldOptions, JSONObject, JSONSchema, Lang, Property, SchemaFormat
 } from "../../../model";
 import { getPropertyContextName, parseJSONPointer } from "../../../utils";
-import { fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fullHeightWithOffset, gnmspc, nmspc } from "../../utils";
+import {
+	fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fullHeightWithOffset, gnmspc, nmspc
+} from "../../utils";
 import { isValid } from "../Builder";
 import { Classable, DraggableWidth, ErrorBoundary } from "../components";
 import { Context } from "../Context";
