@@ -86,7 +86,7 @@ $margin: 2px;
 	padding: $padding;
 }
 
-@mixin editor {
+@mixin backgroundAndFocus {
 	background-color: $neutral;
 	*:focus {
 		outline: none;
@@ -179,7 +179,7 @@ $margin: 2px;
 	&-editor {
 		box-shadow: 0px -2px 6px 1px #0000004d;
 
-		@include editor;
+		@include backgroundAndFocus;
 
 		#{$root}-error, #{$root}-warning {
 			padding: 0 $padding;
@@ -373,7 +373,7 @@ $margin: 2px;
 	}
 
 	.modal-content {
-		@include editor;
+		@include backgroundAndFocus;
 	}
 
 	&-wide-modal {
