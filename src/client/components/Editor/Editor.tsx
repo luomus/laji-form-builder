@@ -1,6 +1,6 @@
 import * as React from "react";
 import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps, ErrorBoundary
+	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps, ErrorBoundary, Tooltip, TooltipCompatible
 } from "../components";
 import { classNames, nmspc, gnmspc, useBooleanSetter, useChain, fullHeightWithOffset } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
@@ -238,15 +238,15 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	}
 }
 
-interface LangChooserProps {
+type LangChooserProps  = TooltipCompatible & {
 	onChange: (lang: Lang) => void;
 }
 
-const LangChooser = React.memo(function LangChooser({onChange}: LangChooserProps) {
+const LangChooser = React.memo(function LangChooser({onChange, ...props}: LangChooserProps) {
 	const {theme, editorLang} = React.useContext(Context);
 	const {ButtonGroup} = theme;
 	return (
-		<ButtonGroup small className={gnmspc("editor-lang-chooser")}>{
+		<ButtonGroup small className={gnmspc("editor-lang-chooser")} {...props}>{
 			["fi", "sv", "en"].map((_lang: Lang) =>
 				<LangChooserByLang key={_lang} onChange={onChange} lang={_lang} activeLang={editorLang} />
 			)
@@ -319,17 +319,25 @@ const EditorMainToolbar = ({
 
 	return (
 		<div style={{display: "flex", alignItems: "center"}} className={toolbarNmspc()}>
-			<LangChooser onChange={onLangChange} />
+			<Tooltip tooltip={translations["editor.langChooser.help"]}  id="lang-choose-help">
+				<LangChooser onChange={onLangChange} />
+			</Tooltip>
 			<ButtonGroup className={gnmspc("ml-1")}>
-				<ElemPicker onSelectedField={onSelectedField}
-				            onSelectedOptions={onSelectedOptions}
-				            containerRef={containerRef} />
+				<Tooltip tooltip={translations["editor.picker.help"]} id="picker-help">
+					<ElemPicker onSelectedField={onSelectedField}
+					            onSelectedOptions={onSelectedOptions}
+					            containerRef={containerRef} />
+				</Tooltip>
 				{onRemountLajiForm && (
-					<Button onClick={onRemountLajiForm} small>
-						<Glyphicon glyph="refresh"  />
-					</Button>
+					<Tooltip tooltip={translations["editor.remount.help"]} id="remount-help">
+						<Button onClick={onRemountLajiForm} small>
+							<Glyphicon glyph="refresh"  />
+						</Button>
+					</Tooltip>
 				) }
-				<Button onClick={openJSONEditor} small>JSON</Button>
+				<Tooltip tooltip={translations["editor.json.help"]} id="json-help">
+					<Button onClick={openJSONEditor} small>JSON</Button>
+				</Tooltip>
 			</ButtonGroup>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
@@ -546,7 +554,8 @@ export const EditorContent = {
 		: EditorContentJSONTabProps<T>) => {
 			const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
 
-			const {Glyphicon} = React.useContext(Context).theme;
+			const {theme ,translations} = React.useContext(Context);
+			const {Glyphicon} = theme;
 
 			const buttonStyle = {position: "absolute", right: 20, top: 5};
 			return (
@@ -563,11 +572,13 @@ export const EditorContent = {
 						                 onSubmit={onJSONChange}
 						                 value={json} />
 					)}
-					<Button onClick={_openJSONEditor}
-					        small
-					        style={buttonStyle} >
-						<Glyphicon glyph="new-window" />
-					</Button>
+					<Tooltip tooltip={translations["jsonEditor.openModal"]} id="json-editor--modal" placement="left">
+						<Button onClick={_openJSONEditor}
+						        small
+						        style={buttonStyle} >
+							<Glyphicon glyph="new-window" />
+						</Button>
+					</Tooltip>
 				</div>
 			);
 		},

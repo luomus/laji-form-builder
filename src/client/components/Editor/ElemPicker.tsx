@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { Classable } from "../components";
+import { Classable, TooltipCompatible } from "../components";
 import { Context } from "../Context";
 import { findNearestParentSchemaElem } from "laji-form/lib/utils";
 import { classNames, gnmspc } from "../../utils";
@@ -23,17 +23,19 @@ const findOptionElem = (elem: Element) => {
 	return undefined;
 };
 
-export interface ElemPickerProps extends Classable {
+export type ElemPickerProps = Classable & TooltipCompatible & {
 	onSelectedField: (selected: string) => void;
 	onSelectedOptions: (selected: string[]) => void;
 	containerRef: React.RefObject<HTMLDivElement>;
-}
-const ElemPicker = React.memo(function ElemPicker({
+};
+const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 	onSelectedField,
 	onSelectedOptions,
 	className,
-	containerRef
-}: ElemPickerProps) {
+	containerRef,
+	onMouseOver,
+	onMouseOut
+}: ElemPickerProps, ref) {
 	const [isActive, setActive] = React.useState(false);
 	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<Element>();
 	const [highlightedOptionElem, setHighlightedOptionElem] = React.useState<Element>();
@@ -110,12 +112,15 @@ const ElemPicker = React.memo(function ElemPicker({
 		<Button active={isActive}
 		        onClick={isActive ? stop : start}
 		        small
-		        className={classNames(gnmspc("elem-picker"), className)}>
+		        className={classNames(gnmspc("elem-picker"), className)}
+		        onMouseOut={onMouseOut}
+		        onMouseOver={onMouseOver}
+		        ref={ref} >
 			<Glyphicon glyph="magnet" className={classNames(isActive && "active")} />
 		</Button>
 		<Highlighter highlightedElem={highlightedElem} active={isActive} onElemHighlighted={onElemHighlighted} />
 	</>;
-});
+}));
 
 export default ElemPicker;
 

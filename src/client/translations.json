@@ -223,5 +223,30 @@
 		"fi": "uusi",
 		"sv": "nya",
 		"en": "new"
+	},
+	"editor.json.help": {
+		"fi": "Muokkaa lomakkeen JSONia sellaisenaan",
+		"sv": "Muokkaa lomakkeen JSONia sellaisenaan",
+		"en": "Edit the form JSON as it is"
+	},
+	"editor.remount.help": {
+		"fi": "Uudelleenlataa lomakkeen käyttöliittymä",
+		"sv": "Uudelleenlataa lomakkeen käyttöliittymä",
+		"en": "Reload the form UI"
+	},
+	"editor.picker.help": {
+		"fi": "Valitse muokattava komponentti kursorilla",
+		"sv": "Valitse muokattava komponentti kursorilla",
+		"en": "Pick an element to edit with the cursor"
+	},
+	"editor.langChooser.help": {
+		"fi": "Valitse kieli, jonka käännöksiä muokataan.",
+		"sv": "Valitse kieli, jonka käännöksiä muokataan.",
+		"en": "Choose the language whose translations are being edited"
+	},
+	"jsonEditor.openModal": {
+		"fi": "Avaa JSON modaaliin muokattavaksi",
+		"sv": "Avaa JSON modaaliin muokattavaksi",
+		"en": "Open the JSON in a modal for editing"
 	}
 }

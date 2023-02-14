@@ -14,6 +14,11 @@ export interface HasChildren {
 	children: React.ReactNode;
 }
 
+export type TooltipCompatible<T = any> = {
+	onMouseOut?: React.MouseEventHandler<T>;
+	onMouseOver?: React.MouseEventHandler<T>;
+}
+
 type Position = "bottom";
 interface DraggablePublicProps extends Stylable, Classable, HasChildren {
 	thickness?: number;
@@ -232,10 +237,10 @@ export const Clickable = React.memo(function Clickable({children, onClick, class
 	);
 });
 
-export const Button = React.memo(function Button({children, active, className, ...props}: any) {
+export const Button = React.memo(React.forwardRef(function Button({children, active, className, ...props}: any, ref) {
 	const {Button} = React.useContext(Context).theme;
-	return <Button className={classNames(className, active && "active")} {...props}>{children}</Button>;
-});
+	return <Button className={classNames(className, active && "active")} {...props} ref={ref}>{children}</Button>;
+}));
 
 export const Spinner = React.memo(function Spinner(
 	{color = "black", size = 32, className, style = {}}
@@ -458,3 +463,11 @@ export class ErrorBoundary extends React.Component<HasChildren, {hasError: boole
 			: this.props.children;
 	}
 }
+
+export const Tooltip = ({children, tooltip, placement = "top", id}
+	: {tooltip: string, placement?: string, id: string} & HasChildren) => {
+	const {Tooltip, OverlayTrigger} = React.useContext(Context).theme;
+	const _tooltip = <Tooltip id={id}>{tooltip}</Tooltip>;
+
+	return <OverlayTrigger placement={placement} overlay={_tooltip}>{children}</OverlayTrigger>;
+};
