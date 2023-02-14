@@ -1,6 +1,7 @@
 import * as React from "react";
 import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
-	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps, ErrorBoundary, Tooltip, TooltipCompatible
+	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps,
+	ErrorBoundary, Tooltip, TooltipCompatible
 } from "../components";
 import { classNames, nmspc, gnmspc, useBooleanSetter, useChain, fullHeightWithOffset } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
