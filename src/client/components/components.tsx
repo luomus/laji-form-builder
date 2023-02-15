@@ -284,7 +284,6 @@ export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON | 
 	ref: React.Ref<HTMLTextAreaElement>) {
 	const stringValue = JSON.stringify(value, undefined, 2) ?? "";
 	const [tmpValue, setTmpValue] = React.useState(stringValue);
-	console.log({stringValue, tmpValue});
 	const [validValue, setValidValue] = React.useState(value);
 	const [valid, setValid] = React.useState(true);
 	const [touched, setTouched] = React.useState(false);
