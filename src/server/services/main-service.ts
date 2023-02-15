@@ -6,6 +6,7 @@ import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaste
 import ApiClient, { ApiClientImplementation } from "../../api-client";
 import StoreService from "./store-service";
 import HasCache from "../../services/has-cache";
+import { CronJob } from "cron"
 
 /**
  * Intended to be used for checked errors, which the controller should return with 422.
@@ -82,6 +83,10 @@ export default class MainService extends HasCache {
 	constructor() {
 		super();
 		this.exposeFormListing = this.exposeFormListing.bind(this);
+		this.flush = this.flush.bind(this);
+
+		// Flush every day at 4am.
+		new CronJob("0 4 * * *", this.flush);
 	}
 
 	setLang(lang: Lang) {
@@ -215,7 +220,15 @@ export default class MainService extends HasCache {
 		this.warmup();
 	}
 
-	warmup() {
-		this.getForms();
+	async warmup() {
+		const warmupForms = async () => {
+			const forms = await this.getForms();
+			for (const f of forms) {
+				await this.getForm(f.id, undefined, Format.Schema);
+			}
+		};
+
+		await this.metadataService.getAllRanges();
+		await warmupForms();
 	}
 }
