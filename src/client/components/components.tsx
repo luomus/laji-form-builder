@@ -284,36 +284,43 @@ export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON | 
 	ref: React.Ref<HTMLTextAreaElement>) {
 	const stringValue = JSON.stringify(value, undefined, 2) ?? "";
 	const [tmpValue, setTmpValue] = React.useState(stringValue);
+	console.log({stringValue, tmpValue});
+	const [validValue, setValidValue] = React.useState(value);
 	const [valid, setValid] = React.useState(true);
 	const [touched, setTouched] = React.useState(false);
 
-	const tryOnChange = React.useCallback(() => {
+	React.useEffect(() => {
 		if (tmpValue === "" || tmpValue === undefined) {
-			const isValid = validator(undefined);
-			isValid && onChange?.(undefined);
-			setValid(isValid);
+			const valid = validator(undefined);
+			setValid(valid);
+			valid && setValidValue(undefined);
 			return;
 		}
-		let parsed: T | undefined;
-		let isValid = false;
 		try {
-			parsed = JSON.parse(tmpValue);
-			isValid = validator(parsed);
+			const parsed = JSON.parse(tmpValue);
+			const valid = validator(JSON.parse(tmpValue));
+			valid && setValidValue(parsed);
+			setValid(valid);
 		} catch (e) {
-			isValid = false;
+			setValid(false);
 		}
-		setValid(isValid ?? false);
-		isValid && onChange?.(parsed);
-	}, [onChange, tmpValue, validator]);
+	}, [tmpValue, validator, setValid]);
+
+	const tryOnChange = React.useCallback(() => {
+		if (!valid) {
+			return;
+		}
+		onChange?.(validValue);
+	}, [valid, validValue, onChange]);
 
 	React.useEffect(() => setTmpValue(stringValue), [stringValue]);
 	React.useEffect(() => {
 		touched && live && tryOnChange();
-	}, [touched, live, tryOnChange]);
+	}, [touched, live, validValue, tryOnChange]);
 
 	React.useEffect(() => onValidChange?.(valid), [valid, onValidChange]);
 
-	const _onChange = React.useCallback((e: any) => {
+	const onTextareChange = React.useCallback((e: any) => {
 		setTouched(true);
 		setTmpValue(e.target.value);
 	}, []);
@@ -341,7 +348,7 @@ export const JSONEditor = React.forwardRef(function JSONEditor<T extends JSON | 
 			onBlur={onBlur}
 			rows={_rows}
 			style={{...style, width: "100%", resize: resizable ? "vertical" : "none"}}
-			onChange={_onChange}
+			onChange={onTextareChange}
 			value={tmpValue}
 			ref={ref}
 		/>
@@ -401,6 +408,7 @@ export function SubmittableJSONEditor<T extends JSON>(
 }
 
 const bypassValidator = (v: JSON): v is JSON => true;
+
 export const AnyJSONEditor = (props: Omit<JSONEditorProps<JSON>, "validator">) =>
 	<JSONEditor {...props} validator={bypassValidator} />;
 
