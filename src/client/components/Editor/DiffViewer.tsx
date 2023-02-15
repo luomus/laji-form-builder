@@ -1,30 +1,39 @@
 import * as React from "react";
 import { Master, JSON } from "../../../model";
 import { Context } from "../Context";
-import { gnmspc, nmspc } from "../../utils";
+import { gnmspc, isSignalAbortError, nmspc, runAbortable } from "../../utils";
 import diff, { Diff, DiffDeleted, DiffEdit, DiffNew, DiffArray } from "deep-diff";
 import memoize from "memoizee";
+import { Spinner } from "../components";
 
 export type DiffViewerProps = {
 	master: Master;
 }
 
-const DiffViewerModal = React.memo(function DiffViewerModal({master}: DiffViewerProps) {
+const DiffViewerModal = ({master}: DiffViewerProps) => {
 	const {formService} = React.useContext(Context);
 	const [remoteMaster, setRemoteMaster] = React.useState<Master | undefined>(undefined);
 	const {id} = master;
+	const abortRef = React.useRef<AbortController>();
 	React.useEffect(() => {
 		if (id === undefined) {
 			return;
 		}
-		const abortController = new AbortController();
-		formService.getMaster(id, abortController.signal).then(setRemoteMaster);
-		return () => abortController.abort();
+		const fetchRemote = async () => {
+			console.log('diff viewer get');
+			const remoteMaster = await runAbortable(signal => formService.getMaster(id, signal), abortRef);
+			if (!isSignalAbortError(remoteMaster)){
+				setRemoteMaster(remoteMaster);
+			}
+		};
+		fetchRemote();
+		const abortController = abortRef.current;
+		return () => abortController?.abort();
 	}, [formService, id]);
-	return (
-		<DiffsViewer diffs={getDiff(remoteMaster as JSON, master as JSON)} />
-	);
-});
+	return remoteMaster
+		? <DiffsViewer diffs={getDiff(remoteMaster as JSON, master as JSON)} />
+		: <Spinner />;
+};
 
 export default DiffViewerModal;
 

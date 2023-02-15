@@ -107,8 +107,13 @@ export default class StoreService extends HasCache {
 		return response;
 	}
 
-	flush() {
-		this.forms = {};
-		super.flush();
+	flush(id?: string) {
+		if (id) {
+			delete this.forms[id];
+			this.getForm.delete(id);
+		} else {
+			this.forms = {};
+			super.flush();
+		}
 	}
 }

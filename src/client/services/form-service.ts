@@ -30,7 +30,7 @@ export default class FormService extends HasCache {
 		}
 		query.expand = false;
 		return this.fetchJSON(`/${id}`, query, {signal});
-	});
+	}, {length: 1});
 
 	private getSchemaFormatCache = this.cache((id: string) => this.cache((lang: Lang): Promise<SchemaFormat> =>
 		this.fetchJSON(`/${id}`, {format: "schema", lang})

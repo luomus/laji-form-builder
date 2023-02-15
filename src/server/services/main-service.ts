@@ -163,6 +163,7 @@ export default class MainService extends HasCache {
 		});
 		this.getFormCache(id).clear();
 		this.getForms.clear();
+		this.storeService.flush();
 		return remoteForm;
 	}
 
