@@ -103,13 +103,6 @@ describe("Editor", () => {
 
 				await builder.saveModal.close();
 			});
-
-			// it("field editor displayed for all fields", async () => {
-			// 	let $field = builder.$rootFieldSelector;
-			// 	debugger;
-			// 	await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
-			// });
-
 		});
 
 		describe("UI editor", () => {
@@ -121,11 +114,6 @@ describe("Editor", () => {
 			it("field selector displayed", async () => {
 				expect(await isDisplayed(builder.$fieldSelectorContainer)).toBe(true);
 			});
-
-			// it("field editor displayed for all fields", async () => {
-			// 	let $field = builder.$rootFieldSelector;
-			// 	await testFieldDisplaysEditor(builder.getFieldSelector($field), "");
-			// });
 
 			describe("ui:title", () => {
 				const fieldName = "gatheringEvent.dateBegin";

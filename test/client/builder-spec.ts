@@ -59,7 +59,7 @@ describe("Builder", () => {
 	});
 
 	describe("lang", () => {
-		beforeAll(async() => {
+		beforeAll(async () => {
 			builder = await createBuilder();
 			await builder.create.$createButton.click();
 			await builder.create.$jsonButton.click();

@@ -10,6 +10,7 @@ import "notus/src/notus.css";
 import  _notus from "notus";
 import { isLang, Lang, SchemaFormat } from "../../model";
 import ApiClient, { ApiClientImplementation } from "../../api-client";
+import {classNames} from "../../client/utils";
 const notus = _notus();
 
 const notifier: Notifier = [
@@ -136,7 +137,7 @@ const formService = new FormService(
 
 		// Needed for e2e tests detecting when form previewer gets new schema with new lang.
 		const propsForTestEnv = {
-			className: lang
+			className: classNames(lang, "rjsf")
 		};
 		const [key, setKey] = React.useState(0);
 

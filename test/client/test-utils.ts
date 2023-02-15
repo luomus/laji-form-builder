@@ -88,7 +88,7 @@ export class BuilderPO {
 
 	formPreview = {
 		$container: $("#app > .laji-form") as ElementFinder,
-		$rjsf: $("#app > .laji-form form") as ElementFinder,
+		$rjsf: $("#app > .laji-form .rjsf") as ElementFinder,
 		locate: lajiFormLocate
 	}
 
@@ -131,7 +131,7 @@ export class BuilderPO {
 	}
 
 	async getEditorForm(): Promise<Form> {
-		const $root = this.$editor.$(".laji-form form > div");
+		const $root = this.$editor.$(".laji-form > div > Div");
 		const id = await $root.getAttribute("id");
 		const contextId = id.match(/\d+/)?.[0];
 		if (typeof contextId !== "string") {
@@ -147,7 +147,7 @@ export class BuilderPO {
 	}
 
 	async editorLocate(path: string): Promise<ElementFinder> {
-		const $root = this.$editor.$(".laji-form form > div");
+		const $root = this.$editor.$(".laji-form > div > div");
 		const id = await $root.getAttribute("id");
 		const contextId = id.match(/\d+/)?.[0];
 		if (typeof contextId !== "string") {
