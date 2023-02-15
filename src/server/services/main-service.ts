@@ -6,7 +6,7 @@ import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaste
 import ApiClient, { ApiClientImplementation } from "../../api-client";
 import StoreService from "./store-service";
 import HasCache from "../../services/has-cache";
-import { CronJob } from "cron"
+import { CronJob } from "cron";
 
 /**
  * Intended to be used for checked errors, which the controller should return with 422.

@@ -20,7 +20,6 @@ const DiffViewerModal = ({master}: DiffViewerProps) => {
 			return;
 		}
 		const fetchRemote = async () => {
-			console.log('diff viewer get');
 			const remoteMaster = await runAbortable(signal => formService.getMaster(id, signal), abortRef);
 			if (!isSignalAbortError(remoteMaster)){
 				setRemoteMaster(remoteMaster);
