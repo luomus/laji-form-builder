@@ -3,6 +3,8 @@ import _Spinner from "react-spinner";
 import { Context } from "./Context";
 import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "../utils";
 import { JSON } from "../../model";
+import LajiFormContext from "laji-form/lib/ReactContext";
+import { Help as LJHelp } from "laji-form/lib/components/components";
 
 export interface Stylable {
 	style?: React.CSSProperties;
@@ -477,4 +479,15 @@ export const Tooltip = ({children, tooltip, placement = "top", id}
 	const _tooltip = <Tooltip id={id}>{tooltip}</Tooltip>;
 
 	return <OverlayTrigger placement={placement} overlay={_tooltip}>{children}</OverlayTrigger>;
+};
+
+export const Help = (props: any) => {
+	const context = React.useContext(Context);
+	return (
+		<div className="laji-form" style={{display: "initial"}}>
+			<LajiFormContext.Provider value={context}>
+				<LJHelp  {...props} />
+			</LajiFormContext.Provider>
+		</div>
+	);
 };

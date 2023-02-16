@@ -1,7 +1,7 @@
 import React from "react";
 import LajiForm from "./LajiForm";
 import _LajiForm from "laji-form/lib/components/LajiForm";
-import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchInput } from "./components";
+import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchInput, Help } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult, isMaster } from "../../model";
 import { JSONSchemaBuilder } from "../../utils";
@@ -11,6 +11,7 @@ import { ButtonProps, ButtonGroupProps } from "../themes/theme";
 
 interface WizardStep {
 	label: string;
+	help?: string;
 	component: React.ComponentType<WizardStepProps>;
 	children?: WizardStepChildren;
 	variant?: ButtonProps["variant"];
@@ -40,10 +41,12 @@ const wizardCreateStep: WizardStep = {
 				},
 				extendFully: {
 					label: "wizard.option.extend.extendFully",
+					help: "wizard.option.extend.extendFully.help",
 					component: FormCreatorExtendWithMethod("fully")
 				},
 				extendFields: {
 					label: "wizard.option.extend.extendFields",
+					help: "wizard.option.extend.extendFields.help",
 					component: FormCreatorExtendWithMethod("fields")
 				},
 			}
@@ -199,7 +202,8 @@ function GenericWizardStepChooser(
 	{takeStep, steps, style, buttonGroupProps}
 	: WizardStepProps & Stylable & {buttonGroupProps: ButtonGroupProps}
 ) {
-	const {theme, translations} = React.useContext(Context);
+	const context = React.useContext(Context);
+	const {theme, translations} = context;
 	const {ButtonGroup} = theme;
 	return !steps
 		? null
@@ -207,13 +211,19 @@ function GenericWizardStepChooser(
 			<ButtonGroup vertical
 			             style={style || {margin: "auto", width: "50%", display: "block"}}
 			             {...(buttonGroupProps || {})}>
-				{(Object.keys(steps)).map(key =>
-					<FormCreatorWizardOptionButton key={key}
-					                               onSelect={takeStep}
-					                               variant={steps[key].variant}
-					                               option={key}>
-						{translations[steps[key].label]}
-					</FormCreatorWizardOptionButton>
+				{(Object.keys(steps)).map(key => {
+					const {label, help} = steps[key];
+					return (
+						<FormCreatorWizardOptionButton key={key}
+						                               onSelect={takeStep}
+						                               variant={steps[key].variant}
+						                               option={key}>
+							{translations[label]}
+							{help && <Help help={translations[help]} id={label} />
+							}
+						</FormCreatorWizardOptionButton>
+					);
+				}
 				)}
 			</ButtonGroup>
 		);
@@ -287,18 +297,30 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 	const {translations} = React.useContext(Context);
 	const submitRef = React.useRef<_LajiForm>(null);
 	const [saveOnSubmit, setSubmitType] = React.useState<boolean>(false);
-	const schema = JSONSchemaBuilder.object({
+	const schema = React.useMemo(() => JSONSchemaBuilder.object({
 		name: JSONSchemaBuilder.String({title: translations["wizard.databank.form.name"]}),
 		collectionID: JSONSchemaBuilder.String({title: translations["wizard.databank.form.collectionID"]}),
 		primary: JSONSchemaBuilder.Boolean({title: translations["wizard.databank.form.primary"], default: true})
-	}, {required: ["name", "collectionID"]});
-	const uiSchema = {
+	}, {required: ["name", "collectionID"]}), [translations]);
+	const uiSchema = React.useMemo(() => ({
+		name: {
+			"ui:help": translations["wizard.databank.form.name.help"]
+		},
 		primary: {
 			"ui:options": {
 				allowUndefined: false
 			}
 		}
-	};
+	}), []);
+
+	const validators = React.useMemo(() => ({
+		collectionID: {
+			format: {
+				pattern: /^HR\.\d+$/,
+				message: translations["wizard.databank.form.collectionID.validator.format"]
+			}
+		}
+	}), [translations]);
 
 	const onLajiFormSubmit = React.useCallback(
 		({formData: {name, collectionID, primary}}:
@@ -322,7 +344,12 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 	}, [setSubmitType, submitRef]);
 
 	return (
-		<LajiForm schema={schema} uiSchema={uiSchema} ref={submitRef} onSubmit={onLajiFormSubmit} autoFocus={true}>
+		<LajiForm schema={schema}
+		          uiSchema={uiSchema}
+		          ref={submitRef}
+		          onSubmit={onLajiFormSubmit}
+		          autoFocus={true}
+		          validators={validators} >
 			<Button onClick={onSubmit} variant="primary">{translations["save"]}</Button>
 			<Button onClick={onSubmitDraft} variant="default">
 				{translations["wizard.option.json.import.draft"]}

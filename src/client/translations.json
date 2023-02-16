@@ -104,10 +104,20 @@
 		"sv": "Databanknamn",
 		"en": "Data bank name"
 	},
+	"wizard.databank.form.name.help": {
+		"fi": "Näkyy ainoastaan lomakkeiden selauksessa admineille.",
+		"sv": "Synlig endast för administratörer när de bläddrar i formulär",
+		"en": "Visible only for admins when browsing forms"
+	},
 	"wizard.databank.form.collectionID": {
-		"fi": "Kokoelman tunniste",
-		"sv": "Samlings ID",
-		"en": "Collection ID"
+		"fi": "Kokoelman tunniste (HR-koodi)",
+		"sv": "Samlings ID (HR kod)",
+		"en": "Collection ID (HR code)"
+	},
+	"wizard.databank.form.collectionID.validator.format": {
+		"fi": "Täytyy olla muotoa 'HR.<numerokoodi>",
+		"sv": "Måste vara 'HR.<nummerkod>'",
+		"en": "Must be 'HR.<number code>'"
 	},
 	"editor.options.clear": {
 		"fi": "Tyhjennä rajaukset ✖",
@@ -202,12 +212,22 @@
 	"wizard.option.extend.extendFully": {
 		"fi": "Kopioi lomake perien se kokonaan",
 		"sv": "Använd ett befintligt formulär som bas",
-		"en": "Kopiera formuläret arv, det helt"
+		"en": "Copy the form fully"
+	},
+	"wizard.option.extend.extendFully.help": {
+		"fi": "Lomakkeen JSON kopioidaan täydellisesti ominaisuudet mukaan lukien. Lomake voi ylikirjoittaa perimänsä lomakkeen tietoja vaikuttamatta perimäänsä lomakkeeseen.\nPerittävä lomake määräytyy 'formBaseID' kentällä.",
+		"sv": "Formuläret JSON kommer att kopieras helt, inklusive formuläralternativen. Formuläret kan åsidosätta saker från det överordnade formuläret utan att påverka det överordnade formuläret.\nDet utökade formuläret bestäms av alternativet 'formBaseID'.",
+		"en": "The form JSON will be copied fully, including the form options. The form can override stuff from the parent form without affecting the parent form.\nThe extended form is determined by the 'formBaseID' option."
 	},
 	"wizard.option.extend.extendFields": {
 		"fi": "Kopioi lomake perien vain sen kentät",
-		"sv": "Kopiera formulärets arv, bara det är fält",
+		"sv": "Kopiera formulärets arv, bara dess fält",
 		"en": "Copy the form heriting, only it's fields"
+	},
+	"wizard.option.extend.extendFields.help": {
+		"fi": "Lomakkeen ominaisuudet eivät kopioidu. Ainoastaan kentät (validaattoreineen), uiSchema ja käännökset kopioituvat.\nPerittävä lomake määräytyy 'fieldsFromID' kentällä",
+		"sv": "Formuläralternativen kommer inte att kopieras. Endast fälten (inklusive deras validerare), uiSchema och transalationer kommer att kopieras.\nDet utökade formuläret bestäms av alternativet 'fieldsFromID'.",
+		"en": "The form options wont be copied. Only the fields (including their validators), uiSchema and transalations will be copied.\nThe extended form is determined by the 'fieldsFromID' option."
 	},
 	"wizard.option.extend.saveOrPreview": {
 		"fi": "Haluatko tallentaa uuden lomakkeen vai vain esikatsella sitä?",
