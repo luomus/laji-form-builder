@@ -84,6 +84,8 @@ const prepareUiSchema = (
 		"title",
 		"description",
 		"shortDescription",
+		"baseFormID",
+		"fieldsFormID",
 		"collectionID",
 		"category",
 		"logo",
