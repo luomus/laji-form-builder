@@ -82,7 +82,7 @@ export default class UiSchemaEditor extends React.PureComponent<GenericFieldEdit
 		);
 	});
 
-	normalizeUiSchema(uiSchema?: JSONObject, prefix = ""): any {
+	normalizeUiSchema<T extends JSONObject | undefined>(uiSchema: T, prefix = ""): T {
 		const key = `${prefix}ui:title`;
 		const getFieldName = () => {
 			const {field} = this.props;
@@ -144,16 +144,16 @@ export default class UiSchemaEditor extends React.PureComponent<GenericFieldEdit
 	getJSONEditorFormData() {
 		let uiSchema = this.normalizeUiSchema(this.props.uiSchema);
 		const {schema} = this.props;
-		if (schema.type === "object") {
+		if (schema.type === "object" && uiSchema) {
 			Object.keys(schema.properties).forEach(prop => {
 				uiSchema = immutableDelete(uiSchema, prop);
 			});
-		} else if (schema.type === "array" && schema.items.type === "object" && uiSchema.items) {
+		} else if (schema.type === "array" && schema.items.type === "object" && uiSchema?.items) {
 			Object.keys(schema.items.properties).forEach(prop => {
 				uiSchema = immutableDelete(uiSchema, `/items/${prop}`);
 			});
 		}
-		if (!Object.keys(uiSchema).length) {
+		if (!uiSchema || !Object.keys(uiSchema).length) {
 			return undefined;
 		}
 		return getTranslatedUiSchema(uiSchema, this.props.translations);
