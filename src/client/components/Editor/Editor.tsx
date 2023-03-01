@@ -143,7 +143,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			content = <FieldEditor {...this.props}
 			                       expandedMaster={expandedMaster}
 														 schemaFormat={schemaFormat}
-														 selectedField={this.state.selectedField} />;
+														 selectedField={this.state.selectedField}
+														 onSelectedField={this.onFieldSelected} />;
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={expandedMaster}
 			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
@@ -204,6 +205,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	onActiveEditorChange = (newActive: ActiveEditorMode) => {
 		this.setState({activeEditorMode: newActive});
+	}
+
+	onFieldSelected = (selectedField: string) => {
+		this.setState({selectedField});
 	}
 
 	onPickerSelectedField = (selectedField: string) => {

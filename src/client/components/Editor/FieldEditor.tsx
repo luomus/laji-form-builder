@@ -29,11 +29,11 @@ export interface GenericFieldEditorProps extends Classable {
 type Props = {
 	expandedMaster: ExpandedMaster;
 	schemaFormat: SchemaFormat;
+	onSelectedField: (selected: string) => void;
 } & Pick<EditorProps, "onChange">
 	& Pick<EditorState, "selectedField">;
 
 type State = {
-	selected?: string;
 	tab: ActiveEditorFieldMode;
 }
 
@@ -46,13 +46,6 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 
 	state: State = {
 		tab: "basic"
-	}
-
-	static getDerivedStateFromProps = (props: Props) => {
-		if (props.selectedField) {
-			return {selected: props.selectedField};
-		}
-		return null;
 	}
 
 	private fieldsRef = React.createRef<HTMLDivElement>();
@@ -76,7 +69,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		};
 
 		const editorProps = {
-			selected: this.state.selected,
+			selected: this.props.selectedField,
 			contentValid: isValid(schemaFormat),
 			active,
 			...this.getFieldEditorChildProps(expandedMaster, schemaFormat),
@@ -90,16 +83,16 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 				                ref={this.fieldsRef} >
 					<Fields className={gnmspc("field-chooser")}
 					        fields={this.getFields(expandedMaster)}
-					        onSelected={this.onFieldSelected}
+					        onSelected={this.props.onSelectedField}
 					        onDeleted={this.onFieldDeleted}
 					        onAdded={this.onFieldAdded}
-					        selected={this.state.selected}
+					        selected={this.props.selectedField}
 					        pointer=""
 					        expanded={true}
 					        fieldsContainerElem={this.fieldsRef.current}
 					        context={expandedMaster.context} />
 				</DraggableWidth>
-				{this.state.selected && <div style={{display: "flex", flexDirection: "column", width: "100%"}}>
+				{this.props.selectedField && <div style={{display: "flex", flexDirection: "column", width: "100%"}}>
 					<TabChooser tabs={tabs}
 					            active={this.state.tab}
 					            onChange={this.onTabChange}
@@ -118,7 +111,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		this.setState({tab});
 	}
 
-	getSelected = () => this.getFieldPath(this.state.selected || "");
+	getSelected = () => this.getFieldPath(this.props.selectedField || "");
 
 	getFieldEditorChildProps(expandedMaster: ExpandedMaster, schemaFormat: SchemaFormat) : GenericFieldEditorProps {
 		const { editorLang } = this.context;
@@ -166,10 +159,6 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 
 	onFieldAdded = (field: string, property: Property) => {
 		this.props.onChange([{type: "field", op: "add" as const, selected: this.getFieldPath(field), value: property}]);
-	}
-
-	onFieldSelected = (field: string) => {
-		this.setState({selected: field});
 	}
 
 	onEditorChange = (events: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => {
