@@ -79,7 +79,7 @@ export const getTranslatedUiSchema = memoize(<T extends JSONObject | undefined>
 			return obj.map(item => translate(item, schemaForUiSchema?.items));
 		}
 		if (typeof obj === "string" && obj[0] === "@") {
-			return translations[obj];
+			return translations[obj] ?? translations[obj.substr(1)];
 		}
 		return obj;
 	}
