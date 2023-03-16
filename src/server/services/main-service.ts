@@ -86,7 +86,8 @@ export default class MainService extends HasCache {
 		this.flush = this.flush.bind(this);
 
 		// Flush every day at 4am.
-		new CronJob("0 4 * * *", this.flush);
+		const job = new CronJob("0 4 * * *", this.flush);
+		job.start();
 	}
 
 	setLang(lang: Lang) {
@@ -121,6 +122,9 @@ export default class MainService extends HasCache {
 		}));
 	}, { length: 1 });
 
+	/*
+	 * We use the curried syntax (id)(lang, format, expand) so that the cache can be busted by id.
+	 */
 	private getFormCache = this.cache((id: string) =>
 		this.cache(async (lang?: Lang, format: Format = Format.JSON, expand = true) => {
 			const form = await this.storeService.getForm(id);
