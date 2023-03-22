@@ -88,6 +88,7 @@ export default class MainService extends HasCache {
 		// Flush every day at 4am.
 		const job = new CronJob("0 4 * * *", this.flush);
 		job.start();
+		this.warmup();
 	}
 
 	setLang(lang: Lang) {

@@ -12,6 +12,5 @@ export default class HasCache {
 
 	public flush() {
 		this.cacheStore.forEach(c => c.clear());
-		this.cacheStore = [];
 	}
 }
