@@ -311,7 +311,7 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 				allowUndefined: false
 			}
 		}
-	}), []);
+	}), [translations]);
 
 	const validators = React.useMemo(() => ({
 		collectionID: {
