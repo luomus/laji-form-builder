@@ -92,17 +92,19 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 					        fieldsContainerElem={this.fieldsRef.current}
 					        context={expandedMaster.context} />
 				</DraggableWidth>
-				{this.props.selectedField && <div style={{display: "flex", flexDirection: "column", width: "100%"}}>
-					<TabChooser tabs={tabs}
-					            active={this.state.tab}
-					            onChange={this.onTabChange}
-					            className={this.nmspc("toolbar")} />
-					<div style={fieldEditorContentStyle} className={this.nmspc("content")}>{
-						active === "uiSchema" && <UiSchemaEditor {...editorProps} />
-						|| active === "basic" && <BasicEditor {...editorProps} />
-						|| null
-					}</div>
-				</div>}
+				{this.props.selectedField
+					&& editorProps.field
+					&& <div style={{display: "flex", flexDirection: "column", width: "100%"}}>
+						<TabChooser tabs={tabs}
+						            active={this.state.tab}
+						            onChange={this.onTabChange}
+						            className={this.nmspc("toolbar")} />
+						<div style={fieldEditorContentStyle} className={this.nmspc("content")}>{
+							active === "uiSchema" && <UiSchemaEditor {...editorProps} />
+							|| active === "basic" && <BasicEditor {...editorProps} />
+							|| null
+						}</div>
+					</div>}
 			</ErrorBoundary>
 		</>;
 	}
