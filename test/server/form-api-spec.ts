@@ -1,7 +1,7 @@
 import request from "supertest";
 import app from "../../src/server/server";
 import { FormListing, Master } from "../../src/model";
-import { exposedProps, exposedOptions } from "../../src/server/services/main-service";
+import { exposedListedProps, exposedListedOptions } from "../../src/server/services/main-service";
 import { formFetch } from "../../src/server/services/store-service";
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
@@ -90,7 +90,7 @@ describe("/api", () => {
 					gatheredProperties[key] = true;
 				});
 			});
-			expect(gatheredProperties).toEqual(exposedProps);
+			expect(gatheredProperties).toEqual(exposedListedProps);
 			done();
 		});
 
@@ -100,7 +100,7 @@ describe("/api", () => {
 			}
 			forms.forEach(f => {
 				Object.keys(f).forEach(key => {
-					expect((exposedProps as any)[key]).toBe(true);
+					expect((exposedListedProps as any)[key]).toBe(true);
 				});
 			});
 			done();
@@ -113,7 +113,7 @@ describe("/api", () => {
 					gatheredOptions[key] = true;
 				});
 			});
-			expect(gatheredOptions).toEqual(exposedOptions);
+			expect(gatheredOptions).toEqual(exposedListedOptions);
 			done();
 		});
 
@@ -123,7 +123,7 @@ describe("/api", () => {
 			}
 			forms.forEach(f => {
 				f.options && Object.keys(f.options).forEach(key => {
-					expect((exposedOptions as any)[key]).toBe(true);
+					expect((exposedListedOptions as any)[key]).toBe(true);
 				});
 			});
 			done();

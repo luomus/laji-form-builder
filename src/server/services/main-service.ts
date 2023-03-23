@@ -30,13 +30,13 @@ const apiClient = new ApiClient(
 	DEFAULT_LANG
 );
 
-export const exposedProps = dictionarify([
+export const exposedListedProps = dictionarify([
 	"id", "logo", "title", "description", "shortDescription",
 	"supportedLanguage", "category", "collectionID", "options",
 	"name"
 ] as (keyof FormListing)[]);
 
-export const exposedOptions = dictionarify([
+export const exposedListedOptions = dictionarify([
 	"allowExcel",
 	"allowTemplate",
 	"dataset",
@@ -44,16 +44,13 @@ export const exposedOptions = dictionarify([
 	"forms",
 	"excludeFromGlobalExcel",
 	"hasAdmins",
-	"prepopulateWithInformalTaxonGroups",
-	"prepopulateWithTaxonSets",
 	"restrictAccess",
 	"secondaryCopy",
 	"sidebarFormLabel",
 	"useNamedPlaces",
 	"viewerType",
 	"disabled",
-	"shortTitleFromCollectionName",
-	"useSchemaCommentsAsHelpTexts"
+	"shortTitleFromCollectionName"
 ]);
 
 const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
@@ -98,9 +95,9 @@ export default class MainService extends HasCache {
 	}
 
 	private exposeFormListing(form: Master) {
-		const exposed = copyWithWhitelist(form as FormListing, exposedProps);
+		const exposed = copyWithWhitelist(form as FormListing, exposedListedProps);
 		if (exposed.options) {
-			exposed.options = copyWithWhitelist(exposed.options, exposedOptions);
+			exposed.options = copyWithWhitelist(exposed.options, exposedListedOptions);
 			if (!Object.keys(exposed.options).length) {
 				delete exposed.options;
 			}

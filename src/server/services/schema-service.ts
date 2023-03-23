@@ -149,7 +149,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 
 		const units = [
 			...(await this.getUnitsFromInformalTaxonGroups(prepopulateWithInformalTaxonGroups)),
-			...(await this.getUnitsFromTaxonsets(prepopulateWithTaxonSets))
+			...(await this.getUnitsFromTaxonSets(prepopulateWithTaxonSets))
 		].map((s: any) => ({
 			identifications: [speciesToIdentification(s)]
 		}));
@@ -190,7 +190,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		});
 	}
 
-	private async getUnitsFromTaxonsets(taxonSets?: string[]) {
+	private async getUnitsFromTaxonSets(taxonSets?: string[]) {
 		if (!taxonSets) {
 			return [];
 		}
