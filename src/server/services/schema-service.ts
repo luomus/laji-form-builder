@@ -1,5 +1,5 @@
 import MetadataService from "../../services/metadata-service";
-import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONSchema, JSONSchemaEnumOneOf,
+import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONObject, JSONSchema, JSONSchemaEnumOneOf,
 	JSONSchemaObject, JSONSchemaV6Enum, Lang, Master, Property, SchemaFormat } from "../../model";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchemaBuilder, multiLang, reduceWith, unprefixProp } from "../../utils";
@@ -107,19 +107,52 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 	}
 
 	private async prepopulate<T extends Pick<SchemaFormat, "schema" | "options">>(schemaFormat: T) {
-		const {prepopulatedDocument, prepopulateWithInformalTaxonGroups} = schemaFormat.options || {};
-		if (!prepopulateWithInformalTaxonGroups) {
+		const {
+			prepopulatedDocument,
+			prepopulateWithInformalTaxonGroups,
+			prepopulateWithTaxonSets
+		} = schemaFormat.options || {};
+
+		if (!prepopulatedDocument && !prepopulateWithTaxonSets && !prepopulateWithTaxonSets) {
 			return schemaFormat;
 		}
-		const BIOTA = "MX.37600";
-		const species = (await this.apiClient.fetchJSON(`/taxa/${BIOTA}/species`, {
-			informalGroupFilters: prepopulateWithInformalTaxonGroups,
-			selectedFields: "id,scientificName,vernacularName",
-			lang: "fi",
-			taxonRanks: "MX.species",
-			onlyFinnish: true,
-			pageSize: 1000
-		})).results;
+
+		const identificationsSchema =
+			(schemaFormat.schema as any).properties.gatherings?.items?.properties
+				.units?.items?.properties.identifications?.items;
+
+		type Species = {
+			id: string;
+			vernacularName?: string;
+			scientificName?: string;
+		}
+
+		const speciesToIdentification = (s: Species) => {
+			if (!identificationsSchema) {
+				// eslint-disable-next-line max-len
+				throw new Error("Form with prepopulateWithInformalTaxonGroups or prepopulateWithTaxonSets in options must have field \"identifications\"");
+			}
+
+			const identification: any = {};
+			const map: Record<string, keyof Species> = {
+				"taxonID": "id",
+				"taxonVerbatim": "vernacularName",
+				"taxon": "scientificName"
+			};
+			Object.keys(map).forEach(k => {
+				if (identificationsSchema.properties[k]) {
+					identification[k] = s[map[k]] || "";
+				}
+			});
+			return identification;
+		};
+
+		const units = [
+			...(await this.getUnitsFromInformalTaxonGroups(prepopulateWithInformalTaxonGroups)),
+			...(await this.getUnitsFromTaxonsets(prepopulateWithTaxonSets))
+		].map((s: any) => ({
+			identifications: [speciesToIdentification(s)]
+		}));
 		return {
 			...schemaFormat,
 			options: {
@@ -127,21 +160,43 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 				prepopulatedDocument: getDefaultFormState(
 					schemaFormat.schema as any,
 					merge((prepopulatedDocument || {}), {
-						gatherings: [{
-							units: species.map((s: any) => ({
-								identifications: [{
-									taxonID: s.id,
-									taxonVerbatim: s.vernacularName || "",
-									taxon: s.scientificName || ""
-								}]
-							}))
-						}]
+						gatherings: [{ units }]
 					},
 					{arrayMerge: combineMerge}
 					),
 				)
 			}
 		};
+	}
+
+	private async fetchSpecies(query: JSONObject) {
+		const BIOTA = "MX.37600";
+		return (await this.apiClient.fetchJSON(`/taxa/${BIOTA}/species`, {
+			selectedFields: "id,scientificName,vernacularName",
+			lang: "fi",
+			taxonRanks: "MX.species",
+			pageSize: 10000,
+			...query, 
+		})).results;
+	}
+
+	private getUnitsFromInformalTaxonGroups(informalTaxonGroups?: string[]) {
+		if (!informalTaxonGroups) {
+			return [];
+		}
+		return this.fetchSpecies({
+			informalGroupFilters: informalTaxonGroups,
+			onlyFinnish: true,
+		});
+	}
+
+	private async getUnitsFromTaxonsets(taxonSets?: string[]) {
+		if (!taxonSets) {
+			return [];
+		}
+		return this.fetchSpecies({
+			taxonSets,
+		});
 	}
 }
 

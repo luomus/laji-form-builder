@@ -45,6 +45,7 @@ export const exposedOptions = dictionarify([
 	"excludeFromGlobalExcel",
 	"hasAdmins",
 	"prepopulateWithInformalTaxonGroups",
+	"prepopulateWithTaxonSets",
 	"restrictAccess",
 	"secondaryCopy",
 	"sidebarFormLabel",

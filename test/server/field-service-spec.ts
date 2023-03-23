@@ -1073,21 +1073,22 @@ describe("language", () => {
 
 describe("prepopulatedDocument population", () => {
 
-	let schemaFormat: SchemaFormat;
-	beforeAll(async () => {
-		const form: Master = {
-			fields,
-			options: {
-				prepopulateWithInformalTaxonGroups: ["MVL.181"],
-				prepopulatedDocument: {
-					gatherings: [{
-						units: [{
-							notes: "foo"
-						}]
-					}] as unknown as JSONObject
-				}
+	const form: Master = {
+		fields,
+		options: {
+			prepopulateWithInformalTaxonGroups: ["MVL.181"],
+			prepopulatedDocument: {
+				gatherings: [{
+					units: [{
+						notes: "foo"
+					}]
+				}] as unknown as JSONObject
 			}
-		};
+		}
+	};
+	let schemaFormat: SchemaFormat;
+
+	beforeAll(async () => {
 		schemaFormat = await fieldService.masterToSchemaFormat(form, LANG);
 	});
 
@@ -1106,6 +1107,14 @@ describe("prepopulatedDocument population", () => {
 		});
 	});
 
+	it("prepopulateWithInformalTaxonGroups without identifications in schema errors", async () => {
+		const _form = {
+			...form,
+			fields: []
+		};
+		expect(await throwsError(() => fieldService.masterToSchemaFormat(_form, LANG))).toBe(true);
+	});
+
 	it("prepopulateWithInformalTaxonGroups fills taxon data", async () => {
 		expect((schemaFormat.options!.prepopulatedDocument as any).gatherings[0].units.length).toBeGreaterThan(1);
 		const identification = (schemaFormat.options!.prepopulatedDocument as any)
@@ -1113,6 +1122,44 @@ describe("prepopulatedDocument population", () => {
 		expect(identification.taxon).toBe("Parnassius apollo");
 		expect(identification.taxonID).toBe("MX.60724");
 		expect(identification.taxonVerbatim).toBe("isoapollo");
+	});
+
+	it("prepopulateWithTaxonSets fills taxon data and doesn't use taxon field if not in schema", async () => {
+		const _form = {
+			...form,
+			options: {
+				prepopulateWithTaxonSets: ["MX.taxonSetSykeButterflyCensusOther"],
+			},
+			fields:  [ // Same as other tests but no taxon field
+				{name: "gatherings",
+					fields: [
+						{name: "units",
+							fields: [
+								{name: "identifications",
+									fields: [
+										{name: "taxonVerbatim"},
+										{name: "taxonID"},
+									]},
+								{name: "recordBasis",
+									options: {
+										default: "MY.recordBasisHumanObservation"
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		};
+
+		schemaFormat = await fieldService.masterToSchemaFormat(_form, LANG);
+
+		expect((schemaFormat.options!.prepopulatedDocument as any).gatherings[0].units.length).toBeGreaterThan(1);
+		const identification = (schemaFormat.options!.prepopulatedDocument as any)
+			.gatherings[0] .units[0].identifications[0];
+		expect(identification.taxon).toBe(undefined);
+		expect(identification.taxonID).toBe("MX.59972");
+		expect(identification.taxonVerbatim).toBe("pikkuetanaperhonen");
 	});
 });
 
