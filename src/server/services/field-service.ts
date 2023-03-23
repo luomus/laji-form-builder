@@ -36,12 +36,17 @@ export default class FieldService {
 		this.addTaxonSets = this.addTaxonSets.bind(this);
 		this.masterToSchemaFormat = this.masterToSchemaFormat.bind(this);
 		this.linkMaster = this.linkMaster.bind(this);
+		this.expand = this.expand.bind(this);
 	}
 
 	setLang(lang: Lang) {
 		this.schemaService.setLang(lang);
 		this.schemaServiceWithEnums.setLang(lang);
 		this.expandedJSONService.setLang(lang);
+	}
+
+	expand(master: Master) {
+		return this.formExpanderService.expandMaster(master);
 	}
 
 	masterToSchemaFormat(master: Master, lang?: Lang): Promise<SchemaFormat> {
@@ -60,7 +65,7 @@ export default class FieldService {
 	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang) : Promise<SchemaFormat<JSONSchemaV6Enum>>
 	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
 	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat> {
-		const expandedMaster = await this.formExpanderService.expandMaster(master);
+		const expandedMaster = await this.expand(master);
 
 		const rootField = expandedMaster.fields
 			? getRootField(expandedMaster)

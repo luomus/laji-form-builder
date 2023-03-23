@@ -113,7 +113,7 @@ export default class MainService extends HasCache {
 			const result = reduceWith(
 				form,
 				undefined,
-				this.fieldService.linkMaster,
+				this.fieldService.expand,
 				translateSafely(lang),
 				this.exposeFormListing,
 				addDefaultSupportedLanguage,
