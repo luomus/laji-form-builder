@@ -1,6 +1,6 @@
 {
   "name": "laji-form-builder",
-  "version": "1.0.21",
+  "version": "1.0.22",
   "description": "UI for building laji.fi forms",
   "main": "lib/client/app.js",
   "scripts": {
