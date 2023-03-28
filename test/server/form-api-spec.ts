@@ -181,6 +181,16 @@ describe("/api", () => {
 				.end(finish(done));
 		});
 
+		it("returns 404 for bad id", (done) => {
+			request(app)
+				.get("/api/foobar")
+				.expect((response: any) => {
+					expect(response.status).toBe(404);
+					expect(response.error).toBeTruthy();
+				})
+				.end(finish(done));
+		});
+
 		it("returns in master format by default", (done) => {
 			request(app)
 				.get(`/api/${TEST_FORM_ID}`)

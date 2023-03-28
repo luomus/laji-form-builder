@@ -12,7 +12,7 @@ export class StoreError extends Error {
 		// Explanation https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
 		Object.setPrototypeOf(this, StoreError.prototype);
 
-		this.status = error.status;
+		this.status = error.status || error.statusCode || 500;
 		this.storeError = error.error;
 	}
 }
@@ -35,14 +35,15 @@ type ListResponse<T> = {
 }
 
 type StoreErrorModel = {
-	status: number;
+	status?: number;
+	statusCode?: number;
 	error: string;
 }
 
 type MaybeStoreError<T> = T | StoreErrorModel
 
 const isStoreError = (response: any): response is StoreErrorModel => 
-	isObject(response) && response.status > 400;
+	isObject(response) && [response.status, response.statusCode].some(c => c > 400);
 
 export default class StoreService extends HasCache {
 	private forms: Record<string, RemoteMaster> = {};
