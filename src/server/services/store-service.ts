@@ -7,13 +7,14 @@ export class StoreError extends Error {
 	status: number;
 	storeError: string;
 	constructor(error: StoreErrorModel) {
-		super("Store error");
+		const msg  = error.error ?? error.message ?? "Store error";
+		super(msg);
 		// eslint-disable-next-line max-len
 		// Explanation https://github.com/Microsoft/TypeScript/wiki/Breaking-Changes#extending-built-ins-like-error-array-and-map-may-no-longer-work
 		Object.setPrototypeOf(this, StoreError.prototype);
 
 		this.status = error.status || error.statusCode || 500;
-		this.storeError = error.error;
+		this.storeError = msg;
 	}
 }
 
@@ -37,7 +38,8 @@ type ListResponse<T> = {
 type StoreErrorModel = {
 	status?: number;
 	statusCode?: number;
-	error: string;
+	error?: string;
+	message?: string;
 }
 
 type MaybeStoreError<T> = T | StoreErrorModel
@@ -62,6 +64,7 @@ export default class StoreService extends HasCache {
 		const response = await (this.forms?.[id]
 			? Promise.resolve(this.forms[id])
 			: formFetch<RemoteMaster>(`/${id}`));
+		console.log(response);
 		if (isStoreError(response)) {
 			throw new StoreError(response);
 		}
