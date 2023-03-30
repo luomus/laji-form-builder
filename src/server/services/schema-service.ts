@@ -226,6 +226,9 @@ const addTitle = (property: Property, lang: Lang, isRootProperty = false) => (sc
 const addDefault = (schema: any, field: Field) => {
 	const _default = field.options?.default;
 	if (_default !== undefined) {
+		if ((schema.type === "number" || schema.type === "integer") && !field.required) {
+			throw new Error("Numeric field with a default value must be also required");
+		}
 		schema.default = _default;
 	}
 	return schema;

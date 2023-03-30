@@ -517,17 +517,43 @@ describe("fields", () => {
 			});
 		});
 
-		describe("default populated", () => {
-			const form = { fields: [ { name: "secureLevel", options: { default: "secureLevelKM5" }} ]};
+		describe("default", () => {
+			describe("populated", () => {
+				const form = { fields: [ { name: "secureLevel", options: { default: "secureLevelKM5" }} ]};
 
-			it("for schema format", async () => {
-				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.schema.properties.secureLevel.default).toBe("secureLevelKM5");
+				it("for schema format", async () => {
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
+					expect(schemaFormat.schema.properties.secureLevel.default).toBe("secureLevelKM5");
+				});
+
+				it("for json format", async () => {
+					const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
+					expect(jsonFormat.fields?.[0]?.options?.default as any).toBe("secureLevelKM5");
+				});
 			});
 
-			it("for json format", async () => {
-				const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
-				expect(jsonFormat.fields?.[0]?.options?.default as any).toBe("secureLevelKM5");
+			describe("numeric", () => {
+				it("not allowed if not required", async () => {
+					const form = {fields: [
+						{ name: "gatheringEvent", fields: [
+							{ name: "gatheringFact", fields: [
+								 { name: "observerCount", options: { default: 1 }} 
+							]}
+						]}
+					]};
+					expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
+				});
+
+				it("allowed if required", async () => {
+					const form = {fields: [
+						{ name: "gatheringEvent", fields: [
+							{ name: "gatheringFact", fields: [
+								 { name: "observerCount", options: { default: 1 }, required: true } 
+							]}
+						]}
+					]};
+					expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
+				});
 			});
 		});
 

@@ -64,7 +64,6 @@ export default class StoreService extends HasCache {
 		const response = await (this.forms?.[id]
 			? Promise.resolve(this.forms[id])
 			: formFetch<RemoteMaster>(`/${id}`));
-		console.log(response);
 		if (isStoreError(response)) {
 			throw new StoreError(response);
 		}
