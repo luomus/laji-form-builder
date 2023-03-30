@@ -107,8 +107,9 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 		return property;
 	}
 
-	getFormData({options, validators, warnings}: Pick<Field, "options" | "validators" | "warnings">) {
-		return (Object.keys({ options, validators, warnings }) as (keyof RelevantFields)[])
+	getFormData({required, options, validators, warnings}
+		: Pick<Field, "required" | "options" | "validators" | "warnings">) {
+		return (Object.keys({ required, options, validators, warnings }) as (keyof RelevantFields)[])
 			.reduce<Partial<RelevantFields> | undefined>((formData, key) => {
 				if (this.props.field[key] !== undefined) {
 					if (!formData) {
@@ -152,6 +153,7 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 			optionsProps.blacklist = list;
 		}
 		const schema = JSONSchemaBuilder.object({
+			required: JSONSchemaBuilder.Boolean(),
 			options: JSONSchemaBuilder.object(optionsProps, {title: ""}),
 			validators: JSONSchemaBuilder.object({}),
 			warnings: JSONSchemaBuilder.object({}),
