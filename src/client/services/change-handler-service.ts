@@ -31,146 +31,145 @@ export default class ChangeHandlerService {
 		let newMaster = {...tmpExpandedMaster} as Master;
 
 		for (const event of eventsAsArray) {
-			if (isUiSchemaChangeEvent(event)) {
-				newMaster.uiSchema = updateSafelyWithJSONPointer(
-					newMaster.uiSchema,
-					event.value,
-					fieldPointerToUiSchemaPointer(schemaFormat.schema, event.selected)
-				);
-			} else if (isTranslationsAddEvent(event)) {
-				const {key, value} = event;
-				newMaster.translations = ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
-					...translations,
-					[lang]: {
-						...translations[lang],
-						[key]: value[lang]
-					}
-				}), expandTranslations(newMaster.translations));
-			} else if (isTranslationsChangeEvent(event)) {
-				const {key, value} = event;
-				newMaster.translations = ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
-					...translations,
-					[lang]: {
-						...translations[lang],
-						[key]: lang === this.lang
-							? value
-							: (translations[lang][key] || value)
-					}
-				}), expandTranslations(newMaster.translations));
-			} else if (isTranslationsDeleteEvent(event)) {
-				const {key} = event;
-				newMaster.translations = ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
-					...byLang,
-					[lang]: immutableDelete(expandTranslations(newMaster.translations)[lang], key)
-				}), {} as CompleteTranslations);
-			} else if (event.type === "field") {
-				const splitted = event.selected.split("/").filter(s => s);
-				if (isFieldDeleteEvent(event)) {
-					const filterFields = (field: Field, pointer: string[]): Field => {
-						const [p, ...remaining] = pointer;
-						return {
-							...field,
-							fields: remaining.length
-								? (field.fields as Field[]).map(
-									(f: Field) => f.name === p ? filterFields(f, remaining) : f)
-								: (field.fields as Field[]).filter((f: Field) => f.name !== p)
-						};
+			newMaster = this.applyEvent(newMaster, schemaFormat, event);
+		}
+
+		return tmpMaster.baseFormID || tmpMaster.fieldsFormID
+			? this.applyChangesAsPatches(tmpExpandedMaster, tmpMaster, newMaster)
+			: newMaster;
+	}
+	
+	private applyEvent(master: Master, schemaFormat: SchemaFormat, event: ChangeEvent): Master {
+		if (isUiSchemaChangeEvent(event)) {
+			return {...master, uiSchema: updateSafelyWithJSONPointer(
+				master.uiSchema,
+				event.value,
+				fieldPointerToUiSchemaPointer(schemaFormat.schema, event.selected)
+			)};
+		} else if (isTranslationsAddEvent(event)) {
+			const {key, value} = event;
+			return {...master, translations: ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
+				...translations,
+				[lang]: {
+					...translations[lang],
+					[key]: value[lang]
+				}
+			}), expandTranslations(master.translations))};
+		} else if (isTranslationsChangeEvent(event)) {
+			const {key, value} = event;
+			return {...master, translations: ["fi", "sv", "en"].reduce((translations: any, lang: Lang) => ({
+				...translations,
+				[lang]: {
+					...translations[lang],
+					[key]: lang === this.lang
+						? value
+						: (translations[lang][key] || value)
+				}
+			}), expandTranslations(master.translations))};
+		} else if (isTranslationsDeleteEvent(event)) {
+			const {key} = event;
+			return {...master, translations: ["fi", "sv", "en"].reduce((byLang, lang: Lang) => ({
+				...byLang,
+				[lang]: immutableDelete(expandTranslations(master.translations)[lang], key)
+			}), {} as CompleteTranslations)};
+		} else if (event.type === "field") {
+			const splitted = event.selected.split("/").filter(s => s);
+			if (isFieldDeleteEvent(event)) {
+				const filterFields = (field: Field, pointer: string[]): Field => {
+					const [p, ...remaining] = pointer;
+					return {
+						...field,
+						fields: remaining.length
+							? (field.fields as Field[]).map(
+								(f: Field) => f.name === p ? filterFields(f, remaining) : f)
+							: (field.fields as Field[]).filter((f: Field) => f.name !== p)
 					};
-					newMaster.fields = filterFields(newMaster as Field, splitted).fields;
-				} else if (isFieldAddEvent(event)) {
-					const propertyModel = event.value;
-					if (propertyModel.range[0] !== PropertyRange.Id) {
-						const addField = (fields: Field[], path: string[], property: string) : Field[] => {
-							if (!path.length) {
-								return [...fields, {name: unprefixProp(property)}];
-							}
-							const [next, ...remaining] = path;
-							return fields.map(field => field.name === next
-								? {...field, fields: addField(field.fields || [], remaining, property)}
-								: field
-							);
-						};
-						const fields = (newMaster.fields as Field[]) || [];
-						newMaster.fields = addField(fields, splitted, event.value.property);
-					}
-				} else if (isFieldUpdateEvent(event)) {
-					const updateField = (fields: Field[], path: string[], value: Field): Field[] => {
-						if (path.length === 1) {
-							return fields.map(field => field.name === value.name ? value : field);
+				};
+				return {...master, fields: filterFields(master as Field, splitted).fields};
+			} else if (isFieldAddEvent(event)) {
+				const propertyModel = event.value;
+				if (propertyModel.range[0] !== PropertyRange.Id) {
+					const addField = (fields: Field[], path: string[], property: string) : Field[] => {
+						if (!path.length) {
+							return [...fields, {name: unprefixProp(property)}];
 						}
 						const [next, ...remaining] = path;
 						return fields.map(field => field.name === next
-							? {...field, fields: updateField(field.fields as Field[], remaining, value)}
+							? {...field, fields: addField(field.fields || [], remaining, property)}
 							: field
 						);
 					};
-					newMaster.fields = updateField(newMaster.fields as Field[], splitted, event.value);
+					const fields = (master.fields as Field[]) || [];
+					return {...master, fields: addField(fields, splitted, event.value.property)};
 				}
-			} else if (isOptionChangeEvent(event)) {
-				const {path, value} = event;
-				newMaster = updateSafelyWithJSONPointer(newMaster, value, path);
+			} else if (isFieldUpdateEvent(event)) {
+				const updateField = (fields: Field[], path: string[], value: Field): Field[] => {
+					if (path.length === 1) {
+						return fields.map(field => field.name === value.name ? value : field);
+					}
+					const [next, ...remaining] = path;
+					return fields.map(field => field.name === next
+						? {...field, fields: updateField(field.fields as Field[], remaining, value)}
+						: field
+					);
+				};
+				return {...master, fields: updateField(master.fields as Field[], splitted, event.value)};
 			}
+		} else if (isOptionChangeEvent(event)) {
+			const {path, value} = event;
+			return updateSafelyWithJSONPointer(master, value, path);
 		}
+		throw new Error("Unhandled error");
+	}
 
-		if (tmpMaster.baseFormID || tmpMaster.fieldsFormID) {
-			const diff = getDiff(tmpExpandedMaster as JSON, newMaster as JSON);
+	private applyChangesAsPatches(tmpExpandedMaster: ExpandedMaster, tmpMaster: Master, newMaster: Master) {
+		const diff = getDiff(tmpExpandedMaster as JSON, newMaster as JSON);
 
-			let patchedMaster = tmpMaster;
+		let patchedMaster = tmpMaster;
 
-			const patches: any[] = [];
-			diff.forEach(d => {
-				const path = "/" + (d.path || []).join("/");
-				const editedProp: keyof Master = d.path[0];
-				if (["fields", "uiSchema", "options"].some(prop => prop === editedProp)) {
-					switch (d.kind) {
-					case "N":
-						patches.push({op: "add", path, value: d.rhs});
-						break;
-					case "E":
-						patches.push({op: "replace", path, value: d.rhs});
-						break;
-					case "D":
-						patches.push({op: "remove", path});
-					}
-				} else {
-					if (editedProp === "translations") {
-						if (d.kind === "N" || d.kind === "E") {
-							const lang: Lang = d.path[1];
-							const label: string = d.path[2];
-							const translations = expandTranslations(patchedMaster.translations);
-							patchedMaster = {
-								...patchedMaster,
-								translations: {
-									...translations,
-									[lang]: {...translations[lang], [label]: d.rhs}
-								}
-							};
-						} else if (d.kind === "D") {
-							const lang: Lang = d.path[1];
-							const label: string = d.path[2];
-							const translations = expandTranslations(patchedMaster.translations);
-							patchedMaster = {
-								...patchedMaster,
-								translations: {
-									...translations,
-									[lang]: immutableDelete(translations, label)
-								}
-							};
+		const patches: any[] = [];
+		diff.forEach(d => {
+			const path = "/" + (d.path || []).join("/");
+			const editedProp: keyof Master = d.path[0];
+			if (editedProp === "translations") {
+				if (d.kind === "N" || d.kind === "E") {
+					const lang: Lang = d.path[1];
+					const label: string = d.path[2];
+					const translations = expandTranslations(patchedMaster.translations);
+					patchedMaster = {
+						...patchedMaster,
+						translations: {
+							...translations,
+							[lang]: {...translations[lang], [label]: d.rhs}
 						}
-					} else {
-						const pointer = `/${d.path.join("/")}`;
-						if (d.kind === "N" || d.kind === "E") {
-							patchedMaster = updateSafelyWithJSONPointer(patchedMaster, d.rhs, pointer);
-						} else {
-							patchedMaster = immutableDelete(patchedMaster, pointer);
+					};
+				} else if (d.kind === "D") {
+					const lang: Lang = d.path[1];
+					const label: string = d.path[2];
+					const translations = expandTranslations(patchedMaster.translations);
+					patchedMaster = {
+						...patchedMaster,
+						translations: {
+							...translations,
+							[lang]: immutableDelete(translations, label)
 						}
-					}
+					};
 				}
-			});
+			} else {
+				switch (d.kind) {
+				case "N":
+					patches.push({op: "add", path, value: d.rhs});
+					break;
+				case "E":
+					patches.push({op: "replace", path, value: d.rhs});
+					break;
+				case "D":
+					patches.push({op: "remove", path});
+				}
+			}
+		});
 
-			newMaster = {...patchedMaster, patch: [...(patchedMaster.patch || []), ...patches]};
-		}
-		return newMaster;
+		return {...patchedMaster, patch: [...(patchedMaster.patch || []), ...patches]};
 	}
 }
 
