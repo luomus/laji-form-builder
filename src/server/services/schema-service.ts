@@ -113,7 +113,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 			prepopulateWithTaxonSets
 		} = schemaFormat.options || {};
 
-		if (!prepopulatedDocument && !prepopulateWithTaxonSets && !prepopulateWithTaxonSets) {
+		if (!prepopulatedDocument && !prepopulateWithInformalTaxonGroups && !prepopulateWithTaxonSets) {
 			return schemaFormat;
 		}
 
