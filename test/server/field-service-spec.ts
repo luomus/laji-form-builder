@@ -22,11 +22,10 @@ class MockApiClient extends ApiClientImplementation {
 		} catch (e) {
 			console.warn(`No mock response found in test/server/mock-responses for ${uri}`);
 		}
-		// let result: any = (mocks as any)[uri];
 		return result
-			? {
-				status: 200, json: () => result, ok: true
-			} as Response
+			? result.status > 400
+				? { status: result.status, ok: false } as Response
+				: { status: 200, json: () => result, ok: true } as Response
 			: undefined;
 	}
 
@@ -78,7 +77,8 @@ const fields = [
 						options: {
 							default: "MY.recordBasisHumanObservation"
 						}
-					}
+					},
+					{name: "informalTaxonGroups"}
 				]
 			}
 		]
@@ -1130,6 +1130,13 @@ describe("prepopulatedDocument population", () => {
 		const {gatherings} = schemaFormat.options!.prepopulatedDocument as any;
 		gatherings[0].units.forEach((unit: any) => {
 			expect(unit.recordBasis).toBe("MY.recordBasisHumanObservation");
+		});
+	});
+
+	it("populates informalTaxonGroups", async () => {
+		const {gatherings} = schemaFormat.options!.prepopulatedDocument as any;
+		gatherings[0].units.forEach((unit: any) => {
+			expect(unit.informalTaxonGroups.length).toBeGreaterThan(0);
 		});
 	});
 

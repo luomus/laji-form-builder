@@ -8,6 +8,14 @@ import merge from "deepmerge";
 import ConverterService from "./converter-service";
 import ApiClient from "../../api-client";
 
+type Species = {
+	id: string;
+	vernacularName?: string;
+	scientificName?: string;
+	informalTaxonGroups?: string[];
+}
+
+
 export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
 	extends ConverterService<SchemaFormat<T>> {
 
@@ -120,14 +128,11 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		const identificationsSchema =
 			(schemaFormat.schema as any).properties.gatherings?.items?.properties
 				.units?.items?.properties.identifications?.items;
+		const informalTaxonGroupsSchema =
+			(schemaFormat.schema as any).properties.gatherings?.items?.properties
+				.units?.items?.properties.informalTaxonGroups;
 
-		type Species = {
-			id: string;
-			vernacularName?: string;
-			scientificName?: string;
-		}
-
-		const speciesToIdentification = (s: Species) => {
+		const speciesToUnit = (s: Species) => {
 			if (!identificationsSchema) {
 				// eslint-disable-next-line max-len
 				throw new Error("Form with prepopulateWithInformalTaxonGroups or prepopulateWithTaxonSets in options must have field \"identifications\"");
@@ -144,15 +149,17 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 					identification[k] = s[map[k]] || "";
 				}
 			});
-			return identification;
+			const unit: JSONObject = { identifications: [identification] };
+			if (informalTaxonGroupsSchema && s.informalTaxonGroups) {
+				unit.informalTaxonGroups = s.informalTaxonGroups;
+			}
+			return unit;
 		};
 
 		const units = [
 			...(await this.getUnitsFromInformalTaxonGroups(prepopulateWithInformalTaxonGroups)),
 			...(await this.getUnitsFromTaxonSets(prepopulateWithTaxonSets))
-		].map((s: any) => ({
-			identifications: [speciesToIdentification(s)]
-		}));
+		].map((s: Species) => speciesToUnit(s));
 		return {
 			...schemaFormat,
 			options: {
@@ -169,10 +176,10 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		};
 	}
 
-	private async fetchSpecies(query: JSONObject) {
+	private async fetchSpecies(query: JSONObject): Promise<Species[]> {
 		const BIOTA = "MX.37600";
 		return (await this.apiClient.fetchJSON(`/taxa/${BIOTA}/species`, {
-			selectedFields: "id,scientificName,vernacularName",
+			selectedFields: "id,scientificName,vernacularName,informalTaxonGroups",
 			lang: "fi",
 			taxonRanks: "MX.species",
 			pageSize: 10000,
