@@ -88,7 +88,7 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 			                      onJSONChange={this.onLajiFormChange}
 			                      validator={isJSONObjectOrUndefined}
 			                      renderUI={this.renderUI}
-			                      topOffset={68} />
+			                      topOffset={68 + (this.props.topOffset || 0)} />
 		);
 	}
 

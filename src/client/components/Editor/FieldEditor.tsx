@@ -23,13 +23,15 @@ export interface GenericFieldEditorProps extends Classable {
 	translations: Record<string, string>;
 	path: string;
 	onChange: (changed: FieldEditorChangeEvent | FieldEditorChangeEvent[]) => void;
-	context?: string
+	context?: string;
+	topOffset?: number;
 }
 
 type Props = {
 	expandedMaster: ExpandedMaster;
 	schemaFormat: SchemaFormat;
 	onSelectedField: (selected: string) => void;
+	topOffset?: number;
 } & Pick<EditorProps, "onChange">
 	& Pick<EditorState, "selectedField">;
 
@@ -64,7 +66,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 		const fieldsStyle: React.CSSProperties = {
 			display: "flex",
 			flexDirection: "column",
-			height: fullHeightWithOffset(25),
+			height: fullHeightWithOffset(25 + (this.props.topOffset || 0)),
 			overflowY: "auto"
 		};
 
@@ -73,7 +75,8 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 			contentValid: isValid(schemaFormat),
 			active,
 			...this.getFieldEditorChildProps(expandedMaster, schemaFormat),
-			className: editorContentNmspc("ui")
+			className: editorContentNmspc("ui"),
+			topOffset: this.props.topOffset
 		};
 
 		return <>

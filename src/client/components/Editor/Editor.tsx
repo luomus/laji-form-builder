@@ -124,6 +124,16 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		);
 	}
 
+	hasWarning() {
+		const {master} = this.props;
+		return isValid(master) && !!master?.baseFormID;
+	}
+
+	getEditorContentOffset() {
+		return ((this.hasWarning() ? 1 : 0) + (this.props.errorMsg ? 1 : 0))
+			* 19;
+	}
+
 	renderActiveEditor() {
 		const containerStyle: React.CSSProperties = {
 			display: "flex",
@@ -144,7 +154,9 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			                       expandedMaster={expandedMaster}
 														 schemaFormat={schemaFormat}
 														 selectedField={this.state.selectedField}
-														 onSelectedField={this.onFieldSelected} />;
+														 onSelectedField={this.onFieldSelected}
+														 topOffset={this.getEditorContentOffset()} />;
+								             
 		} else if (activeEditorMode === "options") {
 			content = <OptionsEditor master={expandedMaster}
 			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
@@ -153,6 +165,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			                         onLoaded={this.state.optionsEditorLoadedCallback}
 			                         filter={this.state.optionsEditorFilter}
 								               clearFilters={this.clearOptionsEditorFilters}
+								               topOffset={this.getEditorContentOffset()}
 			/>;
 		}
 		return content
@@ -565,8 +578,7 @@ export const EditorContent = {
 
 			const buttonStyle = {position: "absolute", right: 20, top: 5};
 			return (
-				<div style={{position: "relative", height: fullHeightWithOffset(topOffset), overflow: "auto"}}
-				     className={editorContentNmspc("padding-bottom-hack")}>
+				<div style={{position: "relative", height: fullHeightWithOffset(topOffset), overflow: "auto"}}>
 					<JSONEditor validator={validator}
 					            onChange={onJSONChange}
 					            value={json}
@@ -589,8 +601,7 @@ export const EditorContent = {
 			);
 		},
 		UI: ({renderUI, overflow = true, topOffset}: EditorContentUITabProps) =>
-			<div style={{height: fullHeightWithOffset(topOffset), overflow: overflow ? "auto" : undefined}}
-			     className={classNames(editorContentNmspc("padding-bottom-hack"))} >
+			<div style={{height: fullHeightWithOffset(topOffset), overflow: overflow ? "auto" : undefined}}>
 			 {renderUI()}
 		 </div>
 	}

@@ -107,7 +107,7 @@ export default class UiSchemaEditor extends React.PureComponent<GenericFieldEdit
 			                      onJSONChange={this.onJSONEditorChange}
 			                      validator={isJSONObjectOrUndefined}
 			                      renderUI={this.renderUI}
-			                      topOffset={68}/>
+			                      topOffset={68 + (this.props.topOffset || 0)}/>
 		);
 	}
 

@@ -46,6 +46,7 @@ type FormOptionsEditorProps = Stylable & {
 	onLoaded?: () => void;
 	filter?: string[];
 	clearFilters: () => void;
+	topOffset?: number;
 }
 
 const formProperty = {
@@ -141,7 +142,7 @@ const prepareMaster = (master: Master) => {
 };
 
 export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor(
-	{master, onChange, translations, onLoaded, filter, clearFilters}
+	{master, onChange, translations, onLoaded, filter, clearFilters, topOffset = 0}
 	: FormOptionsEditorProps, ref) {
 	const context = React.useContext(Context);
 	const { metadataService, translations: appTranslations, editorLang } = context;
@@ -251,7 +252,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			                      activeTab={activeTab}
 			                      onTabChange={setActiveTab}
 			                      overflowUIContent={false}
-			                      topOffset={activeTab === "JSON" ? 46 : 68} />
+			                      topOffset={(activeTab === "JSON" ? 46 : 73) + topOffset} />
 		</div>
 	);
 }));
