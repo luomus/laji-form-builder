@@ -362,12 +362,12 @@ const formSelectNmscp = nmspc("form-select");
 
 function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 	const [forms, setForms] = React.useState<FormListing[] | undefined>(undefined);
-	const {formService, theme, notifier, translations} = React.useContext(Context);
+	const {formService, theme, notifier, translations, lang} = React.useContext(Context);
 	const [loadingForms, setLoadingForms] = React.useState<Record<string, boolean>>({});
 
 	const loadForms = React.useCallback(async () => {
-		setForms(await formService.getForms());
-	}, [formService]);
+		setForms(await formService.getForms(lang));
+	}, [formService, lang]);
 
 	React.useEffect(() => {
 		loadForms();

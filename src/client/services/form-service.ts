@@ -63,8 +63,8 @@ export default class FormService extends HasCache {
 		return response;
 	}
 
-	getForms = this.cache(async (): Promise<FormListing[]> => {
-		const response = (await this.fetchJSON("", undefined));
+	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
+		const response = (await this.fetchJSON("", lang ? {lang} : undefined));
 		return this.formApiClient ? response.forms : response.results;
 	});
 
