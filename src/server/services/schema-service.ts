@@ -181,7 +181,6 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		return (await this.apiClient.fetchJSON(`/taxa/${BIOTA}/species`, {
 			selectedFields: "id,scientificName,vernacularName,informalTaxonGroups",
 			lang: "fi",
-			taxonRanks: "MX.species",
 			pageSize: 10000,
 			...query, 
 		})).results;
