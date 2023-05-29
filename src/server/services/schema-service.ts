@@ -176,8 +176,8 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		};
 	}
 
-	private async fetchTaxa(query: JSONObject): Promise<Species[]> {
-		return (await this.apiClient.fetchJSON("/taxa", {
+	private async fetchTaxa(endpoint: string, query: JSONObject): Promise<Species[]> {
+		return (await this.apiClient.fetchJSON(endpoint, {
 			selectedFields: "id,scientificName,vernacularName,informalTaxonGroups",
 			lang: "fi",
 			pageSize: 10000,
@@ -189,8 +189,11 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		if (!informalTaxonGroups) {
 			return [];
 		}
-		return this.fetchTaxa({
+		const BIOTA = "MX.37600";
+		const endpoint = `/taxa/${BIOTA}/species`;
+		return this.fetchTaxa(endpoint, {
 			informalGroupFilters: informalTaxonGroups,
+			taxonRanks: "MX.species",
 			onlyFinnish: true,
 		});
 	}
@@ -199,7 +202,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 		if (!taxonSets) {
 			return [];
 		}
-		return this.fetchTaxa({
+		return this.fetchTaxa("/taxa", {
 			taxonSets,
 		});
 	}
