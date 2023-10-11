@@ -45,7 +45,7 @@ type StoreErrorModel = {
 type MaybeStoreError<T> = T | StoreErrorModel
 
 const isStoreError = (response: any): response is StoreErrorModel => 
-	isObject(response) && [response.status, response.statusCode].some(c => c > 400);
+	isObject(response) && [response.status, response.statusCode].some(c => typeof c === "number" && c > 400);
 
 export default class StoreService extends HasCache {
 	private forms: Record<string, RemoteMaster> = {};
