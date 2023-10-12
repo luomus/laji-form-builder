@@ -36,6 +36,7 @@ export interface BuilderState {
 	lang: Lang;
 	editorHeight: number;
 	loading: number;
+	jsonEditorOpen: boolean;
 	id?: string;
 	master?: MaybeError<Master>;
 	expandedMaster?: MaybeError<ExpandedMaster>;
@@ -69,7 +70,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	state: BuilderState = {
 		lang: this.props.lang,
 		editorHeight: EDITOR_HEIGHT,
-		loading: 0
+		loading: 0,
+		jsonEditorOpen: false
 	};
 	private apiClient: ApiClient;
 	private formApiClient?: ApiClient;
@@ -298,24 +300,26 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	}
 
 	renderEditor() {
-		const {master, schemaFormat, tmpExpandedMaster, tmpMaster, saving, loading, errorMsg} = this.state;
+		const {master, tmpMaster} = this.state;
 		return (
 			<Editor
-				master={tmpMaster}
-				expandedMaster={tmpExpandedMaster}
-				schemaFormat={schemaFormat}
+				master={this.state.tmpMaster}
+				expandedMaster={this.state.tmpExpandedMaster}
+				schemaFormat={this.state.schemaFormat}
 				onChange={this.onEditorChange}
 				onMasterChange={this.onEditorMasterChange}
 				onSave={this.onSave}
 				onLangChange={this.onLangChange}
 				onHeightChange={this.onHeightChange}
 				height={EDITOR_HEIGHT}
-				saving={saving}
-				loading={loading}
+				saving={this.state.saving}
+				loading={this.state.loading}
+				jsonEditorOpen={this.state.jsonEditorOpen}
+				onJsonEditorOpenChange={this.onJsonEditorOpenChange}
 				submitDisabled={!isValid(master) || !isValid(tmpMaster) || master !== tmpMaster || !master?.id}
 				displaySchemaTabs={this.props.displaySchemaTabs ?? true}
 				className={gnmspc("")}
-				errorMsg={errorMsg}
+				errorMsg={this.state.errorMsg}
 				onRemountLajiForm={this.props.onRemountLajiForm}
 			/>
 		);
@@ -323,6 +327,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	onHeightChange = (editorHeight: number) => {
 		this.setState({editorHeight});
+	}
+
+	onJsonEditorOpenChange = (open: boolean) => {
+		this.setState({jsonEditorOpen: open});
 	}
 
 	onEditorMasterChangeAbortControllerRef = createRef<AbortController>();
@@ -358,7 +366,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				);
 				console.error(rootError);
 			} else {
-				this.setState(newState);
+				this.setState({...newState, jsonEditorOpen: false});
 			}
 		} finally {
 			this.popLoading();
@@ -408,13 +416,13 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			this.setState({saving: true});
 			if (master.id) {
 				const updatedMaster = await this.formService.update(master);
-				this.setState({saving: false, id: master.id});
+				this.setState({saving: false, id: master.id, jsonEditorOpen: false});
 				if (master.id === updatedMaster.id) { // else componentDidUpdate() will handle updating from changed id.
 					this.updateMaster(updatedMaster);
 				}
 			} else {
 				const masterResponse = await this.formService.create(master);
-				this.setState({master: masterResponse, saving: false, id: masterResponse.id});
+				this.setState({master: masterResponse, saving: false, id: masterResponse.id, jsonEditorOpen: false});
 				this.onSelected(masterResponse.id);
 			}
 			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["save.success"]);

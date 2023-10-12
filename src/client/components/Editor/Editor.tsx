@@ -3,7 +3,7 @@ import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, Submi
 	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps,
 	ErrorBoundary, Tooltip, TooltipCompatible
 } from "../components";
-import { classNames, nmspc, gnmspc, useBooleanSetter, useChain, fullHeightWithOffset } from "../../utils";
+import { classNames, nmspc, gnmspc, useBooleanSetter, fullHeightWithOffset } from "../../utils";
 import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
@@ -31,6 +31,8 @@ export interface EditorProps extends Stylable, Classable {
 	onSave: (master: Master) => Promise<boolean>;
 	displaySchemaTabs: boolean;
 	loading: number;
+	jsonEditorOpen: boolean;
+	onJsonEditorOpenChange: (open: boolean) => void;
 	master?: MaybeError<Master>;
 	expandedMaster?: MaybeError<ExpandedMaster>;
 	schemaFormat?: MaybeError<SchemaFormat>;
@@ -47,7 +49,6 @@ export interface EditorState {
 	pointerChoosingActive: boolean;
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
-	jsonEditorOpen?: boolean;
 	saveModalOpen?: Master | false;
 	selectedField?: string;
 }
@@ -172,7 +173,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			? (
 				<div style={containerStyle} ref={this.containerRef} className={editorContentNmspc()}>
 					{content}
-					{this.state.jsonEditorOpen && <FormJSONEditorModal value={master}
+					{this.props.jsonEditorOpen && <FormJSONEditorModal value={master}
 					                                                   onHide={this.hideJSONEditor}
 					                                                   onSave={this.onWantsToSave}
 					                                                   onChange={this.props.onMasterChange} />}
@@ -249,11 +250,11 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 	clearOptionsEditorFilters = () => this.setState({optionsEditorFilter: undefined});
 
 	openJSONEditor = () => {
-		this.setState({jsonEditorOpen: true});
+		this.props.onJsonEditorOpenChange(true);
 	}
 
 	hideJSONEditor = () => {
-		this.setState({jsonEditorOpen: false});
+		this.props.onJsonEditorOpenChange(false);
 	}
 }
 
@@ -500,14 +501,12 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON | und
 	}, [tmpValue, value, translations, onSubmitDraft, onSubmit, onHide]);
 
 
-	const _onSubmitDraft = useChain(onSubmitDraft, onHide);
-
 	return (
 		<GenericModal onHide={onHideCheckForChanges} header={header}>
 			<SubmittableJSONEditor {...props}
 			                       value={isValid(value) ? value : undefined}
-			                       onSubmitDraft={onSubmitDraft && _onSubmitDraft}
-			                       onSubmit={useChain(onSubmit, onHide)}
+			                       onSubmitDraft={onSubmitDraft}
+			                       onSubmit={onSubmit}
 			                       onChange={_onChange} />
 		</GenericModal>
 	);
