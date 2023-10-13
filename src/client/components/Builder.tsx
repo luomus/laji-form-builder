@@ -2,7 +2,7 @@ import * as React from "react";
 import { Notifier } from "laji-form/lib/components/LajiForm";
 import { Theme } from "laji-form/lib/themes/theme";
 import { translate } from "../../utils";
-import { createRef, gnmspc, isSignalAbortError, runAbortable } from "../utils";
+import { createRef, gnmspc, isSignalAbortError, promisify, runAbortable } from "../utils";
 import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";
 import appTranslations from "../translations.json";
@@ -87,6 +87,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		allowList: true
 	};
 
+	setStateAsync = promisify(this.setState.bind(this));
+
 	constructor(props: BuilderProps) {
 		super(props);
 		this.apiClient = new ApiClient(props.apiClient, props.lang);
@@ -117,14 +119,13 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.masterAbortControllerRef.current?.abort();
 	}
 
-	componentDidUpdate(
+	async componentDidUpdate(
 		{lang: prevLang}: BuilderProps,
 		{schemaFormat: prevSchemaFormat, lang: prevStateLang}: BuilderState
 	) {
 		if (prevLang !== this.props.lang && this.state.lang === prevLang) {
-			this.setState({lang: this.props.lang}, () => {
-				this.setLangForServices();
-			});
+			await this.setStateAsync({lang: this.props.lang});
+			this.setLangForServices();
 		}
 		this.updateFromId(this.props.id);
 		if (prevSchemaFormat !== this.state.schemaFormat || this.state.lang !== prevStateLang) {
@@ -134,25 +135,24 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	formAbortControllerRef = createRef<AbortController>();
 
-	updateFromId(id?: string) {
+	async updateFromId(id?: string) {
 		if (id === this.state.id) {
 			return;
 		}
-		this.setState({
+		await this.setStateAsync({
 			master: undefined,
 			tmpMaster: undefined,
 			tmpExpandedMaster: undefined,
 			expandedMaster: undefined,
 			schemaFormat: undefined,
 			id
-		}, () => {
-			runAbortable(async (signal: AbortSignal) => {
-				const master = id
-					? await this.formService.getMaster(id, signal)
-					: undefined;
-				this.updateMaster(master);
-			}, this.formAbortControllerRef);
 		});
+		runAbortable(async (signal: AbortSignal) => {
+			const master = id
+				? await this.formService.getMaster(id, signal)
+				: undefined;
+			this.updateMaster(master);
+		}, this.formAbortControllerRef);
 	}
 
 	onSelected(id: string) {
@@ -198,7 +198,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 	updateMaster(master?: MaybeError<Master>) {
 		return runAbortable(async (signal: AbortSignal) => {
 			const state = await this.getDerivedStateFromMaster(master, signal);
-			this.setState(this.getStateFromMasterUpdate(state));
+			this.setState(getStateFromMasterUpdate(state));
 			return state.master;
 		}, this.masterAbortControllerRef);
 	}
@@ -216,12 +216,6 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		}, this.tmpMasterAbortControllerRef);
 	}
 
-	getStateFromMasterUpdate = (state: Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">) => ({
-		...state,
-		tmpMaster: state.master,
-		tmpExpandedMaster: state.expandedMaster,
-	})
-
 	pushLoading() {
 		this.setState(({loading}) => ({loading: loading + 1}));
 	}
@@ -238,22 +232,21 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 
 	langChangeAbortControllerRef = createRef<AbortController>();
 
-	onLangChange = (lang: Lang) => {
+	onLangChange = async (lang: Lang) => {
 		this.pushLoading();
-		this.setState({lang}, async () => {
-			const {tmpExpandedMaster} = this.state;
-			this.setLangForServices();
-			const schemaFormat = await runAbortable(
-				signal => this.expandedMasterToSchemaFormat(tmpExpandedMaster, signal),
-				this.langChangeAbortControllerRef);
-			if (isSignalAbortError(schemaFormat)) {
-				this.popLoading();
-				return;
-			}
-			this.props.onLangChange(this.state.lang);
-			this.setState({schemaFormat});
+		await this.setStateAsync({lang});
+		const {tmpExpandedMaster} = this.state;
+		this.setLangForServices();
+		const schemaFormat = await runAbortable(
+			signal => this.expandedMasterToSchemaFormat(tmpExpandedMaster, signal),
+			this.langChangeAbortControllerRef);
+		if (isSignalAbortError(schemaFormat)) {
 			this.popLoading();
-		});
+			return;
+		}
+		this.props.onLangChange(this.state.lang);
+		this.setState({schemaFormat});
+		this.popLoading();
 	}
 
 	private setLangForServices() {
@@ -442,3 +435,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.updateMaster(master);
 	}
 }
+
+const getStateFromMasterUpdate = (state: Pick<BuilderState, "master" | "expandedMaster" | "schemaFormat">) => ({
+	...state,
+	tmpMaster: state.master,
+	tmpExpandedMaster: state.expandedMaster,
+});
+

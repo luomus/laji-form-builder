@@ -348,7 +348,7 @@ export function handleTranslationChange<T>(
 	}
 }
 
-type Ref<T> = { current?: T}
+type Ref<T> = { current?: T};
 export const createRef = <T,>(value?: T): Ref<T> => ({current: value});
 
 export const isSignalAbortError = (e: any): e is DOMException => e instanceof DOMException && e.name === "AbortError";
@@ -381,7 +381,7 @@ export function useBooleanSetter(value: boolean): [boolean, () => void, () => vo
 /**
  * Chain two function calls.
  */
-export function useChain<T>(fn1: ((...params: T[]) => void) | undefined, fn2: () => void): (...params: T[]) => void  {
+export function useChain<T>(fn1: ((...params: T[]) => void) | undefined, fn2: () => void): (...params: T[]) => void {
 	return React.useCallback((...params: T[]) => {
 		fn1?.(...params);
 		fn2();
@@ -389,3 +389,6 @@ export function useChain<T>(fn1: ((...params: T[]) => void) | undefined, fn2: ()
 }
 
 export const fullHeightWithOffset = (offset: number) => `calc(100% - ${offset}px)`;
+
+export const promisify = <T, R>(fn: (params: T, callback: (result?: R) => void) => void) => 
+	(params: T) => new Promise<R | void>(resolve => fn(params, resolve));
