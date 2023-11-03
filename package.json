@@ -1,6 +1,6 @@
 {
   "name": "@luomus/laji-form-builder",
-  "version": "1.0.28",
+  "version": "1.0.29",
   "description": "UI for building laji.fi forms",
   "main": "lib/client/app.js",
   "scripts": {
