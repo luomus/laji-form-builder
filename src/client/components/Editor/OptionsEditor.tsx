@@ -8,9 +8,9 @@ import {
 } from "../../../model";
 import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
 import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
-import { isDefaultData, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
+import { isDefaultData, updateSafelyWithJSONPointer } from "@luomus/laji-form/lib/utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
-import { LajiFormProps } from "laji-form/lib/components/LajiForm";
+import { LajiFormProps } from "@luomus/laji-form/lib/components/LajiForm";
 import MetadataService from "../../../services/metadata-service";
 import { editorContentNmspc, EditorContentTab, EditorToolbar, GenericEditorContent } from "./Editor";
 

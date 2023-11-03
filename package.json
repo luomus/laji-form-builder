@@ -1,5 +1,5 @@
 {
-  "name": "laji-form-builder",
+  "name": "@luomus/laji-form-builder",
   "version": "1.0.28",
   "description": "UI for building laji.fi forms",
   "main": "lib/client/app.js",
@@ -31,6 +31,7 @@
     "react-jsonschema-form"
   ],
   "dependencies": {
+    "@luomus/laji-form": "^14.3.6",
     "@types/deep-diff": "^1.0.2",
     "@types/memoizee": "^0.4.3",
     "@types/react": "^16.14.14",
@@ -42,7 +43,6 @@
     "deepmerge": "^4.2.2",
     "fast-json-patch": "^3.1.0",
     "json-schema": "^0.3.0",
-    "laji-form": "^14.3.3",
     "memoizee": "^0.4.14",
     "parse-prop-types": "git+https://git@github.com/olzraiti/parse-prop-types.git#c8a4540d8d0af0e47187c1d0de155c11be84b9ce",
     "react": "^17.0.2",

@@ -9,14 +9,14 @@ import {
 } from "../../utils";
 import { parseJSONPointer, JSONSchemaBuilder, isObject } from "../../../utils";
 import LajiForm from "../LajiForm";
-import { Label as LajiFormLabel } from "laji-form/lib/components/components";
-import LajiFormTitle from "laji-form/lib/components/templates/TitleField";
+import { Label as LajiFormLabel } from "@luomus/laji-form/lib/components/components";
+import LajiFormTitle from "@luomus/laji-form/lib/components/templates/TitleField";
 import {
 	parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, getInnerUiSchema, getUiOptions, immutableDelete
-} from "laji-form/lib/utils";
+} from "@luomus/laji-form/lib/utils";
 import { AnyJSONEditor } from "../components";
 import { Context } from "../Context";
-import { FieldProps } from "laji-form/lib/components/LajiForm";
+import { FieldProps } from "@luomus/laji-form/lib/components/LajiForm";
 import { isJSONObjectOrUndefined, JSONObject, JSONSchema } from "../../../model";
 import { GenericFieldEditorProps } from "./FieldEditor";
 

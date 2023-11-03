@@ -3,7 +3,7 @@ import { Lang } from "../../model";
 import MetadataService from "../../services/metadata-service";
 import FormService from "../services/form-service";
 import { Theme } from "../themes/theme";
-import { Notifier } from "laji-form/lib/components/LajiForm";
+import { Notifier } from "@luomus/laji-form/lib/components/LajiForm";
 import ApiClient from "../../api-client";
 
 export interface ContextProps {

@@ -1,12 +1,12 @@
 import React from "react";
 import LajiForm from "./LajiForm";
-import _LajiForm from "laji-form/lib/components/LajiForm";
+import _LajiForm from "@luomus/laji-form/lib/components/LajiForm";
 import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchInput, Help } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult, isMaster } from "../../model";
 import { JSONSchemaBuilder } from "../../utils";
 import { classNames, gnmspc, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "../utils";
-import { immutableDelete, translate as translateKey } from "laji-form/lib/utils";
+import { immutableDelete, translate as translateKey } from "@luomus/laji-form/lib/utils";
 import { ButtonProps, ButtonGroupProps } from "../themes/theme";
 
 interface WizardStep {

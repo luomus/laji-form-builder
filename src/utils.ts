@@ -1,5 +1,5 @@
 import fetch from "cross-fetch";
-import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "laji-form/lib/utils";
+import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "@luomus/laji-form/lib/utils";
 import { Field, JSONSchema, JSONSchemaArray, JSONSchemaBoolean, JSONSchemaEnumOneOf, JSONSchemaInteger,
 	JSONSchemaNumber, JSONSchemaObject, JSONSchemaString, JSONSchemaV6Enum, Lang, Master, Property } from "./model";
 

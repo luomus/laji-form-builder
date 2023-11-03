@@ -1,6 +1,6 @@
 import * as React from "react";
-import { Notifier } from "laji-form/lib/components/LajiForm";
-import { Theme } from "laji-form/lib/themes/theme";
+import { Notifier } from "@luomus/laji-form/lib/components/LajiForm";
+import { Theme } from "@luomus/laji-form/lib/themes/theme";
 import { translate } from "../../utils";
 import { createRef, gnmspc, isSignalAbortError, promisify, runAbortable } from "../utils";
 import { Editor } from "./Editor/Editor";
@@ -12,7 +12,7 @@ import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
 import ApiClient from "../../api-client";
-import { ApiClientImplementation } from "laji-form/lib/ApiClient";
+import { ApiClientImplementation } from "@luomus/laji-form/lib/ApiClient";
 import FormExpanderService from "../../services/form-expander-service";
 import ChangeHandlerService, {ChangeEvent, MasterChangeEvent} from "../services/change-handler-service";
 

@@ -4,9 +4,9 @@ import {
 	ListGroupProps as LajiFormListGroupProps,
 	BreadcrumbItem as LajiFormBreadcrumbItem,
 	ButtonProps as LajiFormButtonProps,
-} from "laji-form/lib/themes/theme";
+} from "@luomus/laji-form/lib/themes/theme";
 import {TooltipCompatible} from "../components/components";
-export * from "laji-form/lib/themes/theme";
+export * from "@luomus/laji-form/lib/themes/theme";
 
 interface HasMaybeClassName {
 	className?: string;

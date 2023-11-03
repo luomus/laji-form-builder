@@ -1,5 +1,5 @@
 import * as React from "react";
-import LajiForm, { LajiFormProps } from "laji-form/lib/components/LajiForm";
+import LajiForm, { LajiFormProps } from "@luomus/laji-form/lib/components/LajiForm";
 import { Context } from "./Context";
 
 export default React.forwardRef<LajiForm, LajiFormProps>((props: LajiFormProps, ref) => {

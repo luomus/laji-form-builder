@@ -3,8 +3,8 @@ import _Spinner from "react-spinner";
 import { Context } from "./Context";
 import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "../utils";
 import { JSON } from "../../model";
-import LajiFormContext from "laji-form/lib/ReactContext";
-import { Help as LJHelp } from "laji-form/lib/components/components";
+import LajiFormContext from "@luomus/laji-form/lib/ReactContext";
+import { Help as LJHelp } from "@luomus/laji-form/lib/components/components";
 
 export interface Stylable {
 	style?: React.CSSProperties;

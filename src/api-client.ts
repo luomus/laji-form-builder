@@ -1,5 +1,5 @@
 import fetch from "cross-fetch";
-import { ApiClientImplementation as ApiClientAbstract } from "laji-form/lib/ApiClient";
+import { ApiClientImplementation as ApiClientAbstract } from "@luomus/laji-form/lib/ApiClient";
 
 export default class ApiClient {
 	apiClient: ApiClientAbstract;

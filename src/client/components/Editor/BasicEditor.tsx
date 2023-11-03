@@ -3,14 +3,14 @@ import { FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
 import {
 	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
 } from "../../../utils";
-import * as LajiFormUtils from "laji-form/lib/utils";
+import * as LajiFormUtils from "@luomus/laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
 import { Context } from "../Context";
 import { EditorLajiForm } from "./UiSchemaEditor";
 import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf, isJSONObjectOrUndefined } from "../../../model";
 import { detectChangePaths, handleTranslationChange } from "../../utils";
 import { GenericFieldEditorProps } from "./FieldEditor";
-import { immutableDelete } from "laji-form/lib/utils";
+import { immutableDelete } from "@luomus/laji-form/lib/utils";
 
 type BasicEditorState = {
 	childProps?: Property[] | false;

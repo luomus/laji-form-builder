@@ -2,7 +2,7 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { Classable, TooltipCompatible } from "../components";
 import { Context } from "../Context";
-import { findNearestParentSchemaElem } from "laji-form/lib/utils";
+import { findNearestParentSchemaElem } from "@luomus/laji-form/lib/utils";
 import { classNames, gnmspc } from "../../utils";
 
 const parseOptionPaths = (elem: Element) => {

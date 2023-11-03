@@ -3,7 +3,7 @@ import parsePropTypes from "parse-prop-types";
 import memoize from "memoizee";
 import { isObject, parseJSONPointer } from "../utils";
 import { ContextProps } from "./components/Context";
-import { immutableDelete, isEmptyString, updateSafelyWithJSONPointer } from "laji-form/lib/utils";
+import { immutableDelete, isEmptyString, updateSafelyWithJSONPointer } from "@luomus/laji-form/lib/utils";
 import { JSONObject, JSON, isJSONObject } from "../model";
 
 export const classNames = (...cs: any[]) => cs.filter(s => typeof s === "string").join(" ");

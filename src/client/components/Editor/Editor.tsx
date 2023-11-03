@@ -10,7 +10,7 @@ import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, Translation
 import { Context } from "../Context";
 import OptionsEditor from "./OptionsEditor";
 import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster } from "../../../model";
-import { translate as translateKey } from "laji-form/lib/utils";
+import { translate as translateKey } from "@luomus/laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
 import LajiForm from "../LajiForm";

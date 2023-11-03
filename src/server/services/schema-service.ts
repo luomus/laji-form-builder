@@ -3,7 +3,7 @@ import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONOb
 	JSONSchemaObject, JSONSchemaV6Enum, Lang, Master, Property, SchemaFormat } from "../../model";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchemaBuilder, multiLang, reduceWith, unprefixProp } from "../../utils";
-import { getDefaultFormState } from "laji-form/lib/utils";
+import { getDefaultFormState } from "@luomus/laji-form/lib/utils";
 import merge from "deepmerge";
 import ConverterService from "./converter-service";
 import ApiClient from "../../api-client";

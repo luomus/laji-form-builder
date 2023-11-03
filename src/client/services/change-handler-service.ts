@@ -1,4 +1,4 @@
-import { updateSafelyWithJSONPointer, immutableDelete } from "laji-form/lib/utils";
+import { updateSafelyWithJSONPointer, immutableDelete } from "@luomus/laji-form/lib/utils";
 import { unprefixProp } from "../../utils";
 import { fieldPointerToUiSchemaPointer } from "../utils";
 import {

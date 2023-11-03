@@ -2,7 +2,7 @@ import LajiFormBuilder from "../../client/components/Builder";
 import * as config from "../../../config.json";
 import * as React from "react";
 import { render } from "react-dom";
-import LajiForm, { Notifier } from "laji-form/lib/components/LajiForm";
+import LajiForm, { Notifier } from "@luomus/laji-form/lib/components/LajiForm";
 import lajiFormBs3 from "../../client/themes/bs3";
 import FormService from "../../client/services/form-service";
 import "../../client/styles";

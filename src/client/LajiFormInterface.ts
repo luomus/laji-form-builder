@@ -1,5 +1,5 @@
 import memoize from "memoizee";
-import LajiForm from "laji-form/lib/components/LajiForm";
+import LajiForm from "@luomus/laji-form/lib/components/LajiForm";
 import RJSF from "@rjsf/core";
 import validator from "@rjsf/validator-ajv6";
 import { Field, Widget } from "@rjsf/utils";
