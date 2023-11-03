@@ -1,5 +1,5 @@
 import * as React from "react";
-import parsePropTypes from "parse-prop-types";
+import parsePropTypes from "@luomus/parse-prop-types";
 import memoize from "memoizee";
 import { isObject, parseJSONPointer } from "../utils";
 import { ContextProps } from "./components/Context";

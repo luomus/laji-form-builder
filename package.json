@@ -32,6 +32,7 @@
   ],
   "dependencies": {
     "@luomus/laji-form": "^14.3.6",
+    "@luomus/parse-prop-types": "^0.3.0",
     "@types/deep-diff": "^1.0.2",
     "@types/memoizee": "^0.4.3",
     "@types/react": "^16.14.14",
@@ -44,7 +45,6 @@
     "fast-json-patch": "^3.1.0",
     "json-schema": "^0.3.0",
     "memoizee": "^0.4.14",
-    "parse-prop-types": "git+https://git@github.com/olzraiti/parse-prop-types.git#c8a4540d8d0af0e47187c1d0de155c11be84b9ce",
     "react": "^17.0.2",
     "react-bootstrap": "^0.33.1",
     "react-dom": "^17.0.2",
