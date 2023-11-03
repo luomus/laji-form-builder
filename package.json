@@ -104,5 +104,11 @@
   "bugs": {
     "url": "https://github.com/luomus/laji-form-builder/issues"
   },
-  "homepage": "https://github.com/luomus/laji-form-builder#readme"
+  "homepage": "https://github.com/luomus/laji-form-builder#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "volta": {
+    "node": "14.21.3"
+  }
 }
