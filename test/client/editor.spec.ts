@@ -241,6 +241,7 @@ test.describe("Editor", () => {
 				});
 
 				test("shows form after loaded", async () => {
+					await expect(builder.$toolbarSpinner).toBeHidden(); // Wait for form transformation.
 					await expect(builder.optionsEditor.$form).toBeVisible();
 				});
 
@@ -249,6 +250,7 @@ test.describe("Editor", () => {
 					await updateValue($emptyStringField, "foo");
 
 					await builder.saveModal.open();
+					await expect(builder.$toolbarSpinner).toBeHidden(); // Wait for form transformation.
 					const diff = await builder.saveModal.getDiff();
 
 					expect(diff).toEqual([
