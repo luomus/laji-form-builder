@@ -12,6 +12,7 @@ test.describe("Editor", () => {
 		page = await browser.newPage();
 		(await browser.newContext()).route(/https:\/\/apitest.laji.fi\/v0\/named-places*/, route => route.abort());
 		builder = await createBuilder(page, "JX.519");
+		await builder.waitUntilLoaded();
 	});
 
 	test.describe("lang", () => {

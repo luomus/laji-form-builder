@@ -96,6 +96,12 @@ export class BuilderPO {
 
 	editorForm = new Form(this.page, this.$editor.locator(".laji-form"));
 
+	async waitUntilLoaded() {
+		await expect(this.formPreview.$form).toBeVisible({timeout: 30 * 1000});
+		await expect(this.$toolbar).toBeVisible();
+		await expect(this.$toolbarSpinner).toBeHidden();
+	}
+
 	$pickerButton = this.page.locator(gcnmspc("elem-picker"));
 	picker = {
 		$button: this.$pickerButton,

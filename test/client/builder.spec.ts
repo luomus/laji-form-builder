@@ -17,7 +17,6 @@ test.describe("Builder", () => {
 
 	test.describe("JSON", () => {
 
-
 		test("option is displayed",  async () => {
 			await expect(builder.create.$jsonButton).toBeVisible();
 		});
