@@ -21,7 +21,7 @@
     "build:server": "npm run build:static && npm run build:build",
     "preversion": "npm run lint && npm test:client",
     "postversion": "npm publish",
-		"prepublishOnly": "npm run build:client && git push && git push --tags"
+    "prepublishOnly": "npm run build:client && git push && git push --tags"
   },
   "keywords": [
     "laji-form",
@@ -79,6 +79,7 @@
     "node-sass": "^6.0.1",
     "nodemon": "^2.0.15",
     "notus": "^0.3.2",
+    "rimraf": "^5.0.5",
     "sass-loader": "^12.6.0",
     "source-map-loader": "^3.0.1",
     "style-loader": "^3.3.1",
