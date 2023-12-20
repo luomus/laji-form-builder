@@ -65,7 +65,7 @@ const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 	const onClick = React.useCallback((e) => {
 		if (highlightedLajiFormElem) {
 			const id = highlightedLajiFormElem?.id
-				.replace(/_laji-form_[0-9]+_root|_[0-9]/g, "")
+				.replace(/_laji-form_root|_[0-9]/g, "")
 				.replace(/_/g, "/");
 			if (!id) {
 				return;

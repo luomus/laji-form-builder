@@ -1,24 +1,12 @@
-import { $, protractor, browser, ElementFinder as _ElementFinder, by, element } from "protractor";
+import { Page, Locator, expect } from "@playwright/test";
 import { classNames, gnmspc, nmspc } from "../../src/client/utils";
-import { lajiFormLocate, getLocatorForContextId, Form } from "laji-form/test-export/test-utils";
+import { Form } from "@luomus/laji-form/test-export/test-utils";
 import { Lang } from "../../src/model";
-
-const { HOST, PORT } = process.env;
-
-const EC = protractor.ExpectedConditions;
-
-export declare class ElementFinder extends _ElementFinder {
-		then: (fn: (value: any) => any, errorFn?: (error: any) => any) => Promise<any>;
-}
 
 // Class namespace
 const cnmspc = (fn: (str?: string) => string) => (str?: string) => `.${(fn(str))}`;
 // Global namespace
 const gcnmspc = (str: string): string => cnmspc(gnmspc)(str);
-
-interface BuilderPOProps {
-	id?: string
-}
 
 type DiffBase = {path: string};
 type DiffNew = {kind: "new"; rhs: any} & DiffBase;
@@ -28,86 +16,63 @@ type DiffDelete = {kind: "delete"} & DiffBase;
 export type Diff = DiffNew | DiffEdit | DiffDelete;
 
 export class BuilderPO {
-	props: BuilderPOProps;
-	constructor(props: BuilderPOProps = {}) {
-		this.props = props;
-	}
-	async initialize() {
-		if (this.props.id) {
-			await browser.get(`http://${HOST}:${PORT}/${this.props.id}`);
-			await this.waitUntilLoaded();
-		} else {
-			await browser.get(`http://${HOST}:${PORT}`);
-		}
+	constructor(private page: Page) {
 	}
 
 	nmspc = cnmspc(nmspc("editor"));
 
-	$editor = $(this.nmspc(""));
-	$toolbar = $(this.nmspc("toolbar"));
-	$toolbarSpinner = $(this.nmspc("toolbar-loader"));
+	$editor = this.page.locator(this.nmspc(""));
+	$toolbar = this.page.locator(this.nmspc("toolbar"));
+	$toolbarSpinner = this.page.locator(this.nmspc("toolbar-loader"));
 
-	private $langsContainer = this.$toolbar.$(this.nmspc("lang-chooser"));
-	private $$langs = this.$langsContainer.$$(this.nmspc("lang-chooser button"));
+	private $langsContainer = this.$toolbar.locator(this.nmspc("lang-chooser"));
+	private $$langs = this.$langsContainer.locator("button");
 	lang = {
-		$fi: this.$$langs.get(0),
-		$sv: this.$$langs.get(1),
-		$en: this.$$langs.get(2),
-		$active: this.$langsContainer.$(".active"),
+		$fi: this.$$langs.nth(0),
+		$sv: this.$$langs.nth(1),
+		$en: this.$$langs.nth(2),
+		$active: this.$langsContainer.locator(".active"),
 		changeTo: async (lang: Lang) => {
-			function waitForCssClass(elem$: ElementFinder, desiredClass: string) {
-				return async function () {
-					const className = await elem$.getAttribute("class");
-					return className && className.indexOf(desiredClass) >= 0;
-				};
-			}
-			const order: Record<Lang, number> = {fi: 0, sv: 1, en: 2};
-			const idx = order[lang];
-			await this.$$langs.get(idx).click();
-			await browser.wait(waitForCssClass(this.formPreview.$rjsf, lang));
+			await this.$$langs.getByText(lang).click();
+			await expect(this.formPreview.$form).toHaveClass(new RegExp(lang));
 		}
 	};
 
-	private $tabsContainer = this.$toolbar.$(gcnmspc("tabs"));
-	private $$mainTabs = this.$tabsContainer.$$(gcnmspc("tab"));
+	private $tabsContainer = this.$toolbar.locator(gcnmspc("tabs"));
+	private $$mainTabs = this.$tabsContainer.locator(gcnmspc("tab"));
 	mainTabs = {
-		$options: this.$$mainTabs.get(0),
-		$fields: this.$$mainTabs.get(1),
-		$active: this.$tabsContainer.$(gcnmspc("active"))
+		$options: this.$$mainTabs.nth(0),
+		$fields: this.$$mainTabs.nth(1),
+		$active: this.$tabsContainer.locator(gcnmspc("active"))
 	};
 
-	$fieldToolbar = $(gnmspc("field-editor-toolbar"));
+	$fieldToolbar = this.page.locator(gnmspc("field-editor-toolbar"));
 
-	private $fieldTabsContainer = $(gcnmspc("field-editor-toolbar") + gcnmspc("tabs"));
-	private $$fieldTabs = this.$fieldTabsContainer.$$(gcnmspc("tab"));
+	private $fieldTabsContainer = this.page.locator(gcnmspc("field-editor-toolbar") + gcnmspc("tabs"));
+	private $$fieldTabs = this.$fieldTabsContainer.locator(gcnmspc("tab"));
 	fieldTabs = {
-		$basic: this.$$fieldTabs.get(0),
-		$ui: this.$$fieldTabs.get(1),
-		$active: this.$fieldTabsContainer.$(gcnmspc("active"))
+		$basic: this.$$fieldTabs.nth(0),
+		$ui: this.$$fieldTabs.nth(1),
+		$active: this.$fieldTabsContainer.locator(gcnmspc("active"))
 	}
 
-	formPreview = {
-		$container: $("#app > .laji-form") as ElementFinder,
-		$rjsf: $("#app > .laji-form .rjsf") as ElementFinder,
-		locate: lajiFormLocate
-	}
+	formPreview = new Form(this.page, this.page.locator("#app > .laji-form"))
 
-	$fieldSelectorContainer = $(gcnmspc("field-chooser")) as ElementFinder
-	$fieldEditor = $(gcnmspc("field-editor")) as ElementFinder
-	$rootFieldSelector = this.$fieldSelectorContainer.$(`:scope > ${gcnmspc("field")}`) as ElementFinder;
-	getFieldSelector = ($field: ElementFinder): FieldSelectorPO => ({
+	$fieldSelectorContainer = this.page.locator(gcnmspc("field-chooser"))
+	$fieldEditor = this.page.locator(gcnmspc("field-editor"))
+	$rootFieldSelector = this.$fieldSelectorContainer.locator(`:scope > ${gcnmspc("field")}`);
+	getFieldSelector = ($field: Locator)=> ({
 		$field,
-		getLabel: () => $field.$(gcnmspc("field-label")).getText() as Promise<string>,
-		getFieldSelectors: () => new Promise(resolve => $field.$$(`:scope > div > ${gcnmspc("field")}`).then(
-			$es => resolve($es.map((($e: ElementFinder) => this.getFieldSelector($e))))
-		))
+		$label: $field.locator(gcnmspc("field-label")),
+		getFieldSelectors: async () => {
+			const $es = await $field.locator(`:scope > div > ${gcnmspc("field")}`).all();
+			return $es.map($e => this.getFieldSelector($e))
+		}
 	});
 	getFieldSelectorByJSONPath = (path: string) =>
-		this.getFieldSelector($(`${gcnmspc("field")}${path.replace(/\//g, "-")}`) as ElementFinder);
-	getActiveField = () => this.getFieldSelector(
-		this.$fieldSelectorContainer.$(`${gcnmspc("field-selected")}`) as ElementFinder
-	);
-	getFieldByPointer = (pointer: string) => $(gcnmspc(`field-document-${pointer.replace(/\./g, "-")}`))
+		this.getFieldSelector(this.page.locator(`${gcnmspc("field")}${path.replace(/\//g, "-")}`));
+	$activeField = this.getFieldSelector(this.$fieldSelectorContainer.locator(`${gcnmspc("field-selected")}`));
+	getFieldByPointer = (pointer: string) => this.page.locator(gcnmspc(`field-document-${pointer.replace(/\./g, "-")}`))
 	activateFieldByPointer = async (pointer: string) => {
 		let splittedCumulated = "";
 		for (const split of pointer.split(".")) {
@@ -117,80 +82,43 @@ export class BuilderPO {
 		}
 	}
 
-	private $optionsEditorContainer = $(gcnmspc("options-editor"));
+	private $optionsEditorContainer = this.page.locator(gcnmspc("options-editor"));
 	optionsEditor = {
 		$container: this.$optionsEditorContainer,
-		$spinner: this.$optionsEditorContainer.$(`${gcnmspc("field-editor")} > .react-spinner`) as ElementFinder,
-		$form: this.$optionsEditorContainer.$(".laji-form") as ElementFinder,
-		waitUntilLoaded: () => (browser.wait(EC.visibilityOf(this.optionsEditor.$form)) as Promise<void>),
+		$spinner: this.$optionsEditorContainer.locator(`${gcnmspc("field-editor")} > .react-spinner`),
+		$form: this.$optionsEditorContainer.locator(".laji-form"),
 		tabs: {
-			$UI: this.$optionsEditorContainer.$$(gcnmspc("tab")).get(0),
-			$JSON: this.$optionsEditorContainer.$$(gcnmspc("tab")).get(1),
-			$active: this.$optionsEditorContainer.$(gcnmspc("tabs")).$(gcnmspc("active"))
+			$UI: this.$optionsEditorContainer.locator(gcnmspc("tab")).nth(0),
+			$JSON: this.$optionsEditorContainer.locator(gcnmspc("tab")).nth(1),
+			$active: this.$optionsEditorContainer.locator(gcnmspc("tabs")).locator(gcnmspc("active"))
 		}
 	}
 
-	async getEditorForm(): Promise<Form> {
-		const $root = this.$editor.$(".laji-form > div > Div");
-		const id = await $root.getAttribute("id");
-		const contextId = id.match(/\d+/)?.[0];
-		if (typeof contextId !== "string") {
-			throw "No form found for getEditorForm()";
-		}
-		const asNumber = +contextId;
-		if (typeof asNumber !== "number" || isNaN(asNumber)) {
-			throw "No form found for getEditorForm()";
-		}
-		const form = new Form();
-		form.contextId = asNumber;
-		return form;
-	}
+	editorForm = new Form(this.page, this.$editor.locator(".laji-form"));
 
-	async editorLocate(path: string): Promise<ElementFinder> {
-		const $root = this.$editor.$(".laji-form > div > div");
-		const id = await $root.getAttribute("id");
-		const contextId = id.match(/\d+/)?.[0];
-		if (typeof contextId !== "string") {
-			throw "No form found for editorLocate()";
-		}
-		const asNumber = +contextId;
-		if (typeof asNumber !== "number" || isNaN(asNumber)) {
-			throw "No form found for editorLocate()";
-		}
-		return element(by.id(getLocatorForContextId(asNumber)(path).substr(1))) as ElementFinder;
-	}
-
-	async waitUntilLoaded() {
-		await (browser.wait(EC.visibilityOf(this.formPreview.$container)) as Promise<void>);
-		await (browser.wait(EC.visibilityOf(this.$toolbar)) as Promise<void>);
-		await (browser.wait(EC.invisibilityOf(this.$toolbarSpinner)) as Promise<void>);
-		return;
-	}
-
-	$pickerButton = $(gcnmspc("elem-picker"));
+	$pickerButton = this.page.locator(gcnmspc("elem-picker"));
 	picker = {
-		$button: this.$pickerButton as ElementFinder,
-		isButtonActive: () => isDisplayed(this.$pickerButton.$(".active") as ElementFinder),
-		$highlighter: $(gcnmspc("picker-highlighter")) as ElementFinder
+		$button: this.$pickerButton,
+		$highlighter: this.page.locator(gcnmspc("picker-highlighter"))
 	}
 
 	wizardNmspc = cnmspc(nmspc("creator-wizard"));
-	$creator = $(this.wizardNmspc());
+	$creator = this.page.locator(this.wizardNmspc());
 
 	create = {
-		$createButton: $(this.wizardNmspc("create-create")) as ElementFinder,
-		$jsonButton: $(this.wizardNmspc("create-json")) as ElementFinder,
-		$DatabankButton: $(this.wizardNmspc("create-databank")) as ElementFinder,
+		$createButton: this.page.locator(this.wizardNmspc("create-create")),
+		$jsonButton: this.page.locator(this.wizardNmspc("create-json")),
+		$DatabankButton: this.page.locator(this.wizardNmspc("create-databank")),
 		json: {
 			inputSelector: classNames(this.wizardNmspc("json"), gcnmspc("json-editor")),
-			$input: $(this.wizardNmspc("json")).$("textarea") as ElementFinder,
-			$submit: $(this.wizardNmspc("json")).$(this.wizardNmspc("json-preview-btn")) as ElementFinder
+			$input: this.page.locator(this.wizardNmspc("json")).locator("textarea"),
+			$submit: this.page.locator(this.wizardNmspc("json")).locator(this.wizardNmspc("json-preview-btn"))
 		}
 	}
 
 	saveModal = {
-		open: () => $(`#${gnmspc("open-save-view")}`).click(),
-		close: () => $(gcnmspc("save-modal")).$(".close").click(),
+		open: () => this.page.locator(`#${gnmspc("open-save-view")}`).click(),
+		close: () => this.page.locator(gcnmspc("save-modal")).locator(".close").click(),
 		getDiff: async () => {
 			const diffNmspc = nmspc("diff");
 			const diffCnmspc = cnmspc(diffNmspc);
@@ -206,37 +134,31 @@ export class BuilderPO {
 				throw new Error(`unknown diff kind ${className}`);
 			};
 
-			const $container = $(diffCnmspc());
+			const $container = this.page.locator(diffCnmspc());
 
-			return $container.$$("tr").reduce(async (rows: Diff[], $tr: ElementFinder) => {
-				const kind = mapClassToKind(await $tr.getAttribute("className"));
+			const $rows = await $container.locator("tr").all();
+			return $rows.reduce(async (rowsAsync: Promise<Diff[]>, $tr: Locator) => {
+				const rows = await rowsAsync;
+				const kind = mapClassToKind(await $tr.getAttribute("class") as string);
 				const ALL_DOTS = /\./g;
-				const path = "/" + (await $tr.$("th").getText()).replace(ALL_DOTS, "/");
+				const path = "/" + (await $tr.locator("th").textContent())!.replace(ALL_DOTS, "/");
 				const parseEdit = (text: string) => text.split(" ➞ ").map(v => JSON.parse(v));
 				if (kind === "new") {
-					rows.push({kind, path, rhs: JSON.parse(await $tr.$("td").getText())});
+					rows.push({kind, path, rhs: JSON.parse(await $tr.locator("td").textContent() as string)});
 				} else if (kind === "edit") {
-					const [lhs, rhs] = parseEdit(await $tr.$("td").getText());
+					const [lhs, rhs] = parseEdit(await $tr.locator("td").textContent() as string);
 					rows.push({kind, path, lhs, rhs});
 				} else {
 					rows.push({kind, path});
 				}
 				return rows;
-			}, []);
+			}, Promise.resolve([]));
 		}
 	}
 }
 
-export interface FieldSelectorPO {
-	$field: ElementFinder;
-	getLabel: () => Promise<string>;
-	getFieldSelectors: () => Promise<FieldSelectorPO[]>;
-}
-
-export async function createBuilder(props?: BuilderPOProps): Promise<BuilderPO> {
-	const builder = new BuilderPO(props);
-	await builder.initialize();
+export async function createBuilder(page: Page, id = ""): Promise<BuilderPO> {
+	await page.goto(`/${id}`);
+	const builder = new BuilderPO(page);
 	return builder;
 }
-
-export const isDisplayed = async ($elem: ElementFinder) => (await $elem.isPresent()) && (await $elem.isDisplayed());
