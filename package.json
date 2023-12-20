@@ -9,7 +9,7 @@
     "start:prod": "node build/main.js",
     "test": "npm run test:server && npm run test:client",
     "test:client": "npx playwright test",
-    "test:client:ci": "PLAYWRIGHT_JUNIT_OUTPUT_NAME=test-results/client.xml npx playwright test --reporter junit",
+    "test:client:ci": "npx playwright install && CI=true PLAYWRIGHT_JUNIT_OUTPUT_NAME=test-results/client.xml npx playwright test --reporter junit",
     "test:server": "ts-node node_modules/jasmine-xml-reporter/bin/jasmine.js --conf=jasmine.json \"test/server/*-spec.ts\"",
     "test:server:ci": "npm run test:server -- --junitreport --output=test-results/server",
     "test:ci": "npm run test:server:ci && npm run test:client:ci",

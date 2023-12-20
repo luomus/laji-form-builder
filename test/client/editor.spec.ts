@@ -93,6 +93,7 @@ test.describe("Editor", () => {
 				const $excludeFromCopy = builder.editorForm.getBooleanWidget("options.excludeFromCopy");
 				await $excludeFromCopy.$false.click();
 
+				await expect(builder.$toolbarSpinner).toBeHidden(); // Wait for form transformation.
 				await builder.saveModal.open();
 
 				expect(await builder.saveModal.getDiff()).toEqual([
