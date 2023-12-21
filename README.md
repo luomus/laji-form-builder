@@ -1,4 +1,5 @@
 # laji-form-builder
+
 This repo is responsible for two things:
 * the **server** aka form backend which runs at https://form.laji.fi
 * the **client** which is a React component for editing forms. Available as an npm package [`laji-form-builder`](https://www.npmjs.com/package/laji-form-builder).
@@ -29,7 +30,7 @@ For documentation, see how the server uses the `Builder` component: https://gith
 * TypeScript
 * express
 * React
-* protractor (e2e tests)
+* playwright (e2e tests)
 * supertest (express tests)
 
 Development is done against node `v14`. Might work on other versions or might not.
@@ -52,9 +53,8 @@ npm start
 
 ### Tests
 
-Both server/client tests use jasmine. Client e2e testing is done with protractor on top of jasmine.
-
 #### Server
+
 Server is tested without having to run the server. Just run:
 
 ```
@@ -66,26 +66,26 @@ npm run test:server
 * `MOCK=true`: Field service test API requests are mocked by default.
 
 #### Client
-First start the development server. You might need to update the webdriver manager:
-```
-node_modules/.bin/webdriver-manager update
-```
 
-Then run the e2e tests:
+Server can be running or or not. If it's not running, it will be automatically started.
+
 ```
 npm run test:client
 ```
 
-##### Debugging
+##### Dependencies
 
-You can debug the tests by running `npm run test:client:debug`. Details in [protractor docs](https://www.protractortest.org/#/debugging).
+To run the tests, you might need to install playwright dependencies:
 
+```
+npx playwright install
+```
 
-##### Env variables:
+If you run into issues with browser dependencies etc, there's also a dockerized runner:
 
-* `HEADLESS=false`: Run the tests in an actual browser window instead of the headless browser. Supports only Chrome.
-* `TEST_BROWSER=chrome`: `firefox` will run against firefox, `multi` against both.
-* `THREADS=4`: How many browser instances the tests are run against. 
+```
+npm run test:client:docker
+```
 
 ### Build
 
