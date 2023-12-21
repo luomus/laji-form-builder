@@ -26,14 +26,14 @@ For documentation, see how the server uses the `Builder` component: https://gith
 
 ### Stack
 
-* node@14
+* node
 * TypeScript
 * express
 * React
 * playwright (e2e tests)
 * supertest (express tests)
 
-Development is done against node `v14`. Might work on other versions or might not.
+Correct node version is selected with `volta` or `nvm use default`.
 
 ### Install dependencies
 ```
