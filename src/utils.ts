@@ -113,7 +113,7 @@ export const bypass = <T>(any: T): T => any;
 export const multiLang = (obj: Partial<Record<Lang, string>> | undefined, lang: Lang) =>
 	!obj ? undefined : (obj[lang] ?? obj["en"]);
 
-export const isObject = _isObject;
+export const isObject: (obj: any) => obj is Record<string, unknown> = _isObject;
 
 /**
  * Removes the name space prefix.
