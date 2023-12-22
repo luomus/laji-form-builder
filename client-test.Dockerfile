@@ -8,5 +8,4 @@ COPY . .
 # Install dependencies
 RUN npm ci
 
-# Set the entry point for the container
-CMD DOCKER_TEST_RUN=true npx playwright test
+ENTRYPOINT ["DOCKER_TEST_RUN=true", "npx", "playwright", "test"]

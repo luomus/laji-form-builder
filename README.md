@@ -84,7 +84,11 @@ npx playwright install
 If you run into issues with browser dependencies etc, there's also a dockerized runner:
 
 ```
-npm run test:client:docker
+# Run all tests (builds docker image & runs it)
+npm run test:docker
+
+# Or if you want to give playwright params, run certain tests etc:
+npm run test:docker -- test/client/editor.ts --project chromium
 ```
 
 ### Build
