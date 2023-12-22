@@ -10,7 +10,7 @@
     "test": "npm run test:server && npm run test:client",
     "test:client": "npx playwright test",
     "test:client:lightweight": "npx playwright test --project chromium",
-		"test:client:docker": "npm run test:ci:docker:build && npm run test:ci:docker:run",
+		"test:client:docker": "npm run test:client:docker:build && npm run test:client:docker:run",
 		"test:client:docker:build": "docker build -t laji-form-builder-client-tests -f client-tests.Dockerfile .",
 		"test:client:docker:run": "docker run laji-form-builder-client-tests:latest",
     "test:server": "ts-node node_modules/jasmine-xml-reporter/bin/jasmine.js --conf=jasmine.json \"test/server/*-spec.ts\"",
