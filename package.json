@@ -22,7 +22,7 @@
     "build:build": "rimraf build && NODE_ENV=production webpack --config webpack.config.build.js",
     "build:static": "rimraf static && NODE_ENV=production webpack --config webpack.config.static.js",
     "build:server": "npm run build:static && npm run build:build",
-    "preversion": "npm run lint && npm test:client:lightweight",
+    "preversion": "npm run lint && npm run test:client:lightweight",
     "postversion": "npm publish",
     "prepublishOnly": "npm run build:client && git push && git push --tags"
   },
