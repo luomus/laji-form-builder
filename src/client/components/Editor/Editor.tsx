@@ -8,7 +8,7 @@ import { MaybeError, isValid  } from "../Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
 	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
 import { Context } from "../Context";
-import OptionsEditor from "./OptionsEditor";
+import OptionsEditor, {FormOptionsEditorProps} from "./OptionsEditor";
 import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster } from "../../../model";
 import { translate as translateKey } from "@luomus/laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
@@ -49,6 +49,7 @@ export interface EditorState {
 	pointerChoosingActive: boolean;
 	optionsEditorLoadedCallback?: () => void;
 	optionsEditorFilter?: string[];
+	optionsActiveTab?: FormOptionsEditorProps["activeTab"];
 	saveModalOpen?: Master | false;
 	selectedField?: string;
 }
@@ -163,6 +164,8 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			                         translations={expandedMaster.translations?.[this.context.editorLang as Lang] || {}}
 			                         onChange={this.props.onChange}
 			                         ref={this.optionsEditorRef}
+															 activeTab={this.state.optionsActiveTab}
+															 onTabChange={this.onTabChange}
 			                         onLoaded={this.state.optionsEditorLoadedCallback}
 			                         filter={this.state.optionsEditorFilter}
 								               clearFilters={this.clearOptionsEditorFilters}
@@ -239,6 +242,7 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		} else {
 			this.setState({
 				activeEditorMode: "options",
+				optionsActiveTab: "UI",
 				optionsEditorLoadedCallback: () => this.setState({
 					optionsEditorFilter: selected,
 					optionsEditorLoadedCallback: undefined
@@ -255,6 +259,10 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 
 	hideJSONEditor = () => {
 		this.props.onJsonEditorOpenChange(false);
+	}
+
+	onTabChange = (tab: FormOptionsEditorProps["activeTab"]) => {
+		this.setState({optionsActiveTab: tab});
 	}
 }
 
@@ -617,9 +625,7 @@ type GenericEditorContentProps<T extends JSON | undefined> = {
 	& EditorContentJSONTabProps<T>
 	& EditorContentUITabProps
 
-/**
- * If @param activeTab is given, then it is a controlled prop. Otherwise, the active tab is stateful.
- */
+/** @param activeTab if given, then it is a controlled prop. Otherwise, the active tab is stateful. */
 export const GenericEditorContent = <T extends JSON | undefined>(
 	{initialActiveTab = "UI", activeTab, onTabChange, json, onJSONChange, validator, renderUI, overflowUIContent = true,
 		topOffset}

@@ -39,7 +39,7 @@ export const mapPropertyToUiSchema =
 		mapComment(multiLang(property.comment, lang), await mapRangeToUiSchema(property, metadataService, lang));
 
 type FormOptionEvent = OptionChangeEvent | TranslationsChangeEvent;
-type FormOptionsEditorProps = Stylable & {
+export type FormOptionsEditorProps = Stylable & {
 	master: Master;
 	translations: {[key: string]: string};
 	onChange: (events: FormOptionEvent | FormOptionEvent[]) => void;
@@ -47,6 +47,8 @@ type FormOptionsEditorProps = Stylable & {
 	filter?: string[];
 	clearFilters: () => void;
 	topOffset?: number;
+	activeTab?: EditorContentTab;
+	onTabChange: (tab: EditorContentTab) => void;
 }
 
 const formProperty = {
@@ -142,7 +144,7 @@ const prepareMaster = (master: Master) => {
 };
 
 export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProps>(function OptionsEditor(
-	{master, onChange, translations, onLoaded, filter, clearFilters, topOffset = 0}
+	{master, onChange, translations, onLoaded, filter, clearFilters, topOffset = 0, activeTab = "JSON", onTabChange}
 	: FormOptionsEditorProps, ref) {
 	const context = React.useContext(Context);
 	const { metadataService, translations: appTranslations, editorLang } = context;
@@ -237,12 +239,6 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 
 	const getJSON = React.useCallback(() => formData, [formData]);
 
-	const [activeTab, setActiveTab] = React.useState<EditorContentTab>("JSON");
-
-	React.useEffect(() => {
-		filter?.length && setActiveTab("UI");
-	} , [filter]);
-
 	return  (
 		<div className={gnmspc("options-editor")} ref={ref} style={{width: "100%"}}>
 			<GenericEditorContent json={getJSON()}
@@ -250,7 +246,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 			                      validator={isJSONObject}
 			                      renderUI={content}
 			                      activeTab={activeTab}
-			                      onTabChange={setActiveTab}
+			                      onTabChange={onTabChange}
 			                      overflowUIContent={false}
 			                      topOffset={(activeTab === "JSON" ? 46 : 73) + topOffset} />
 		</div>
