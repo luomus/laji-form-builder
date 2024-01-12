@@ -309,7 +309,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				loading={this.state.loading}
 				jsonEditorOpen={this.state.jsonEditorOpen}
 				onJsonEditorOpenChange={this.onJsonEditorOpenChange}
-				submitDisabled={!isValid(master) || !isValid(tmpMaster) || master !== tmpMaster || !master?.id}
+				submitDisabled={!isValid(master) || !isValid(tmpMaster) || master === tmpMaster || !master?.id}
 				displaySchemaTabs={this.props.displaySchemaTabs ?? true}
 				className={gnmspc("")}
 				errorMsg={this.state.errorMsg}

@@ -94,14 +94,11 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 		const fieldEditorStyle: React.CSSProperties = {
 			width: "100%"
 		};
-		const {master, schemaFormat, errorMsg} = this.props;
-		if (!master || !schemaFormat) {
-			return <Spinner size={100} />;
-		}
+		const {master, errorMsg} = this.props;
 		const {translations} = this.context;
 		return (
 			<div style={fieldEditorStyle}>
-				{isValid(master) && master.baseFormID && (
+				{isValid(master) && master?.baseFormID && (
 					<div className={gnmspc("warning")}>
 						{translateKey(translations, "editor.warning.baseFormID", {baseFormID: master.baseFormID})}
 					</div>
@@ -335,9 +332,11 @@ const EditorMainToolbar = ({
 }: EditorMainToolbarProps) => {
 	const {translations} = React.useContext(Context);
 	const {Glyphicon, ButtonGroup} = React.useContext(Context).theme;
-	const saveTranslationsKey = master && isValid(master) && master.id
-		? "editor.save.button"
-		: "save";
+	const saveTranslationsKey = master
+		? isValid(master) && master.id
+			? "editor.save.button"
+			: "save"
+		: undefined;
 	const infoClassNames = classNames(toolbarNmspc("info"), gnmspc("mr-1"));
 	const info  = master && isValid(master) && (
 		<span className={infoClassNames}>
@@ -358,26 +357,30 @@ const EditorMainToolbar = ({
 				</Tooltip>
 				{onRemountLajiForm && (
 					<Tooltip tooltip={translations["editor.remount.help"]} id="remount-help">
-						<Button onClick={onRemountLajiForm} small>
+						<Button onClick={onRemountLajiForm} disabled={!master} small>
 							<Glyphicon glyph="refresh"  />
 						</Button>
 					</Tooltip>
-				) }
+				)}
 				<Tooltip tooltip={translations["editor.json.help"]} id="json-help">
-					<Button onClick={openJSONEditor} small>JSON</Button>
+					<Button onClick={openJSONEditor} disabled={!master} small>JSON</Button>
 				</Tooltip>
 			</ButtonGroup>
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
 			<div style={{marginLeft: "auto", display: "flex", alignItems: "inherit"}}>
 				{ loading ? <Spinner className={toolbarNmspc("loader")} size={20} style={{left: 0}}/> : null }
-				<EditorToolbarSeparator />
+				{master && <EditorToolbarSeparator />}
 				{info}
-				<Button id={gnmspc("open-save-view")}
-				        small
-				        variant="primary"
-				        disabled={!submitDisabled || saving}
-				        onClick={onSave}>{translations[saveTranslationsKey]}</Button>
+				{saveTranslationsKey &&
+					<Button id={gnmspc("open-save-view")}
+				          small
+				          variant="primary"
+				          disabled={submitDisabled || saving}
+				          onClick={onSave}>
+						{translations[saveTranslationsKey]}
+					</Button>
+				}
 			</div>
 		</div>
 	);
