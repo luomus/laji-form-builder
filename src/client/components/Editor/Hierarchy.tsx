@@ -41,8 +41,12 @@ const getLabel = (form: FormListing, idToUri?: (uri: string) => string) => {
 		) : text;
 };
 
-const createNode = (form: FormListing, idToUri?: (uri: string) => string): Hierarchy =>
-	({ name: form.id, label: getLabel(form, idToUri), children: [] });
+const createNode = (form: FormListing, idToUri?: (uri: string) => string, isBase?: boolean): Hierarchy => ({
+	name: form.id,
+	label: getLabel(form, idToUri),
+	children: [], 
+	gProps: { className: hierarchyNmpsc(isBase ? "base-node" : "node") }
+});
 
 const formsToHierarchy = (
 	forms: FormListing[],
@@ -55,14 +59,14 @@ const formsToHierarchy = (
 	const idToNode: Record<string, Hierarchy> = {};
 
 	forms.forEach(form => {
-		const node: Hierarchy = idToNode[form.id] || createNode(form, idToUri);
+		const node: Hierarchy = idToNode[form.id] || createNode(form, idToUri, form.id === id);
 		if (node.name === id) {
-			node.gProps = { className: "base" };
+			node.gProps = { className: hierarchyNmpsc("base-node") };
 			base = node;
 		}
 		const parentId = form.baseFormID || form.fieldsFormID;
 		if (parentId) {
-			const parentNode = idToNode[parentId] || createNode(formsById[parentId], idToUri);
+			const parentNode = idToNode[parentId] || createNode(formsById[parentId], idToUri, parentId === id);
 			!parentNode.children.includes(node) && parentNode.children.push(node);
 			node.parent = parentNode;
 			idToNode[parentId] = parentNode;
@@ -148,7 +152,7 @@ const HierarchyModal = ({ hierarchy, onHide }: { hierarchy: Hierarchy, onHide: (
 	const height = maxChildren * (LABEL_HEIGHT * 2 + LABEL_PADDING + NODES_PADDING);
 	return (
 		<GenericModal onHide={onHide}
-		              className={hierarchyNmpsc("modal")}
+		              className={hierarchyNmpsc("")}
 		              bodyRef={ref}
 		              header={translations["editor.hierarchy.title"]}>
 			<Tree data={hierarchy}

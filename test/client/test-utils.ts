@@ -166,8 +166,8 @@ export class BuilderPO {
 	hierarchy = {
 		$button: this.page.locator(this.hierarchyNmspc("button")),
 		modal: {
-			$container: this.page.locator(this.hierarchyNmspc("modal")),
-			$close: this.page.locator(this.hierarchyNmspc("modal")).locator(".close")
+			$container: this.page.locator(this.hierarchyNmspc("")),
+			$close: this.page.locator(this.hierarchyNmspc("")).locator(".close")
 		}
 	}
 }

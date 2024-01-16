@@ -425,26 +425,25 @@ $margin: 2px;
 		}
 	}
 
-	&-hierarchy-modal {
+	&-hierarchy {
 		svg {
 			display: flex;
 			margin: auto;
 		}
-		path.link {
-			stroke: #aaaaaa;
+		&-node circle {
+      fill: white;
+			stroke: $dark-3;
 		}
-		text {
-      text-decoration: underline;
-    }
-		.base text {
-			stroke: #555555;
+		&-base-node circle {
+      fill: $dark-5;
+			stroke: black;
 		}
-		#{$root}-hierarchy-label {
+		&-label {
       display: flex;
     }
-    #{$root}-hierarchy-link {
+    &-link {
       fill: none;
-			stroke: #aaaaaa;
+			stroke: $dark-1;
     }
   }
 }
