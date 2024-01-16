@@ -225,9 +225,9 @@
 		"en": "Copy the form heriting, only it's fields"
 	},
 	"wizard.option.extend.extendFields.help": {
-		"fi": "Lomakkeen ominaisuudet eivät kopioidu. Ainoastaan kentät (validaattoreineen), uiSchema ja käännökset kopioituvat.\nPerittävä lomake määräytyy 'fieldsFromID' kentällä",
-		"sv": "Formuläralternativen kommer inte att kopieras. Endast fälten (inklusive deras validerare), uiSchema och transalationer kommer att kopieras.\nDet utökade formuläret bestäms av alternativet 'fieldsFromID'.",
-		"en": "The form options wont be copied. Only the fields (including their validators), uiSchema and transalations will be copied.\nThe extended form is determined by the 'fieldsFromID' option."
+		"fi": "Lomakkeen ominaisuudet eivät kopioidu. Ainoastaan kentät (validaattoreineen), uiSchema ja käännökset kopioituvat.\nPerittävä lomake määräytyy 'fieldsFormID' kentällä",
+		"sv": "Formuläralternativen kommer inte att kopieras. Endast fälten (inklusive deras validerare), uiSchema och transalationer kommer att kopieras.\nDet utökade formuläret bestäms av alternativet 'fieldsFormID'.",
+		"en": "The form options wont be copied. Only the fields (including their validators), uiSchema and transalations will be copied.\nThe extended form is determined by the 'fieldsFormID' option."
 	},
 	"wizard.option.extend.saveOrPreview": {
 		"fi": "Haluatko tallentaa uuden lomakkeen vai vain esikatsella sitä?",
@@ -275,7 +275,7 @@
 		"en": "Open the form inheritance tree"
 	},
 	"editor.hierarchy.title": {
-		"fi": "Lomake perii toisen lomakkeen kentällä 'baseFormID' tai 'fieldsFromID'",
+		"fi": "Lomake perii toisen lomakkeen kentällä 'baseFormID' tai 'fieldsFormID'",
 		"sv": "Näytä lomakkeiden perintäpuu",
 		"en": "Open the form inheritance tree"
 	}

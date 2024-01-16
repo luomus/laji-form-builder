@@ -231,8 +231,7 @@ test.describe("Editor", () => {
 			});
 
 			test("shows JSON tab by default", async () => {
-				await expect(builder.optionsEditor.tabs.$JSON)
-					.toHaveClass(/active/);
+				await expect(builder.optionsEditor.tabs.$JSON).toHaveClass(/active/);
 			});
 
 			test.describe("selecting UI editor", () => {

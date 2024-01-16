@@ -1,8 +1,18 @@
 import request from "supertest";
 import app from "../../src/server/server";
 import { FormListing, Master } from "../../src/model";
-import { exposedListedProps, exposedListedOptions } from "../../src/server/services/main-service";
+import {
+	exposedListedProps as _exposedListedProps,
+	exposedListedOptions
+} from "../../src/server/services/main-service";
 import { formFetch } from "../../src/server/services/store-service";
+
+// The '_exposedListedProps' from main service doesn't have these two props even though they are really exposed.
+const exposedListedProps = {
+	..._exposedListedProps,
+	baseFormID: true,
+	fieldsFormID: true
+};
 
 // Hack for jasmine/supertest integration, see https://github.com/jasmine/jasmine-npm/issues/31
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
