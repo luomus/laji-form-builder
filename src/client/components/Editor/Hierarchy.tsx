@@ -22,7 +22,7 @@ const hierarchyNmpsc = nmspc("hierarchy");
 const getLabel = (form: FormListing, idToUri?: (uri: string) => string) => {
 	const y = LABEL_HEIGHT + LABEL_PADDING;
 	const { name = "" } = form;
-	let ellipsedName = name.substring(0, 30);
+	let ellipsedName = name.substring(0, 21);
 	if (ellipsedName.length < name.length) {
 		ellipsedName += "...";
 	}
