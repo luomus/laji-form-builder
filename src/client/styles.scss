@@ -439,5 +439,8 @@ $margin: 2px;
 		.base text {
 			stroke: #555555;
 		}
+		#{$root}-hierarchy-label {
+      display: flex;
+    }
 	}
 }

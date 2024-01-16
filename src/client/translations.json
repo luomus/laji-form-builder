@@ -270,8 +270,13 @@
 		"en": "Open the JSON in a modal for editing"
 	},
 	"editor.hierarchy.help": {
-		"fi": "Näytä riippuvuuspuu",
-		"sv": "Näytä riippuvuuspuu",
-		"en": "Open the hierarchy tree"
+		"fi": "Näytä lomakkeiden perintäpuu",
+		"sv": "Näytä lomakkeiden perintäpuu",
+		"en": "Open the form inheritance tree"
+	},
+	"editor.hierarchy.title": {
+		"fi": "Lomake perii toisen lomakkeen kentällä 'baseFormID' tai 'fieldsFromID'",
+		"sv": "Näytä lomakkeiden perintäpuu",
+		"en": "Open the form inheritance tree"
 	}
 }
