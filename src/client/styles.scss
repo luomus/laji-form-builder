@@ -442,5 +442,9 @@ $margin: 2px;
 		#{$root}-hierarchy-label {
       display: flex;
     }
-	}
+    #{$root}-hierarchy-link {
+      fill: none;
+			stroke: #aaaaaa;
+    }
+  }
 }

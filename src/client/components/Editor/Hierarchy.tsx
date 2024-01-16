@@ -137,6 +137,8 @@ const useComputeMaxWidth = (ref: React.RefObject<HTMLElement>) => {
 	return maxWidth;
 };
 
+const pathProps = { className: hierarchyNmpsc("link") };
+
 const HierarchyModal = ({ hierarchy, onHide }: { hierarchy: Hierarchy, onHide: () => void }) => {
 	const { translations } = React.useContext(Context);
 	const ref = React.useRef<HTMLDivElement>(null);
@@ -149,7 +151,11 @@ const HierarchyModal = ({ hierarchy, onHide }: { hierarchy: Hierarchy, onHide: (
 		              className={hierarchyNmpsc("modal")}
 		              bodyRef={ref}
 		              header={translations["editor.hierarchy.title"]}>
-			<Tree data={hierarchy} labelProp="label" height={height} width={Math.min(depth * 200, maxWidth)} />
+			<Tree data={hierarchy}
+			      labelProp="label"
+			      pathProps={pathProps}
+			      height={height}
+			      width={Math.min(depth * 200, maxWidth)} />
 		</GenericModal>
 	);
 };
