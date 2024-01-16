@@ -63,6 +63,8 @@ export type CommonFormat = {
 	name?: string;
 	translations?: Translations;
 	language?: Lang;
+	baseFormID?: string;
+	fieldsFormID?: string;
 }
 
 export type FormListing = CommonFormat & {
@@ -82,8 +84,6 @@ export const isJSONObjectOrUndefined = (v?: JSON): v is (undefined | JSON) => v 
 
 export type Master = CommonExpanded & {
 	fields?: Field[];
-	baseFormID?: string;
-	fieldsFormID?: string;
 	patch?: any[];
 	"@type"?: string;
 	"@context"?: string;

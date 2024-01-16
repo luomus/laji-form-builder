@@ -442,9 +442,10 @@ export const SearchInput = ({onChange, onKeyDown, autoFocus}: SearchInputProps) 
 export type GenericModalProps = {
 	onHide: () => void;
 	header?: string;
+	bodyRef?: React.Ref<HTMLDivElement>
 } & HasChildren & Classable
 
-export const GenericModal = ({onHide, children, header, className}: GenericModalProps) => {
+export const GenericModal = ({onHide, children, header, className, bodyRef}: GenericModalProps) => {
 	const {theme} = React.useContext(Context);
 	const {Modal} = theme;
 	return (
@@ -453,7 +454,9 @@ export const GenericModal = ({onHide, children, header, className}: GenericModal
 				<h4>{header}</h4>
 			</Modal.Header>
 			<Modal.Body>
-				{ children }
+				<div ref={bodyRef}>
+					{ children }
+				</div>
 			</Modal.Body>
 		</Modal>
 	);

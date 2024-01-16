@@ -15,6 +15,7 @@ import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
 import LajiForm from "../LajiForm";
 import FieldEditor from "./FieldEditor";
+import {HierarchyButton} from "./Hierarchy";
 
 export type FieldEditorChangeEvent =
 	TranslationsAddEvent
@@ -346,7 +347,7 @@ const EditorMainToolbar = ({
 
 	return (
 		<div style={{display: "flex", alignItems: "center"}} className={toolbarNmspc()}>
-			<Tooltip tooltip={translations["editor.langChooser.help"]}  id="lang-choose-help">
+			<Tooltip tooltip={translations["editor.langChooser.help"]} id="lang-choose-help">
 				<LangChooser onChange={onLangChange} />
 			</Tooltip>
 			<ButtonGroup className={gnmspc("ml-1")}>
@@ -366,6 +367,7 @@ const EditorMainToolbar = ({
 					<Button onClick={openJSONEditor} disabled={!master} small>JSON</Button>
 				</Tooltip>
 			</ButtonGroup>
+			<HierarchyButton master={master} className={gnmspc("ml-1")} />
 			<EditorToolbarSeparator />
 			<EditorChooser active={active} onChange={onEditorChange} displaySchemaTabs={displaySchemaTabs} />
 			<div style={{marginLeft: "auto", display: "flex", alignItems: "inherit"}}>

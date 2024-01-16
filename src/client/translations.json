@@ -268,5 +268,10 @@
 		"fi": "Avaa JSON modaaliin muokattavaksi",
 		"sv": "Avaa JSON modaaliin muokattavaksi",
 		"en": "Open the JSON in a modal for editing"
+	},
+	"editor.hierarchy.help": {
+		"fi": "Näytä riippuvuuspuu",
+		"sv": "Näytä riippuvuuspuu",
+		"en": "Open the hierarchy tree"
 	}
 }

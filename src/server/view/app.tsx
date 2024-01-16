@@ -71,6 +71,8 @@ const formService = new FormService(
 	formApiClient,
 );
 
+const idToUri  = (id: string) => `${window.location.origin}/${id}`;
+
 (async () => {
 	// State is stored in "route" object, which is purely reduced from the browser URI.
 	const LajiFormApp = () => {
@@ -167,6 +169,7 @@ const formService = new FormService(
 					               theme={lajiFormBs3}
 												 allowList={true}
 				                 onSelected={onSelected}
+												 idToUri={idToUri}
 				                 notifier={notifier}
 				                 onRemountLajiForm={onRemountLajiForm}
 				/>

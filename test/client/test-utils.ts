@@ -161,6 +161,15 @@ export class BuilderPO {
 			}, Promise.resolve([]));
 		}
 	}
+
+	hierarchyNmspc = cnmspc(nmspc("hierarchy"));
+	hierarchy = {
+		$button: this.page.locator(this.hierarchyNmspc("button")),
+		modal: {
+			$container: this.page.locator(this.hierarchyNmspc("modal")),
+			$close: this.page.locator(this.hierarchyNmspc("modal")).locator(".close")
+		}
+	}
 }
 
 export async function createBuilder(page: Page, id = ""): Promise<BuilderPO> {

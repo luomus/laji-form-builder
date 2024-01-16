@@ -30,6 +30,7 @@ export interface BuilderProps {
 	formApiClient?: ApiClientImplementation;
 	allowList?: boolean;
 	onSelected?: (id: string) => void;
+	idToUri?: (id: string) => string;
 	onRemountLajiForm?: () => void;
 }
 export interface BuilderState {
@@ -257,7 +258,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		this.changeHandlerService.setLang(this.state.lang);
 	}
 
-	getContext = memoize((lang: Lang, editorLang: Lang): ContextProps => ({
+	getContext = memoize((lang: Lang, editorLang: Lang, idToUri: BuilderProps["idToUri"]): ContextProps => ({
 		apiClient: this.apiClient,
 		lang,
 		editorLang,
@@ -269,11 +270,12 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		metadataService: this.metadataService,
 		formService: this.formService,
 		theme: this.props.theme,
-		notifier: this.notifier
+		notifier: this.notifier,
+		idToUri: idToUri
 	}))
 
 	render() {
-		const context = this.getContext(this.props.lang, this.state.lang);
+		const context = this.getContext(this.props.lang, this.state.lang, this.props.idToUri);
 		return (
 			<Context.Provider value={context}>
 				{
@@ -353,7 +355,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				.find(prop => !isValid(newState[prop]));
 			if (rootErrorProp) {
 				const rootError = this.state[rootErrorProp] as BuilderError;
-				const {translations} = this.getContext(this.props.lang, this.state.lang);
+				const {translations} = this.getContext(this.props.lang, this.state.lang, this.props.idToUri);
 				this.notifier.error(
 					`${translations["builder.masterChange.fail"]}\n${rootError.message}\n${rootError.stack}`
 				);
@@ -405,6 +407,8 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 		if (!master) {
 			return false;
 		}
+
+		const { translations } = this.getContext(this.props.lang, this.state.lang, this.props.idToUri);
 		try {
 			this.setState({saving: true});
 			if (master.id) {
@@ -418,10 +422,10 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 				this.setState({master: masterResponse, saving: false, id: masterResponse.id, jsonEditorOpen: false});
 				this.onSelected(masterResponse.id);
 			}
-			this.notifier.success(this.getContext(this.props.lang, this.state.lang).translations["save.success"]);
+			this.notifier.success(translations["save.success"]);
 			return true;
 		} catch (e) {
-			this.notifier.error(this.getContext(this.props.lang, this.state.lang).translations["save.error"]);
+			this.notifier.error(translations["save.error"]);
 			this.setState({saving: false});
 			return false;
 		}

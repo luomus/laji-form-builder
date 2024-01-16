@@ -73,6 +73,24 @@ const translateSafely = (lang?: Lang) => (f: Master) => (isLang(lang) && f.trans
 	? translate(f, (f.translations[lang] as {[key: string]: string}))
 	: f;
 
+
+const exposeFormListing = (form: Master) => {
+	const exposed = copyWithWhitelist(form as FormListing, exposedListedProps);
+	if (exposed.options) {
+		exposed.options = copyWithWhitelist(exposed.options, exposedListedOptions);
+		if (!Object.keys(exposed.options).length) {
+			delete exposed.options;
+		}
+	}
+	return exposed;
+};
+
+const exposeInheritance = (form: Master) => {
+	return (expandedForm: Master): Master => {
+		return { ...expandedForm, baseFormID: form.baseFormID, fieldsFormID: form.fieldsFormID };
+	};
+};
+
 export default class MainService extends HasCache {
 	private metadataService = new MetadataService(apiClient, DEFAULT_LANG);
 	private storeService = new StoreService();
@@ -80,7 +98,6 @@ export default class MainService extends HasCache {
 
 	constructor() {
 		super();
-		this.exposeFormListing = this.exposeFormListing.bind(this);
 		this.flush = this.flush.bind(this);
 
 		// Flush every day at 4am.
@@ -94,17 +111,6 @@ export default class MainService extends HasCache {
 		this.fieldService.setLang(lang);
 	}
 
-	private exposeFormListing(form: Master) {
-		const exposed = copyWithWhitelist(form as FormListing, exposedListedProps);
-		if (exposed.options) {
-			exposed.options = copyWithWhitelist(exposed.options, exposedListedOptions);
-			if (!Object.keys(exposed.options).length) {
-				delete exposed.options;
-			}
-		}
-		return exposed;
-	}
-
 	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
 		lang && this.setLang(lang);
 		return Promise.all((await this.storeService.getForms()).map(form => {
@@ -113,7 +119,8 @@ export default class MainService extends HasCache {
 				undefined,
 				this.fieldService.expand,
 				translateSafely(lang),
-				this.exposeFormListing,
+				exposeFormListing,
+				exposeInheritance(form),
 				addDefaultSupportedLanguage,
 				addEmptyOptions
 			);

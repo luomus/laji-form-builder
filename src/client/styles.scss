@@ -193,8 +193,8 @@ $margin: 2px;
 		}
 		#{$root}-warning {
 			background-color: $warning-1;
-			border-color:  $warning-6;
-			color: $warning-6;
+			border-color:  $warning-7;
+			color: $warning-7;
 		}
 	}
 	&-editor-nav-bar {
@@ -422,6 +422,22 @@ $margin: 2px;
 		}
 		&-mb-#{$factor}{
 			margin-bottom: $margin * $factor;
+		}
+	}
+
+	&-hierarchy-modal {
+		svg {
+			display: flex;
+			margin: auto;
+		}
+		path.link {
+			stroke: #aaaaaa;
+		}
+		text {
+      text-decoration: underline;
+    }
+		.base text {
+			stroke: #555555;
 		}
 	}
 }
