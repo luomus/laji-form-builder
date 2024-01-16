@@ -152,7 +152,7 @@ const HierarchyModal = ({ hierarchy, onHide }: { hierarchy: Hierarchy, onHide: (
 	const height = maxChildren * (LABEL_HEIGHT * 2 + LABEL_PADDING + NODES_PADDING);
 	return (
 		<GenericModal onHide={onHide}
-		              className={hierarchyNmpsc("")}
+		              className={hierarchyNmpsc()}
 		              bodyRef={ref}
 		              header={translations["editor.hierarchy.title"]}>
 			<Tree data={hierarchy}

@@ -166,13 +166,14 @@ export class BuilderPO {
 	hierarchy = {
 		$button: this.page.locator(this.hierarchyNmspc("button")),
 		modal: {
-			$container: this.page.locator(this.hierarchyNmspc("")),
-			$close: this.page.locator(this.hierarchyNmspc("")).locator(".close")
+			$container: this.page.locator(this.hierarchyNmspc()),
+			$close: this.page.locator(this.hierarchyNmspc()).locator(".close")
 		}
 	}
 }
 
 export async function createBuilder(page: Page, id = ""): Promise<BuilderPO> {
+	const hierarchyNmspc = cnmspc(nmspc("hierarchy"));
 	await page.goto(`/${id}`);
 	const builder = new BuilderPO(page);
 	return builder;
