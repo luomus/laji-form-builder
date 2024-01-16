@@ -296,4 +296,26 @@ test.describe("Editor", () => {
 			await expect(builder.picker.$button).not.toHaveClass(/active/);
 		});
 	});
+
+	test.describe("Hierarchy", () => {
+		test("button shown", async () => {
+			await expect(builder.hierarchy.$button).toBeVisible();
+		});
+
+		test("clicking button shows modal", async () => {
+			await builder.hierarchy.$button.click();
+			await expect(builder.hierarchy.modal.$container).toBeVisible();
+		});
+
+		test("modal shows related forms", async () => {
+			await expect(builder.hierarchy.modal.$container).toContainText("JX.519");
+			await expect(builder.hierarchy.modal.$container).toContainText("MHL.70");
+			await expect(builder.hierarchy.modal.$container).toContainText("MHL.617");
+		});
+
+		test("modal can be closed", async () => {
+			await builder.hierarchy.modal.$close.click();
+			await expect(builder.hierarchy.modal.$container).toBeHidden();
+		});
+	});
 });
