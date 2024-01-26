@@ -50,7 +50,12 @@ export const exposedListedOptions = dictionarify([
 	"useNamedPlaces",
 	"viewerType",
 	"disabled",
-	"shortTitleFromCollectionName"
+	"shortTitleFromCollectionName",
+	"namedPlaceOptions"
+]);
+
+export const exposedListedNamedPlaceOptions = dictionarify([
+	"includeUnits"
 ]);
 
 const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
@@ -78,6 +83,13 @@ const exposeFormListing = (form: Master) => {
 	const exposed = copyWithWhitelist(form as FormListing, exposedListedProps);
 	if (exposed.options) {
 		exposed.options = copyWithWhitelist(exposed.options, exposedListedOptions);
+		if (exposed.options.namedPlaceOptions) {
+			exposed.options.namedPlaceOptions =
+				copyWithWhitelist(exposed.options.namedPlaceOptions, exposedListedNamedPlaceOptions);
+			if (!Object.keys(exposed.options.namedPlaceOptions).length) {
+				delete exposed.options.namedPlaceOptions;
+			}
+		}
 		if (!Object.keys(exposed.options).length) {
 			delete exposed.options;
 		}

@@ -3,7 +3,8 @@ import app from "../../src/server/server";
 import { FormListing, Master } from "../../src/model";
 import {
 	exposedListedProps as _exposedListedProps,
-	exposedListedOptions
+	exposedListedOptions,
+	exposedListedNamedPlaceOptions
 } from "../../src/server/services/main-service";
 import { formFetch } from "../../src/server/services/store-service";
 
@@ -119,7 +120,7 @@ describe("/api", () => {
 		it("returns only certain options", (done) => {
 			const gatheredOptions: Record<string, boolean> = {};
 			forms.forEach(f => {
-				f.options && Object.keys(f.options).forEach(key => {
+				Object.keys(f.options).forEach(key => {
 					gatheredOptions[key] = true;
 				});
 			});
@@ -132,8 +133,31 @@ describe("/api", () => {
 				return;
 			}
 			forms.forEach(f => {
-				f.options && Object.keys(f.options).forEach(key => {
+				Object.keys(f.options).forEach(key => {
 					expect((exposedListedOptions as any)[key]).toBe(true);
+				});
+			});
+			done();
+		});
+
+		it("returns only certain namedPlaceOptions", (done) => {
+			const gatheredNamedPlaceOptions: Record<string, boolean> = {};
+			forms.forEach(f => {
+				f.options.namedPlaceOptions && Object.keys(f.options.namedPlaceOptions).forEach(key => {
+					gatheredNamedPlaceOptions[key] = true;
+				});
+			});
+			expect(gatheredNamedPlaceOptions).toEqual(exposedListedNamedPlaceOptions);
+			done();
+		});
+
+		it("doesn't return any other namedPlaceOptions", (done) => {
+			if (!forms) {
+				return;
+			}
+			forms.forEach(f => {
+				f.options.namedPlaceOptions && Object.keys(f.options.namedPlaceOptions).forEach(key => {
+					expect((exposedListedNamedPlaceOptions as any)[key]).toBe(true);
 				});
 			});
 			done();
