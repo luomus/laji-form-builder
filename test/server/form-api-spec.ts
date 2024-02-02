@@ -3,8 +3,6 @@ import app from "../../src/server/server";
 import { FormListing, Master } from "../../src/model";
 import {
 	exposedListedProps as _exposedListedProps,
-	exposedListedOptions,
-	exposedListedNamedPlaceOptions
 } from "../../src/server/services/main-service";
 import { formFetch } from "../../src/server/services/store-service";
 
@@ -19,7 +17,6 @@ const exposedListedProps = {
 const finish = (done: DoneFn) => (err: string | Error) => err ? done.fail(err) : done();
 
 const TEST_FORM_ID = "MHL.119";
-const TEST_FORM_WITH_BASE_ID = "MHL.89";
 const TEST_FORM_WITH_BASE_EXTENDS = "MHL.59";
 const TEST_FORM_WITH_FIELDS_ID = "MHL.32";
 const TEST_FORM_WITH_FIELDS_ID_EXTENDS = "MHL.36";
@@ -117,62 +114,19 @@ describe("/api", () => {
 			done();
 		});
 
-		it("returns only certain options", (done) => {
-			const gatheredOptions: Record<string, boolean> = {};
-			forms.forEach(f => {
-				Object.keys(f.options).forEach(key => {
-					gatheredOptions[key] = true;
-				});
-			});
-			expect(gatheredOptions).toEqual(exposedListedOptions);
-			done();
-		});
-
-		it("doesn't return any other options", (done) => {
-			if (!forms) {
-				return;
-			}
-			forms.forEach(f => {
-				Object.keys(f.options).forEach(key => {
-					expect((exposedListedOptions as any)[key]).toBe(true);
-				});
-			});
-			done();
-		});
-
-		it("returns only certain namedPlaceOptions", (done) => {
-			const gatheredNamedPlaceOptions: Record<string, boolean> = {};
-			forms.forEach(f => {
-				f.options.namedPlaceOptions && Object.keys(f.options.namedPlaceOptions).forEach(key => {
-					gatheredNamedPlaceOptions[key] = true;
-				});
-			});
-			expect(gatheredNamedPlaceOptions).toEqual(exposedListedNamedPlaceOptions);
-			done();
-		});
-
-		it("doesn't return any other namedPlaceOptions", (done) => {
-			if (!forms) {
-				return;
-			}
-			forms.forEach(f => {
-				f.options.namedPlaceOptions && Object.keys(f.options.namedPlaceOptions).forEach(key => {
-					expect((exposedListedNamedPlaceOptions as any)[key]).toBe(true);
-				});
-			});
-			done();
-		});
-
-		it("extends base form", (done) => {
+		it("extends base form", async (done) => {
+			const extendingForm = await formFetch(`/${TEST_FORM_WITH_BASE_EXTENDS}?expand=false`) as Master;
 			request(app)
 				.get("/api")
 				.expect(200)
 				.expect("Content-Type", "application/json; charset=utf-8")
 				.expect(response => {
 					forms = response.body.forms;
-					const form = forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_ID);
-					const baseForm = forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_EXTENDS);
-					expect(form.options).toEqual(baseForm.options);
+					const listedBaseForm = forms.find((f: FormListing) => f.id === TEST_FORM_WITH_BASE_EXTENDS);
+					expect(listedBaseForm.options).toEqual({
+						...listedBaseForm.options,
+						...extendingForm.options
+					});
 				})
 				.end(finish(done));
 		});

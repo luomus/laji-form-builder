@@ -2,7 +2,7 @@ import * as config from "../../../config.json";
 import { reduceWith, translate, dictionarify, bypass } from "../../utils";
 import MetadataService from "../../services/metadata-service";
 import FieldService, { addEmptyOptions, removeTranslations } from "./field-service";
-import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster } from "../../model";
+import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster, FormOptions } from "../../model";
 import ApiClient, { ApiClientImplementation } from "../../api-client";
 import StoreService from "./store-service";
 import HasCache from "../../services/has-cache";
@@ -36,24 +36,6 @@ export const exposedListedProps = dictionarify([
 	"name"
 ] as (keyof FormListing)[]);
 
-export const exposedListedOptions = dictionarify([
-	"allowExcel",
-	"allowTemplate",
-	"dataset",
-	"emptyOnNoCount",
-	"forms",
-	"excludeFromGlobalExcel",
-	"hasAdmins",
-	"restrictAccess",
-	"secondaryCopy",
-	"sidebarFormLabel",
-	"useNamedPlaces",
-	"viewerType",
-	"disabled",
-	"shortTitleFromCollectionName",
-	"namedPlaceOptions"
-]);
-
 export const exposedListedNamedPlaceOptions = dictionarify([
 	"includeUnits"
 ]);
@@ -79,22 +61,8 @@ const translateSafely = (lang?: Lang) => (f: Master) => (isLang(lang) && f.trans
 	: f;
 
 
-const exposeFormListing = (form: Master) => {
-	const exposed = copyWithWhitelist(form as FormListing, exposedListedProps);
-	if (exposed.options) {
-		exposed.options = copyWithWhitelist(exposed.options, exposedListedOptions);
-		if (exposed.options.namedPlaceOptions) {
-			exposed.options.namedPlaceOptions =
-				copyWithWhitelist(exposed.options.namedPlaceOptions, exposedListedNamedPlaceOptions);
-			if (!Object.keys(exposed.options.namedPlaceOptions).length) {
-				delete exposed.options.namedPlaceOptions;
-			}
-		}
-		if (!Object.keys(exposed.options).length) {
-			delete exposed.options;
-		}
-	}
-	return exposed;
+const exposeFormListing = (form: Master & { options: FormOptions } ) => {
+	return copyWithWhitelist(form, exposedListedProps);
 };
 
 const exposeInheritance = (form: Master) => {
@@ -131,10 +99,10 @@ export default class MainService extends HasCache {
 				undefined,
 				this.fieldService.expand,
 				translateSafely(lang),
+				addEmptyOptions,
 				exposeFormListing,
 				exposeInheritance(form),
 				addDefaultSupportedLanguage,
-				addEmptyOptions
 			);
 			return result;
 		}));
