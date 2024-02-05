@@ -30,19 +30,13 @@ const apiClient = new ApiClient(
 	DEFAULT_LANG
 );
 
-export const exposedListedProps = dictionarify([
-	"id", "logo", "title", "description", "shortDescription",
-	"supportedLanguage", "category", "collectionID", "options",
-	"name"
-] as (keyof FormListing)[]);
+export const hiddenListedProps = dictionarify([
+	"fields", "translations", "uiSchema"
+] as (keyof Master)[]);
 
-export const exposedListedNamedPlaceOptions = dictionarify([
-	"includeUnits"
-]);
-
-const copyWithWhitelist = <T>(obj: T, whitelistDict: Record<keyof T, true>) => {
+const copyWithBlacklist = <T>(obj: T, blacklistDict: Record<keyof T, true>) => {
 	const isExposableProperty = (key: string | number | symbol): key is (keyof T) => {
-		return !!(whitelistDict as any)[key];
+		return !(blacklistDict as any)[key];
 	};
 	return Object.keys(obj).reduce<T>((copy: T, key) => {
 		if (isExposableProperty(key)) {
@@ -62,7 +56,7 @@ const translateSafely = (lang?: Lang) => (f: Master) => (isLang(lang) && f.trans
 
 
 const exposeFormListing = (form: Master & { options: FormOptions } ) => {
-	return copyWithWhitelist(form, exposedListedProps);
+	return copyWithBlacklist(form, hiddenListedProps);
 };
 
 const exposeInheritance = (form: Master) => {
