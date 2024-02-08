@@ -1,6 +1,5 @@
 import ApiClient from "../api-client";
-import { Property, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, JSONSchemaV6Enum,
-	JSONSchemaEnumOneOf, Field } from "../model";
+import { Property, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, Field } from "../model";
 import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } from "../utils";
 import HasCache from "./has-cache";
 
@@ -71,16 +70,7 @@ export default class MetadataService extends HasCache {
 
 	isAltRange = async (range: string) => !!(await this.getAllRanges())[range];
 
-	getJSONSchemaFromProperty<T extends JSONSchema>
-	(property: Property): Promise<T>;
-	getJSONSchemaFromProperty<T extends JSONSchema>
-	(property: Property, useEnums: false): Promise<T>;
-	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaV6Enum>>
-	(property: Property, useEnums: true): Promise<T>;
-	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>>
-	(property: Property, useEnums: boolean): Promise<T>
-	getJSONSchemaFromProperty<T extends JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>>
-	(property: Property, useEnums = false): Promise<T> {
+	getJSONSchemaFromProperty<T extends JSONSchema>(property: Property): Promise<T> {
 		const mapRangeToSchema = async (property: Property): Promise<T> => {
 			const range = property.range[0];
 			const isRange = await this.isAltRange(range);
@@ -98,7 +88,7 @@ export default class MetadataService extends HasCache {
 								: e.id
 					);
 				}
-				return JSONSchemaBuilder.enu({enum: enums, enumNames}, undefined, useEnums) as T;
+				return JSONSchemaBuilder.enu({enum: enums, enumNames}, undefined) as T;
 			}
 			if (property.multiLanguage) {
 				return JSONSchemaBuilder.object(["fi", "sv", "en"].reduce((props, lang) =>

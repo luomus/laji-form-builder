@@ -1,6 +1,6 @@
 import MetadataService from "../../services/metadata-service";
 import { AltTreeNode, AltTreeParent, ExpandedMaster, Field, FieldOptions, JSONObject, JSONSchema, JSONSchemaEnumOneOf,
-	JSONSchemaObject, JSONSchemaV6Enum, Lang, Master, Property, SchemaFormat } from "../../model";
+	JSONSchemaObject, Lang, Master, Property, SchemaFormat } from "../../model";
 import { mapUnknownFieldWithTypeToProperty } from "./field-service";
 import { dictionarify, JSONSchemaBuilder, multiLang, reduceWith, unprefixProp } from "../../utils";
 import { getDefaultFormState } from "@luomus/laji-form/lib/utils";
@@ -15,26 +15,21 @@ type Species = {
 	informalTaxonGroups?: string[];
 }
 
-
-export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
-	extends ConverterService<SchemaFormat<T>> {
+export default class SchemaService extends ConverterService<SchemaFormat> {
 
 	metadataService: MetadataService;
 	apiClient: ApiClient;
 	lang: Lang;
-	useEnums = false;
 
 	constructor(
 		metadataService: MetadataService,
 		apiClient: ApiClient,
 		lang: Lang,
-		useEnums = false
 	) {
 		super();
 		this.metadataService = metadataService;
 		this.apiClient = apiClient;
 		this.lang = lang;
-		this.useEnums = useEnums;
 
 		this.prepopulate = this.prepopulate.bind(this);
 	}
@@ -65,10 +60,10 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 	}
 
 	async fieldToSchema(field: Field, property: Property, isRootProperty = false)
-	: Promise<JSONSchema<T>> {
+	: Promise<JSONSchema> {
 		const {fields = []} = field;
 
-		let transformed: JSONSchema<T>;
+		let transformed: JSONSchema;
 		if (property.isEmbeddable) {
 			const properties = await this.metadataService.getProperties(fields, property);
 
@@ -81,7 +76,7 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 					return [
 						field.name,
 						await this.fieldToSchema(field, prop, false)
-					] as [string, JSONSchema<T>];
+					] as [string, JSONSchema];
 				})
 			);
 
@@ -93,16 +88,16 @@ export default class SchemaService<T extends (JSONSchemaEnumOneOf | JSONSchemaV6
 				field,
 				addRequireds(properties),
 				mapMaxOccurs(property)
-			) as JSONSchema<T>;
+			) as JSONSchema;
 		} else {
 			transformed = await reduceWith(
-				this.metadataService.getJSONSchemaFromProperty(property, this.useEnums),
+				this.metadataService.getJSONSchemaFromProperty(property),
 				field,
-				addValueOptions(this.useEnums),
-				filterWhitelist(this.useEnums),
-				filterBlacklist(this.useEnums),
-				hide(this.useEnums)
-			) as JSONSchema<T>;
+				addValueOptions,
+				filterWhitelist,
+				filterBlacklist,
+				hide
+			) as JSONSchema;
 		}
 
 		return reduceWith(
@@ -252,55 +247,52 @@ const mapEmbeddable = (field: Field, properties: JSONSchemaObject["properties"])
 	return JSONSchemaBuilder.object(properties, {required});
 };
 
-const mapMaxOccurs = ({maxOccurs}: Property) =>
-	<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum)>(schema: JSONSchema<T>) =>
-		maxOccurs === "unbounded" ? JSONSchemaBuilder.array(schema) : schema;
+const mapMaxOccurs = ({maxOccurs}: Property) => (schema: JSONSchema) =>
+	maxOccurs === "unbounded" ? JSONSchemaBuilder.array(schema) : schema;
 
 const stringNumberLargerThan = (value: string, largerThan: number) =>
 	!isNaN(parseInt(value)) && parseInt(value) > largerThan;
 
-const addRequireds = (properties: Record<string, Property>) =>
-	<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum)>(schema: JSONSchemaObject<T>) =>
-		Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
-			const property = properties[unprefixProp(propertyName)];
-			if (!property) {
-				return schema;
-			}
-			const isRequired = (stringNumberLargerThan(property.minOccurs, 0) || property.required)
-				&& !schema.required?.includes(property.shortName);
-			if (isRequired) {
-				if (!schema.required) {
-					schema.required = [];
-				}
-				schema.required.push(property.shortName);
-			}
-			return schema;
-		}, schema);
-
-const addValueOptions = (useEnums = false) =>
-	<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum>(schema: JSONSchema<T>, field: Field) => {
-		const {value_options} = field.options || {};
-		if (!value_options) {
+const addRequireds = (properties: Record<string, Property>) => (schema: JSONSchemaObject) =>
+	Object.keys((schema.properties as any)).reduce((schema, propertyName) => {
+		const property = properties[unprefixProp(propertyName)];
+		if (!property) {
 			return schema;
 		}
-		const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(
-			([_enum, enumNames], option) => {
-				_enum.push(option);
-				const label = value_options[option];
-				enumNames.push(label);
-				return [_enum, enumNames];
-			}, [[], []]);
-		const {type, ...enumData} = JSONSchemaBuilder.enu({
-			enum: _enum,
-			enumNames
-		}, undefined, useEnums);
-		return schema.type === "array"
-			? { ...schema, items: {...(schema.items as any), ...enumData}, uniqueItems: true}
-			: {...schema, ...enumData};
-	};
+		const isRequired = (stringNumberLargerThan(property.minOccurs, 0) || property.required)
+			&& !schema.required?.includes(property.shortName);
+		if (isRequired) {
+			if (!schema.required) {
+				schema.required = [];
+			}
+			schema.required.push(property.shortName);
+		}
+		return schema;
+	}, schema);
 
-const filterList = (listName: "whitelist" | "blacklist", white = true, useEnums = false) =>
-	<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum>(schema: JSONSchema<T>, field: Field) => {
+const addValueOptions =	(schema: JSONSchema, field: Field) => {
+	const {value_options} = field.options || {};
+	if (!value_options) {
+		return schema;
+	}
+	const [_enum, enumNames] = Object.keys(value_options).reduce<[string[], string[]]>(
+		([_enum, enumNames], option) => {
+			_enum.push(option);
+			const label = value_options[option];
+			enumNames.push(label);
+			return [_enum, enumNames];
+		}, [[], []]);
+	const {type, ...enumData} = JSONSchemaBuilder.enu({
+		enum: _enum,
+		enumNames
+	});
+	return schema.type === "array"
+		? { ...schema, items: {...(schema.items as any), ...enumData}, uniqueItems: true}
+		: {...schema, ...enumData};
+};
+
+const filterList = (listName: "whitelist" | "blacklist", white = true) =>
+	(schema: JSONSchema, field: Field) => {
 		const list = (field.options || {} as FieldOptions)[listName];
 
 		if (!list) {
@@ -321,55 +313,38 @@ const filterList = (listName: "whitelist" | "blacklist", white = true, useEnums 
 			return schema;
 		}
 
-		const enu: string[] =
-			(useEnums
-				? schemaForEnum.enum
-				: (schemaForEnum.oneOf as JSONSchemaEnumOneOf["oneOf"])?.map(item => (item as any).const)
-			) || [];
+		const enu: string[] = (schemaForEnum.oneOf as JSONSchemaEnumOneOf["oneOf"])?.map(item => (item as any).const)
+			|| [];
 
 		[...enu].forEach((w: string) => {
 			if (!check(w)) {
 				return;
 			}
-			if (useEnums) {
-				const idxInEnum = schemaForEnum.enum.indexOf(w);
-				schemaForEnum.enum.splice(idxInEnum, 1);
-				schemaForEnum.enumNames.splice(idxInEnum, 1);
-			} else {
-				const idxInEnum = schemaForEnum.oneOf.findIndex((one: any) => one.const === w);
-				schemaForEnum.oneOf.splice(idxInEnum, 1);
-			}
+			const idxInEnum = schemaForEnum.oneOf.findIndex((one: any) => one.const === w);
+			schemaForEnum.oneOf.splice(idxInEnum, 1);
 		});
 
 		return schema;
 	};
 
-const filterWhitelist = (useEnums = false) => filterList("whitelist", true, useEnums);
-const filterBlacklist = (useEnums = false) => filterList("blacklist", false, useEnums);
+const filterWhitelist = filterList("whitelist", true);
+const filterBlacklist = filterList("blacklist", false);
 
-const hide = (useEnums = false) =>
-	<T extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum)>(schema: JSONSchema<T>, field: Field) => {
-		if (field.type !== "hidden") {
-			return schema;
-		}
-		if (useEnums) {
-			delete (schema as any).enum;
-			delete (schema as any).enumNames;
-		} else {
-			delete (schema as any).oneOf;
-		}
+const hide = (schema: JSONSchema, field: Field) => {
+	if (field.type !== "hidden") {
 		return schema;
-	};
+	}
+	delete (schema as any).oneOf;
+	return schema;
+};
 
-type EnumType = JSONSchemaEnumOneOf | JSONSchemaV6Enum;
+type AddValidatorsInput = Pick<SchemaFormat, "schema"> & Pick<Master, "translations">;
 
-type AddValidatorsInput<T extends EnumType> = Pick<SchemaFormat<T>, "schema"> & Pick<Master, "translations">;
-
-function addValidators<P extends EnumType, T extends AddValidatorsInput<P>>(type: "validators")
+function addValidators<T extends AddValidatorsInput>(type: "validators")
 	: ((schemaFormat: T, master: ExpandedMaster) => T & {validators: any})
-function addValidators<P extends EnumType, T extends AddValidatorsInput<P>>(type: "warnings")
+function addValidators<T extends AddValidatorsInput>(type: "warnings")
 	: ((schemaFormat: T, master: ExpandedMaster) => T & {warnings: any})
-function addValidators<P extends EnumType, T extends AddValidatorsInput<P>>(type: "validators" | "warnings")
+function addValidators<T extends AddValidatorsInput>(type: "validators" | "warnings")
 	: ((schemaFormat: T, master: ExpandedMaster) => T & {validators?: any, warnings?: any})
 {
 	return (schemaFormat: T, master: ExpandedMaster) => {
@@ -421,13 +396,13 @@ const addAttributes = <T extends Record<string, unknown>>(schemaFormat: T, maste
 			}
 			: schemaFormat;
 
-const addExcludeFromCopy = <T extends {schema: JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>}>
+const addExcludeFromCopy = <T extends {schema: JSONSchema}>
 	(schemaFormat: T, master: ExpandedMaster) => {
 	const exclude = (field: Pick<Field, "fields" | "options">, path: string) =>
 		field.options?.excludeFromCopy ? [path] : [];
 	const excludeRecursively = (
 		field: Pick<Field, "fields" | "options">,
-		schema: JSONSchema<JSONSchemaEnumOneOf | JSONSchemaV6Enum>,
+		schema: JSONSchema,
 		path: string
 	) : string[] => 
 		[

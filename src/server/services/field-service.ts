@@ -2,7 +2,7 @@ import MetadataService from "../../services/metadata-service";
 import SchemaService from "./schema-service";
 import ExpandedJSONService from "./expanded-json-service";
 import { Field, Lang, Master, Property, SchemaFormat, Translations, Range, ExpandedMaster, ExpandedJSONFormat,
-	CommonFormat, Format, isLang, JSONSchemaEnumOneOf, JSONSchemaV6Enum, JSONObject } from "../../model";
+	CommonFormat, Format, isLang, JSONObject } from "../../model";
 import { reduceWith, unprefixProp, isObject, translate, bypass, getPropertyContextName, getRootField as _getRootField,
 	getRootProperty } from "../../utils";
 import merge from "deepmerge";
@@ -17,8 +17,7 @@ export default class FieldService {
 	private apiClient: ApiClient;
 	private metadataService: MetadataService;
 	private storeService: StoreService;
-	private schemaService: SchemaService<JSONSchemaEnumOneOf>;
-	private schemaServiceWithEnums: SchemaService<JSONSchemaV6Enum>;
+	private schemaService: SchemaService;
 	private expandedJSONService: ExpandedJSONService;
 	private uiSchemaService: UiSchemaService;
 	private formExpanderService: FormExpanderService;
@@ -28,7 +27,6 @@ export default class FieldService {
 		this.metadataService = metadataService;
 		this.storeService = storeService;
 		this.schemaService = new SchemaService(metadataService, apiClient, lang);
-		this.schemaServiceWithEnums = new SchemaService(metadataService, apiClient, lang, true);
 		this.expandedJSONService = new ExpandedJSONService(metadataService, lang);
 		this.uiSchemaService = new UiSchemaService(this.metadataService);
 		this.formExpanderService = new FormExpanderService(this.storeService);
@@ -41,7 +39,6 @@ export default class FieldService {
 
 	setLang(lang: Lang) {
 		this.schemaService.setLang(lang);
-		this.schemaServiceWithEnums.setLang(lang);
 		this.expandedJSONService.setLang(lang);
 	}
 
@@ -53,16 +50,11 @@ export default class FieldService {
 		return this.convert(master, Format.Schema, lang);
 	}
 
-	masterToSchemaWithEnumsFormat(master: Master, lang?: Lang): Promise<SchemaFormat<JSONSchemaV6Enum>> {
-		return this.convert(master, Format.SchemaWithEnums, lang);
-	}
-
 	masterToExpandedJSONFormat(master: Master, lang?: Lang): Promise<ExpandedJSONFormat> {
 		return this.convert(master, Format.JSON, lang);
 	}
 
 	async convert(master: Master, format: Format.Schema, lang?: Lang) : Promise<SchemaFormat>
-	async convert(master: Master, format: Format.SchemaWithEnums, lang?: Lang) : Promise<SchemaFormat<JSONSchemaV6Enum>>
 	async convert(master: Master, format: Format.JSON, lang?: Lang) : Promise<ExpandedJSONFormat>
 	async convert(master: Master, format: Format, lang?: Lang) : Promise<SchemaFormat | ExpandedJSONFormat> {
 		const expandedMaster = await this.expand(master);
@@ -79,9 +71,6 @@ export default class FieldService {
 		switch (format) {
 		case Format.Schema:
 			converter = this.schemaService;
-			break;
-		case Format.SchemaWithEnums:
-			converter = this.schemaServiceWithEnums;
 			break;
 		case Format.JSON:
 			converter = this.expandedJSONService;

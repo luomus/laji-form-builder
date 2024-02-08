@@ -397,18 +397,6 @@ describe("fields", () => {
 				expect(secureLevel.oneOf[1].title).toBe("Ei karkeistettu");
 			});
 
-			it("for schema-with-enum format", async () => {
-				const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-				const {secureLevel}: any = schemaFormat.schema.properties;
-				expect(secureLevel.type).toBe("string");
-				expect(secureLevel.enum.length).toBe(10);
-				expect(secureLevel.enumNames.length).toBe(10);
-				expect(secureLevel.enum[0]).toBe("");
-				expect(secureLevel.enumNames[0]).toBe("");
-				expect(secureLevel.enum[1]).toBe("MX.secureLevelNone");
-				expect(secureLevel.enumNames[1]).toBe("Ei karkeistettu");
-			});
-
 			it("for json format", async () => {
 				const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
 				expect(jsonFormat.fields?.[0]?.type).toEqual("select");
@@ -429,13 +417,6 @@ describe("fields", () => {
 				expect(secureLevel.oneOf).toEqual([{const: "MX.secureLevelKM5", title: "5 km"}]);
 			});
 
-			it("for schema-with-enums format", async () => {
-				const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-				const {secureLevel}: any = schemaFormat.schema.properties;
-				expect(secureLevel.enum).toEqual(["MX.secureLevelKM5"]);
-				expect(secureLevel.enumNames).toEqual(["5 km"]);
-			});
-
 			it("for json format", async () => {
 				const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
 				expect(jsonFormat.fields?.[0]?.options?.value_options?.["MX.secureLevelKM5"]).toEqual("5 km");
@@ -449,13 +430,6 @@ describe("fields", () => {
 				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 				const {secureLevel}: any = schemaFormat.schema.properties;
 				expect(secureLevel.oneOf.length).toBe(8);
-			});
-
-			it("for schema-with-enums format", async () => {
-				const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-				const {secureLevel}: any = schemaFormat.schema.properties;
-				expect(secureLevel.enum.length).toBe(8);
-				expect(secureLevel.enumNames.length).toBe(8);
 			});
 
 			it("for json format", async () => {
@@ -600,13 +574,6 @@ describe("fields", () => {
 					]);
 				});
 
-				it("for schema-with-enums format", async () => {
-					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-					const {coordinateSource} = schemaFormat.schema.properties.gatherings.items.properties;
-					expect(coordinateSource.enum).toEqual(["a", "b"]);
-					expect(coordinateSource.enumNames).toEqual(["aLabel", "bLabel"]);
-				});
-
 				it("for json format", async () => {
 					const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
 					expect(jsonFormat.fields?.[0]?.fields?.[0]?.options?.value_options).toEqual(value_options);
@@ -628,19 +595,6 @@ describe("fields", () => {
 					]);
 					expect(batHabitat.uniqueItems).toEqual(true);
 				});
-
-				it("for schema-with-enums format", async () => {
-					const form = { fields: [
-						{ name: "gatherings",
-							fields: [ { name: "batHabitat", options: { value_options: {a: "aLabel", b: "bLabel"} }} ]
-						}
-					]};
-					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-					const batHabitat = schemaFormat.schema.properties.gatherings.items.properties.batHabitat;
-					expect(batHabitat.items.enum).toEqual(["a", "b"]);
-					expect(batHabitat.items.enumNames).toEqual(["aLabel", "bLabel"]);
-					expect(batHabitat.uniqueItems).toEqual(true);
-				});
 			});
 
 			it("whitelist works", () => {
@@ -649,17 +603,11 @@ describe("fields", () => {
 				]};
 
 				it("for schema format", async () => {
-					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
+					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
 					expect(schemaFormat.schema.properties.secureLevel.oneOf).toEqual([
 						{const: "", title:  ""},
 						{const: "MX.secureLevelKM5", title: "5 km"}
 					]);
-				});
-
-				it("for schema-with-enums format", async () => {
-					const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
-					expect(schemaFormat.schema.properties.secureLevel.enum).toEqual(["", "MX.secureLevelKM5"]);
-					expect(schemaFormat.schema.properties.secureLevel.enumNames).toEqual(["", "5 km"]);
 				});
 
 				it("for json format", async () => {
@@ -681,12 +629,6 @@ describe("fields", () => {
 					expect(schemaFormat.schema.properties.secureLevel.oneOf).toEqual([
 						{const: "", title:  ""}
 					]);
-				});
-
-				it("for schema-with-enums format", async () => {
-					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-					expect(schemaFormat.schema.properties.secureLevel.enum).toEqual([""]);
-					expect(schemaFormat.schema.properties.secureLevel.enumNames).toEqual([""]);
 				});
 
 				it("for json format", async () => {
@@ -711,13 +653,6 @@ describe("fields", () => {
 					]);
 				});
 
-				it("for schema-with-enums format", async () => {
-					const schemaFormat: any = await fieldService.masterToSchemaWithEnumsFormat(form, LANG);
-					const {secureLevel}: any = schemaFormat.schema.properties;
-					expect(secureLevel.enum).toEqual(["MX.secureLevelKM1", "MX.secureLevelKM25"]);
-					expect(secureLevel.enumNames).toEqual(["1 km", "25 km"]);
-				});
-
 				it("for json format", async () => {
 					const jsonFormat = await fieldService.masterToExpandedJSONFormat(form, LANG);
 					expect(jsonFormat.fields?.[0]?.options?.value_options).toEqual({
@@ -734,11 +669,6 @@ describe("fields", () => {
 
 				it("for schema format", async () => {
 					expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
-				});
-
-				it("for schema-with-enums format", async () => {
-					expect(await throwsError(() => fieldService.masterToSchemaWithEnumsFormat(form, LANG)))
-						.toBe(false);
 				});
 
 				it("for json format", async () => {

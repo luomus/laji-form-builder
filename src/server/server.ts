@@ -63,8 +63,8 @@ api.get("/:id", langCheckMiddleWare, async (req, res) => {
 		return error(res, 422, "Query param expand should be one of 'true', 'false'");
 	}
 	const _expand = expand !== "false";
-	if (format !== Format.Schema && format !== Format.JSON && format !== Format.SchemaWithEnums) {
-		return error(res, 422, "Query param format should be one of 'json', 'schema' or 'schema-with-enums'");
+	if (format !== Format.Schema && format !== Format.JSON) {
+		return error(res, 422, "Query param format should be 'json' or 'schema'");
 	}
 	return res.status(200).json(await main.getForm(id, lang as (Lang | undefined), format, _expand));
 });

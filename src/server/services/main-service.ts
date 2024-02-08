@@ -111,7 +111,6 @@ export default class MainService extends HasCache {
 			lang && this.setLang(lang);
 			const isConvertable = (
 				format === Format.Schema
-				|| format === Format.SchemaWithEnums
 				|| format === Format.JSON && expand
 			);
 

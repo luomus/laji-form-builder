@@ -95,8 +95,8 @@ export function isMaster(master: unknown): master is Master {
 	return isObject(master);
 }
 
-export type SchemaFormat<T extends JSONSchemaEnumOneOf | JSONSchemaV6Enum = JSONSchemaEnumOneOf> = CommonExpanded & {
-	schema: JSONSchema<T>;
+export type SchemaFormat = CommonExpanded & {
+	schema: JSONSchema;
 	validators: {[prop: string]: (JSONObject | boolean)};
 	warnings: {[prop: string]: (JSONObject | boolean)};
 	excludeFromCopy: string[];
@@ -199,18 +199,17 @@ export type FormDeleteResult = {
 
 export enum Format {
 	Schema = "schema",
-	SchemaWithEnums = "schema-with-enums",
 	JSON = "json"
 }
 
-export type JSONSchema<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf> =
+export type JSONSchema =
 	JSONSchemaObject
 	| JSONSchemaArray
 	| JSONSchemaNumber
 	| JSONSchemaInteger
 	| JSONSchemaBoolean
 	| JSONSchemaString
-	| E;
+	| JSONSchemaEnumOneOf;
 
 type JSONShemaTypeCommon<T, D> = {
 	type: T;
@@ -218,14 +217,12 @@ type JSONShemaTypeCommon<T, D> = {
 	title?: string;
 }
 
-export type JSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
-	= JSONShemaTypeCommon<"object", Record<string, unknown>> & {
-	properties: Record<string, JSONSchema<E>>;
+export type JSONSchemaObject = JSONShemaTypeCommon<"object", Record<string, unknown>> & {
+	properties: Record<string, JSONSchema>;
 	required?: string[];
 }
 
-export function isJSONSchemaObject<E extends (JSONSchemaEnumOneOf | JSONSchemaV6Enum) = JSONSchemaEnumOneOf>
-(schema: JSONSchema<E>): schema is JSONSchemaObject {
+export function isJSONSchemaObject(schema: JSONSchema): schema is JSONSchemaObject {
 	return schema.type === "object";
 }
 
@@ -248,9 +245,4 @@ export type JSONSchemaEnumOneOf = JSONSchemaString & {
 
 export function isJSONSchemaEnumOneOf(jsonSchema: JSONSchema): jsonSchema is JSONSchemaEnumOneOf {
 	return !!(jsonSchema as any).oneOf;
-}
-
-export type JSONSchemaV6Enum = JSONSchemaString & {
-	enum: string[];
-	enumNames: string[];
 }

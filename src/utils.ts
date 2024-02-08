@@ -1,7 +1,7 @@
 import fetch from "cross-fetch";
 import { isObject as _isObject, parseJSONPointer as _parseJSONPointer } from "@luomus/laji-form/lib/utils";
 import { Field, JSONSchema, JSONSchemaArray, JSONSchemaBoolean, JSONSchemaEnumOneOf, JSONSchemaInteger,
-	JSONSchemaNumber, JSONSchemaObject, JSONSchemaString, JSONSchemaV6Enum, Lang, Master, Property } from "./model";
+	JSONSchemaNumber, JSONSchemaObject, JSONSchemaString, Lang, Master, Property } from "./model";
 
 export const translate = <T>(obj: T, translations: Record<string, string>): T => {
 	function translate(_any: any): any {
@@ -39,26 +39,14 @@ export class JSONSchemaBuilder {
 	static object = (properties = {}, options = {}) =>
 		JSONSchemaBuilder.type<JSONSchemaObject>("object")({properties, ...options});
 
-	static enu(_enum: {enum: string[], enumNames: string[]})
-		: JSONSchemaEnumOneOf;
-	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions)
-		: JSONSchemaEnumOneOf;
-	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions | undefined, useEnums: false)
-		: JSONSchemaEnumOneOf;
-	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions | undefined, useEnums: true)
-		: JSONSchemaV6Enum;
-	static enu(_enum: {enum: string[], enumNames: string[]}, options: EVOptions  | undefined, useEnums: boolean)
-		: JSONSchemaEnumOneOf | JSONSchemaV6Enum;
-	static enu(_enum: {enum: string[], enumNames: string[]}, options?: EVOptions, useEnums = false)
-		: JSONSchemaEnumOneOf | JSONSchemaV6Enum {
+	static enu(_enum: {enum: string[], enumNames: string[]}, options?: EVOptions)
+		: JSONSchemaEnumOneOf {
 		return {
 			...JSONSchemaBuilder.String(options),
-			...(!useEnums
-				? {oneOf: _enum.enum.reduce((oneOf, enu, idx) => {
-					oneOf.push({const: enu, title: _enum.enumNames[idx]});
-					return oneOf;
-				}, [] as {const: string, title: string}[])}
-				: _enum)
+			...({oneOf: _enum.enum.reduce((oneOf, enu, idx) => {
+				oneOf.push({const: enu, title: _enum.enumNames[idx]});
+				return oneOf;
+			}, [] as {const: string, title: string}[])})
 		};
 	}
 }
