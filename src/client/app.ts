@@ -1,4 +1,4 @@
-import Builder, { BuilderProps } from "./components/Builder";
+import Builder, { BuilderProps } from "src/client/components/Builder";
 import * as React from "react";
 import { render, unmountComponentAtNode } from "react-dom";
 

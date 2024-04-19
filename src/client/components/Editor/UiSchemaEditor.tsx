@@ -2,22 +2,22 @@ import * as React from "react";
 import parsePropTypes from "@luomus/parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
-import LajiFormInterface from "../../LajiFormInterface";
+import LajiFormInterface from "src/client/LajiFormInterface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
 	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, handleTranslationChange, 
 } from "../../utils";
-import { parseJSONPointer, JSONSchemaBuilder, isObject } from "../../../utils";
+import { parseJSONPointer, JSONSchemaBuilder, isObject } from "src/utils";
 import LajiForm from "../LajiForm";
 import { Label as LajiFormLabel } from "@luomus/laji-form/lib/components/components";
 import LajiFormTitle from "@luomus/laji-form/lib/components/templates/TitleField";
 import {
 	parseSchemaFromFormDataPointer, updateSafelyWithJSONPointer, getInnerUiSchema, getUiOptions, immutableDelete
 } from "@luomus/laji-form/lib/utils";
-import { AnyJSONEditor } from "../components";
-import { Context } from "../Context";
+import { AnyJSONEditor } from "src/client/components/components";
+import { Context } from "src/client/components/Context";
 import { FieldProps } from "@luomus/laji-form/lib/components/LajiForm";
-import { isJSONObjectOrUndefined, JSONObject, JSONSchema } from "../../../model";
+import { isJSONObjectOrUndefined, JSONObject, JSONSchema } from "src/model";
 import { GenericFieldEditorProps } from "./FieldEditor";
 
 const PREFIX = "$";

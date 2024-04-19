@@ -2,18 +2,18 @@ import * as React from "react";
 import { DraggableHeight, Clickable, Button, Stylable, Classable, Spinner, SubmittableJSONEditor,
 	HasChildren, SubmittableJSONEditorProps, JSONEditor, GenericModal, GenericModalProps, JSONEditorProps,
 	ErrorBoundary, Tooltip, TooltipCompatible
-} from "../components";
-import { classNames, nmspc, gnmspc, useBooleanSetter, fullHeightWithOffset } from "../../utils";
-import { MaybeError, isValid  } from "../Builder";
+} from "src/client/components/components";
+import { classNames, nmspc, gnmspc, useBooleanSetter, fullHeightWithOffset } from "src/client/utils";
+import { MaybeError, isValid  } from "src/client/components/Builder";
 import { ChangeEvent, TranslationsAddEvent, TranslationsChangeEvent, TranslationsDeleteEvent, UiSchemaChangeEvent,
-	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "../../services/change-handler-service";
-import { Context } from "../Context";
-import OptionsEditor, {FormOptionsEditorProps} from "./OptionsEditor";
-import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster } from "../../../model";
+	FieldDeleteEvent, FieldUpdateEvent, MasterChangeEvent } from "src/client/services/change-handler-service";
+import { Context } from "src/client/components/Context";
+import OptionsEditor, { FormOptionsEditorProps } from "./OptionsEditor";
+import { Lang, Master, SchemaFormat, ExpandedMaster, JSON, isMaster } from "src/model";
 import { translate as translateKey } from "@luomus/laji-form/lib/utils";
 import DiffViewer from "./DiffViewer";
 import ElemPicker, { ElemPickerProps } from "./ElemPicker";
-import LajiForm from "../LajiForm";
+import LajiForm from "src/client/components/LajiForm";
 import FieldEditor from "./FieldEditor";
 import { HierarchyButton } from "./Hierarchy";
 

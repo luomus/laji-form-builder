@@ -2,13 +2,13 @@ import * as React from "react";
 import { FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
 import {
 	unprefixProp, translate, JSONSchemaBuilder, parseJSONPointer, getRootProperty, getRootField
-} from "../../../utils";
+} from "src/utils";
 import * as LajiFormUtils from "@luomus/laji-form/lib/utils";
 const { updateSafelyWithJSONPointer } = LajiFormUtils;
-import { Context } from "../Context";
+import { Context } from "src/client/components/Context";
 import { EditorLajiForm } from "./UiSchemaEditor";
-import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf, isJSONObjectOrUndefined } from "../../../model";
-import { detectChangePaths, handleTranslationChange } from "../../utils";
+import { Property, Field, JSONSchema, isJSONSchemaEnumOneOf, isJSONObjectOrUndefined } from "src/model";
+import { detectChangePaths, handleTranslationChange } from "src/client/utils";
 import { GenericFieldEditorProps } from "./FieldEditor";
 import { immutableDelete } from "@luomus/laji-form/lib/utils";
 
