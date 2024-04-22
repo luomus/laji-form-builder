@@ -10,3 +10,4 @@ test*
 protractor*
 tslint.json
 jasmine*
+*.json
