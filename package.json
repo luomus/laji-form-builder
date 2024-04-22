@@ -1,13 +1,13 @@
 {
   "name": "@luomus/laji-form-builder",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "UI for building laji.fi forms",
   "main": "lib/client/app.js",
-	"files": [
-		"lib",
-		"README.md",
-		"CHANGELOG.md"
-	],
+  "files": [
+    "lib",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "start": "npm run start:dev",
     "start:dev": "nodemon src/server/start-dev.ts --ignore test --ignore src/client",
