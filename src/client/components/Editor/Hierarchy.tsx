@@ -1,15 +1,16 @@
 import * as React from "react";
-import { FormListing, Master } from "src/model";
-import { MaybeError, isValid  } from "src/client/components/Builder";
-import { Button, Classable, GenericModal, Tooltip } from "src/client/components/components";
-import { Context } from "src/client/components/Context";
-import { classNames, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "src/client/utils";
+import { FormListing, Master } from "../../../model";
+import { MaybeError, isValid  } from "../Builder";
+import { Button, Classable, GenericModal, Tooltip } from "../components";
+import { Context } from "../Context";
+import { classNames, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "../../utils";
 import { Tree, Data as D3HierarchyData } from "react-tree-graph";
-import { dictionarifyByKey } from "src/utils";
+import { dictionarifyByKey } from "../../../utils";
 
 type Hierarchy = D3HierarchyData & {
 	label: JSX.Element;
 	parent?: Hierarchy;
+	// children: Hierarchy[];
 };
 
 const LABEL_HEIGHT = 18; // Should match the actual height in DOM.

@@ -1,11 +1,11 @@
 import * as React from "react";
-import { Lang } from "src/model";
-import MetadataService from "src/services/metadata-service";
-import FormService from "src/client/services/form-service";
-import { Theme } from "src/client/themes/theme";
+import { Lang } from "../../model";
+import MetadataService from "../../services/metadata-service";
+import FormService from "../services/form-service";
+import { Theme } from "../themes/theme";
 import { Notifier } from "@luomus/laji-form/lib/components/LajiForm";
-import ApiClient from "src/api-client";
-import { BuilderProps } from "src/client/components/Builder";
+import ApiClient from "../../api-client";
+import { BuilderProps } from "./Builder";
 
 export interface ContextProps {
 	apiClient: ApiClient;

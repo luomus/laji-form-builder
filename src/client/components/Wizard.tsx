@@ -3,11 +3,11 @@ import LajiForm from "./LajiForm";
 import _LajiForm from "@luomus/laji-form/lib/components/LajiForm";
 import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchInput, Help } from "./components";
 import { Context } from "./Context";
-import { FormListing, Master, FormDeleteResult, isMaster } from "src/model";
-import { JSONSchemaBuilder } from "src/utils";
-import { classNames, gnmspc, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "src/client/utils";
+import { FormListing, Master, FormDeleteResult, isMaster } from "../../model";
+import { JSONSchemaBuilder } from "../../utils";
+import { classNames, gnmspc, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "../utils";
 import { immutableDelete, translate as translateKey } from "@luomus/laji-form/lib/utils";
-import { ButtonProps, ButtonGroupProps } from "src/client/themes/theme";
+import { ButtonProps, ButtonGroupProps } from "../themes/theme";
 
 interface WizardStep {
 	label: string;
@@ -360,23 +360,6 @@ function FormCreatorDatabank({onCreate, primaryDataBankFormID, secondaryDataBank
 
 const formSelectNmscp = nmspc("form-select");
 
-const useRangeIncrementor = (length: number)
-	: [number | undefined, () => void, () => void]  => {
-	const [idx, _setIdx] = React.useState<number | undefined>(length || undefined);
-	const setIdx = React.useCallback((idx?: number) => {
-		let nextIdx: number | undefined = idx;
-		if (idx === undefined || idx < 0 || length === 0) {
-			nextIdx = undefined;
-		} else if (idx >= length) {
-			nextIdx = length - 1;
-		}
-		_setIdx(nextIdx);
-	}, [ _setIdx, length]);
-	const increment = React.useCallback(() => setIdx((idx || 0) - 1), [idx, setIdx]);
-	const decrement = React.useCallback(() => setIdx(idx === undefined ? 0 : idx + 1), [idx, setIdx]);
-	return [idx, increment, decrement];
-};
-
 function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 	const [forms, setForms] = React.useState<FormListing[] | undefined>(undefined);
 	const {formService, theme, notifier, translations, lang} = React.useContext(Context);
@@ -391,7 +374,23 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 	}, [loadForms]);
 
 	const [displayedForms, setDisplayedForms] = React.useState<FormListing[] | undefined>(undefined);
-	const [activeIdx, activeIdxUp, activeIdxDown] = useRangeIncrementor((forms || []).length);
+	const [activeIdx, _setActiveIdx] = React.useState<number | undefined>(undefined);
+
+	// Wrapper that guards that activeIdx stays in range.
+	const setActiveIdx = React.useCallback((idx?: number) => {
+		let nextIdx: number | undefined = idx;
+		if (idx === undefined || idx < 0 || (displayedForms || []).length === 0) {
+			nextIdx = undefined;
+		} else if (idx >= (displayedForms || []).length) {
+			nextIdx = (displayedForms || []).length - 1;
+		}
+		_setActiveIdx(nextIdx);
+	}, [_setActiveIdx, displayedForms]);
+
+	// Synchronizes activeIdx to be the last item if it drops out of range during filtering.
+	React.useEffect(() => {
+		setActiveIdx(activeIdx);
+	}, [activeIdx, setActiveIdx, setDisplayedForms]);
 
 	const {Panel, ListGroup} = theme;
 	const onSelected = React.useCallback((f: FormListing) => onChoose(f.id), [onChoose]);
@@ -419,16 +418,19 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 	const onKeyDown = React.useCallback((e) => {
 		switch (e.key) {
 		case "ArrowDown":
-			activeIdxDown();
+			setActiveIdx(activeIdx === undefined
+				? 0
+				: activeIdx + 1
+			);
 			break;
 		case "ArrowUp":
-			activeIdxUp();
+			setActiveIdx((activeIdx || 0) - 1);
 			break;
 		case "Enter":
 			activeIdx !== undefined && displayedForms && onSelected(displayedForms[activeIdx]);
 			break;
 		}
-	}, [activeIdx, activeIdxDown, activeIdxUp, displayedForms, onSelected]);
+	}, [activeIdx, displayedForms, onSelected, setActiveIdx]);
 
 	const list = !forms
 		? <Spinner />

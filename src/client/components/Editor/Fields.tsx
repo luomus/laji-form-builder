@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Property, Field as FieldOptions } from "src/model";
-import { dictionarify, getRootField, getRootProperty, JSONSchemaBuilder, unprefixProp } from "src/utils";
-import { classNames, nmspc, scrollIntoViewIfNeeded } from "src/client/utils";
-import { Stylable, Classable, Clickable, Spinner, GenericModal } from "src/client/components/components";
-import { Context } from "src/client/components/Context";
-import LajiForm from "src/client/components/LajiForm";
+import { Property, Field as FieldOptions } from "../../../model";
+import { dictionarify, getRootField, getRootProperty, JSONSchemaBuilder, unprefixProp } from "../../../utils";
+import { classNames, nmspc, scrollIntoViewIfNeeded } from "../../utils";
+import { Stylable, Classable, Clickable, Spinner, GenericModal } from "../components";
+import { Context } from "../Context";
+import LajiForm from "../LajiForm";
 
 type OnSelectedCB = (field: string) => void;
 

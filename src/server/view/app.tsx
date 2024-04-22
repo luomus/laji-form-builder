@@ -1,16 +1,16 @@
-import LajiFormBuilder from "src/client/components/Builder";
-import * as config from "src/../config.json";
+import LajiFormBuilder from "../../client/components/Builder";
+import * as config from "../../../config.json";
 import * as React from "react";
 import { render } from "react-dom";
 import LajiForm, { Notifier } from "@luomus/laji-form/lib/components/LajiForm";
-import lajiFormBs3 from "src/client/themes/bs3";
-import FormService from "src/client/services/form-service";
-import "src/client/styles";
+import lajiFormBs3 from "../../client/themes/bs3";
+import FormService from "../../client/services/form-service";
+import "../../client/styles";
 import "notus/src/notus.css";
 import  _notus from "notus";
-import { isLang, Lang, SchemaFormat } from "src/model";
-import ApiClient, { ApiClientImplementation } from "src/api-client";
-import {classNames} from "src/client/utils";
+import { isLang, Lang, SchemaFormat } from "../../model";
+import ApiClient, { ApiClientImplementation } from "../../api-client";
+import {classNames} from "../../client/utils";
 const notus = _notus();
 
 const notifier: Notifier = [
@@ -48,6 +48,7 @@ const uriToState = (uri: string) => {
 const initialUri = window.location.href;
 const initialRoute = uriToState(initialUri);
 const initialLang = initialRoute.lang || DEFAULT_LANG;
+
 
 const apiClientImplementation = new ApiClientImplementation(
 	config.apiBase,

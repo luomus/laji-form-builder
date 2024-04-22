@@ -1,8 +1,5 @@
 {
 	"compilerOptions": {
-		"paths": {
-			"src/*": ["./src/*"]
-		},
 		"outDir": "./build",
 		"module": "commonjs",
 		"target": "es6",

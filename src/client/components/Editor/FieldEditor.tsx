@@ -1,20 +1,20 @@
 import * as React from "react";
 import {
 	ExpandedMaster, Field as FieldOptions, JSONObject, JSONSchema, Lang, Property, SchemaFormat
-} from "src/model";
-import { getPropertyContextName, parseJSONPointer } from "src/utils";
+} from "../../../model";
+import { getPropertyContextName, parseJSONPointer } from "../../../utils";
 import {
 	fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fullHeightWithOffset, gnmspc, nmspc
-} from "src/client/utils";
-import { isValid } from "src/client/components/Builder";
-import { Classable, DraggableWidth, ErrorBoundary } from "src/client/components/components";
-import { Context } from "src/client/components/Context";
+} from "../../utils";
+import { isValid } from "../Builder";
+import { Classable, DraggableWidth, ErrorBoundary } from "../components";
+import { Context } from "../Context";
 import { editorContentNmspc, EditorProps, EditorState, FieldEditorChangeEvent, TabChooser } from "./Editor";
 import memoize from "memoizee";
 import Fields from "./Fields";
 import UiSchemaEditor from "./UiSchemaEditor";
 import BasicEditor from "./BasicEditor";
-import { ChangeEvent } from "src/client/services/change-handler-service";
+import { ChangeEvent } from "../../services/change-handler-service";
 
 export interface GenericFieldEditorProps extends Classable {
 	uiSchema?: JSONObject;

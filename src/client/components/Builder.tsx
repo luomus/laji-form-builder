@@ -1,20 +1,20 @@
 import * as React from "react";
 import { Notifier } from "@luomus/laji-form/lib/components/LajiForm";
 import { Theme } from "@luomus/laji-form/lib/themes/theme";
-import { translate } from "src/utils";
-import { createRef, gnmspc, isSignalAbortError, promisify, runAbortable } from "src/client/utils";
-import { Editor } from "src/client/components/Editor/Editor";
+import { translate } from "../../utils";
+import { createRef, gnmspc, isSignalAbortError, promisify, runAbortable } from "../utils";
+import { Editor } from "./Editor/Editor";
 import { Context, ContextProps } from "./Context";
-import appTranslations from "src/client/translations.json";
-import { Lang, Master, SchemaFormat, ExpandedMaster } from "src/model";
-import MetadataService from "src/services/metadata-service";
-import FormService from "src/client/services/form-service";
+import appTranslations from "../translations.json";
+import { Lang, Master, SchemaFormat, ExpandedMaster } from "../../model";
+import MetadataService from "../../services/metadata-service";
+import FormService from "../services/form-service";
 import memoize from "memoizee";
 import { FormCreatorWizard } from "./Wizard";
-import ApiClient from "src/api-client";
+import ApiClient from "../../api-client";
 import { ApiClientImplementation } from "@luomus/laji-form/lib/ApiClient";
-import FormExpanderService from "src/services/form-expander-service";
-import ChangeHandlerService, { ChangeEvent, MasterChangeEvent } from "src/client/services/change-handler-service";
+import FormExpanderService from "../../services/form-expander-service";
+import ChangeHandlerService, {ChangeEvent, MasterChangeEvent} from "../services/change-handler-service";
 
 export interface BuilderProps {
 	lang: Lang;
