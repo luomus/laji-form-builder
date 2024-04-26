@@ -22,7 +22,7 @@
     "test:server:ci": "npm run test:server -- --junitreport --output=test-results/server",
     "test:ci": "npm run test:server:ci",
     "lint": "eslint -c .eslintrc.prod.json src",
-    "build:client": "rimraf lib && NODE_ENV=production tsc -p tsconfig.client.json && tscpaths -p tsconfig.client.json -s lib -o lib && sass src/client/styles.scss lib/client/styles.css",
+    "build:client": "rimraf lib && NODE_ENV=production tsc -p tsconfig.client.json && tsconfig-replace-paths -p tsconfig.client.json -s src && sass src/client/styles.scss lib/client/styles.css",
     "build:dist": "rimraf dist && NODE_ENV=production webpack --config webpack.config.dist.js && rimraf dist/styles.js",
     "build:build": "rimraf build && NODE_ENV=production webpack --config webpack.config.build.js",
     "build:static": "rimraf static && NODE_ENV=production webpack --config webpack.config.static.js",
@@ -57,8 +57,7 @@
     "react-bootstrap": "^0.33.1",
     "react-dom": "^17.0.2",
     "react-spinner": "^0.2.7",
-    "react-tree-graph": "^8.0.1",
-    "tscpaths": "^0.0.9"
+    "react-tree-graph": "^8.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",
@@ -97,6 +96,7 @@
     "supertest": "^3.4.2",
     "ts-loader": "^9.2.8",
     "ts-node": "^10.9.2",
+    "tsconfig-replace-paths": "^0.0.14",
     "typescript": "~4.9.0",
     "webpack": "^5.70.0",
     "webpack-cli": "^4.9.2",
