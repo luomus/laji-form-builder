@@ -34,11 +34,11 @@ export const hiddenListedProps = dictionarify([
 	"fields", "translations", "uiSchema"
 ] as (keyof Master)[]);
 
-const copyWithBlacklist = <T>(obj: T, blacklistDict: Record<keyof T, true>) => {
+const copyWithBlacklist = <T extends Record<string, unknown>>(obj: T, blacklistDict: Record<keyof T, true>) => {
 	const isExposableProperty = (key: string | number | symbol): key is (keyof T) => {
 		return !(blacklistDict as any)[key];
 	};
-	return Object.keys(obj).reduce<T>((copy: T, key) => {
+	return Object.keys(obj).reduce<T>((copy: T, key: keyof T) => {
 		if (isExposableProperty(key)) {
 			copy[key] = obj[key];
 		}
