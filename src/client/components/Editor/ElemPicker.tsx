@@ -1,9 +1,9 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { Classable, TooltipCompatible } from "../components";
-import { Context } from "../Context";
+import { Classable, TooltipCompatible } from "src/client/components/components";
+import { Context } from "src/client/components/Context";
 import { findNearestParentSchemaElem } from "@luomus/laji-form/lib/utils";
-import { classNames, gnmspc } from "../../utils";
+import { classNames, gnmspc } from "src/client/utils";
 
 const parseOptionPaths = (elem: Element) => {
 	const matches = elem.className.match(/laji-form-option-[^ ]+/g);

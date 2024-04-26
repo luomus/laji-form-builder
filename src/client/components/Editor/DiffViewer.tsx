@@ -1,10 +1,10 @@
 import * as React from "react";
-import { Master, JSON } from "../../../model";
-import { Context } from "../Context";
-import { gnmspc, isSignalAbortError, nmspc, runAbortable } from "../../utils";
+import { Master, JSON } from "src/model";
+import { Context } from "src/client/components/Context";
+import { gnmspc, isSignalAbortError, nmspc, runAbortable } from "src/client/utils";
 import diff, { Diff, DiffDeleted, DiffEdit, DiffNew, DiffArray } from "deep-diff";
 import memoize from "memoizee";
-import { Spinner } from "../components";
+import { Spinner } from "src/client/components/components";
 
 export type DiffViewerProps = {
 	master: Master;

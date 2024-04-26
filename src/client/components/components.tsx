@@ -1,8 +1,8 @@
 import * as React from "react";
 import _Spinner from "react-spinner";
 import { Context } from "./Context";
-import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "../utils";
-import { JSON } from "../../model";
+import { classNames, nmspc, gnmspc, CSS_NAMESPACE } from "src/client/utils";
+import { JSON } from "src/model";
 import LajiFormContext from "@luomus/laji-form/lib/ReactContext";
 import { Help as LJHelp } from "@luomus/laji-form/lib/components/components";
 

@@ -1,17 +1,17 @@
 import * as React from "react";
-import LajiForm from "../LajiForm";
-import { Context } from "../Context";
-import { Spinner, Stylable, Button } from "../components";
-import {  OptionChangeEvent, TranslationsChangeEvent } from "../../services/change-handler-service";
+import LajiForm from "src/client/components/LajiForm";
+import { Context } from "src/client/components/Context";
+import { Spinner, Stylable, Button } from "src/client/components/components";
+import {  OptionChangeEvent, TranslationsChangeEvent } from "src/client/services/change-handler-service";
 import {
 	Property, SchemaFormat, Master, PropertyRange, Lang, JSONObject, JSONSchema, isJSONSchemaObject, isJSONObject
-} from "../../../model";
-import { translate, parseJSONPointer, unprefixProp, multiLang } from "../../../utils";
-import { detectChangePaths, gnmspc, handleTranslationChange } from "../../utils";
+} from "src/model";
+import { translate, parseJSONPointer, unprefixProp, multiLang } from "src/utils";
+import { detectChangePaths, gnmspc, handleTranslationChange } from "src/client/utils";
 import { isDefaultData, updateSafelyWithJSONPointer } from "@luomus/laji-form/lib/utils";
 import { TextareaEditorField } from "./UiSchemaEditor";
 import { LajiFormProps } from "@luomus/laji-form/lib/components/LajiForm";
-import MetadataService from "../../../services/metadata-service";
+import MetadataService from "src/services/metadata-service";
 import { editorContentNmspc, EditorContentTab, EditorToolbar, GenericEditorContent } from "./Editor";
 
 export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
