@@ -284,7 +284,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 						<div style={{height: this.state.editorHeight}} />
 					</> : (
 						<FormCreatorWizard onCreate={this.onCreate}
-						                   onChoose={this.onSelected}
+						                   onSelected={this.onSelected}
 						                   primaryDataBankFormID={this.props.primaryDataBankFormID}
 						                   secondaryDataBankFormID={this.props.secondaryDataBankFormID}
 						                   allowList={this.props.allowList} />

@@ -2,7 +2,7 @@ import * as React from "react";
 import parsePropTypes from "@luomus/parse-prop-types";
 import memoize from "memoizee";
 import { FieldEditorChangeEvent, GenericEditorContent } from "./Editor";
-import LajiFormInterface from "src/client/LajiFormInterface";
+import LajiFormInterface from "src/client/laji-form-interface";
 import {
 	propTypesToSchema, getComponentPropTypes, getTranslatedUiSchema, unprefixDeeply, prefixSchemaDeeply,
 	unprefixSchemaDeeply, prefixUiSchemaDeeply, unprefixer, detectChangePaths, handleTranslationChange, 

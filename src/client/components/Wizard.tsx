@@ -1,13 +1,15 @@
 import React from "react";
 import LajiForm from "./LajiForm";
 import _LajiForm from "@luomus/laji-form/lib/components/LajiForm";
-import { SubmittableJSONEditor, HasChildren, Spinner, Stylable, Button, SearchInput, Help } from "./components";
 import { Context } from "./Context";
 import { FormListing, Master, FormDeleteResult, isMaster } from "src/model";
 import { JSONSchemaBuilder } from "src/utils";
 import { classNames, gnmspc, isSignalAbortError, nmspc, runAbortable, useBooleanSetter } from "src/client/utils";
 import { immutableDelete, translate as translateKey } from "@luomus/laji-form/lib/utils";
-import { ButtonProps, ButtonGroupProps } from "src/client/themes/theme";
+import { ButtonProps, ButtonGroupProps, ListGroupItemProps } from "src/client/themes/theme";
+import {
+	HasChildren, Stylable, SubmittableJSONEditor, Spinner, Button, SearchInput, Help
+} from "src/client/components/components";
 
 interface WizardStep {
 	label: string;
@@ -70,7 +72,7 @@ const extendForm = (form: Master, method: Method): Master => {
 type FormCreatorExtendProps = WizardStepProps & {method: Method};
 function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 	const {theme, translations, formService} = React.useContext(Context);
-	const [chosen, onChoose] = React.useState<string>();
+	const [chosen, onSelected] = React.useState<string>();
 	const [form, setForm] = React.useState<Master>();
 	const [loading, setLoading] = React.useState(false);
 	const [displayModal, showModal, hideModal] = useBooleanSetter(false);
@@ -109,7 +111,7 @@ function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 
 	const {Modal} = theme;
 	return <>
-		<FormList onChoose={onChoose} />
+		<FormList onSelected={onSelected} />
 		{displayModal && (
 			<Modal show={true} onHide={hideModal} >
 				<Modal.Body>
@@ -117,7 +119,7 @@ function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 					<Button onClick={onSubmitAndSave}
 					        variant="primary"
 					        disabled={loading}>{translations["save"]}</Button>
-					<Button onClick={onSubmitDraft} variant="default"  disabled={loading}>
+					<Button onClick={onSubmitDraft} variant="default" disabled={loading}>
 						{translations["wizard.option.json.import.draft"]}
 					</Button>
 				</Modal.Body>
@@ -234,7 +236,7 @@ function WizardCreateOrList(props: WizardStepProps) {
 	const {create} = steps;
 	return <>
 		<GenericWizardStepChooser {...props} steps={{create}} style={{}} buttonGroupProps={{block: true}} />
-		<FormList onChoose={props.onChoose} />
+		<FormList onSelected={props.onSelected} />
 	</>;
 }
 
@@ -252,7 +254,7 @@ const FormCreatorWizardOptionButton = ({children, option, onSelect, variant}: Fo
 
 interface FormCreatorProps {
 	onCreate: (form: Omit<Master, "id">, save?: boolean) => void;
-	onChoose: (id: string) => void;
+	onSelected: (id: string) => void;
 	primaryDataBankFormID: string;
 	secondaryDataBankFormID: string;
 	allowList?: boolean;
@@ -374,13 +376,20 @@ const useRangeIncrementor = (length: number)
 	}, [ _setIdx, length]);
 	const increment = React.useCallback(() => setIdx((idx || 0) - 1), [idx, setIdx]);
 	const decrement = React.useCallback(() => setIdx(idx === undefined ? 0 : idx + 1), [idx, setIdx]);
-	return [idx, increment, decrement];
+	return [idx === undefined ? idx : Math.min(idx, length - 1), increment, decrement];
 };
 
-function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
+function FormList({onSelected}: Pick<FormCreatorProps, "onSelected">) {
 	const [forms, setForms] = React.useState<FormListing[] | undefined>(undefined);
-	const {formService, theme, notifier, translations, lang} = React.useContext(Context);
+	const {formService, notifier, translations, lang} = React.useContext(Context);
 	const [loadingForms, setLoadingForms] = React.useState<Record<string, boolean>>({});
+
+	const itemProps = React.useMemo(() => Object.keys(loadingForms).reduce((idToProps, id) => {
+		if (loadingForms[id]) {
+			idToProps[id] = { disabled: true };
+		}
+		return idToProps;
+	}, {} as Record<string, ListGroupItemProps>), [loadingForms]);
 
 	const loadForms = React.useCallback(async () => {
 		setForms(await formService.getForms(lang));
@@ -389,12 +398,6 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 	React.useEffect(() => {
 		loadForms();
 	}, [loadForms]);
-
-	const [displayedForms, setDisplayedForms] = React.useState<FormListing[] | undefined>(undefined);
-	const [activeIdx, activeIdxUp, activeIdxDown] = useRangeIncrementor((forms || []).length);
-
-	const {Panel, ListGroup} = theme;
-	const onSelected = React.useCallback((f: FormListing) => onChoose(f.id), [onChoose]);
 
 	const setFormLoading = React.useCallback((id: string, loading: boolean) => {
 		setLoadingForms({...loadForms, [id]: loading});
@@ -416,63 +419,24 @@ function FormList({onChoose}: Pick<FormCreatorProps, "onChoose">) {
 		}
 	}, [formService, forms, notifier, setFormLoading, translations]);
 
-	const onKeyDown = React.useCallback((e) => {
-		switch (e.key) {
-		case "ArrowDown":
-			activeIdxDown();
-			break;
-		case "ArrowUp":
-			activeIdxUp();
-			break;
-		case "Enter":
-			activeIdx !== undefined && displayedForms && onSelected(displayedForms[activeIdx]);
-			break;
-		}
-	}, [activeIdx, activeIdxDown, activeIdxUp, displayedForms, onSelected]);
-
-	const list = !forms
-		? <Spinner />
-		: (
-			<ListGroup className={formSelectNmscp("list")}>{
-				(displayedForms || []).map((f, idx) =>
-					<FormListItem key={f.id}
-					              {...f}
-					              active={idx === activeIdx}
-					              onSelected={onSelected}
-					              onDelete={onDelete}
-					              loading={loadingForms[f.id]} />)
-			}</ListGroup>
-		);
-
-	const [searchValue, setSearchValue] = React.useState("");
-
-	const filterForms = React.useCallback(() => {
-		if (searchValue === "") {
-			return setDisplayedForms(forms);
-		}
-		if (!forms) {
-			return;
-		}
-		setDisplayedForms(forms.filter(f => (f.name + f.id).toLowerCase().match(searchValue.toLowerCase())));
-	}, [forms, searchValue, setDisplayedForms]);
-
-
-	React.useEffect(filterForms, [searchValue, forms, filterForms]);
-
-	return (
-		<Panel>
-			<Panel.Heading>
-				<h4>{translations["wizard.list.header"]}</h4>
-				<SearchInput onChange={setSearchValue}
-				             onKeyDown={onKeyDown}
-				             autoFocus={true} />
-			</Panel.Heading>
-			{list}
-		</Panel>
+	const searchFilterPredicate = React.useCallback(
+		(search: string) => (f: FormListing) => (f.name + f.id).toLowerCase().match(search.toLowerCase()),
+		[]
 	);
+
+	const _FormListItemContent = React.useCallback((props: Parameters<typeof FormListItemContent>[0]) => (
+		<FormListItemContent {...props} onDelete={onDelete} />
+	), [onDelete]);
+
+	return <SearchList items={forms}
+			             itemProps={itemProps}
+			             onSelected={onSelected}
+			             header={"wizard.list.header"}
+			             searchFilterPredicate={searchFilterPredicate}
+			             itemContentComponent={_FormListItemContent} />;
 }
 
-function FormListItem(
+function FormListItemContent(
 	{onSelected, onDelete, loading, active, ...f}
 	: {
 		onSelected: (form: FormListing) => void,
@@ -481,24 +445,122 @@ function FormListItem(
 		active?: boolean
 	} & FormListing
 ) {
-	const {theme, translations} = React.useContext(Context);
-	const onClick = React.useCallback(() => {
-		onSelected(f);
-	}, [f, onSelected]);
+	const {translations} = React.useContext(Context);
 	const _onDelete = React.useCallback(async (e) => {
 		e.stopPropagation();
 		if (confirm(translateKey(translations, "wizard.list.delete.confirm", {name: f.name, id: f.id}))) {
 			onDelete(f.id);
 		}
 	}, [f, onDelete, translations]);
+	return <>
+		{f.name} ({f.id})
+		{loading
+			? <Spinner />
+			: <span onClick={_onDelete} className={formSelectNmscp("list-item-delete")} />
+		}
+	</>;
+}
+
+function SearchListItem<T extends { id: string }>(
+	{item, onSelected, active, itemContentComponent, itemProps}
+	: {
+		item: T;
+		onSelected: (id: string) => void;
+		itemContentComponent: React.ComponentType<T>;
+		itemProps?: ListGroupItemProps;
+		active?: boolean;
+	}
+) {
+	const {theme} = React.useContext(Context);
+	const onClick = React.useCallback(() => {
+		!itemProps?.disabled && onSelected(item.id);
+	}, [item.id, itemProps?.disabled, onSelected]);
 	const {ListGroupItem} = theme;
+	const ItemContent = itemContentComponent;
 	return (
-		<ListGroupItem onClick={onClick} disabled={loading} className={formSelectNmscp("list-item")} active={active}>
-			{f.name} ({f.id})
-			{loading
-				? <Spinner />
-				: <span onClick={_onDelete} className={formSelectNmscp("list-item-delete")} />
-			}
+		<ListGroupItem onClick={onClick}
+		               className={formSelectNmscp("list-item")}
+		               active={active}
+		               {...(itemProps || {})}>
+		 <ItemContent {...item} />
 		</ListGroupItem>
+	);
+}
+
+type SearchListProps<T extends { id: string }> = {
+	items?: T[];
+	onSelected: (item: string) => void;
+	itemContentComponent: React.ComponentType<T>;
+	itemProps: Record<string, ListGroupItemProps>;
+	searchFilterPredicate: (filter: string) => (item: T) => unknown;
+	header: string;
+};
+
+function SearchList<T extends { id: string }>(
+	{items, onSelected, itemContentComponent, itemProps, header, searchFilterPredicate}: SearchListProps<T>
+) {
+	const {theme, translations} = React.useContext(Context);
+
+	const [displayedItems, setDisplayedItems] = React.useState<T[] | undefined>(undefined);
+	const [activeIdx, activeIdxUp, activeIdxDown] = useRangeIncrementor((displayedItems || []).length);
+
+	const {Panel, ListGroup} = theme;
+
+	const onKeyDown = React.useCallback((e) => {
+		switch (e.key) {
+		case "ArrowDown":
+			activeIdxDown();
+			e.preventDefault();
+			break;
+		case "ArrowUp":
+			activeIdxUp();
+			e.preventDefault();
+			break;
+		case "Enter":
+			activeIdx !== undefined && displayedItems && onSelected(displayedItems[activeIdx].id);
+			e.preventDefault();
+			break;
+		}
+	}, [activeIdx, activeIdxDown, activeIdxUp, displayedItems, onSelected]);
+
+	const list = !items
+		? <Spinner />
+		: (
+			<ListGroup className={formSelectNmscp("list")}>
+				{(displayedItems || []).map((item, idx) =>
+					<SearchListItem key={item.id}
+					              item={item}
+					              itemContentComponent={itemContentComponent}
+					              itemProps={itemProps?.[item.id]}
+					              active={idx === activeIdx}
+					              onSelected={onSelected} />
+				)}
+			</ListGroup>
+		);
+
+	const [searchValue, setSearchValue] = React.useState("");
+
+	const filterItems = React.useCallback(() => {
+		if (searchValue === "") {
+			return setDisplayedItems(items);
+		}
+		if (!items) {
+			return;
+		}
+		setDisplayedItems(items.filter(searchFilterPredicate(searchValue)));
+	}, [items, searchFilterPredicate, searchValue]);
+
+	React.useEffect(filterItems, [searchValue, items, filterItems]);
+
+	return (
+		<Panel>
+			<Panel.Heading>
+				<h4>{translations[header]}</h4>
+				<SearchInput onChange={setSearchValue}
+				             onKeyDown={onKeyDown}
+				             autoFocus={true} />
+			</Panel.Heading>
+			{list}
+		</Panel>
 	);
 }
