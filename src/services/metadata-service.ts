@@ -1,9 +1,9 @@
 import ApiClient from "../api-client";
 import { Property, PropertyContext, PropertyRange, Range, Lang, Class, JSONSchema, Field } from "../model";
 import { reduceWith, fetchJSON, JSONSchemaBuilder, multiLang, unprefixProp } from "../utils";
-import HasCache from "./has-cache";
+import UsesMemoization from "./uses-memoization";
 
-export default class MetadataService extends HasCache {
+export default class MetadataService extends UsesMemoization {
 	private apiClient: ApiClient;
 	private lang: Lang;
 	private allRanges: Record<string, Range[]> | undefined;
@@ -23,11 +23,11 @@ export default class MetadataService extends HasCache {
 		this.lang = lang;
 	}
 
-	getPropertiesContextFor = this.cache((context: string) => 
+	getPropertiesContextFor = this.memoize((context: string) => 
 		fetchJSON<{"@context": Record<string, PropertyContext>}>(`https://schema.laji.fi/context/${context}.jsonld`)
 			.then(result => result["@context"]))
 
-	getPropertiesForEmbeddedProperty = this.cache(
+	getPropertiesForEmbeddedProperty = this.memoize(
 		async (property: string, lang = "multi", signal?: AbortSignal): Promise<Property[]> => 
 			(await this.apiClient.fetchJSON(
 				`/metadata/classes/${unprefixProp(property)}/properties`,
@@ -48,7 +48,7 @@ export default class MetadataService extends HasCache {
 			: {};
 	}
 
-	getRange = this.cache((property: string): Promise<Range[]> =>
+	getRange = this.memoize((property: string): Promise<Range[]> =>
 		this.allRanges && Promise.resolve(this.allRanges[property])
 		|| this.apiClient.fetchJSON(
 			// eslint-disable-next-line max-len
@@ -164,5 +164,5 @@ export default class MetadataService extends HasCache {
 		return mapPropertyToJSONSchema(property);
 	}
 
-	getClasses = this.cache(async (): Promise<Class[]> => (await this.apiClient.fetchJSON("/metadata/classes")).results)
+	getClasses = this.memoize(async (): Promise<Class[]> => (await this.apiClient.fetchJSON("/metadata/classes")).results)
 }

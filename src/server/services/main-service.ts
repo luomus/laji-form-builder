@@ -5,7 +5,7 @@ import FieldService, { addEmptyOptions, removeTranslations } from "./field-servi
 import { FormListing, isLang, Lang, Master, Format, SupportedFormat, RemoteMaster, FormOptions } from "../../model";
 import ApiClient, { ApiClientImplementation } from "../../api-client";
 import StoreService from "./store-service";
-import HasCache from "../../services/has-cache";
+import UsesMemoization from "../../services/uses-memoization";
 import { CronJob } from "cron";
 
 /**
@@ -65,7 +65,7 @@ const exposeInheritance = (form: Master) => {
 	};
 };
 
-export default class MainService extends HasCache {
+export default class MainService extends UsesMemoization {
 	private metadataService = new MetadataService(apiClient, DEFAULT_LANG);
 	private storeService = new StoreService();
 	private fieldService = new FieldService(apiClient, this.metadataService, this.storeService, DEFAULT_LANG);
@@ -85,7 +85,7 @@ export default class MainService extends HasCache {
 		this.fieldService.setLang(lang);
 	}
 
-	getForms = this.cache(async (lang?: Lang): Promise<FormListing[]> => {
+	getForms = this.memoize(async (lang?: Lang): Promise<FormListing[]> => {
 		lang && this.setLang(lang);
 		return Promise.all((await this.storeService.getForms()).map(form => {
 			const result = reduceWith(
@@ -105,8 +105,8 @@ export default class MainService extends HasCache {
 	/*
 	 * We use the curried syntax (id)(lang, format, expand) so that the cache can be busted by id.
 	 */
-	private getFormCache = this.cache((id: string) =>
-		this.cache(async (lang?: Lang, format: Format = Format.JSON, expand = true) => {
+	private getFormCache = this.memoize((id: string) =>
+		this.memoize(async (lang?: Lang, format: Format = Format.JSON, expand = true) => {
 			const form = await this.storeService.getForm(id);
 			lang && this.setLang(lang);
 			const isConvertable = (

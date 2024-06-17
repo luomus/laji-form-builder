@@ -1,9 +1,8 @@
 import ApiClient from "../../api-client";
 import { FormDeleteResult, FormListing, Lang, Master, RemoteMaster, SchemaFormat } from "../../model";
-import HasCache from "../../services/has-cache";
+import UsesMemoization from "../../services/uses-memoization";
 
-
-export default class FormService extends HasCache {
+export default class FormService extends UsesMemoization {
 	private apiClient: ApiClient;
 	private formApiClient?: ApiClient;
 	private lang: Lang
@@ -23,7 +22,7 @@ export default class FormService extends HasCache {
 			: this.apiClient.fetchJSON(`/forms/${path}`, query as any, options);
 	}
 
-	getMaster = this.cache((id: string, signal?: AbortSignal): Promise<Master> => {
+	getMaster = this.memoize((id: string, signal?: AbortSignal): Promise<Master> => {
 		const query: any = {format: "json"};
 		if (!this.formApiClient) {
 			query.lang = "multi";
@@ -32,7 +31,7 @@ export default class FormService extends HasCache {
 		return this.fetchJSON(`/${id}`, query, {signal});
 	}, {length: 1});
 
-	private getSchemaFormatCache = this.cache((id: string) => this.cache((lang: Lang): Promise<SchemaFormat> =>
+	private getSchemaFormatCache = this.memoize((id: string) => this.memoize((lang: Lang): Promise<SchemaFormat> =>
 		this.fetchJSON(`/${id}`, {format: "schema", lang})
 	));
 
@@ -63,7 +62,7 @@ export default class FormService extends HasCache {
 		return response;
 	}
 
-	getForms = this.cache(async (lang?: Lang, signal?: AbortSignal): Promise<FormListing[]> => {
+	getForms = this.memoize(async (lang?: Lang, signal?: AbortSignal): Promise<FormListing[]> => {
 		const response = (await this.fetchJSON("", lang ? {lang} : undefined, { signal }));
 		return this.formApiClient ? response.forms : response.results;
 	});

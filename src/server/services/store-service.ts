@@ -1,7 +1,7 @@
 import { Master, RemoteMaster } from "../../model";
 import { fetchJSON, dictionarifyByKey, isObject } from "../../utils";
 import * as config from "../../../config.json";
-import HasCache from "../../services/has-cache";
+import UsesMemoization from "../../services/uses-memoization";
 
 export class StoreError extends Error {
 	status: number;
@@ -47,10 +47,10 @@ type MaybeStoreError<T> = T | StoreErrorModel
 const isStoreError = (response: any): response is StoreErrorModel => 
 	isObject(response) && [response.status, response.statusCode].some(c => typeof c === "number" && c > 400);
 
-export default class StoreService extends HasCache {
+export default class StoreService extends UsesMemoization {
 	private forms: Record<string, RemoteMaster> = {};
 
-	getForms = this.cache(async (): Promise<RemoteMaster[]> => {
+	getForms = this.memoize(async (): Promise<RemoteMaster[]> => {
 		const response = await formFetch<ListResponse<RemoteMaster[]>>("/", {page_size: 10000});
 		if (isStoreError(response)) {
 			throw new StoreError(response);
@@ -60,7 +60,7 @@ export default class StoreService extends HasCache {
 		return remoteForms;
 	});
 
-	getForm = this.cache(async (id: string) => {
+	getForm = this.memoize(async (id: string) => {
 		const response = await (this.forms?.[id]
 			? Promise.resolve(this.forms[id])
 			: formFetch<RemoteMaster>(`/${id}`));
