@@ -75,7 +75,7 @@ function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 	const [chosen, onSelected] = React.useState<string>();
 	const [form, setForm] = React.useState<Master>();
 	const [loading, setLoading] = React.useState(false);
-	const [displayModal, showModal, hideModal] = useBooleanSetter(false);
+	const [modalIsShown, showModal, hideModal] = useBooleanSetter(false);
 
 	const onSubmit = React.useCallback((form: Master, save: boolean) => {
 		setLoading(true);
@@ -112,7 +112,7 @@ function FormCreatorExtend({onCreate, method}: FormCreatorExtendProps) {
 	const {Modal} = theme;
 	return <>
 		<FormList onSelected={onSelected} />
-		{displayModal && (
+		{modalIsShown && (
 			<Modal show={true} onHide={hideModal} >
 				<Modal.Body>
 					<p>{translations["wizard.option.extend.saveOrPreview"]}</p>
@@ -166,10 +166,10 @@ export const FormCreatorWizard = ({onCreate, allowList = false, ...config}: Form
 			<Modal.Header>
 				<Breadcrumb>{stepsTaken.map((step, i) =>
 					<WizardBreadcrumbItem key={step}
-					                setStepsTaken={setStepsTaken}
-					                steps={stepsTaken.slice(0, i + 1)}
-					                rootStep={rootStep}
-					                active={i === stepsTaken.length - 1} />
+					                      setStepsTaken={setStepsTaken}
+					                      steps={stepsTaken.slice(0, i + 1)}
+					                      rootStep={rootStep}
+					                      active={i === stepsTaken.length - 1} />
 				)}</Breadcrumb>
 			</Modal.Header>
 			<Modal.Body>
@@ -420,7 +420,7 @@ function FormList({onSelected}: Pick<FormCreatorProps, "onSelected">) {
 	}, [formService, forms, notifier, setFormLoading, translations]);
 
 	const searchFilterPredicate = React.useCallback(
-		(search: string) => (f: FormListing) => (f.name + f.id).toLowerCase().match(search.toLowerCase()),
+		(search: string) => (f: FormListing) => (f.name + f.id).toLowerCase().includes(search.toLowerCase()),
 		[]
 	);
 
