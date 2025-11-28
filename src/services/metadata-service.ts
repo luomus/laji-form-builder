@@ -164,5 +164,7 @@ export default class MetadataService extends UsesMemoization {
 		return mapPropertyToJSONSchema(property);
 	}
 
-	getClasses = this.memoize(async (): Promise<Class[]> => (await this.apiClient.fetchJSON("/metadata/classes")).results)
+	getClasses = this.memoize(async (): Promise<Class[]> =>
+		(await this.apiClient.fetchJSON("/metadata/classes")).results
+	)
 }
