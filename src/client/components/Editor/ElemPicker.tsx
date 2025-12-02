@@ -1,9 +1,9 @@
 import * as React from "react";
-import { createPortal } from "react-dom";
 import { Classable, TooltipCompatible } from "src/client/components/components";
 import { Context } from "src/client/components/Context";
 import { findNearestParentSchemaElem } from "@luomus/laji-form/lib/utils";
 import { classNames, gnmspc } from "src/client/utils";
+import Highlighter from "./Highlighter";
 
 const parseOptionPaths = (elem: Element) => {
 	const matches = elem.className.match(/laji-form-option-[^ ]+/g);
@@ -40,6 +40,7 @@ const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 	const [highlightedLajiFormElem, setHighlightedLajiFormElem] = React.useState<Element>();
 	const [highlightedOptionElem, setHighlightedOptionElem] = React.useState<Element>();
 	const [highlightedElem, setHighlightedElem] = React.useState<Element>();
+
 	const onElemHighlighted = React.useCallback((elem: Element) => {
 		const lajiFormElem = findNearestParentSchemaElem(elem as HTMLElement);
 		const optionElem = elem && findOptionElem(elem);
@@ -51,16 +52,6 @@ const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 			setHighlightedLajiFormElem(undefined);
 		}
 	}, [containerRef]);
-
-	React.useEffect(() => {
-		if (highlightedLajiFormElem) {
-			setHighlightedElem(highlightedLajiFormElem);
-		} else if (highlightedOptionElem) {
-			setHighlightedElem(highlightedOptionElem);
-		} else if (highlightedElem !== undefined) {
-			setHighlightedElem(undefined);
-		}
-	}, [highlightedElem, highlightedLajiFormElem, highlightedOptionElem]);
 
 	const onClick = React.useCallback((e) => {
 		if (highlightedLajiFormElem) {
@@ -82,9 +73,21 @@ const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 			}
 		}
 	}, [setActive, highlightedLajiFormElem, highlightedOptionElem, onSelectedOptions, onSelectedField]);
+
 	const onKeyDown = React.useCallback((e: KeyboardEvent) => {
 		e.key === "Escape" && setActive(false);
 	}, [setActive]);
+
+	React.useEffect(() => {
+		if (highlightedLajiFormElem) {
+			setHighlightedElem(highlightedLajiFormElem);
+		} else if (highlightedOptionElem) {
+			setHighlightedElem(highlightedOptionElem);
+		} else if (highlightedElem !== undefined) {
+			setHighlightedElem(undefined);
+		}
+	}, [highlightedElem, highlightedLajiFormElem, highlightedOptionElem]);
+
 	React.useEffect(() => {
 		if (isActive) {
 			document.addEventListener("click", onClick);
@@ -99,12 +102,14 @@ const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 			return undefined;
 		}
 	}, [isActive, onClick, onKeyDown]);
+
 	React.useEffect(() => {
 		if (!isActive) {
 			setHighlightedLajiFormElem(undefined);
 			setHighlightedOptionElem(undefined);
 		}
 	}, [isActive]);
+
 	const start = React.useCallback(() => setActive(true), [setActive]);
 	const stop = React.useCallback(() => setActive(false), [setActive]);
 	const {Button, Glyphicon} = React.useContext(Context).theme;
@@ -123,57 +128,3 @@ const ElemPicker = React.memo(React.forwardRef(function ElemPicker({
 }));
 
 export default ElemPicker;
-
-const Highlighter = ({highlightedElem, active, onElemHighlighted}
-	: {highlightedElem?: Element, active?: boolean, onElemHighlighted: (e: Element) => void}) => {
-	const ref = React.useRef<HTMLDivElement>(null);
-	const highlighter = ref.current;
-	const onMouseMove = React.useCallback(({clientX, clientY}: MouseEvent) => {
-		const elems = document.elementsFromPoint(clientX, clientY);
-		onElemHighlighted(highlighter && elems[0] === highlighter ? elems[1] : elems[0]);
-	}, [highlighter, onElemHighlighted]);
-
-	React.useEffect(() => {
-		if (active) {
-			document.addEventListener("mousemove", onMouseMove);
-			return () => {
-				document.removeEventListener("mousemove", onMouseMove);
-			};
-		} else {
-			document.removeEventListener("mousemove", onMouseMove);
-			return undefined;
-		}
-	}, [active, onMouseMove]);
-
-	const {top, width, left, height} = highlightedElem?.getBoundingClientRect() || {};
-	const scrolled = window.pageYOffset;
-	React.useEffect(() => {
-		if (!highlighter) {
-			return;
-		}
-		if (!highlightedElem) {
-			highlighter.style.display = "none";
-			return;
-		}
-		highlighter.style.display = "block";
-		if (typeof top === "number") {
-			highlighter.style.top = top + scrolled + "px";
-		}
-		if (typeof left === "number") {
-			highlighter.style.left = left + "px";
-		}
-		if (typeof width === "number") {
-			highlighter.style.width = width + "px";
-		}
-		if (typeof height === "number") {
-			highlighter.style.height = height + "px";
-		}
-	}, [highlighter, highlightedElem, top, width, left, height, scrolled]);
-	return createPortal(
-		<div ref={ref}
-		     className={gnmspc("picker-highlighter")}
-		     style={{position: "absolute", zIndex: 1039}} />,
-		document.body
-	);
-};
-

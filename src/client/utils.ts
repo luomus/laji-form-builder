@@ -370,12 +370,15 @@ export const runAbortable = async <T,>(
 	}
 };
 
+/**
+ * @param value the default value of the setter
+ * @returns [stateValue, setTrue, setFalse]
+ */
 export function useBooleanSetter(value: boolean): [boolean, () => void, () => void] {
 	const [open, setOpen] = React.useState(value);
-	// (complains even though inside a custom hook).
-	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const openStateToCallback = (v: boolean) => React.useCallback(() => setOpen(v), [v]);
-	return [open, openStateToCallback(true), openStateToCallback(false)];
+	const setTrue = React.useCallback(() => setOpen(true), []);
+	const setFalse = React.useCallback(() => setOpen(false), []);
+	return [open, setTrue, setFalse];
 }
 
 /**

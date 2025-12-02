@@ -135,7 +135,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 			uiSchema: parseJSONPointer(
 				expandedMaster.uiSchema,
 				fieldPointerToUiSchemaPointer(schemaFormat.schema, selected),
-				!!"safely"
+				true
 			),
 			field: findField(this.getFields(expandedMaster)[0], selected),
 			translations: expandedMaster.translations?.[editorLang as Lang] || {},

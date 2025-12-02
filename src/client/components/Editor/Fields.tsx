@@ -63,6 +63,7 @@ interface FieldProps extends FieldOptions {
 	fieldsContainerElem: HTMLDivElement | null;
 	context?: string;
 }
+
 interface FieldState {
 	expanded: boolean;
 	prevSelected?: string;
@@ -70,6 +71,7 @@ interface FieldState {
 	addOpen: boolean
 	properties?: Property[] | false;
 }
+
 class Field extends React.PureComponent<FieldProps, FieldState> {
 	state: FieldState = {
 		expanded: this.props.expanded || Field.isSelected(this.props.selected, this.props.pointer) ||  false,
