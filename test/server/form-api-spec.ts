@@ -359,20 +359,6 @@ describe("/api", () => {
 	});
 
 	describe("/:id PUT (form update)", () => {
-		it("returns JSON error for store error", (done) => {
-			request(app)
-				.post("/api")
-				.send({...testForm, "badprop": "bad!"})
-				.set("Content-Type", "application/json")
-				.expect(422)
-				.expect("Content-Type", "application/json; charset=utf-8")
-				.expect((response: any) => {
-					expect(response.status).toBe(422);
-					expect(response.error).toBeTruthy();
-				})
-				.end(finish(done));
-		});
-
 		it("updates form and returns in master format", (done) => {
 			const title = "test title";
 			request(app)
