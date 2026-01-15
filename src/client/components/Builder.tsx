@@ -129,7 +129,7 @@ export default class Builder extends React.PureComponent<BuilderProps, BuilderSt
 			this.setLangForServices();
 		}
 		this.updateFromId(this.props.id);
-		if (prevSchemaFormat && prevSchemaFormat !== this.state.schemaFormat || this.state.lang !== prevStateLang) {
+		if (prevSchemaFormat !== this.state.schemaFormat || this.state.lang !== prevStateLang) {
 			this.propagateState();
 		}
 	}
