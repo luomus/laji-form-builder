@@ -1265,7 +1265,6 @@
                   "identifications_0_identificationBasis",
                   "samplingMethod",
                   "samplingMethodNotes",
-                  "unitGathering_habitatIUCN",
                   "unitGathering_habitatDescription",
                   "unitGathering_dateBegin",
                   "unitGathering_dateEnd"
@@ -1342,7 +1341,6 @@
                       "identifications_0_identificationBasis",
                       "samplingMethod",
                       "samplingMethodNotes",
-                      "unitGathering_habitatIUCN",
                       "unitGathering_habitatDescription",
                       "unitGathering_dateBegin",
                       "unitGathering_dateEnd"
@@ -1411,7 +1409,6 @@
                           "sex",
                           "unitGathering_dateBegin",
                           "unitGathering_dateEnd",
-                          "unitGathering_habitatIUCN",
                           "unitGathering_habitatDescription",
                           "preservation",
                           "samplingMethod",
@@ -1483,7 +1480,6 @@
                       },
                       "MVL.232": {
                         "defaultFields": [
-                          "unitGathering_habitatIUCN",
                           "unitGathering_habitatDescription",
                           "identifications_0_det",
                           "identifications_0_identificationBasis",
@@ -1510,7 +1506,6 @@
                             "lifeStage",
                             "samplingMethod",
                             "preservation",
-                            "unitGathering_habitatIUCN",
                             "unitGathering_habitatDescription",
                             "identifications_0_det",
                             "identifications_0_detDate",
@@ -1611,7 +1606,6 @@
               "sex",
               "unitGathering_dateBegin",
               "unitGathering_dateEnd",
-              "unitGathering_habitatIUCN",
               "unitGathering_habitatDescription",
               "preservation",
               "samplingMethod",
