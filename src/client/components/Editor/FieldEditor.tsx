@@ -2,7 +2,7 @@ import * as React from "react";
 import {
 	ExpandedMaster, Field as FieldOptions, JSONObject, JSONSchema, Lang, Property, SchemaFormat
 } from "src/model";
-import { getPropertyContextName, parseJSONPointer } from "src/utils";
+import { getPropertyContextName, parseJSONPointer, unprefixProp } from "src/utils";
 import {
 	fieldPointerToSchemaPointer, fieldPointerToUiSchemaPointer, fullHeightWithOffset, gnmspc, nmspc
 } from "src/client/utils";
@@ -146,7 +146,7 @@ export default class FieldEditor extends React.PureComponent<Props, State> {
 	}
 
 	getFields = memoize((master: ExpandedMaster): any => ([{
-		name: getPropertyContextName(master.context),
+		name: unprefixProp(getPropertyContextName(master.context)),
 		fields: master.fields
 	}]));
 
