@@ -64,6 +64,7 @@ npm run test:server
 ##### Env variables:
 
 * `MOCK=true`: Field service test API requests are mocked by default.
+* `CREATE_MOCKS=false`: Field service test API responses mock are recreated.
 
 #### Client
 

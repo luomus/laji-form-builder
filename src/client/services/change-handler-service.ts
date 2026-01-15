@@ -88,7 +88,7 @@ export default class ChangeHandlerService {
 				return {...master, fields: filterFields(master as Field, splitted).fields};
 			} else if (isFieldAddEvent(event)) {
 				const propertyModel = event.value;
-				if (propertyModel.range[0] !== PropertyRange.Id) {
+				if (propertyModel.range !== PropertyRange.Id) {
 					const addField = (fields: Field[], path: string[], property: string) : Field[] => {
 						if (!path.length) {
 							return [...fields, {name: unprefixProp(property)}];

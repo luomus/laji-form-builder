@@ -28,7 +28,7 @@ const config = {
 };
 const compiler = webpack(config);
 
-// Redirect all but /static/* to the static index.html, since it's a  single-page app.
+// Redirect all but /static/* to the static index.html, since it's a single-page app.
 server.use(historyApiFallback({
 	rewrites: [
 		{from: /^\/(static|__webpack_hmr)/, to: (context) => {

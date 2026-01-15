@@ -39,9 +39,7 @@ export default class FormService extends UsesMemoization {
 
 	async update(form: any): Promise<RemoteMaster> {
 		const remoteForm = await this.fetchJSON(`/${form.id}`, {personToken: this.personToken},
-			{method: "PUT", body: JSON.stringify(form), headers: {
-				"Content-Type": "application/json"
-			}});
+			{method: "PUT", body: form});
 		this.getMaster.delete(form.id);
 		this.getSchemaFormatCache(form.id).clear();
 		return remoteForm;
@@ -49,9 +47,7 @@ export default class FormService extends UsesMemoization {
 
 	create(form: any): Promise<RemoteMaster> {
 		return this.fetchJSON("", {personToken: this.personToken},
-			{method: "POST", body: JSON.stringify(form), headers: {
-				"Content-Type": "application/json"
-			}});
+			{method: "POST", body: form});
 	}
 
 	async delete(id: string): Promise<FormDeleteResult> {
@@ -69,9 +65,7 @@ export default class FormService extends UsesMemoization {
 
 	masterToSchemaFormat(master: Master, signal?: AbortSignal): Promise<SchemaFormat> {
 		return this.fetchJSON("/transform", {lang: this.lang, personToken: this.personToken},
-			{method: "POST", body: JSON.stringify(master), headers: {
-				"Content-Type": "application/json"
-			}, signal});
+			{method: "POST", body: master, signal});
 	}
 
 	setLang(lang: Lang) {

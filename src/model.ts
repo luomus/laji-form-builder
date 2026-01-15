@@ -16,7 +16,7 @@ export enum PropertyRange {
 export type Property = {
 	property: string;
 	label: Partial<Record<Lang, string>>;
-	range: (PropertyRange | string)[];
+	range: (PropertyRange | string);
 	shortName: string;
 	comment?: Partial<Record<Lang, string>>;
 	maxOccurs: string;

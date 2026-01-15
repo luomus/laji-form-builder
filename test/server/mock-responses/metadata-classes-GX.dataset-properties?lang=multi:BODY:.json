@@ -1,0 +1,349 @@
+{
+  "results": [
+    {
+      "property": "GX.benefitsDerivedAndShared",
+      "label": {
+        "en": "Benefits derived and shared",
+        "fi": "Saadut ja jaetut hyödyt",
+        "sv": "Tillträde och fördelning av nytta"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 10,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "benefitsDerivedAndShared",
+      "comment": {
+        "en": "What monetary or non-monetary benefits arised from the project and how they were shared. (Related to the monitoring of the utilisation of genetic resources and Nagoya compliance)."
+      }
+    },
+    {
+      "property": "GX.datasetName",
+      "label": {
+        "sv": "Namn",
+        "en": "Name",
+        "fi": "Nimi"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "1",
+      "maxOccurs": "1",
+      "required": true,
+      "hasMany": false,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": true,
+      "shortName": "datasetName",
+      "comment": {
+        "en": "Name of the tag. This must be unique."
+      }
+    },
+    {
+      "property": "GX.datasetType",
+      "label": {
+        "sv": "Tagg typ",
+        "fi": "Tagin tyyppi",
+        "en": "Tag type"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "GX.datasetTypeEnum",
+      "minOccurs": "1",
+      "maxOccurs": "1",
+      "required": true,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "datasetType",
+      "comment": {
+        "en": "Type of the tag. Usually basic, project type is generally used only to give information on project Nagoya compliance."
+      }
+    },
+    {
+      "property": "GX.description",
+      "label": {
+        "sv": "Beskrivning",
+        "en": "Description",
+        "fi": "Kuvaus"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "1",
+      "maxOccurs": "1",
+      "required": true,
+      "hasMany": false,
+      "sortOrder": 5,
+      "isEmbeddable": false,
+      "multiLanguage": true,
+      "shortName": "description",
+      "comment": {
+        "en": "Description of the tag, so that other people understand what it is about."
+      }
+    },
+    {
+      "property": "GX.personsResponsible",
+      "label": {
+        "fi": "Vastuuhenkilö(t)",
+        "en": "Person(s) responsible",
+        "sv": "Ansvarig person"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "1",
+      "maxOccurs": "1",
+      "required": true,
+      "hasMany": false,
+      "sortOrder": 4,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "personsResponsible",
+      "comment": {
+        "en": "Person(s) responsible for the tag."
+      }
+    },
+    {
+      "property": "GX.researchCollaborator",
+      "label": {
+        "fi": "Yhteistyötaho(t)",
+        "en": "Research collaborator(s)",
+        "sv": "Samarbetspartner"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 9,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "researchCollaborator",
+      "comment": {
+        "en": "Institutions or persons collaborating in the project."
+      }
+    },
+    {
+      "property": "GX.researchFundingDuration",
+      "label": {
+        "en": "Research funding duration",
+        "fi": "Tutkimusrahoituksen kesto",
+        "sv": "Längd av forsknings finansiering"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 8,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "researchFundingDuration",
+      "comment": {
+        "en": "Duration of the project funding (dates from and to). (related to the monitoring of the utilisation of genetic resources and Nagoya compliance)."
+      }
+    },
+    {
+      "property": "GX.researchFundingRecipient",
+      "label": {
+        "sv": "Forsknings finansiering mottagare",
+        "fi": "Tutkimusrahoituksen saaja",
+        "en": "Research funding recipient"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "researchFundingRecipient",
+      "comment": {
+        "en": "Which person or institution received the project funding (related to the monitoring of the utilisation of genetic resources and Nagoya compliance)."
+      }
+    },
+    {
+      "property": "GX.researchFundingSource",
+      "label": {
+        "fi": "Tutkimusrahoituksen lähde",
+        "sv": "Forsknings finansieringskälla",
+        "en": "Research funding source"
+      },
+      "domain": [
+        "GX.dataset"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 6,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "researchFundingSource",
+      "comment": {
+        "en": "Who funded the project (related to the monitoring of the utilisation of genetic resources and Nagoya compliance)."
+      }
+    },
+    {
+      "property": "MZ.creator",
+      "label": {
+        "sv": "Skapare",
+        "en": "Creator",
+        "fi": "Luoja"
+      },
+      "domain": [
+        "HRX.specimenTransaction",
+        "MY.document",
+        "MOS.organization",
+        "GX.dataset",
+        "HRA.transaction",
+        "MF.sample",
+        "MXC.device",
+        "MY.collection"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "creator"
+    },
+    {
+      "property": "MZ.dateCreated",
+      "label": {
+        "en": "Created",
+        "fi": "Luotu",
+        "sv": "Skapad"
+      },
+      "domain": [
+        "HRX.specimenTransaction",
+        "MF.sample",
+        "MXC.device",
+        "GX.dataset",
+        "MOS.organization",
+        "MY.document",
+        "MY.collection",
+        "HRA.transaction"
+      ],
+      "range": "xsd:dateTime",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateCreated"
+    },
+    {
+      "property": "MZ.dateEdited",
+      "label": {
+        "fi": "Muokattu",
+        "sv": "Editering",
+        "en": "Edited"
+      },
+      "domain": [
+        "MF.sample",
+        "MXC.device",
+        "MOS.organization",
+        "MY.document",
+        "MY.collection",
+        "HRA.transaction",
+        "GX.dataset",
+        "HRX.specimenTransaction"
+      ],
+      "range": "xsd:dateTime",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateEdited"
+    },
+    {
+      "property": "MZ.editor",
+      "label": {
+        "fi": "Editoija",
+        "sv": "Editor",
+        "en": "Editor"
+      },
+      "domain": [
+        "HRA.transaction",
+        "MF.sample",
+        "MXC.device",
+        "HRX.specimenTransaction",
+        "GX.dataset",
+        "MOS.organization",
+        "MY.document",
+        "MY.collection"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "editor"
+    },
+    {
+      "property": "MZ.owner",
+      "label": {
+        "en": "Owner of record",
+        "fi": "Tietueen omistaja",
+        "sv": "Ägare av rekord"
+      },
+      "domain": [
+        "HRA.transaction",
+        "HRX.specimenTransaction",
+        "MF.sample",
+        "GX.dataset",
+        "MOS.organization",
+        "MY.document",
+        "MY.collection"
+      ],
+      "range": "MOS.organization",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "owner",
+      "comment": {
+        "en": "Team or organisation that owns the record and can edit it."
+      }
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

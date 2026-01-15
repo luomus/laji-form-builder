@@ -211,7 +211,7 @@ export default class MainService extends UsesMemoization {
 			}
 		};
 
-		await this.metadataService.getAllRanges();
+		await this.metadataService.getAllAlts();
 		await warmupForms();
 	}
 }

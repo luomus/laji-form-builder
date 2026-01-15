@@ -1,0 +1,2037 @@
+{
+  "results": [
+    {
+      "property": "MY.AFEQuadrat",
+      "label": {
+        "en": "AFE grid",
+        "fi": "AFE-ruutu",
+        "sv": "AFE-ruta"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 17,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "AFEQuadrat",
+      "comment": {
+        "en": "AFE grid name"
+      }
+    },
+    {
+      "property": "MY.UTMQuadrat",
+      "label": {
+        "sv": "UTM-ruta",
+        "fi": "UTM-ruutu",
+        "en": "UTM grid"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 23,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "UTMQuadrat",
+      "comment": {
+        "en": "UTM grid name"
+      }
+    },
+    {
+      "property": "MY.acknowledgeNoUnitsInCensus",
+      "label": {
+        "fi": "Laskennassa ei havaintoja",
+        "en": "No units in census",
+        "sv": "Inga enheter i census"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "acknowledgeNoUnitsInCensus"
+    },
+    {
+      "property": "MY.administrativeProvince",
+      "label": {
+        "sv": "Administrativ landskap",
+        "fi": "Hallinnollinen maakunta",
+        "en": "Administrative province"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 24,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "administrativeProvince",
+      "comment": {
+        "en": "Regions, rayons, provinces and other administrative areas. Separate multiple names with commas, from generic to specific. (E.g. Etelä-Suomen lääni, Uusimaa)"
+      }
+    },
+    {
+      "property": "MY.alt",
+      "label": {
+        "en": "Alt in meters",
+        "fi": "Korkeus metreinä",
+        "sv": "Höjd på meter"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 15,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "alt",
+      "comment": {
+        "en": "Altitude form sea level in meters, single value or range (E.g. 90, or 80-100). No GPS altitude here."
+      }
+    },
+    {
+      "property": "MY.areaDetail",
+      "label": {
+        "sv": "Områdets detaljer",
+        "en": "Area details",
+        "fi": "Alueen yksityiskohdat"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "areaDetail"
+    },
+    {
+      "property": "MY.associatedObservationTaxa",
+      "label": {
+        "en": "Associated observation taxa",
+        "fi": "Seuralaislajihavainnot",
+        "sv": "Observationerna av följearter"
+      },
+      "domain": [
+        "MY.gathering",
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 35,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "associatedObservationTaxa",
+      "comment": {
+        "en": "Write associated observation taxa names here, separated by a semicolon (;). E.g.: \"Betula pendula; Betula pubescens; Poaceae\". These will form their own units of the type observation."
+      }
+    },
+    {
+      "property": "MY.associatedSpecimenTaxa",
+      "label": {
+        "fi": "Seuralaislajinäytteet",
+        "en": "Associated specimen taxa",
+        "sv": "Proven av följearter"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 40,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "associatedSpecimenTaxa",
+      "comment": {
+        "en": "Write associated specimen taxa names here, separated by a semicolon (;). E.g.: \"Betula pendula; Betula pubescens; Poaceae\". These will form their own units of the type Preserved specimen."
+      }
+    },
+    {
+      "property": "MY.batHabitat",
+      "label": {
+        "fi": "Habitaatti",
+        "sv": "Habitat",
+        "en": "Habitat"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.batHabitatEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "batHabitat",
+      "comment": {
+        "en": "Bat habitat"
+      }
+    },
+    {
+      "property": "MY.binocularsUsed",
+      "label": {
+        "en": "Binoculars",
+        "fi": "Kiikarit",
+        "sv": "Kikare"
+      },
+      "domain": [
+        "MY.gatheringFactClass",
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "binocularsUsed"
+    },
+    {
+      "property": "MY.biologicalProvince",
+      "label": {
+        "en": "Biogeographical province",
+        "fi": "Eliömaakunta",
+        "sv": "Biogeografisk provins"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 22,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "biologicalProvince",
+      "comment": {
+        "en": "Formal abbreviation. For Finnish eliömaakunnat, use Finnish abbreviation."
+      }
+    },
+    {
+      "property": "MY.censusHinderedByEnviromentalFactors",
+      "label": {
+        "en": "Weather (etc) hindered the census",
+        "sv": "Väder (etc) hindrade folkräkningen",
+        "fi": "Sääolot (tms) haittasivat"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "censusHinderedByEnviromentalFactors"
+    },
+    {
+      "property": "MY.censusHinderedByFog",
+      "label": {
+        "fi": "Sumu/usva haittasi",
+        "en": "Fog hindered the census",
+        "sv": "Dimma hindrade folkräkningen"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "censusHinderedByFog"
+    },
+    {
+      "property": "MY.censusHinderedByRain",
+      "label": {
+        "sv": "Regn hindrade folkräkningen",
+        "en": "Rain hindered the census",
+        "fi": "Sade haittasi"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "censusHinderedByRain"
+    },
+    {
+      "property": "MY.censusHinderedByWind",
+      "label": {
+        "fi": "Tuuli haittasi",
+        "en": "Wind hindered the census",
+        "sv": "Vind hindrade folkräkningen"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "censusHinderedByWind"
+    },
+    {
+      "property": "MY.collectingEventName",
+      "label": {
+        "fi": "Keruutapahtuman nimi",
+        "en": "Collecting event name",
+        "sv": "Namnet av insamlingshändelse"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 39,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "collectingEventName",
+      "comment": {
+        "en": "Name of an expedition or such."
+      }
+    },
+    {
+      "property": "MY.controlActivitiesNotes",
+      "label": {
+        "en": "Prevention measures",
+        "fi": "Torjuntatoimet"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "controlActivitiesNotes"
+    },
+    {
+      "property": "MY.coordinateNotes",
+      "label": {
+        "sv": "Koordinat anteckningar",
+        "en": "Coordinate notes",
+        "fi": "Lisätietoja koordinaateista"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 18,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "coordinateNotes",
+      "comment": {
+        "en": "Free-text notes about the coordinates."
+      }
+    },
+    {
+      "property": "MY.coordinateRadius",
+      "label": {
+        "en": "Error radius in meters",
+        "sv": "Fel radie i meter",
+        "fi": "Tarkkuus metreinä"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 13,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "coordinateRadius",
+      "comment": {
+        "en": "Maximum error of coordinates in meters"
+      }
+    },
+    {
+      "property": "MY.coordinateSource",
+      "label": {
+        "fi": "Koordinaattien lähde",
+        "sv": "Koordinatkälla",
+        "en": "Coord source"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.coordinateSources",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 12,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "coordinateSource",
+      "comment": {
+        "en": "Use for NEW SPECIMENS: Where the coordinates have been acquired"
+      }
+    },
+    {
+      "property": "MY.coordinateSystem",
+      "label": {
+        "en": "Coordinate system",
+        "fi": "Koordinaattijärjestelmä",
+        "sv": "Geografiska koordinatsystem"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.coordinateSystems",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 11,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "coordinateSystem",
+      "comment": {
+        "en": "More information about the coordinate systems: https://wiki.helsinki.fi/display/digit/Entering+specimen+data"
+      }
+    },
+    {
+      "property": "MY.coordinatesGridYKJ",
+      "label": {
+        "en": "Finnish uniform grid coordinates",
+        "fi": "Yhtenäiskoordinaatit",
+        "sv": "Enhetskoordinater"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 5,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "coordinatesGridYKJ"
+    },
+    {
+      "property": "MY.coordinatesVerbatim",
+      "label": {
+        "sv": "Koordinater ord för ord från primärkälla",
+        "fi": "Koordinaatit sanatarkasti alkuperäislähteestä",
+        "en": "Verbatim coordinates from label or other original source"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 8,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "coordinatesVerbatim",
+      "comment": {
+        "en": "Coordinates, possible coordinate system and error radius word-to-word as they appear on the label or other original source, errors and all."
+      }
+    },
+    {
+      "property": "MY.country",
+      "label": {
+        "en": "Country",
+        "fi": "Maa",
+        "sv": "Land"
+      },
+      "domain": [
+        "TDFX.traitSubject",
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 20,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "country",
+      "comment": {
+        "en": "Country name in English, or 2-letter country code, or name from label"
+      }
+    },
+    {
+      "property": "MY.county",
+      "label": {
+        "en": "County",
+        "fi": "Piirikunta (county)"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 41,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "county",
+      "comment": {
+        "en": "County (piirikunta, kreivikunta etc.)"
+      }
+    },
+    {
+      "property": "MY.dateBegin",
+      "label": {
+        "en": "Start date",
+        "sv": "Startdatum",
+        "fi": "Alku"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "TDFX.traitSubject",
+        "MZ.unitGathering",
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateBegin"
+    },
+    {
+      "property": "MY.dateEnd",
+      "label": {
+        "en": "End date",
+        "fi": "Loppu",
+        "sv": "Slutdatum"
+      },
+      "domain": [
+        "TDFX.traitSubject",
+        "MY.gathering",
+        "MZ.gatheringEvent",
+        "MZ.unitGathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 4,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateEnd"
+    },
+    {
+      "property": "MY.dateVerbatim",
+      "label": {
+        "fi": "Keruuajankohta sanatarkasti alkuperäislähteestä",
+        "sv": "Datum ord för ord",
+        "en": "Verbatim date from original source"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 30,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateVerbatim",
+      "comment": {
+        "en": "Date just as it appears on the label or other original source, no interpretation, errors and all"
+      }
+    },
+    {
+      "property": "MY.depth",
+      "label": {
+        "sv": "Djup (m)",
+        "fi": "Syvyys metreinä",
+        "en": "Depth in meters"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 16,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "depth",
+      "comment": {
+        "en": "Depth in meters, single value or range (E.g. 0.9, or 0.8-1.0)"
+      }
+    },
+    {
+      "property": "MY.dynamicProperties",
+      "label": {},
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dynamicProperties"
+    },
+    {
+      "property": "MY.eventDate",
+      "label": {
+        "sv": "Händelsedatum",
+        "en": "Event Date",
+        "fi": "Tapahtumapäivä"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "eventDate"
+    },
+    {
+      "property": "MY.forestVegetationZone",
+      "label": {
+        "sv": "Skogsvegetationsbälte",
+        "en": "Forest vegetation zone",
+        "fi": "Metsäkasvillisuusvyöhyke"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.forestVegetationZones",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 36,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "forestVegetationZone",
+      "comment": {
+        "en": "Finnish forest vegetation zone"
+      }
+    },
+    {
+      "property": "MY.gatheringFact",
+      "label": {},
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering"
+      ],
+      "range": "MY.gatheringFactClass",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "gatheringFact"
+    },
+    {
+      "property": "MY.gatheringType",
+      "label": {
+        "fi": "Keruutapahtuman tyyppi",
+        "en": "Gathering event type"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.gatheringTypeEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "gatheringType"
+    },
+    {
+      "property": "MY.geometry",
+      "label": {
+        "fi": "Koordinaatit",
+        "en": "Coordinates"
+      },
+      "domain": [
+        "MZ.unitGathering",
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "MZ.geometry",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "geometry"
+    },
+    {
+      "property": "MY.georeferenceSource",
+      "label": {
+        "sv": "Georeferencingskälla",
+        "fi": "Lähde jälkikäteen hankituille koordinaateille",
+        "en": "Georeferencing source"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.georeferenceSources",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 14,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "georeferenceSource",
+      "comment": {
+        "en": "Use for OLD SPECIMENS: What source was used to get coordinates based on locality names"
+      }
+    },
+    {
+      "property": "MY.habitat",
+      "label": {
+        "sv": "Habitat",
+        "fi": "Elinympäristö",
+        "en": "Habitat"
+      },
+      "domain": [
+        "MY.gathering",
+        "TDFX.traitSubject",
+        "MY.unit"
+      ],
+      "range": "MY.habitatEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitat"
+    },
+    {
+      "property": "MY.habitatAttributes",
+      "label": {
+        "fi": "Elinympäristön lisätiedot",
+        "sv": "Tilläggsuppgifter av habitat",
+        "en": "Additional information of habitat"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.habitatAttributesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitatAttributes"
+    },
+    {
+      "property": "MY.habitatClassification",
+      "label": {
+        "fi": "Habitaatin luokka",
+        "sv": "Habitatklass",
+        "en": "Habitat classification"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 31,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitatClassification",
+      "comment": {
+        "en": "Formal habitat name or abbreviation. If several, separate with semicolons (E.g. 'OMT; OMaT')."
+      }
+    },
+    {
+      "property": "MY.habitatDescription",
+      "label": {
+        "en": "Habitat description",
+        "fi": "Elinympäristön kuvaus",
+        "sv": "Habitatbeskrivning"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.unitGathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitatDescription",
+      "comment": {
+        "en": "Informal description of the habitat."
+      }
+    },
+    {
+      "property": "MY.hasUnit",
+      "label": {},
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.unit",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasUnit"
+    },
+    {
+      "property": "MY.higherGeography",
+      "label": {
+        "fi": "Maata laajempi alue",
+        "en": "Higher geography",
+        "sv": "Högre geografi"
+      },
+      "domain": [
+        "MY.gathering",
+        "TDFX.traitSubject"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 21,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "higherGeography",
+      "comment": {
+        "en": "If country is not known or not applicable, for example continent, ocean or large island"
+      }
+    },
+    {
+      "property": "MY.invasiveControlAreaKnown",
+      "label": {
+        "fi": "Esiintymän koko / laajuus tiedossa"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlAreaKnown"
+    },
+    {
+      "property": "MY.invasiveControlDangerous",
+      "label": {
+        "fi": "Onko esiintymä välitön uhka esimerkiksi uhanalaisille lajeille, luontotyypeille tai ihmisille?",
+        "en": "Is the occurrence a direct threat to e.g. endangered species, biotopes or humans?"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlDangerous"
+    },
+    {
+      "property": "MY.invasiveControlDangerousDescription",
+      "label": {
+        "en": "Description of threats",
+        "fi": "Uhkien kuvaus"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlDangerousDescription"
+    },
+    {
+      "property": "MY.invasiveControlEffectiveness",
+      "label": {
+        "fi": "Torjunnan taso",
+        "sv": "styrnivån",
+        "en": "Control level"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.invasiveControlEffectivenessEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlEffectiveness"
+    },
+    {
+      "property": "MY.invasiveControlEffectivenessNotes",
+      "label": {
+        "fi": "Lisätiedot torjunnan tasosta",
+        "en": "Notes of control level"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlEffectivenessNotes"
+    },
+    {
+      "property": "MY.invasiveControlMethods",
+      "label": {
+        "fi": "Torjuntatoimet",
+        "en": "Control methods"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.invasiveControlMethodsEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlMethods"
+    },
+    {
+      "property": "MY.invasiveControlMethodsDescription",
+      "label": {
+        "en": "Description of control methods",
+        "fi": "Torjuntatoimien lisätiedot"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlMethodsDescription"
+    },
+    {
+      "property": "MY.invasiveControlOpen",
+      "label": {
+        "en": "Are follow-up controls needed?",
+        "fi": "Vaatiiko jatkotoimia / seurantaa?"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlOpen"
+    },
+    {
+      "property": "MY.invasiveControlOpenDescription",
+      "label": {
+        "en": "Description of follow-up controls?",
+        "fi": "Lisätietoja jatkotoimista"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlOpenDescription"
+    },
+    {
+      "property": "MY.invasiveControlOtherExpensesInEuros",
+      "label": {
+        "fi": "Arvio muista kustannuksista euroina",
+        "en": "Estimated of other expenses in euros"
+      },
+      "domain": [
+        "MY.gatheringFactClass",
+        "MY.gathering"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlOtherExpensesInEuros"
+    },
+    {
+      "property": "MY.invasiveControlTaxon",
+      "label": {
+        "en": "Control target taxon",
+        "sv": "Kontroll mål taxon",
+        "fi": "Torjunnan kohdetaksoni"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlTaxon"
+    },
+    {
+      "property": "MY.isPartOf",
+      "label": {
+        "en": "Is part of"
+      },
+      "domain": [
+        "MY.gathering",
+        "MY.collection",
+        "HRA.permitClass",
+        "MY.unit",
+        "MY.identification",
+        "MY.typeSpecimen",
+        "MF.sample",
+        "MY.measurementClass",
+        "MF.preparationClass"
+      ],
+      "range": "rdfs:Resource",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 24,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "isPartOf",
+      "comment": {
+        "en": "Which parent or larger collection this is part of."
+      }
+    },
+    {
+      "property": "MY.keywords",
+      "label": {
+        "fi": "Avainsanat",
+        "sv": "Nyckelord",
+        "en": "Keywords"
+      },
+      "domain": [
+        "MY.document",
+        "MY.gathering",
+        "MY.unit"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "keywords"
+    },
+    {
+      "property": "MY.latitude",
+      "label": {
+        "sv": "Nordkordinat",
+        "en": "Lat (N)",
+        "fi": "Pohjoiskoordinaatti"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 9,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "latitude",
+      "comment": {
+        "en": "Latitude. For southern latitudes, use negative value."
+      }
+    },
+    {
+      "property": "MY.leg",
+      "label": {
+        "fi": "Kerääjä (leg)",
+        "sv": "Leg",
+        "en": "Leg"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "leg",
+      "comment": {
+        "en": "Name of the collector(s), in format 'Lastname, Firstname; Lastname Firstname'"
+      }
+    },
+    {
+      "property": "MY.legUserID",
+      "label": {
+        "fi": "Käyttäjätunnus"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "legUserID",
+      "comment": {
+        "fi": "Alkuperäislähteen käyttäjätunnus"
+      }
+    },
+    {
+      "property": "MY.legVerbatim",
+      "label": {
+        "en": "Verbatim leg from orginal source",
+        "fi": "Kerääjä(t) sanatarkasti alkuperäislähteestä",
+        "sv": "Leg ord för ord"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 25,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "legVerbatim",
+      "comment": {
+        "en": "Leg just as it appears in the label or other original source, no interpretation, errors and all."
+      }
+    },
+    {
+      "property": "MY.locality",
+      "label": {
+        "sv": "Ortnamn",
+        "en": "Locality names",
+        "fi": "Paikannimet"
+      },
+      "domain": [
+        "MY.gathering",
+        "TDFX.traitSubject"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 27,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "locality",
+      "comment": {
+        "en": "Official name of the locality in basic form. Separate multiple names with commas, from generic to specific. No informal description here."
+      }
+    },
+    {
+      "property": "MY.localityDescription",
+      "label": {
+        "en": "Locality description",
+        "fi": "Paikan vapaamuotoinen kuvaus",
+        "sv": "Beskrivning av ort"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 29,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "localityDescription",
+      "comment": {
+        "en": "Informal description of the exact locality, e.g. '5 km NE of city X, under stone bridge'"
+      }
+    },
+    {
+      "property": "MY.localityID",
+      "label": {
+        "en": "Locality ID",
+        "fi": "Paikannimen tunniste",
+        "sv": "Ortnamn id"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 28,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "localityID",
+      "comment": {
+        "en": "An unique identifier or code for the locality, if the locality has one (e.g. from SAPO-ontology)."
+      }
+    },
+    {
+      "property": "MY.localityVerbatim",
+      "label": {
+        "fi": "Paikannimet sanatarkasti alkuperäislähteestä",
+        "sv": "Ortnamn ord för ord",
+        "en": "Verbatim locality from label or other original source"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 19,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "localityVerbatim",
+      "comment": {
+        "en": "Locality word-to-word as it appears on the label or other original source, errors and all"
+      }
+    },
+    {
+      "property": "MY.longitude",
+      "label": {
+        "sv": "Östkoordinat",
+        "fi": "Itäkoordinaatti",
+        "en": "Lon (E)"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 10,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "longitude",
+      "comment": {
+        "en": "Longitude. For western longitudes, use negative value."
+      }
+    },
+    {
+      "property": "MY.mothSamplingMethod",
+      "label": {
+        "sv": "Provtagningsmetod",
+        "fi": "Pyydystyyppi",
+        "en": "Moth sampling method"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.mothSamplingMethodEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 45,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "mothSamplingMethod",
+      "comment": {
+        "": "Main method for moth sampling"
+      }
+    },
+    {
+      "property": "MY.municipality",
+      "label": {
+        "en": "Municipality",
+        "fi": "Kunta",
+        "sv": "Kommun"
+      },
+      "domain": [
+        "MY.gathering",
+        "TDFX.traitSubject"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 26,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "municipality",
+      "comment": {
+        "en": "Municipality, commune, town, city or civil parish"
+      }
+    },
+    {
+      "property": "MY.namedPlaceID",
+      "label": {
+        "en": "Named place",
+        "fi": "Nimetty paikka"
+      },
+      "domain": [
+        "MY.document",
+        "MY.gathering"
+      ],
+      "range": "MNP.namedPlace",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "namedPlaceID"
+    },
+    {
+      "property": "MY.notes",
+      "label": {
+        "sv": "Anteckningar",
+        "fi": "Lisätiedot",
+        "en": "Notes"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.collection",
+        "MY.gathering",
+        "MY.unit",
+        "MY.document"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 6,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "notes",
+      "comment": {
+        "en": "Additional information to the data in each section."
+      }
+    },
+    {
+      "property": "MY.numberOfSampledIndividuals",
+      "label": {
+        "en": "Number of sampled individuals"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 42,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "numberOfSampledIndividuals",
+      "comment": {
+        "en": "For garden accessions/seed bank, number of individuals from which seeds were collected"
+      }
+    },
+    {
+      "property": "MY.observationDays",
+      "label": {
+        "fi": "Havaintopäivien lukumäärä",
+        "en": "Observation days",
+        "sv": "Observationsdagar"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "observationDays"
+    },
+    {
+      "property": "MY.observationMinutes",
+      "label": {
+        "sv": "Observeringsminuter",
+        "fi": "Havainnointiminuutit",
+        "en": "Observation minutes"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:positiveInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "observationMinutes"
+    },
+    {
+      "property": "MY.percentageGivingSeeds",
+      "label": {
+        "en": "% of plant population giving seeds"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 43,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "percentageGivingSeeds",
+      "comment": {
+        "en": "For garden accessions/seed bank, what proportion of the population sampled was giving seeds"
+      }
+    },
+    {
+      "property": "MY.predominantTree",
+      "label": {
+        "en": "Predominant tree",
+        "fi": "Valtapuulaji",
+        "sv": "Dominerande trädart"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.predominantTreeEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "predominantTree"
+    },
+    {
+      "property": "MY.projectTitle",
+      "label": {},
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "projectTitle"
+    },
+    {
+      "property": "MY.province",
+      "label": {},
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "province"
+    },
+    {
+      "property": "MY.relativeHumidity",
+      "label": {
+        "fi": "Suhteellinen kosteus",
+        "en": "Relative humidity",
+        "sv": "Relativ luftfuktighet"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "relativeHumidity",
+      "comment": {
+        "en": "Relative humidity %"
+      }
+    },
+    {
+      "property": "MY.samplingAreaSizeInSquareMeters",
+      "label": {
+        "en": "Size of sampling area (m2)"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:decimal",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 44,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "samplingAreaSizeInSquareMeters",
+      "comment": {
+        "en": "For garden accessions/seed bank, estimated size of the area sampled, in square meters"
+      }
+    },
+    {
+      "property": "MY.samplingMethod",
+      "label": {
+        "fi": "Keruumenetelmä",
+        "sv": "Insamlingsmetod",
+        "en": "Sampling method"
+      },
+      "domain": [
+        "MY.unit",
+        "MY.gathering"
+      ],
+      "range": "MY.samplingMethods",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 32,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "samplingMethod",
+      "comment": {
+        "en": "Main method for (usually intentional) sampling"
+      }
+    },
+    {
+      "property": "MY.samplingMethodNotes",
+      "label": {
+        "sv": "Ancteckningar om insamlingsmetod",
+        "fi": "Keruumenetelmän lisätiedot",
+        "en": "Sampling method notes"
+      },
+      "domain": [
+        "MY.gathering",
+        "MY.unit",
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "samplingMethodNotes"
+    },
+    {
+      "property": "MY.section",
+      "label": {
+        "sv": "Sektion",
+        "fi": "Lohko",
+        "en": "Section"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "section"
+    },
+    {
+      "property": "MY.skipped",
+      "label": {
+        "en": "Skipped",
+        "sv": "Skippa",
+        "fi": "Jätetty väliin"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "skipped"
+    },
+    {
+      "property": "MY.spottingScopeUsed",
+      "label": {
+        "sv": "Tubkikare",
+        "en": "Spotting scope",
+        "fi": "Kaukoputki"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering",
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "spottingScopeUsed"
+    },
+    {
+      "property": "MY.substrate",
+      "label": {
+        "en": "Substrate",
+        "fi": "Kasvualusta",
+        "sv": "Substrat"
+      },
+      "domain": [
+        "MZ.unitGathering",
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "substrate",
+      "comment": {
+        "en": "Type of substrate or name of substrate species."
+      }
+    },
+    {
+      "property": "MY.taxonCensus",
+      "label": {
+        "en": "Completely recorded taxon",
+        "fi": "Kattavasti kirjattu taksoni"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "MY.taxonCensusClass",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "taxonCensus",
+      "comment": {
+        "": "This property is used for documenting those taxa that are completely recorded as part of the gathering event"
+      }
+    },
+    {
+      "property": "MY.temperature",
+      "label": {
+        "sv": "Temperatur",
+        "en": "Temperature in celsius",
+        "fi": "Lämpötila"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "temperature"
+    },
+    {
+      "property": "MY.timeEnd",
+      "label": {
+        "sv": "Slutet",
+        "fi": "Lopetusaika",
+        "en": "End time"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "timeEnd"
+    },
+    {
+      "property": "MY.timeStart",
+      "label": {
+        "en": "Start time",
+        "sv": "Starttid",
+        "fi": "Aloitusaika"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "timeStart"
+    },
+    {
+      "property": "MY.trapCount",
+      "label": {
+        "sv": "Antal fällor",
+        "en": "Trap count",
+        "fi": "Pyydysten lukumäärä"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "trapCount"
+    },
+    {
+      "property": "MY.weather",
+      "label": {
+        "en": "Weather",
+        "fi": "Sää",
+        "sv": "Väder"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "weather"
+    },
+    {
+      "property": "MY.wgs84Latitude",
+      "label": {
+        "en": "WGS84 Latitude",
+        "fi": "WGS84 latitudi (N)",
+        "sv": "WGS84 latitud (N)"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 37,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "wgs84Latitude"
+    },
+    {
+      "property": "MY.wgs84Longitude",
+      "label": {
+        "fi": "WGS84 longitudi (E)",
+        "en": "WGS84 Longitude",
+        "sv": "WGS84 longitud (E)"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 38,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "wgs84Longitude"
+    },
+    {
+      "property": "MZ.images",
+      "label": {
+        "fi": "Kuvat",
+        "sv": "Bilder",
+        "en": "Images"
+      },
+      "domain": [
+        "MY.document",
+        "MY.gathering",
+        "MY.unit",
+        "MXA.individual"
+      ],
+      "range": "MM.image",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "images"
+    },
+    {
+      "property": "MZ.publicityRestrictions",
+      "label": {
+        "en": "Publicity restrictions",
+        "fi": "Julkisuusrajoitukset",
+        "sv": "Publicitet restriktioner"
+      },
+      "domain": [
+        "MY.unit",
+        "MM.model",
+        "HRX.specimenTransaction",
+        "MM.video",
+        "MM.audio",
+        "MM.pdf",
+        "MY.collection",
+        "MY.document",
+        "MY.gathering",
+        "MY.identification",
+        "HRA.transaction",
+        "MY.typeSpecimen",
+        "MM.image"
+      ],
+      "range": "MZ.publicityRestrictionsEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 33,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "publicityRestrictions",
+      "comment": {
+        "en": "PUBLIC: all data can be published; PROTECTED: exact locality is hidden (100*100km square); PRIVATE: most of the data is hidden. Empty value means same as public."
+      }
+    },
+    {
+      "property": "MY.units",
+      "label": {
+        "sv": "Prov",
+        "en": "Specimen",
+        "fi": "Havainto"
+      },
+      "domain": [
+        "MY.gathering"
+      ],
+      "range": "MY.unit",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "units"
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

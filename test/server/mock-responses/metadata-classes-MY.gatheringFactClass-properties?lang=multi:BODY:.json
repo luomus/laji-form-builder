@@ -1,0 +1,1828 @@
+{
+  "results": [
+    {
+      "property": "MY.batCollector",
+      "label": {
+        "fi": "Vein äänitallentimen maastoon",
+        "sv": "Jag lade ljudinspelaren till terrängen",
+        "en": "I placed the sound recorder to the terrain"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.batCollectorEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "batCollector"
+    },
+    {
+      "property": "MY.binocularsUsed",
+      "label": {
+        "en": "Binoculars",
+        "fi": "Kiikarit",
+        "sv": "Kikare"
+      },
+      "domain": [
+        "MY.gatheringFactClass",
+        "MY.gathering"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "binocularsUsed"
+    },
+    {
+      "property": "MY.censusAreaHectares",
+      "label": {
+        "fi": "Laskentasektorin pinta-ala/ha",
+        "en": "Census area/ha"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "censusAreaHectares"
+    },
+    {
+      "property": "MY.documentation",
+      "label": {
+        "en": "Observation documentation",
+        "sv": "Observationsdokumentation",
+        "fi": "Havainnon dokumentointi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "documentation"
+    },
+    {
+      "property": "MY.invasiveControlOtherExpensesInEuros",
+      "label": {
+        "fi": "Arvio muista kustannuksista euroina",
+        "en": "Estimated of other expenses in euros"
+      },
+      "domain": [
+        "MY.gatheringFactClass",
+        "MY.gathering"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlOtherExpensesInEuros"
+    },
+    {
+      "property": "MY.invasiveControlWorkHours",
+      "label": {
+        "en": "Work hours spent during the control",
+        "fi": "Toimenpiteeseen käytetty työaika tunteina"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveControlWorkHours"
+    },
+    {
+      "property": "MY.lineTransectSegmentCounted",
+      "label": {
+        "en": "Biotope counted",
+        "fi": "Biotooppi laskettu",
+        "sv": "Räknat biotop"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "lineTransectSegmentCounted"
+    },
+    {
+      "property": "MY.lineTransectSegmentMetersEnd",
+      "label": {
+        "sv": "Biotopens slutmätare uppgår från början av linjen",
+        "fi": "Biotoopin loppu metreissä linjan alusta",
+        "en": "Biotope's end meter amount from the start of the line"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "lineTransectSegmentMetersEnd"
+    },
+    {
+      "property": "MY.lineTransectSegmentMetersStart",
+      "label": {
+        "fi": "Biotoopin alku metreissä linjan alusta",
+        "en": "Biotope's start meter amount from the start of the line",
+        "sv": "Biotopens startmätare beloppet från början av linjen"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "lineTransectSegmentMetersStart"
+    },
+    {
+      "property": "MY.lolifeSiteClassification",
+      "label": {
+        "sv": "Platsklassificering",
+        "en": "Site classification",
+        "fi": "Ruudun luokitus"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.lolifeSiteClassificationEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "lolifeSiteClassification"
+    },
+    {
+      "property": "MY.lolifeSiteClassificationComments",
+      "label": {
+        "sv": "Klassificeringskommentarer",
+        "en": "Classification comments",
+        "fi": "Luokituksen kommentit"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "lolifeSiteClassificationComments"
+    },
+    {
+      "property": "MY.marineArea",
+      "label": {
+        "sv": "Havsområde",
+        "fi": "Merialue",
+        "en": "Marine area"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "marineArea"
+    },
+    {
+      "property": "MY.marineMammalExpertise",
+      "label": {
+        "en": "Observer's marine mammal expertise",
+        "sv": "Observers marina däggdjur expertis",
+        "fi": "Havainnoitsijan kokemus merinisäkkäistä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "marineMammalExpertise"
+    },
+    {
+      "property": "MY.observationTools",
+      "label": {
+        "en": "Observation tools",
+        "fi": "Havainnointivälineet",
+        "sv": "Observationsverktyg"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "observationTools"
+    },
+    {
+      "property": "MY.observedAreaHectares",
+      "label": {
+        "fi": "Laskentasektorin pinta-ala/ha",
+        "en": "Observed area/ha"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "observedAreaHectares"
+    },
+    {
+      "property": "MY.pointCountHabitat",
+      "label": {
+        "fi": "Biotooppi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.pointCountHabitatEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "pointCountHabitat"
+    },
+    {
+      "property": "MY.shorelineLengthMeters",
+      "label": {
+        "fi": "Rantaviivan pituus/m",
+        "en": "Shoreline length/m"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "shorelineLengthMeters"
+    },
+    {
+      "property": "MY.spottingScopeUsed",
+      "label": {
+        "sv": "Tubkikare",
+        "en": "Spotting scope",
+        "fi": "Kaukoputki"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "MY.gathering",
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "spottingScopeUsed"
+    },
+    {
+      "property": "MY.sunniness",
+      "label": {
+        "sv": "Solsken %",
+        "en": "Sunniness %",
+        "fi": "Aurinkoisuus %"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sunniness"
+    },
+    {
+      "property": "MY.sykeButterFlyCensusWind",
+      "label": {
+        "fi": "Tuulisuus",
+        "en": "Windiness"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.sykeButterFlyCensusWindEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sykeButterFlyCensusWind"
+    },
+    {
+      "property": "MY.sykeButterFlyCensusWindEnd",
+      "label": {
+        "en": "End windiness",
+        "fi": "Tuulisuus lopetettaessa"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.sykeButterFlyCensusWindEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sykeButterFlyCensusWindEnd"
+    },
+    {
+      "property": "MY.sykeButterFlyCensusWindStart",
+      "label": {
+        "en": "Start windiness",
+        "fi": "Tuulisuus alkaessa"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.sykeButterFlyCensusWindEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sykeButterFlyCensusWindStart"
+    },
+    {
+      "property": "MY.waterbirdCensusPeriod",
+      "label": {
+        "sv": "Folkräkningsperiod",
+        "en": "Census period",
+        "fi": "Laskentakerta"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.waterbirdCensusPeriodEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "waterbirdCensusPeriod"
+    },
+    {
+      "property": "MY.waterbirdHabitat",
+      "label": {
+        "en": "Habitat",
+        "sv": "Habitat",
+        "fi": "Vesistötyyppi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "MY.waterbirdHabitatEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "waterbirdHabitat"
+    },
+    {
+      "property": "MY.ykjSquareNumber",
+      "label": {
+        "fi": "Atlasruutu",
+        "en": "Atlas grid"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ykjSquareNumber"
+    },
+    {
+      "property": "WBC.ACAFLAonAlder",
+      "label": {
+        "fi": "Urpiaisten ruokailut lepällä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ACAFLAonAlder"
+    },
+    {
+      "property": "WBC.ACAFLAonBirch",
+      "label": {
+        "fi": "Urpiaisten ruokailut koivulla"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ACAFLAonBirch"
+    },
+    {
+      "property": "WBC.ACAFLAonGround",
+      "label": {
+        "fi": "Urpiaisten ruokailut maassa"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ACAFLAonGround"
+    },
+    {
+      "property": "WBC.ACAFLAonPine",
+      "label": {
+        "fi": "Urpiaisten ruokailut männyllä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ACAFLAonPine"
+    },
+    {
+      "property": "WBC.ACAFLAonSpruce",
+      "label": {
+        "fi": "Urpiaisten ruokailut kuusella"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ACAFLAonSpruce"
+    },
+    {
+      "property": "WBC.CARSPIonAlder",
+      "label": {
+        "fi": "Vihervarpusten ruokailut lepällä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "CARSPIonAlder"
+    },
+    {
+      "property": "WBC.CARSPIonBirch",
+      "label": {
+        "fi": "Vihervarpusten ruokailut koivulla"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "CARSPIonBirch"
+    },
+    {
+      "property": "WBC.CARSPIonGround",
+      "label": {
+        "fi": "Vihervarpusten ruokailut maassa"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "CARSPIonGround"
+    },
+    {
+      "property": "WBC.CARSPIonPine",
+      "label": {
+        "": "Vihervarpusten ruokailut männyllä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "CARSPIonPine"
+    },
+    {
+      "property": "WBC.CARSPIonSpruce",
+      "label": {
+        "fi": "Vihervarpusten ruokailut kuusella"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "CARSPIonSpruce"
+    },
+    {
+      "property": "WBC.LOXIAonAlder",
+      "label": {
+        "fi": "Käpylintujen ruokailut lepällä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "LOXIAonAlder"
+    },
+    {
+      "property": "WBC.LOXIAonBirch",
+      "label": {
+        "fi": "Käpylintujen ruokailut koivulla"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "LOXIAonBirch"
+    },
+    {
+      "property": "WBC.LOXIAonGround",
+      "label": {
+        "fi": "Käpylintujen ruokailut maassa"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "LOXIAonGround"
+    },
+    {
+      "property": "WBC.LOXIAonPine",
+      "label": {
+        "fi": "Käpylintujen ruokailut männyllä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "LOXIAonPine"
+    },
+    {
+      "property": "WBC.LOXIAonSpruce",
+      "label": {
+        "fi": "Käpylintujen ruokailut kuusella"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "LOXIAonSpruce"
+    },
+    {
+      "property": "WBC.abundanceBOMGAR",
+      "label": {
+        "fi": "Tilhi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.speciesAbundanceEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "abundanceBOMGAR"
+    },
+    {
+      "property": "WBC.abundancePINENU",
+      "label": {
+        "fi": "Taviokuurna"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.speciesAbundanceEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "abundancePINENU"
+    },
+    {
+      "property": "WBC.abundanceTURPIL",
+      "label": {
+        "fi": "Räkättirastas"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.speciesAbundanceEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "abundanceTURPIL"
+    },
+    {
+      "property": "WBC.birdFeederCount",
+      "label": {
+        "fi": "Lintulautoja (kpl)"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCount"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeA",
+      "label": {
+        "fi": "Kaatopaikan lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeA"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeB",
+      "label": {
+        "fi": "Kaupunkiasutuksen lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeB"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeC",
+      "label": {
+        "fi": "Maaseutuasutuksen lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeC"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeD",
+      "label": {
+        "fi": "Pellon lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeD"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeE",
+      "label": {
+        "fi": "Metsän lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeE"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeF",
+      "label": {
+        "fi": "Lintulaudat muu biotooppi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeF"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeG",
+      "label": {
+        "fi": "Hakkuuaukean lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeG"
+    },
+    {
+      "property": "WBC.birdFeederCountBiotopeH",
+      "label": {
+        "fi": "Ruovikon lintulaudat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdFeederCountBiotopeH"
+    },
+    {
+      "property": "WBC.cloudAndRain",
+      "label": {
+        "fi": "Pilvisyys ja sade"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.cloudAndRainEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "cloudAndRain"
+    },
+    {
+      "property": "WBC.descriptionBiotopeF",
+      "label": {
+        "fi": "Mitä biotooppiin Muu (F) kuuluu"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionBiotopeF"
+    },
+    {
+      "property": "WBC.feedingStationCount",
+      "label": {
+        "fi": "Ruokintapaikkoja (kpl)"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCount"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeA",
+      "label": {
+        "": "Kaatopaikan ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeA"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeB",
+      "label": {
+        "fi": "Kaupunkiasutuksen ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeB"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeC",
+      "label": {
+        "fi": "Maaseutuasutuksen ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeC"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeD",
+      "label": {
+        "fi": "Pellon ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeD"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeE",
+      "label": {
+        "fi": "Metsän ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeE"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeF",
+      "label": {
+        "fi": "Ruokintapaikat muu biotooppi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeF"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeG",
+      "label": {
+        "fi": "Ruovikon ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeG"
+    },
+    {
+      "property": "WBC.feedingStationCountBiotopeH",
+      "label": {
+        "fi": "Ruovikon ruokintapaikat"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "feedingStationCountBiotopeH"
+    },
+    {
+      "property": "WBC.iceCover",
+      "label": {
+        "fi": "Jääpeite"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.iceCoverEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "iceCover"
+    },
+    {
+      "property": "WBC.meanTemperature",
+      "label": {
+        "fi": "Keskilämpötila (asteen tarkkuus)"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "meanTemperature"
+    },
+    {
+      "property": "WBC.observerCount",
+      "label": {
+        "fi": "Laskijoiden lukumäärä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:positiveInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "observerCount"
+    },
+    {
+      "property": "WBC.observerID",
+      "label": {
+        "fi": "Havainnoijanumero"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "observerID"
+    },
+    {
+      "property": "WBC.pineConesAtCensus",
+      "label": {
+        "fi": "Männynkäpyjä laskenta-aikaan"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.berriesAndConesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "pineConesAtCensus"
+    },
+    {
+      "property": "WBC.routeID",
+      "label": {
+        "fi": "Reitin numero"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeID"
+    },
+    {
+      "property": "WBC.routeLength",
+      "label": {
+        "fi": "Reitin pituus (m)"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLength"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeA",
+      "label": {
+        "en": "Route length dump",
+        "sv": "Ruttlängd deponi",
+        "fi": "Reitin pituus kaatopaikka"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeA"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeB",
+      "label": {
+        "fi": "Reitin pituus kaupunkiasutus",
+        "en": "Route length urban",
+        "sv": "Ruttlängd tätorter"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeB"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeC",
+      "label": {
+        "sv": "Ruttlängd landsbygden",
+        "en": "Route length countryside",
+        "fi": "Reitin pituus maaseutu"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeC"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeD",
+      "label": {
+        "sv": "Ruttlängd fält",
+        "en": "Route length field",
+        "fi": "Reitin pituus pelto"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeD"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeE",
+      "label": {
+        "en": "Route length forest",
+        "sv": "Ruttlängd skog",
+        "fi": "Reitin pituus metsä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeE"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeF",
+      "label": {
+        "en": "Route length other biotope",
+        "sv": "Ruttlängd annan biotop",
+        "fi": "Reitin pituus muu biotooppi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeF"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeG",
+      "label": {
+        "": "Ruttlängd klippa upp",
+        "en": "Route length cutting open",
+        "fi": "Reitin pituus hakkuuaukea"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeG"
+    },
+    {
+      "property": "WBC.routeLengthBiotopeH",
+      "label": {
+        "sv": "Ruttlängd reed",
+        "en": "Route length reed",
+        "fi": "Reitin pituus ruovikko"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:nonNegativeInteger",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthBiotopeH"
+    },
+    {
+      "property": "WBC.routeLengthChange",
+      "label": {
+        "fi": "Reitin muutokset (m)"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChange"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeA",
+      "label": {
+        "fi": "Reitin muutokset kaatopaikka"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeA"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeB",
+      "label": {
+        "fi": "Reitin muutokset kaupunkiasutus"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeB"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeC",
+      "label": {
+        "fi": "Reitin muutokset maaseutuasutus"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeC"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeD",
+      "label": {
+        "fi": "Reitin muutokset pelto"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeD"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeE",
+      "label": {
+        "fi": "Reitin muutokset metsä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeE"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeF",
+      "label": {
+        "fi": "Reitin muutokset muu biotooppi"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeF"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeG",
+      "label": {
+        "fi": "Reitin muutokset hakkuuaukea"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeG"
+    },
+    {
+      "property": "WBC.routeLengthChangeBiotopeH",
+      "label": {
+        "fi": "Reitin muutokset ruovikko"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "routeLengthChangeBiotopeH"
+    },
+    {
+      "property": "WBC.snowAndIceOnTrees",
+      "label": {
+        "fi": "Puissa oleva lumi ja jääkarsta"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.snowAndIceOnTreesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "snowAndIceOnTrees"
+    },
+    {
+      "property": "WBC.snowCover",
+      "label": {
+        "fi": "Lumipeite"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.snowCoverEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "snowCover"
+    },
+    {
+      "property": "WBC.sorbusBerriesAtCensus",
+      "label": {
+        "fi": "Pihlajanmarjoja laskenta-aikaan"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.berriesAndConesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sorbusBerriesAtCensus"
+    },
+    {
+      "property": "WBC.sorbusBerriesEarlyFall",
+      "label": {
+        "fi": "Pihlajanmarjoja alkusyksyllä"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.berriesAndConesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sorbusBerriesEarlyFall"
+    },
+    {
+      "property": "WBC.spruceConesAtCensus",
+      "label": {
+        "fi": "Kuusenkäpyjä laskenta-aikaan"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.berriesAndConesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "spruceConesAtCensus"
+    },
+    {
+      "property": "WBC.typeOfSnowCover",
+      "label": {
+        "fi": "Maassa olevan lumen laatu"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.typeOfSnowCoverEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "typeOfSnowCover"
+    },
+    {
+      "property": "WBC.visibility",
+      "label": {
+        "fi": "Näkyvyys"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.visibilityEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "visibility"
+    },
+    {
+      "property": "WBC.waterbodies",
+      "label": {
+        "fi": "Vesistöt"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.waterbodiesEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "waterbodies"
+    },
+    {
+      "property": "WBC.wayOfTravel",
+      "label": {
+        "fi": "Kulkutapa"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.wayOfTravelEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "wayOfTravel"
+    },
+    {
+      "property": "WBC.wayOfTravelNotes",
+      "label": {
+        "fi": "Kulkutavan kuvaus"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "wayOfTravelNotes"
+    },
+    {
+      "property": "WBC.wind",
+      "label": {
+        "fi": "Tuuli"
+      },
+      "domain": [
+        "MY.gatheringFactClass"
+      ],
+      "range": "WBC.windEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "wind"
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

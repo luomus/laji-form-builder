@@ -6,7 +6,7 @@ import UsesMemoization from "./uses-memoization";
 export default class MetadataService extends UsesMemoization {
 	private apiClient: ApiClient;
 	private lang: Lang;
-	private allRanges: Record<string, Range[]> | undefined;
+	private allAlts: Record<string, Range[]> | undefined;
 
 	constructor(apiClient: ApiClient, lang: Lang) {
 		super();
@@ -16,7 +16,7 @@ export default class MetadataService extends UsesMemoization {
 
 	flush() {
 		super.flush();
-		this.allRanges = undefined;
+		this.allAlts = undefined;
 	}
 
 	setLang(lang: Lang) {
@@ -30,7 +30,7 @@ export default class MetadataService extends UsesMemoization {
 	getPropertiesForEmbeddedProperty = this.memoize(
 		async (property: string, lang = "multi", signal?: AbortSignal): Promise<Property[]> => 
 			(await this.apiClient.fetchJSON(
-				`/metadata/classes/${unprefixProp(property)}/properties`,
+				`/metadata/classes/${property}/properties`,
 				{lang},
 				{signal})
 			).results as Property[]
@@ -38,7 +38,7 @@ export default class MetadataService extends UsesMemoization {
 
 	async getProperties(fields: Field[], property: Property, signal?: AbortSignal) {
 		return fields
-			? (await this.getPropertiesForEmbeddedProperty(property.range[0], undefined, signal))
+			? (await this.getPropertiesForEmbeddedProperty(property.range, undefined, signal))
 				.reduce<Record<string, Property>>((propMap, prop) => {
 					if (fields.some(f => unprefixProp(prop.property) === unprefixProp(f.name))) {
 						propMap[unprefixProp(prop.property)] = prop;
@@ -48,34 +48,34 @@ export default class MetadataService extends UsesMemoization {
 			: {};
 	}
 
-	getRange = this.memoize((property: string): Promise<Range[]> =>
-		this.allRanges && Promise.resolve(this.allRanges[property])
+	getAlt = this.memoize((property: string): Promise<Range[]> =>
+		this.allAlts && Promise.resolve(this.allAlts[property])
 		|| this.apiClient.fetchJSON(
 			// eslint-disable-next-line max-len
-			`/metadata/ranges/${unprefixProp(property)}`,
+			`/metadata/alts/${property}`,
 			{lang: "multi"}
 		)
 	)
 
-	getAllRanges = async () => {
-		if (this.allRanges) {
-			return this.allRanges;
+	getAllAlts = async () => {
+		if (this.allAlts) {
+			return this.allAlts;
 		}
-		const ranges = await (
-			this.apiClient.fetchJSON("/metadata/ranges", {lang: "multi"}) as Promise<Record<string, Range[]>>
+		const alts = await (
+			this.apiClient.fetchJSON("/metadata/alts", {lang: "multi"}) as Promise<Record<string, Range[]>>
 		);
-		this.allRanges = ranges;
-		return ranges;
+		this.allAlts = alts;
+		return alts;
 	}
 
-	isAltRange = async (range: string) => !!(await this.getAllRanges())[range];
+	isAltRange = async (range: string) => !!(await this.getAllAlts())[range];
 
 	getJSONSchemaFromProperty<T extends JSONSchema>(property: Property): Promise<T> {
 		const mapRangeToSchema = async (property: Property): Promise<T> => {
-			const range = property.range[0];
-			const isRange = await this.isAltRange(range);
-			if (isRange) {
-				const _enums = await this.getRange(range);
+			const range = property.range;
+			const isAlt = await this.isAltRange(range);
+			if (isAlt) {
+				const _enums = await this.getAlt(range);
 				const empty = property.minOccurs === "1" ? [] : [""];
 				let enums = [...empty], enumNames = [...empty];
 				for (const e of _enums) {
@@ -138,7 +138,7 @@ export default class MetadataService extends UsesMemoization {
 				: schema;
 
 		const mapUniqueItemsForUnboundedAlt = async (schema: T, {range, maxOccurs}: Property) =>
-			(await this.isAltRange(range[0])) && maxOccurs === "unbounded"
+			(await this.isAltRange(range)) && maxOccurs === "unbounded"
 				? {...schema, uniqueItems: true}
 				: schema;
 

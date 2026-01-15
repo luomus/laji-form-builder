@@ -29,7 +29,6 @@ test.describe("Builder", () => {
 		test("builds form", async () => {
 			await builder.create.json.$input.fill(formJSON);
 			await builder.create.json.$submit.click();
-			await page.pause();
 			await expect(builder.formPreview.$form).toBeVisible();
 		});
 	});

@@ -1,0 +1,2448 @@
+{
+  "results": [
+    {
+      "property": "HBE.invasiveSpeciesMainGroup",
+      "label": {
+        "en": "Main portal group"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "HBE.invasiveSpeciesMainGroups",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveSpeciesMainGroup"
+    },
+    {
+      "property": "MKV.primaryHabitat",
+      "label": {
+        "fi": "Elinympäristö, ensisijainen",
+        "en": "Primary habitat",
+        "sv": "Primära habitat"
+      },
+      "domain": [
+        "MKV.iucnRedListEvaluation",
+        "MX.taxon"
+      ],
+      "range": "MKV.habitatObject",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "primaryHabitat",
+      "comment": {
+        "fi": "<p>Lisämerkinnät:</p>\n<ul> \n<li><b>v - vanhat metsät</b> (myös yksittäiset vanhat puut ja runsaasti lahopuuta sisältävät nuoremmat metsät)</li>\n<li><b>h - harjumetsät</b>, myös puoliavoimet</li>\n<li><b>p - metsäpaloalueet</b> ja muut luontaisen sukkession alkuvaiheen metsät</li>\n<li><b>j - jalopuuesiintymä</b></li>\n<li><b>pa - paahteinen</b></li>\n<li><b>va - varjoinen</b></li>\n<li><b>ra - sijaitsee rannalla</b> (lajin esiintyminen on sidoksissa rannan läheisyyteen)</li>\n<li><b>ka - karut kalliot ja kivikot</b></li>\n<li><b>ke - keskiravinteiset kalliot ja kivikot</b></li>\n<li><b>ca - kalkkivaikutteinen</b></li>\n</ul>"
+      }
+    },
+    {
+      "property": "MKV.secondaryHabitat",
+      "label": {
+        "fi": "Elinympäristö, muu",
+        "sv": "Sekundära habitat",
+        "en": "Secondary habitat"
+      },
+      "domain": [
+        "MX.taxon",
+        "MKV.iucnRedListEvaluation"
+      ],
+      "range": "MKV.habitatObject",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "secondaryHabitat"
+    },
+    {
+      "property": "MX.additionalID",
+      "label": {
+        "fi": "Tunnisteet muissa järjestelmissä",
+        "sv": "Ytterligare identifierare",
+        "en": "Additional identifiers"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "additionalID",
+      "comment": {
+        "en": "Identifier of this taxon concept/name in other systems/sources"
+      }
+    },
+    {
+      "property": "MX.algalPartnerOfLichen",
+      "label": {
+        "sv": "Algkomponent",
+        "fi": "Leväosakas",
+        "en": "Algal partner"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "algalPartnerOfLichen",
+      "comment": {
+        "fi": "Leväosakkaiden kuvaus"
+      }
+    },
+    {
+      "property": "MX.alsoKnownAs",
+      "label": {
+        "fi": "AKA-nimet",
+        "sv": "AKA namn",
+        "en": "AKA names"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "alsoKnownAs",
+      "comment": {
+        "fi": "Havainnoissa käytettyjä nimiä, joita linkitetään taksonomiaan. (Esim. erityistapauksissa käytetyt nimet sekä epämuodolliset ja slanginimet.)",
+        "sv": "Namn som används i observationer som är kopplade till taxonomi. (Till exempel namn som används i speciella fall och informella och slangnamn.)",
+        "en": "Names used in observations that are linked to taxonomy. (Eg names used in special cases and informal and slang names.)"
+      }
+    },
+    {
+      "property": "MX.alternativeVernacularName",
+      "label": {
+        "en": "Other common names",
+        "sv": "Andra allmänspråkliga namn",
+        "fi": "Muut yleiskieliset nimet"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": true,
+      "shortName": "alternativeVernacularName",
+      "comment": {
+        "fi": "Yleisesti käytössä olevat nimet. (Esim. tuoreessa kirjallisuudessa käytettävät nimet.)",
+        "sv": "Vanligt förekommande namn. (Till exempel namn som används i ny litteratur.)",
+        "en": "Commonly used names. (Eg names used in recent literature.)"
+      }
+    },
+    {
+      "property": "MX.autoNonWild",
+      "label": {
+        "en": "Automatically set occurrences as non-wild"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "autoNonWild"
+    },
+    {
+      "property": "MX.behaviour",
+      "label": {
+        "sv": "Beteende",
+        "en": "Behaviour",
+        "fi": "Elintavat"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "behaviour",
+      "comment": {
+        "fi": "Lajin elintavat"
+      }
+    },
+    {
+      "property": "MX.birdlifeCode",
+      "label": {
+        "fi": "BirdLifen lajikoodi",
+        "sv": "BirdLife koden",
+        "en": "BirdLife code"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdlifeCode"
+    },
+    {
+      "property": "MX.breedingSecureLevel",
+      "label": {
+        "sv": "Skyddsnivå medan häckningstid",
+        "fi": "Salaustaso pesimäaikaan",
+        "en": "Secure level during breeding season"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.secureLevels",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "breedingSecureLevel"
+    },
+    {
+      "property": "MX.circumscription",
+      "label": {
+        "en": "Circumscription",
+        "fi": "Taksonirajaus",
+        "sv": "Circumscription"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MC.taxonConcept",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "circumscription"
+    },
+    {
+      "property": "MX.colloquialVernacularName",
+      "label": {
+        "en": "Colloquial name",
+        "fi": "Epämuodollinen yleisesti käytetty nimi",
+        "sv": "Informellt vanligt namn"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": true,
+      "shortName": "colloquialVernacularName",
+      "comment": {
+        "sv": "Informellt men vanligt förekommande namn. Ett namn som är föråldrat, inofficiellt eller inte rekommenderas, men som fortfarande används ofta för denna taxon.",
+        "fi": "Epämuodollinen mutta yleisesti käytetty nimi. Nimi, joka on vanhentunut, virallistamaton tai jonka käyttöä ei suositella, mutta jota kuitenkin käytetään tästä taksonista yleisesti.",
+        "en": "Informal but commonly used name. Name that is outdated, unofficial or non-recommended, but which is still commonly used for this taxon."
+      }
+    },
+    {
+      "property": "MX.conservationStatusDescriptionFinland",
+      "label": {
+        "fi": "Uhanalaisuus Suomessa",
+        "en": "Conservation status in Finland",
+        "sv": "Bevarande i Finland"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "conservationStatusDescriptionFinland"
+    },
+    {
+      "property": "MX.conservationStatusDescriptionWorld",
+      "label": {
+        "fi": "Uhanalaisuus maailmalla",
+        "en": "Conservation status globally",
+        "sv": "Bevarande i världen"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "conservationStatusDescriptionWorld"
+    },
+    {
+      "property": "MX.cultivationText",
+      "label": {
+        "fi": "Viljely",
+        "en": "Cultivation",
+        "sv": "Odling"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "cultivationText"
+    },
+    {
+      "property": "MX.customReportFormLink",
+      "label": {
+        "fi": "Linkki havaintolomakkeeseen",
+        "en": "Custom observation report from link",
+        "sv": "Observationsrapport från länk"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "customReportFormLink"
+    },
+    {
+      "property": "MX.descriptionCone",
+      "label": {
+        "fi": "Käpy",
+        "sv": "Kotte",
+        "en": "Cone"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionCone",
+      "comment": {
+        "fi": "Käpyjen kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionFlower",
+      "label": {
+        "fi": "Kukka",
+        "en": "Flower",
+        "sv": "Blomma"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionFlower",
+      "comment": {
+        "fi": "Kukan kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionFruitAndSeed",
+      "label": {
+        "fi": "Hedelmä ja siemen",
+        "en": "Fruit and seed",
+        "sv": "Frukt och frö"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionFruitAndSeed",
+      "comment": {
+        "fi": "Hedelmän/siemenen -kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionFruitbody",
+      "label": {
+        "sv": "Fruktkropp",
+        "en": "Fruitbody",
+        "fi": "Itiöemä"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionFruitbody",
+      "comment": {
+        "fi": "Itiöemän kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionHostParasite",
+      "label": {
+        "en": "Host-parasite relationships",
+        "sv": "Värd-parasit interaktioner",
+        "fi": "Isäntä-loissuhteet"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionHostParasite"
+    },
+    {
+      "property": "MX.descriptionLeaf",
+      "label": {
+        "en": "Leaf",
+        "fi": "Lehti",
+        "sv": "Blad"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionLeaf",
+      "comment": {
+        "fi": "Lehden kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionMicroscopicIdentification",
+      "label": {
+        "en": "Microscopic identification",
+        "sv": "Mikroskopiska kännetecken",
+        "fi": "Mikroskooppiset tuntomerkit"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionMicroscopicIdentification",
+      "comment": {
+        "fi": "Lajin mikroskooppiset tuntomerkit"
+      }
+    },
+    {
+      "property": "MX.descriptionOrganismSize",
+      "label": {
+        "fi": "Koko",
+        "en": "Size",
+        "sv": "Storlek"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionOrganismSize",
+      "comment": {
+        "fi": "Eliön koon kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionReferences",
+      "label": {
+        "en": "References",
+        "sv": "Referenser",
+        "fi": "Viitteet"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionReferences"
+    },
+    {
+      "property": "MX.descriptionRoot",
+      "label": {
+        "fi": "Juuri",
+        "en": "Root",
+        "sv": "Rot"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionRoot"
+    },
+    {
+      "property": "MX.descriptionSporangiumAndAsexualReproduction",
+      "label": {
+        "fi": "Itiöpesäkkeet",
+        "en": "Sporangium",
+        "sv": "Sporangium"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionSporangiumAndAsexualReproduction",
+      "comment": {
+        "fi": "Itiöpesäkkeet ja suvuton lisääntyminen"
+      }
+    },
+    {
+      "property": "MX.descriptionSpore",
+      "label": {
+        "sv": "Sporer",
+        "en": "Spores",
+        "fi": "Itiöt"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionSpore",
+      "comment": {
+        "fi": "Itiöiden kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionStem",
+      "label": {
+        "en": "Stem",
+        "fi": "Varsi",
+        "sv": "Stam"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionStem",
+      "comment": {
+        "fi": "Kasvin varren kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionText",
+      "label": {
+        "fi": "Yleiskuvaus",
+        "sv": "Beskrivning",
+        "en": "Description"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionText"
+    },
+    {
+      "property": "MX.descriptionThallus",
+      "label": {
+        "fi": "Sekovarsi",
+        "en": "Thallus",
+        "sv": "Thallus"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionThallus",
+      "comment": {
+        "fi": "Sekovarren kuvaus"
+      }
+    },
+    {
+      "property": "MX.descriptionToxicity",
+      "label": {
+        "sv": "Giftighet",
+        "fi": "Myrkyllisyys",
+        "en": "Toxicity"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "descriptionToxicity"
+    },
+    {
+      "property": "MX.distributionFinland",
+      "label": {
+        "sv": "Utbredning i Finland",
+        "fi": "Levinneisyys Suomessa",
+        "en": "Distribution in Finland"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "distributionFinland"
+    },
+    {
+      "property": "MX.distributionMapFinland",
+      "label": {
+        "sv": "Karta över utbredning i Finland",
+        "fi": "Kartta levinneisyydestä Suomessa",
+        "en": "Map of distribution in Finland"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "distributionMapFinland"
+    },
+    {
+      "property": "MX.ecology",
+      "label": {
+        "en": "Ecological and economic importance",
+        "sv": "Ekologisk och ekonomisk betydelse",
+        "fi": "Ekologinen ja taloudellinen merkitys"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ecology",
+      "comment": {
+        "fi": "Lajin ekologian sekalainen kuvaus"
+      }
+    },
+    {
+      "property": "MX.economicUseText",
+      "label": {
+        "en": "Use",
+        "sv": "Användning",
+        "fi": "Käyttö"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "economicUseText"
+    },
+    {
+      "property": "MX.etymologyText",
+      "label": {
+        "sv": "Etymologi",
+        "en": "Etymology of names",
+        "fi": "Nimien alkuperä"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "etymologyText"
+    },
+    {
+      "property": "MX.euringCode",
+      "label": {
+        "fi": "EURING-lajikoodi",
+        "en": "EURING code",
+        "sv": "EURING koden"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "euringCode"
+    },
+    {
+      "property": "MX.euringNumber",
+      "label": {
+        "fi": "EURING-lajinumero",
+        "en": "EURING number",
+        "sv": "EURING nummer"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:int",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "euringNumber"
+    },
+    {
+      "property": "MX.externalLinkURL",
+      "label": {
+        "sv": "Länk till extern sida",
+        "en": "Link to external information page",
+        "fi": "Linkki ulkopuoliselle sivustolle"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "externalLinkURL"
+    },
+    {
+      "property": "MX.finnish",
+      "label": {
+        "en": "Finnish taxon",
+        "fi": "Suomalainen taksoni"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "finnish"
+    },
+    {
+      "property": "MX.frequencyScoringPoints",
+      "label": {
+        "en": "Frequency scoring points",
+        "sv": "Frekvens",
+        "fi": "Frekvenssipisteet"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "frequencyScoringPoints"
+    },
+    {
+      "property": "MX.growthFormAndGrowthHabit",
+      "label": {
+        "fi": "Kasvumuoto",
+        "sv": "Livsform",
+        "en": "Growing form"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "growthFormAndGrowthHabit"
+    },
+    {
+      "property": "MX.habitat",
+      "label": {
+        "fi": "Elinympäristö",
+        "en": "Habitat",
+        "sv": "Habitat"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitat",
+      "comment": {
+        "fi": "Lajin elinympäristö"
+      }
+    },
+    {
+      "property": "MX.habitatSubstrate",
+      "label": {
+        "en": "Substrate",
+        "fi": "Kasvualusta",
+        "sv": "Växtunderlag"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitatSubstrate",
+      "comment": {
+        "fi": "Lajin kasvialusta"
+      }
+    },
+    {
+      "property": "MX.hasAdminStatus",
+      "label": {
+        "sv": "Administrativ status",
+        "en": "Administrative status",
+        "fi": "Hallinnollinen asema"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.adminStatusEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasAdminStatus"
+    },
+    {
+      "property": "MX.hasAlternativeName",
+      "label": {
+        "sv": "Alternativt namn",
+        "en": "Alternative name",
+        "fi": "Vaihtoehtoinen nimi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasAlternativeName"
+    },
+    {
+      "property": "MX.hasBasionym",
+      "label": {
+        "en": "Basionym / Original combination",
+        "fi": "Basionyymi / nimen kantamuoto",
+        "sv": "Basionym"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasBasionym"
+    },
+    {
+      "property": "MX.hasHeterotypicSynonym",
+      "label": {
+        "fi": "Heterotyyppinen synonyymi",
+        "en": "Heterotypic synonym",
+        "sv": "Heterotypisk synonym"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasHeterotypicSynonym"
+    },
+    {
+      "property": "MX.hasHomotypicSynonym",
+      "label": {
+        "sv": "Homotypisk synonym",
+        "en": "Homotypic synonym",
+        "fi": "Homotyyppinen synonyymi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasHomotypicSynonym"
+    },
+    {
+      "property": "MX.hasMisappliedName",
+      "label": {
+        "en": "Misapplied name",
+        "sv": "Felanvändning",
+        "fi": "Väärinkäytetty nimi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasMisappliedName"
+    },
+    {
+      "property": "MX.hasMisspelledName",
+      "label": {
+        "sv": "Felstavad namn",
+        "fi": "Väärinkirjoitettu nimi",
+        "en": "Misspelled name"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasMisspelledName"
+    },
+    {
+      "property": "MX.hasObjectiveSynonym",
+      "label": {
+        "sv": "Objektiv synonym",
+        "en": "Objective synonym",
+        "fi": "Objektiivinen synonyymi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasObjectiveSynonym"
+    },
+    {
+      "property": "MX.hasOrthographicVariant",
+      "label": {
+        "sv": "Ortografisk variant",
+        "fi": "Ortografinen variantti",
+        "en": "Orthographic variant"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasOrthographicVariant"
+    },
+    {
+      "property": "MX.hasSubjectiveSynonym",
+      "label": {
+        "en": "Subjective synonym",
+        "sv": "Subjektiv synonym",
+        "fi": "Subjektiivinen synonyymi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasSubjectiveSynonym"
+    },
+    {
+      "property": "MX.hasSynonym",
+      "label": {
+        "en": "Synonym",
+        "sv": "Synonym",
+        "fi": "Synonyymi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasSynonym"
+    },
+    {
+      "property": "MX.hasUncertainSynonym",
+      "label": {
+        "fi": "Epävarma synonyymi",
+        "sv": "Osäker synonym",
+        "en": "Uncertain synonym"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hasUncertainSynonym"
+    },
+    {
+      "property": "MX.hiddenTaxon",
+      "label": {
+        "sv": "Dold taxon?",
+        "fi": "Piilotettu taksoni?",
+        "en": "Hidden?"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "hiddenTaxon",
+      "comment": {
+        "en": "Should this taxon be hidden when showing contents of a checklist (publicly)?"
+      }
+    },
+    {
+      "property": "MX.identificationText",
+      "label": {
+        "fi": "Tunnistaminen",
+        "en": "Identification",
+        "sv": "Bestämning"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "identificationText"
+    },
+    {
+      "property": "MX.ingressText",
+      "label": {
+        "fi": "Ingressi",
+        "sv": "Ingress",
+        "en": "Ingress"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "ingressText"
+    },
+    {
+      "property": "MX.invasiveCitizenActionsText",
+      "label": {
+        "en": "What can I do?",
+        "sv": "Vad kan jag göra?",
+        "fi": "Mitä minä voin tehdä?"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveCitizenActionsText"
+    },
+    {
+      "property": "MX.invasiveEffectText",
+      "label": {
+        "sv": "Olägenheter",
+        "en": "Harmfulness",
+        "fi": "Haitat"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveEffectText"
+    },
+    {
+      "property": "MX.invasivePreventionMethodsText",
+      "label": {
+        "fi": "Torjuntakeinot",
+        "en": "Prevention methods",
+        "sv": "Bekämpningsmetoder"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasivePreventionMethodsText"
+    },
+    {
+      "property": "MX.invasiveSpeciesCategory",
+      "label": {
+        "fi": "Haitallisuuskategoria",
+        "en": "Invasive category",
+        "sv": "Skadlighetskategori"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.invasiveSpeciesCategories",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveSpeciesCategory"
+    },
+    {
+      "property": "MX.invasiveSpeciesClassificationDescription",
+      "label": {
+        "sv": "Klassificering",
+        "en": "Classification",
+        "fi": "Vieraslajiluokittelusta"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveSpeciesClassificationDescription"
+    },
+    {
+      "property": "MX.invasiveSpeciesEarlyWarning",
+      "label": {
+        "en": "Send observation warning"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveSpeciesEarlyWarning"
+    },
+    {
+      "property": "MX.invasiveSpeciesEstablishment",
+      "label": {
+        "sv": "Etablering",
+        "en": "Establishment",
+        "fi": "Vakiintuneisuus"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.invasiveSpeciesEstablishmentStatuses",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "invasiveSpeciesEstablishment"
+    },
+    {
+      "property": "MX.isPartOf",
+      "label": {
+        "fi": "Emotaksoni",
+        "sv": "Modertaxon",
+        "en": "Parent taxon"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "isPartOf"
+    },
+    {
+      "property": "MX.isPartOfInformalTaxonGroup",
+      "label": {
+        "en": "Informal group",
+        "fi": "Muotoryhmä",
+        "sv": "Organismgrupp"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MVL.informalTaxonGroup",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "isPartOfInformalTaxonGroup"
+    },
+    {
+      "property": "MX.isPartOfSet",
+      "label": {
+        "fi": "Kuluu sekalaiseen kokoelmaan taksoneita",
+        "en": "Is part of a set of various taxa"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxonSetEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "isPartOfSet"
+    },
+    {
+      "property": "MX.lifeCycle",
+      "label": {
+        "fi": "Elinkierto",
+        "en": "Life cycle",
+        "sv": "Livscykel"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "lifeCycle",
+      "comment": {
+        "fi": "Eliön elinkierto"
+      }
+    },
+    {
+      "property": "MX.management",
+      "label": {
+        "sv": "Instruktioner för hantering av habitat",
+        "fi": "Elinympäristön hoito-ohjeita",
+        "en": "Instructions for habitat management"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "management"
+    },
+    {
+      "property": "MX.miscText",
+      "label": {
+        "fi": "Lisätiedot",
+        "en": "Additional information",
+        "sv": "Tilläggsuppgifter"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "miscText"
+    },
+    {
+      "property": "MX.nameAccordingTo",
+      "label": {
+        "en": "Checklist",
+        "fi": "Lajiluettelo",
+        "sv": "Artlista"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MR.checklist",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 4,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "nameAccordingTo"
+    },
+    {
+      "property": "MX.nameDecidedBy",
+      "label": {
+        "en": "Name decided by",
+        "fi": "Päätös nimestä",
+        "sv": "Namn beslutat av"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "nameDecidedBy"
+    },
+    {
+      "property": "MX.nameDecidedDate",
+      "label": {
+        "fi": "Päätöspvm",
+        "en": "Date of decision",
+        "sv": "Datum"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:date",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "nameDecidedDate"
+    },
+    {
+      "property": "MX.naturaAreaSecureLevel",
+      "label": {
+        "en": "Secure level in Natura-area",
+        "sv": "Skyddsnivån i Natura-område",
+        "fi": "Salaustaso Natura-alueella"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.secureLevels",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "naturaAreaSecureLevel"
+    },
+    {
+      "property": "MX.nestSiteSecureLevel",
+      "label": {
+        "fi": "Salaustaso pesäpaikalle",
+        "sv": "Skyddsnivån för häckningsplats",
+        "en": "Secure level for nest site"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.secureLevels",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "nestSiteSecureLevel"
+    },
+    {
+      "property": "MX.notes",
+      "label": {
+        "en": "Notes on taxonomy",
+        "sv": "Anmärkningar om taxonomi",
+        "fi": "Huomautuksia taksonomiasta"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "notes"
+    },
+    {
+      "property": "MX.obsoleteVernacularName",
+      "label": {
+        "en": "Obsolete vernacular names",
+        "sv": "Föråldrade folkspråkliga namn",
+        "fi": "Aiemmin käytössä olleet yleiskieliset nimet"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": true,
+      "shortName": "obsoleteVernacularName",
+      "comment": {
+        "fi": "Ei-suositellut ja ei enää (pitkään aikaan) yleisesti käytössä olleet nimet. (Esim. 1900-luvulla kirjallisuudessa käytetyt nimet, tai nimet, jotka siirretty toiselle taksonille.)",
+        "sv": "Namn som rekommenderas inte och används inte längre (länge). (Till exempel namn som användes i litteraturen under 1900-talet eller namn som överförts till en annan taxon.)",
+        "en": "Names not recommended and no longer (for a long time) commonly used. (For example, names used in the literature in the 20th century, or names transferred to another taxon."
+      }
+    },
+    {
+      "property": "MX.occurrenceInFinland",
+      "label": {
+        "sv": "Förekomsten i Finland",
+        "fi": "Esiintyminen Suomessa",
+        "en": "Occurrence in Finland"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.occurrenceInFinlandEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 9,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "occurrenceInFinland"
+    },
+    {
+      "property": "MX.occurrenceInFinlandPublication",
+      "label": {
+        "sv": "Publikationer av förekomsten",
+        "en": "Publication of occurrence",
+        "fi": "Julkaisu esiintymisestä"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MP.publication",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "occurrenceInFinlandPublication"
+    },
+    {
+      "property": "MX.occurrenceInFinlandSpecimenURI",
+      "label": {
+        "sv": "Prov URI-identifierare av förekomst i Finland",
+        "en": "Specimen URI Identifier of occurrence in Finland",
+        "fi": "Näytteen tunniste johon esiintyminen Suomessa perustuu"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "occurrenceInFinlandSpecimenURI"
+    },
+    {
+      "property": "MX.originAndDistributionText",
+      "label": {
+        "fi": "Alkuperä ja yleislevinneisyys",
+        "sv": "Ursprung och helhetsutbredning",
+        "en": "Origin and general distribution"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "originAndDistributionText"
+    },
+    {
+      "property": "MX.originalDescription",
+      "label": {
+        "en": "Nomenclatural reference",
+        "fi": "Alkuperäisen lajikuvauksen viite"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MP.publication",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "originalDescription"
+    },
+    {
+      "property": "MX.originalPublication",
+      "label": {
+        "fi": "Taksonomian lähde",
+        "en": "Source of taxonomy",
+        "sv": "Publikationer av taxonomi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MP.publication",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "originalPublication"
+    },
+    {
+      "property": "MX.overridingTargetName",
+      "label": {
+        "en": "Observations reported using this name will be linked to this taxon"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "overridingTargetName"
+    },
+    {
+      "property": "MX.privateNotes",
+      "label": {
+        "sv": "Dolda kommentarer",
+        "en": "Private notes",
+        "fi": "Ei-julkiset kommentit"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "privateNotes"
+    },
+    {
+      "property": "MX.productionText",
+      "label": {
+        "en": "Production",
+        "sv": "Produktion",
+        "fi": "Tuotanto"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "productionText"
+    },
+    {
+      "property": "MX.redListStatus2000Finland",
+      "label": {
+        "fi": "Punaisen kirjan 2000 uhanalaisuusluokitus",
+        "en": "Red List 2000 IUCN category",
+        "sv": "Rödlistning 2000 klassificering"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.iucnStatuses",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "redListStatus2000Finland"
+    },
+    {
+      "property": "MX.redListStatus2010Finland",
+      "label": {
+        "fi": "Punaisen kirjan 2010 uhanalaisuusluokitus",
+        "en": "Red List 2010 IUCN category",
+        "sv": "Rödlistning 2010 klassificering"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.iucnStatuses",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "redListStatus2010Finland"
+    },
+    {
+      "property": "MX.redListStatus2015Finland",
+      "label": {
+        "sv": "Rödlistning 2015 klassificering",
+        "fi": "Punaisen kirjan 2015 uhanalaisuusluokitus",
+        "en": "Red List 2015 IUCN category"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.iucnStatuses",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "redListStatus2015Finland"
+    },
+    {
+      "property": "MX.redListStatus2019Finland",
+      "label": {
+        "en": "Red List 2019 IUCN category",
+        "sv": "Rödlistning 2019 klassificering",
+        "fi": "Punaisen kirjan 2019 uhanalaisuusluokitus"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.iucnStatuses",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "redListStatus2019Finland"
+    },
+    {
+      "property": "MX.reproduction",
+      "label": {
+        "en": "Reproduction",
+        "fi": "Lisääntyminen",
+        "sv": "Reproduktion"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "reproduction"
+    },
+    {
+      "property": "MX.reproductionFloweringTime",
+      "label": {
+        "en": "Flowering time",
+        "fi": "Kukinta-aika",
+        "sv": "Blomningstid"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "reproductionFloweringTime",
+      "comment": {
+        "fi": "Kukinta-aika"
+      }
+    },
+    {
+      "property": "MX.reproductionPollination",
+      "label": {
+        "en": "Pollination",
+        "fi": "Pölytys",
+        "sv": "Pollination"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "reproductionPollination",
+      "comment": {
+        "fi": "Pölytyksen kuvaus"
+      }
+    },
+    {
+      "property": "MX.scientificName",
+      "label": {
+        "en": "Scientific name",
+        "fi": "Tieteellinen nimi",
+        "sv": "Vetenskapligt namn"
+      },
+      "domain": [
+        "TDFX.traitSubject",
+        "TDFX.traitSearchTaxon",
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "scientificName"
+    },
+    {
+      "property": "MX.scientificNameAuthorship",
+      "label": {
+        "sv": "Auktor",
+        "en": "Authors",
+        "fi": "Auktorit"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "scientificNameAuthorship"
+    },
+    {
+      "property": "MX.secureLevel",
+      "label": {
+        "en": "Secure level",
+        "fi": "Salaustaso",
+        "sv": "Skyddsnivå"
+      },
+      "domain": [
+        "MY.collection",
+        "MX.taxon",
+        "MY.document"
+      ],
+      "range": "MX.secureLevels",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 33,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "secureLevel",
+      "comment": {
+        "en": "Secure level (salaus-/karkeistustaso) for the data"
+      }
+    },
+    {
+      "property": "MX.speciesCardAuthors",
+      "label": {
+        "sv": "Författare av artbeskrivningen",
+        "fi": "Kuvaustekstin laatijat",
+        "en": "Description text authors"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "speciesCardAuthors"
+    },
+    {
+      "property": "MX.stopInformalTaxonGroupInheritance",
+      "label": {
+        "en": "Stop informal taxon group inheritance"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "stopInformalTaxonGroupInheritance"
+    },
+    {
+      "property": "MX.stopOccurrenceInFinlandPublicationInheritance",
+      "label": {
+        "fi": "Stop occurrence in Finland publication inheritance"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "stopOccurrenceInFinlandPublicationInheritance"
+    },
+    {
+      "property": "MX.stopOriginalPublicationInheritance",
+      "label": {
+        "en": "Stop original publication inheritance"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "stopOriginalPublicationInheritance"
+    },
+    {
+      "property": "MX.targetName",
+      "label": {
+        "en": "Target name in observations",
+        "sv": "Artnamn i obsar",
+        "fi": "Havaintokohteen nimi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "targetName"
+    },
+    {
+      "property": "MX.taxonEditor",
+      "label": {
+        "sv": "Taxonomins tekniska redaktör",
+        "fi": "Taksonomian tekniset ylläpitäjät",
+        "en": "Checklist editors"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 14,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonEditor"
+    },
+    {
+      "property": "MX.taxonExpert",
+      "label": {
+        "en": "Experts",
+        "fi": "Asiantuntijat",
+        "sv": "Experter"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 13,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonExpert"
+    },
+    {
+      "property": "MX.taxonRank",
+      "label": {
+        "sv": "Taxonomisk rang",
+        "fi": "Taksonominen taso",
+        "en": "Taxonomic rank"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.taxonRankEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 0,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonRank"
+    },
+    {
+      "property": "MX.taxonomyText",
+      "label": {
+        "fi": "Taksonomia",
+        "en": "Taxonomy",
+        "sv": "Taxonomi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonomyText"
+    },
+    {
+      "property": "MX.tradeName",
+      "label": {
+        "en": "Trade name",
+        "sv": "Handelsnamn",
+        "fi": "Kauppanimi"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "tradeName"
+    },
+    {
+      "property": "MX.typeOfOccurrenceInFinland",
+      "label": {
+        "fi": "Esiintymisen tila",
+        "en": "Type of occurrence",
+        "sv": "Typ av förekomst"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.typeOfOccurrenceEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "typeOfOccurrenceInFinland"
+    },
+    {
+      "property": "MX.typeOfOccurrenceInFinlandNotes",
+      "label": {
+        "fi": "Kommentit esiintymisestä Suomessa",
+        "en": "Notes on occurrence in Finland",
+        "sv": "Antekningar om typ av förekomst"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "typeOfOccurrenceInFinlandNotes"
+    },
+    {
+      "property": "MX.typeSpecimenURI",
+      "label": {
+        "fi": "Tyyppinäytteen tunniste",
+        "en": "Type specimen URI",
+        "sv": "Typprover URI"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "typeSpecimenURI"
+    },
+    {
+      "property": "MX.vernacularName",
+      "label": {
+        "fi": "Suositeltu yleiskielinen nimi",
+        "en": "Recommended common name",
+        "sv": "Rekommenderat allmänspråkligt namn"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 6,
+      "isEmbeddable": false,
+      "multiLanguage": true,
+      "shortName": "vernacularName",
+      "comment": {
+        "sv": "Nuförtiden rekommenderat namn",
+        "fi": "Nykyisin suositeltu nimi (yksi per laji; ei pilkulla eroteltuja nimiä)",
+        "en": "Currently recommended name"
+      }
+    },
+    {
+      "property": "MX.winteringSecureLevel",
+      "label": {
+        "fi": "Salaustaso talvehtiessa",
+        "en": "Secure level while wintering",
+        "sv": "Skyddsnivån medan övervintringen"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "MX.secureLevels",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "winteringSecureLevel"
+    },
+    {
+      "property": "MZ.createdAtTimestamp",
+      "label": {},
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "xsd:int",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "createdAtTimestamp"
+    },
+    {
+      "property": "sortOrder",
+      "label": {},
+      "domain": [
+        "MKV.habitatObject",
+        "MM.audio",
+        "MM.video",
+        "MKV.endangermentObject",
+        "DDF.dataField",
+        "MM.model",
+        "TDF.traitEnumValue",
+        "HBDF.term",
+        "MM.image",
+        "MY.identification",
+        "MX.taxon"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sortOrder"
+    },
+    {
+      "property": "skos:exactMatch",
+      "label": {
+        "en": "Taxonid.org identifier"
+      },
+      "domain": [
+        "MX.taxon"
+      ],
+      "range": "skos:Concept",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "skos:exactMatch"
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

@@ -14,20 +14,17 @@ export default class ApiClient {
 		this.lang = lang;
 	}
 
-	fetch(path: string, query?: any, options?: any): Promise<Response> {
-		return new Promise((resolve, reject) => {
-			this.apiClient.fetch(path, query, options).then(response => {
-				if (response.status > 400) {
-					reject(response);
-				} else {
-					resolve(response);
-				}
-			}, reject);
-		});
+	async fetch(path: string, query?: any, options?: any): Promise<Response> {
+		const response = await this.apiClient.fetch(path, query, options);
+		if (response.status >= 400) {
+			throw response;
+		}
+		return response;
 	}
 
 	async fetchJSON(path: string, query?: any, options?: any) {
-		return (await this.fetch(path, query, options)).json();
+		const res = (await this.fetch(path, query, options));
+		return res.json();
 	}
 }
 
@@ -41,15 +38,27 @@ export class ApiClientImplementation implements ApiClientAbstract {
 		this.personToken = personToken;
 	}
 
-	getBaseQuery() {
-		return {access_token: this.accessToken, personToken: this.personToken};
-	}
-
-	fetch(path: string, query?: any, options?: any): Promise<Response> {
-		const baseQuery = this.getBaseQuery();
-		const queryObject = (typeof query === "object") ? {...baseQuery, ...query} : baseQuery;
+	fetch(path: string, query: any = {}, options?: any): Promise<Response> {
+		options = {
+			...(options|| {}),
+			headers: {
+				...(options?.headers || {}),
+				"API-Version": 1,
+				Authorization: `Bearer ${this.accessToken}`,
+			}
+		};
+		if (options.body) {
+			options.body = JSON.stringify(options.body);
+			options.headers = {
+				...(options?.headers || {}),
+				"Content-Type": "application/json"
+			}
+		}
+		if (this.personToken) {
+			options.headers["Person-Token"] = this.personToken;
+		}
 		return fetch(
-			`${this.BASE_URL}${path}?${new URLSearchParams(queryObject as any).toString()}`,
+			`${this.BASE_URL}${path}?${new URLSearchParams(query as any).toString()}`,
 			options
 		);
 	}

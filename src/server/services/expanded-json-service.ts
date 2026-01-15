@@ -78,7 +78,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 
 	mapRange = (translations: CompleteTranslations) => async (field: Field, property: Property)
 	: Promise<Omit<Field, "type"> & Pick<ExpandedField, "type">> => {
-		const range = property.range[0];
+		const { range } = property;
 		if (await this.metadataService.isAltRange(range)) {
 			if (field.type === "hidden") {
 				return field;
@@ -115,7 +115,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 
 	async mapAltRange(field: Field, property: Property, translations: CompleteTranslations)
 	: Promise<Omit<Field, "type"> & Pick<ExpandedField, "type">> {
-		const range = await this.metadataService.getRange(property.range[0]);
+		const range = await this.metadataService.getAlt(property.range);
 		return {
 			...field,
 			type: "select",

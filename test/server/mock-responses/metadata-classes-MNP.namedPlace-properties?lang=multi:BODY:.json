@@ -1,0 +1,500 @@
+{
+  "results": [
+    {
+      "property": "MNP.acceptedDocument",
+      "label": {
+        "en": "The last accepted version of the document by admin"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MY.document",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 19,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "acceptedDocument"
+    },
+    {
+      "property": "MNP.accessibility",
+      "label": {
+        "sv": "Tillgänglighet",
+        "fi": "Saavutettavuus",
+        "en": "Accessibility"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MNP.accessibilityEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 9,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "accessibility"
+    },
+    {
+      "property": "MNP.active",
+      "label": {
+        "fi": "Aktiivinen",
+        "en": "Active",
+        "sv": "Aktiva"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MNP.dateRange",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 10,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "active"
+    },
+    {
+      "property": "MNP.alternativeIDs",
+      "label": {
+        "fi": "Vaihtoehtoiset tunnisteet",
+        "en": "Alternative IDs",
+        "sv": "Alternativa ID:n"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 11,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "alternativeIDs"
+    },
+    {
+      "property": "MNP.biogeographicalProvince",
+      "label": {
+        "fi": "Eliömaakunta",
+        "sv": "Biogeografisk provins",
+        "en": "Biogeographical province"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "ML.area",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "biogeographicalProvince",
+      "comment": {
+        "en": "Formal abbreviation. For Finnish eliömaakunnat, use Finnish abbreviation."
+      }
+    },
+    {
+      "property": "MNP.birdAssociationArea",
+      "label": {
+        "fi": "Lintuyhdistys",
+        "en": "Bird assocation area"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "ML.area",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 16,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "birdAssociationArea"
+    },
+    {
+      "property": "MNP.collectionID",
+      "label": {
+        "en": "Collection",
+        "sv": "Insamling",
+        "fi": "Kokoelma"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MY.collection",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 5,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "collectionID"
+    },
+    {
+      "property": "MNP.editors",
+      "label": {
+        "sv": "Editorer",
+        "en": "Editors",
+        "fi": "Editoijat"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "editors",
+      "comment": {
+        "en": "Persons who have rights to see and use the named places in their documents",
+        "sv": "Personer som har rätt att se och använda namngivna platser i sina dokument",
+        "fi": "Henkilöt, joilla on oikeus nähdä ja käyttää nimettyä paikkaa havaintoerissä"
+      }
+    },
+    {
+      "property": "MNP.geometry",
+      "label": {
+        "en": "Geometry for the named place",
+        "sv": "Geometri för den namngivna platsen",
+        "fi": "Paikan geometria"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MZ.geometry",
+      "minOccurs": "1",
+      "maxOccurs": "1",
+      "required": true,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "geometry",
+      "comment": {
+        "en": "Using GeoJSONs geometry object specification",
+        "fi": "Käyttäen GeoJSONin geometria objectia",
+        "sv": "Med användning GeoJSONs geometri objektspecifikationen"
+      }
+    },
+    {
+      "property": "MNP.images",
+      "label": {
+        "en": "Images",
+        "fi": "Kuvat",
+        "sv": "Bilder"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MM.image",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "images"
+    },
+    {
+      "property": "MNP.locality",
+      "label": {
+        "fi": "Paikkatiedot"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "locality"
+    },
+    {
+      "property": "MNP.localityDescription",
+      "label": {
+        "fi": "Paikan vapaamuotoinen kuvaus",
+        "sv": "Platsbeskrivning",
+        "en": "Locality description"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "localityDescription",
+      "comment": {
+        "en": "Informal description of the exact locality, e.g. '5 km NE of city X, under stone bridge'"
+      }
+    },
+    {
+      "property": "MNP.municipality",
+      "label": {
+        "en": "Municipality",
+        "fi": "Kunta",
+        "sv": "Kommun"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "ML.area",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 18,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "municipality"
+    },
+    {
+      "property": "MNP.name",
+      "label": {
+        "en": "Name",
+        "sv": "Namn",
+        "fi": "Nimi"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "1",
+      "maxOccurs": "1",
+      "required": true,
+      "hasMany": false,
+      "sortOrder": 1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "name"
+    },
+    {
+      "property": "MNP.notes",
+      "label": {
+        "fi": "Lisätiedot",
+        "sv": "Anteckningar",
+        "en": "Notes"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "notes"
+    },
+    {
+      "property": "MNP.owners",
+      "label": {
+        "sv": "Ägare av den namngivna platsen",
+        "en": "Owners of the named place",
+        "fi": "Nimetyn paikan omistaja"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MA.person",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 4,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "owners",
+      "comment": {
+        "en": "Persons who have full use access and rights to edit the named place",
+        "sv": "Personer som har full användning tillträde och rättigheter att redigera namngiven plats",
+        "fi": "Henkilöt joilla on täysi käyttöoikeus sekä oikeus muokata nimettyä paikkaa"
+      }
+    },
+    {
+      "property": "MNP.prepopulatedDocument",
+      "label": {
+        "en": "Document data to prepopulate form with"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MY.document",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 17,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "prepopulatedDocument"
+    },
+    {
+      "property": "MNP.priority",
+      "label": {
+        "fi": "Prioriteetti",
+        "en": "Priority",
+        "sv": "Prioritet"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MNP.priorityEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 15,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "priority"
+    },
+    {
+      "property": "MNP.privateNotes",
+      "label": {
+        "en": "Private notes",
+        "fi": "Ei-julkiset kommentit",
+        "sv": "Dolda kommentarer"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 8,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "privateNotes"
+    },
+    {
+      "property": "MNP.public",
+      "label": {
+        "en": "Publicly available"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 13,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "public",
+      "comment": {
+        "en": "Is the named place publicaly available. (Defaults to false)"
+      }
+    },
+    {
+      "property": "MNP.reserve",
+      "label": {
+        "fi": "Varaa",
+        "en": "Reserve",
+        "sv": "Boka"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MNP.reserveClass",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 12,
+      "isEmbeddable": true,
+      "multiLanguage": false,
+      "shortName": "reserve"
+    },
+    {
+      "property": "MNP.tags",
+      "label": {
+        "fi": "Paikan ominaisuudet",
+        "sv": "Tags",
+        "en": "Tags"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MNP.tagEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 14,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "tags"
+    },
+    {
+      "property": "MNP.taxonIDs",
+      "label": {
+        "en": "Taxa"
+      },
+      "domain": [
+        "MNP.namedPlace"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": 6,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonIDs"
+    },
+    {
+      "property": "MY.samplingMethodNotes",
+      "label": {
+        "sv": "Ancteckningar om insamlingsmetod",
+        "fi": "Keruumenetelmän lisätiedot",
+        "en": "Sampling method notes"
+      },
+      "domain": [
+        "MY.gathering",
+        "MY.unit",
+        "MNP.namedPlace"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "samplingMethodNotes"
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

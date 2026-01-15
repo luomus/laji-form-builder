@@ -4,23 +4,31 @@ import MetadataService from "../../src/services/metadata-service";
 import { SchemaFormat, Master, JSONSchemaObject, JSONObject } from "../../src/model";
 import ApiClient, { ApiClientImplementation } from "../../src/api-client";
 import StoreService from "../../src/server/services/store-service";
+import fs from "node:fs";
+import _path from "node:path";
 
 const LANG = "fi";
 const mock = !(process.env.MOCK === "false");
 
+const getMockKey = (path: string, query?: any, options?: any) => {
+	const queryString = new URLSearchParams(query);
+	const bodyQueryString = new URLSearchParams(options?.body ? options.body : {});
+	const uri = queryString ? `${path}?${queryString}:BODY:${bodyQueryString}` : path;
+	return uri.substr(1).replace(/\//g, "-");
+};
+
 class MockApiClient extends ApiClientImplementation {
 	mock(path: string, query?: any, options?: any): Response | undefined {
-		if (options?.method) {
+		if (options?.method && !path.startsWith("/taxa")) {
 			return undefined;
 		}
-		const queryString = new URLSearchParams(query);
-		const uri = queryString ? `${path}?${queryString}` : path;
+		const mockKey = getMockKey(path, query, options);
 		let result: any;
 		try {
 			// Mock files have '-' in place of '/' since slash isn't an allowed character in filenames in UNIX.
-			result = require(`./mock-responses/${uri.substr(1).replace(/\//g, "-")}.json`);
+			result = require(`./mock-responses/${mockKey}.json`);
 		} catch (e) {
-			console.warn(`No mock response found in test/server/mock-responses for ${uri}`);
+			console.warn(`No mock response found in test/server/mock-responses for ${mockKey}`);
 		}
 		return result
 			? result.status > 400
@@ -29,12 +37,38 @@ class MockApiClient extends ApiClientImplementation {
 			: undefined;
 	}
 
-	fetch(path: string, query?: any, options?: any) {
-		const mockResponse = this.mock(path, query , options);
-		if (mockResponse) {
+	async fetch(path: string, query?: any, options?: any) {
+		const mockResponse = this.mock(path, query, options);
+		if (mockResponse && process.env.CREATE_MOCKS !== "true") {
 			return Promise.resolve(mockResponse);
 		} else {
-			return super.fetch(path, query, options);
+			const response = await super.fetch(path, query, options);
+
+			if (process.env.CREATE_MOCKS !== "true") {
+				return response;
+			}
+
+			const mockKey = getMockKey(path, query, options);
+			// Reading the JSON stream from a clone is buggy. This solution is derived from
+			// https://github.com/node-fetch/node-fetch#custom-highwatermark
+			const clone = response.clone();
+			const origResponseJson =  response.json.bind(response);
+			response.json = () => new Promise((resolve) => {
+				Promise.all([origResponseJson(), clone.json()]).then(([orig, cloned]) => {
+					const MOCK_DIR = _path.resolve(
+						__dirname,
+						"mock-responses"
+					);
+					const filePath = _path.join(
+						MOCK_DIR,
+						`${mockKey}.json`
+					);
+
+					fs.writeFileSync(filePath, JSON.stringify(cloned, undefined, 2));
+					resolve(orig);
+				});
+			});
+			return response;
 		}
 	}
 }
@@ -91,7 +125,7 @@ const uiSchema = {
 
 describe("fields", () => {
 	describe("context", () => {
-		it("is document by default", async () => {
+		it("is MY.document by default", async () => {
 			const form = {
 				fields: [{ name: "gatherings" }]
 			};
@@ -100,7 +134,7 @@ describe("fields", () => {
 
 		it("changes the root field and allows fields from that context", async () => {
 			const form = {
-				context: "namedPlace",
+				context: "MNP.namedPlace",
 				fields: [{ name: "privateNotes" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
@@ -108,23 +142,24 @@ describe("fields", () => {
 
 		it("changes the root field and doesn't allow fields outside that context", async () => {
 			const form = {
-				context: "namedPlace",
+				context: "MNP.namedPlace",
 				fields: [{ name: "gatherings" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
 		});
 
-		it("doesn't work with prefix", async () => {
-			const form = {
-				context: "MNP.namedPlace",
-				fields: [{ name: "privateNotes" }]
-			};
-			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
-		});
+		// TODO make it fail when no prefix instead after migration
+		// it("doesn't work with prefix", async () => {
+		// 	const form = {
+		// 		context: "MNP.namedPlace",
+		// 		fields: [{ name: "privateNotes" }]
+		// 	};
+		// 	expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
+		// });
 
 		it("doesn't allow properties", async () => {
 			const form = {
-				context: "gatherings", // Not a class but property. "gathering" would be fine.
+				context: "MY.gatherings", // Not a class but property. "gathering" would be fine.
 				fields: [{ name: "locality" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(true);
@@ -132,7 +167,7 @@ describe("fields", () => {
 
 		it("works with embeddable range property even though it's not a class", async () => {
 			const form = {
-				context: "gathering",
+				context: "MY.gathering",
 				fields: [{ name: "locality" }]
 			};
 			expect(await throwsError(() => fieldService.masterToSchemaFormat(form, LANG))).toBe(false);
@@ -439,7 +474,7 @@ describe("fields", () => {
 		});
 
 		describe("multiLanguage", async () => {
-			const form = { context: "dataset", fields: [{ name: "datasetName" }] };
+			const form = { context: "GX.dataset", fields: [{ name: "datasetName" }] };
 			let jsonFormat: SchemaFormat;
 
 			beforeAll(async () => {
@@ -461,7 +496,7 @@ describe("fields", () => {
 
 			it("unbounded mapped to uiSchema.items", async () => {
 				const unboundedMultiLanguageForm = {
-					context: "taxon", fields: [{ name: "alternativeVernacularName" }]
+					context: "MX.taxon", fields: [{ name: "alternativeVernacularName" }]
 				};
 				const unboundedJsonFormat = await fieldService.masterToSchemaFormat(unboundedMultiLanguageForm);
 				expect(
@@ -727,20 +762,20 @@ describe("fields", () => {
 			describe("useSchemaCommentsAsHelpTexts", async () => {
 				it("sets schema comment as help text", async () => {
 					const form = {
-						context: "dataset",
+						context: "GX.dataset",
 						fields: [{ name: "datasetName" }],
 						options: { useSchemaCommentsAsHelpTexts : true }
 					};
 					const jsonFormat = await fieldService.masterToSchemaFormat(form, "en");
 
 					expect((jsonFormat.uiSchema as any).datasetName["ui:help"]).toBe(
-						"Name of the dataset. This must be unique."
+						"Name of the tag. This must be unique."
 					);
 				});
 
 				it("doesn't set help text if there is no comment in selected language", async () => {
 					const form = {
-						context: "dataset",
+						context: "GX.dataset",
 						fields: [{ name: "datasetName" }],
 						options: { useSchemaCommentsAsHelpTexts : true }
 					};
@@ -751,7 +786,7 @@ describe("fields", () => {
 
 				it("doesn't set help text without the option", async () => {
 					const form = {
-						context: "dataset",
+						context: "GX.dataset",
 						fields: [{ name: "datasetName" }]
 					};
 					const jsonFormat = await fieldService.masterToSchemaFormat(form, "en");

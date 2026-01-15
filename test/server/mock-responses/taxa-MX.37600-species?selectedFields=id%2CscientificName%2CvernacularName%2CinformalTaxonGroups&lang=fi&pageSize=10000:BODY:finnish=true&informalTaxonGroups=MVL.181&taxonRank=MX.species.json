@@ -1,0 +1,1865 @@
+{
+  "results": [
+    {
+      "vernacularName": "isoapollo",
+      "scientificName": "Parnassius apollo",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60724",
+      "vernacularNameMultiLang": {
+        "fi": "isoapollo",
+        "sv": "apollofjäril"
+      }
+    },
+    {
+      "vernacularName": "pikkuapollo",
+      "scientificName": "Parnassius mnemosyne",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60725",
+      "vernacularNameMultiLang": {
+        "fi": "pikkuapollo",
+        "sv": "mnemosynefjäril"
+      }
+    },
+    {
+      "vernacularName": "purjeperhonen",
+      "scientificName": "Iphiclides podalirius",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60728",
+      "vernacularNameMultiLang": {
+        "fi": "purjeperhonen",
+        "sv": "segelfjäril"
+      }
+    },
+    {
+      "vernacularName": "ritariperhonen",
+      "scientificName": "Papilio machaon",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60730",
+      "vernacularNameMultiLang": {
+        "fi": "ritariperhonen",
+        "sv": "makaonfjäril"
+      }
+    },
+    {
+      "vernacularName": "tunturikirjosiipi",
+      "scientificName": "Pyrgus andromedae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60738",
+      "vernacularNameMultiLang": {
+        "fi": "tunturikirjosiipi",
+        "sv": "blomvisslare"
+      }
+    },
+    {
+      "vernacularName": "suokirjosiipi",
+      "scientificName": "Pyrgus centaureae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60739",
+      "vernacularNameMultiLang": {
+        "fi": "suokirjosiipi",
+        "sv": "myrvisslare"
+      }
+    },
+    {
+      "vernacularName": "mansikkakirjosiipi",
+      "scientificName": "Pyrgus malvae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60735",
+      "vernacularNameMultiLang": {
+        "fi": "mansikkakirjosiipi",
+        "sv": "smultronvisslare"
+      }
+    },
+    {
+      "vernacularName": "tummakirjosiipi",
+      "scientificName": "Pyrgus alveus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60736",
+      "vernacularNameMultiLang": {
+        "fi": "tummakirjosiipi",
+        "sv": "kattunvisslare"
+      }
+    },
+    {
+      "vernacularName": "heinähiipijä",
+      "scientificName": "Heteropterus morpheus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60742",
+      "vernacularNameMultiLang": {
+        "fi": "heinähiipijä",
+        "sv": "spegelsmygare"
+      }
+    },
+    {
+      "vernacularName": "keltatäplähiipijä",
+      "scientificName": "Carterocephalus palaemon",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60744",
+      "vernacularNameMultiLang": {
+        "fi": "keltatäplähiipijä",
+        "sv": "gulfläckig glanssmygare"
+      }
+    },
+    {
+      "vernacularName": "mustatäplähiipijä",
+      "scientificName": "Carterocephalus silvicola",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60745",
+      "vernacularNameMultiLang": {
+        "fi": "mustatäplähiipijä",
+        "sv": "svartfläckig glanssmygare"
+      }
+    },
+    {
+      "vernacularName": "lauhahiipijä",
+      "scientificName": "Thymelicus lineola",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60749",
+      "vernacularNameMultiLang": {
+        "fi": "lauhahiipijä",
+        "sv": "mindre tåtelsmygare"
+      }
+    },
+    {
+      "vernacularName": "etelänhiipijä",
+      "scientificName": "Thymelicus sylvestris",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.5094958",
+      "vernacularNameMultiLang": {
+        "fi": "etelänhiipijä"
+      }
+    },
+    {
+      "vernacularName": "valkotäpläpaksupää",
+      "scientificName": "Hesperia comma",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60751",
+      "vernacularNameMultiLang": {
+        "fi": "valkotäpläpaksupää",
+        "sv": "silversmygare"
+      }
+    },
+    {
+      "vernacularName": "piippopaksupää",
+      "scientificName": "Ochlodes sylvanus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60755",
+      "vernacularNameMultiLang": {
+        "fi": "piippopaksupää",
+        "sv": "ängssmygare"
+      }
+    },
+    {
+      "vernacularName": "virnaperhonen",
+      "scientificName": "Leptidea sinapis",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60763",
+      "vernacularNameMultiLang": {
+        "fi": "virnaperhonen",
+        "sv": "skogsvitvinge"
+      }
+    },
+    {
+      "vernacularName": "peltovirnaperhonen",
+      "scientificName": "Leptidea juvernica",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60761",
+      "vernacularNameMultiLang": {
+        "fi": "peltovirnaperhonen",
+        "sv": "ängsvitvinge"
+      }
+    },
+    {
+      "vernacularName": "auroraperhonen",
+      "scientificName": "Anthocharis cardamines",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60767",
+      "vernacularNameMultiLang": {
+        "fi": "auroraperhonen",
+        "sv": "aurorafjäril"
+      }
+    },
+    {
+      "vernacularName": "aroauroraperhonen",
+      "scientificName": "Euchloe ausonia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60769",
+      "vernacularNameMultiLang": {
+        "fi": "aroauroraperhonen"
+      }
+    },
+    {
+      "vernacularName": "pihlajaperhonen",
+      "scientificName": "Aporia crataegi",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60772",
+      "vernacularNameMultiLang": {
+        "fi": "pihlajaperhonen",
+        "sv": "hagtornsfjäril"
+      }
+    },
+    {
+      "vernacularName": "kaaliperhonen",
+      "scientificName": "Pieris brassicae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60775",
+      "vernacularNameMultiLang": {
+        "fi": "kaaliperhonen",
+        "sv": "kålfjäril"
+      }
+    },
+    {
+      "vernacularName": "naurisperhonen",
+      "scientificName": "Pieris rapae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60777",
+      "vernacularNameMultiLang": {
+        "fi": "naurisperhonen",
+        "sv": "rovfjäril"
+      }
+    },
+    {
+      "vernacularName": "lanttuperhonen",
+      "scientificName": "Pieris napi",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60778",
+      "vernacularNameMultiLang": {
+        "fi": "lanttuperhonen",
+        "sv": "rapsfjäril"
+      }
+    },
+    {
+      "vernacularName": "vuorisinappiperhonen",
+      "scientificName": "Pontia callidice",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60780",
+      "vernacularNameMultiLang": {
+        "fi": "vuorisinappiperhonen",
+        "sv": "alpvitfjäril"
+      }
+    },
+    {
+      "vernacularName": "sinappiperhonen",
+      "scientificName": "Pontia edusa",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60781",
+      "vernacularNameMultiLang": {
+        "fi": "sinappiperhonen",
+        "sv": "grönfläckig vitfjäril"
+      }
+    },
+    {
+      "vernacularName": "arosinappiperhonen",
+      "scientificName": "Pontia chloridice",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60782",
+      "vernacularNameMultiLang": {
+        "fi": "arosinappiperhonen",
+        "sv": "bergvitfjäril"
+      }
+    },
+    {
+      "vernacularName": "vaaleakeltaperhonen",
+      "scientificName": "Colias hyale",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60785",
+      "vernacularNameMultiLang": {
+        "fi": "vaaleakeltaperhonen",
+        "sv": "ljusgul höfjäril"
+      }
+    },
+    {
+      "vernacularName": "lapinkeltaperhonen",
+      "scientificName": "Colias hecla",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60786",
+      "vernacularNameMultiLang": {
+        "fi": "lapinkeltaperhonen",
+        "sv": "högnordisk höfjäril"
+      }
+    },
+    {
+      "vernacularName": "tunturikeltaperhonen",
+      "scientificName": "Colias tyche",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60788",
+      "vernacularNameMultiLang": {
+        "fi": "tunturikeltaperhonen",
+        "sv": "fjällhöfjäril"
+      }
+    },
+    {
+      "vernacularName": "suokeltaperhonen",
+      "scientificName": "Colias palaeno",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60791",
+      "vernacularNameMultiLang": {
+        "fi": "suokeltaperhonen",
+        "sv": "svavelgul höfjäril"
+      }
+    },
+    {
+      "vernacularName": "etelänkeltaperhonen",
+      "scientificName": "Colias croceus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60792",
+      "vernacularNameMultiLang": {
+        "fi": "etelänkeltaperhonen",
+        "sv": "rödgul höfjäril"
+      }
+    },
+    {
+      "vernacularName": "sitruunaperhonen",
+      "scientificName": "Gonepteryx rhamni",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60794",
+      "vernacularNameMultiLang": {
+        "fi": "sitruunaperhonen",
+        "sv": "citronfjäril"
+      }
+    },
+    {
+      "vernacularName": "rämehopeatäplä",
+      "scientificName": "Boloria eunomia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60887",
+      "vernacularNameMultiLang": {
+        "fi": "rämehopeatäplä",
+        "sv": "svartringlad pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "pursuhopeatäplä",
+      "scientificName": "Boloria euphrosyne",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60889",
+      "vernacularNameMultiLang": {
+        "fi": "pursuhopeatäplä",
+        "sv": "prydlig pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "lehtohopeatäplä",
+      "scientificName": "Boloria titania",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60891",
+      "vernacularNameMultiLang": {
+        "fi": "lehtohopeatäplä",
+        "sv": "lundpärlemofjäril"
+      }
+    },
+    {
+      "vernacularName": "niittyhopeatäplä",
+      "scientificName": "Boloria selene",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60890",
+      "vernacularNameMultiLang": {
+        "fi": "niittyhopeatäplä",
+        "sv": "brunfläckig pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "tundrahopeatäplä",
+      "scientificName": "Boloria chariclea",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60892",
+      "vernacularNameMultiLang": {
+        "fi": "tundrahopeatäplä",
+        "sv": "arktisk pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "muurainhopeatäplä",
+      "scientificName": "Boloria freija",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60893",
+      "vernacularNameMultiLang": {
+        "fi": "muurainhopeatäplä",
+        "sv": "frejas pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "pohjanhopeatäplä",
+      "scientificName": "Boloria polaris",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60894",
+      "vernacularNameMultiLang": {
+        "fi": "pohjanhopeatäplä",
+        "sv": "högnordisk pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "purohopeatäplä",
+      "scientificName": "Boloria thore",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60895",
+      "vernacularNameMultiLang": {
+        "fi": "purohopeatäplä",
+        "sv": "bäckpärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "rahkahopeatäplä",
+      "scientificName": "Boloria frigga",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60898",
+      "vernacularNameMultiLang": {
+        "fi": "rahkahopeatäplä",
+        "sv": "friggas pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "kääpiöhopeatäplä",
+      "scientificName": "Boloria improba",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60899",
+      "vernacularNameMultiLang": {
+        "fi": "kääpiöhopeatäplä",
+        "sv": "dvärgpärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "tunturihopeatäplä",
+      "scientificName": "Boloria napaea",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60902",
+      "vernacularNameMultiLang": {
+        "fi": "tunturihopeatäplä",
+        "sv": "fjällpärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "suohopeatäplä",
+      "scientificName": "Boloria aquilonaris",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60904",
+      "vernacularNameMultiLang": {
+        "fi": "suohopeatäplä",
+        "sv": "myrpärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "helmihopeatäplä",
+      "scientificName": "Issoria lathonia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60882",
+      "vernacularNameMultiLang": {
+        "fi": "helmihopeatäplä",
+        "sv": "storfläckig pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "angervohopeatäplä",
+      "scientificName": "Brenthis ino",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60884",
+      "vernacularNameMultiLang": {
+        "fi": "angervohopeatäplä",
+        "sv": "älggräspärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "keisarinviitta",
+      "scientificName": "Argynnis paphia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60876",
+      "vernacularNameMultiLang": {
+        "fi": "keisarinviitta",
+        "sv": "silverstreckad pärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "etelänhopeatäplä",
+      "scientificName": "Argynnis laodice",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60880",
+      "vernacularNameMultiLang": {
+        "fi": "etelänhopeatäplä",
+        "sv": "skuggpärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "orvokkihopeatäplä",
+      "scientificName": "Speyeria aglaja",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60877",
+      "vernacularNameMultiLang": {
+        "fi": "orvokkihopeatäplä",
+        "sv": "ängspärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "rinnehopeatäplä",
+      "scientificName": "Fabriciana niobe",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60879",
+      "vernacularNameMultiLang": {
+        "fi": "rinnehopeatäplä",
+        "sv": "hedpärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "ketohopeatäplä",
+      "scientificName": "Fabriciana adippe",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60878",
+      "vernacularNameMultiLang": {
+        "fi": "ketohopeatäplä",
+        "sv": "skogspärlemorfjäril"
+      }
+    },
+    {
+      "vernacularName": "karttaperhonen",
+      "scientificName": "Araschnia levana",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60908",
+      "vernacularNameMultiLang": {
+        "fi": "karttaperhonen",
+        "sv": "kartfjäril"
+      }
+    },
+    {
+      "vernacularName": "amiraali",
+      "scientificName": "Vanessa atalanta",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60910",
+      "vernacularNameMultiLang": {
+        "fi": "amiraali",
+        "sv": "amiral"
+      }
+    },
+    {
+      "vernacularName": "ohdakeperhonen",
+      "scientificName": "Vanessa cardui",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60911",
+      "vernacularNameMultiLang": {
+        "fi": "ohdakeperhonen",
+        "sv": "tistelfjäril"
+      }
+    },
+    {
+      "vernacularName": "neitoperhonen",
+      "scientificName": "Aglais io",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60914",
+      "vernacularNameMultiLang": {
+        "fi": "neitoperhonen",
+        "sv": "påfågelöga"
+      }
+    },
+    {
+      "vernacularName": "nokkosperhonen",
+      "scientificName": "Aglais urticae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60916",
+      "vernacularNameMultiLang": {
+        "fi": "nokkosperhonen",
+        "sv": "nässelfjäril"
+      }
+    },
+    {
+      "vernacularName": "suruvaippa",
+      "scientificName": "Nymphalis antiopa",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60920",
+      "vernacularNameMultiLang": {
+        "fi": "suruvaippa",
+        "sv": "sorgmantel"
+      }
+    },
+    {
+      "vernacularName": "kirsikkaperhonen",
+      "scientificName": "Nymphalis polychloros",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60918",
+      "vernacularNameMultiLang": {
+        "fi": "kirsikkaperhonen",
+        "sv": "körsbärsfuks"
+      }
+    },
+    {
+      "vernacularName": "isonokkosperhonen",
+      "scientificName": "Nymphalis xanthomelas",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60919",
+      "vernacularNameMultiLang": {
+        "fi": "isonokkosperhonen",
+        "sv": "videfuks"
+      }
+    },
+    {
+      "vernacularName": "valkotäplänokkosperhonen",
+      "scientificName": "Nymphalis vaualbum",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60922",
+      "vernacularNameMultiLang": {
+        "fi": "valkotäplänokkosperhonen",
+        "sv": "aspfuks"
+      }
+    },
+    {
+      "vernacularName": "herukkaperhonen",
+      "scientificName": "Polygonia c-album",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60925",
+      "vernacularNameMultiLang": {
+        "fi": "herukkaperhonen",
+        "sv": "vinbärsfuks"
+      }
+    },
+    {
+      "vernacularName": "lapinverkkoperhonen",
+      "scientificName": "Euphydryas iduna",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60930",
+      "vernacularNameMultiLang": {
+        "fi": "lapinverkkoperhonen",
+        "sv": "lappnätfjäril"
+      }
+    },
+    {
+      "vernacularName": "kirjoverkkoperhonen",
+      "scientificName": "Euphydryas maturna",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60931",
+      "vernacularNameMultiLang": {
+        "fi": "kirjoverkkoperhonen",
+        "sv": "asknätfjäril"
+      }
+    },
+    {
+      "vernacularName": "keltaverkkoperhonen",
+      "scientificName": "Euphydryas aurinia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60934",
+      "vernacularNameMultiLang": {
+        "fi": "keltaverkkoperhonen",
+        "sv": "väddnätfjäril"
+      }
+    },
+    {
+      "vernacularName": "täpläverkkoperhonen",
+      "scientificName": "Melitaea cinxia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60937",
+      "vernacularNameMultiLang": {
+        "fi": "täpläverkkoperhonen",
+        "sv": "ängsnätfjäril"
+      }
+    },
+    {
+      "vernacularName": "tummaverkkoperhonen",
+      "scientificName": "Melitaea diamina",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60938",
+      "vernacularNameMultiLang": {
+        "fi": "tummaverkkoperhonen",
+        "sv": "sotnätfjäril"
+      }
+    },
+    {
+      "vernacularName": "ratamoverkkoperhonen",
+      "scientificName": "Melitaea athalia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60939",
+      "vernacularNameMultiLang": {
+        "fi": "ratamoverkkoperhonen",
+        "sv": "skogsnätfjäril"
+      }
+    },
+    {
+      "vernacularName": "haapaperhonen",
+      "scientificName": "Limenitis populi",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60944",
+      "vernacularNameMultiLang": {
+        "fi": "haapaperhonen",
+        "sv": "aspfjäril"
+      }
+    },
+    {
+      "vernacularName": "kuusamaperhonen",
+      "scientificName": "Limenitis camilla",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60945",
+      "vernacularNameMultiLang": {
+        "fi": "kuusamaperhonen",
+        "sv": "tryfjäril"
+      }
+    },
+    {
+      "vernacularName": "pikkuhäiveperhonen",
+      "scientificName": "Apatura ilia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60949",
+      "vernacularNameMultiLang": {
+        "fi": "pikkuhäiveperhonen",
+        "sv": "aspskimmerfjäril"
+      }
+    },
+    {
+      "vernacularName": "häiveperhonen",
+      "scientificName": "Apatura iris",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60948",
+      "vernacularNameMultiLang": {
+        "fi": "häiveperhonen",
+        "sv": "sälgskimmerfjäril"
+      }
+    },
+    {
+      "vernacularName": "täpläpapurikko",
+      "scientificName": "Pararge aegeria",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60953",
+      "vernacularNameMultiLang": {
+        "fi": "täpläpapurikko",
+        "sv": "kvickgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "ruostepapurikko",
+      "scientificName": "Lasiommata megera",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60956",
+      "vernacularNameMultiLang": {
+        "fi": "ruostepapurikko",
+        "sv": "svingelgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "metsäpapurikko",
+      "scientificName": "Lasiommata petropolitana",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60958",
+      "vernacularNameMultiLang": {
+        "fi": "metsäpapurikko",
+        "sv": "berggräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "tummapapurikko",
+      "scientificName": "Lasiommata maera",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60957",
+      "vernacularNameMultiLang": {
+        "fi": "tummapapurikko",
+        "sv": "vitgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "kirjopapurikko",
+      "scientificName": "Lopinga achine",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60960",
+      "vernacularNameMultiLang": {
+        "fi": "kirjopapurikko",
+        "sv": "dårgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "saraikkoniittyperhonen",
+      "scientificName": "Coenonympha tullia",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60963",
+      "vernacularNameMultiLang": {
+        "fi": "saraikkoniittyperhonen",
+        "sv": "starrgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "kirjoniittyperhonen",
+      "scientificName": "Coenonympha arcania",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.5104765",
+      "vernacularNameMultiLang": {
+        "fi": "kirjoniittyperhonen"
+      }
+    },
+    {
+      "vernacularName": "idänniittyperhonen",
+      "scientificName": "Coenonympha glycerion",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60965",
+      "vernacularNameMultiLang": {
+        "fi": "idänniittyperhonen",
+        "sv": "darrgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "ruskoniittyperhonen",
+      "scientificName": "Coenonympha hero",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60967",
+      "vernacularNameMultiLang": {
+        "fi": "ruskoniittyperhonen",
+        "sv": "brun gräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "keltaniittyperhonen",
+      "scientificName": "Coenonympha pamphilus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60968",
+      "vernacularNameMultiLang": {
+        "fi": "keltaniittyperhonen",
+        "sv": "kamgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "tesmaperhonen",
+      "scientificName": "Aphantopus hyperantus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60970",
+      "vernacularNameMultiLang": {
+        "fi": "tesmaperhonen",
+        "sv": "luktgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "tummahäränsilmä",
+      "scientificName": "Maniola jurtina",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60974",
+      "vernacularNameMultiLang": {
+        "fi": "tummahäränsilmä",
+        "sv": "slåttergräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "idänhäränsilmä",
+      "scientificName": "Hyponephele lycaon",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60976",
+      "vernacularNameMultiLang": {
+        "fi": "idänhäränsilmä",
+        "sv": "gråbrun slottergräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "metsänokiperhonen",
+      "scientificName": "Erebia ligea",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60979",
+      "vernacularNameMultiLang": {
+        "fi": "metsänokiperhonen",
+        "sv": "skogsgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "idännokiperhonen",
+      "scientificName": "Erebia euryale",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60980",
+      "vernacularNameMultiLang": {
+        "fi": "idännokiperhonen"
+      }
+    },
+    {
+      "vernacularName": "suonokiperhonen",
+      "scientificName": "Erebia embla",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60982",
+      "vernacularNameMultiLang": {
+        "fi": "suonokiperhonen",
+        "sv": "gulringad gräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "kairanokiperhonen",
+      "scientificName": "Erebia disa",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60983",
+      "vernacularNameMultiLang": {
+        "fi": "kairanokiperhonen",
+        "sv": "disas gräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "ruijannokiperhonen",
+      "scientificName": "Erebia medusa",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60984",
+      "vernacularNameMultiLang": {
+        "fi": "ruijannokiperhonen",
+        "sv": "högnordisk gräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "lapinnokiperhonen",
+      "scientificName": "Erebia pandrose",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60986",
+      "vernacularNameMultiLang": {
+        "fi": "lapinnokiperhonen",
+        "sv": "fjällgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "ruutuperhonen",
+      "scientificName": "Melanargia galathea",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.5126452",
+      "vernacularNameMultiLang": {
+        "fi": "ruutuperhonen"
+      }
+    },
+    {
+      "vernacularName": "hietaheinäperhonen",
+      "scientificName": "Hipparchia semele",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60993",
+      "vernacularNameMultiLang": {
+        "fi": "hietaheinäperhonen",
+        "sv": "sandgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "sarakylmänperhonen",
+      "scientificName": "Oeneis norna",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60995",
+      "vernacularNameMultiLang": {
+        "fi": "sarakylmänperhonen",
+        "sv": "myrgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "paljakkakylmänperhonen",
+      "scientificName": "Oeneis bore",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60996",
+      "vernacularNameMultiLang": {
+        "fi": "paljakkakylmänperhonen",
+        "sv": "tundragräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "rämekylmänperhonen",
+      "scientificName": "Oeneis jutta",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60997",
+      "vernacularNameMultiLang": {
+        "fi": "rämekylmänperhonen",
+        "sv": "tallgräsfjäril"
+      }
+    },
+    {
+      "vernacularName": "pikkusinisiipi",
+      "scientificName": "Cupido minimus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60825",
+      "vernacularNameMultiLang": {
+        "fi": "pikkusinisiipi",
+        "sv": "mindre blåvinge"
+      }
+    },
+    {
+      "vernacularName": "kannussinisiipi",
+      "scientificName": "Cupido argiades",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60827",
+      "vernacularNameMultiLang": {
+        "fi": "kannussinisiipi",
+        "sv": "kortsvansad blåvinge"
+      }
+    },
+    {
+      "vernacularName": "luhtasinisiipi",
+      "scientificName": "Cupido alcetas",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60828",
+      "vernacularNameMultiLang": {
+        "fi": "luhtasinisiipi",
+        "sv": "kronillblåvinge"
+      }
+    },
+    {
+      "vernacularName": "paatsamasinisiipi",
+      "scientificName": "Celastrina argiolus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60830",
+      "vernacularNameMultiLang": {
+        "fi": "paatsamasinisiipi",
+        "sv": "tosteblåvinge"
+      }
+    },
+    {
+      "vernacularName": "kalliosinisiipi",
+      "scientificName": "Scolitantides orion",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60836",
+      "vernacularNameMultiLang": {
+        "fi": "kalliosinisiipi",
+        "sv": "fetörtsblåvinge"
+      }
+    },
+    {
+      "vernacularName": "virnasinisiipi",
+      "scientificName": "Glaucopsyche alexis",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60838",
+      "vernacularNameMultiLang": {
+        "fi": "virnasinisiipi",
+        "sv": "klöverblåvinge"
+      }
+    },
+    {
+      "vernacularName": "muurahaissinisiipi",
+      "scientificName": "Phengaris arion",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60841",
+      "vernacularNameMultiLang": {
+        "fi": "muurahaissinisiipi",
+        "sv": "svartfläckig blåvinge"
+      }
+    },
+    {
+      "vernacularName": "kangassinisiipi",
+      "scientificName": "Plebejus argus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60854",
+      "vernacularNameMultiLang": {
+        "fi": "kangassinisiipi",
+        "sv": "ljungblåvinge"
+      }
+    },
+    {
+      "vernacularName": "ketosinisiipi",
+      "scientificName": "Plebejus idas",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60855",
+      "vernacularNameMultiLang": {
+        "fi": "ketosinisiipi",
+        "sv": "hedblåvinge"
+      }
+    },
+    {
+      "vernacularName": "lehtosinisiipi",
+      "scientificName": "Aricia artaxerxes",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60859",
+      "vernacularNameMultiLang": {
+        "fi": "lehtosinisiipi",
+        "sv": "midsommarblåvinge"
+      }
+    },
+    {
+      "vernacularName": "huhtasinisiipi",
+      "scientificName": "Aricia nicias",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60862",
+      "vernacularNameMultiLang": {
+        "fi": "huhtasinisiipi",
+        "sv": "turkos blåvinge"
+      }
+    },
+    {
+      "vernacularName": "ruskosinisiipi",
+      "scientificName": "Eumedonia eumedon",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60863",
+      "vernacularNameMultiLang": {
+        "fi": "ruskosinisiipi",
+        "sv": "brun blåvinge"
+      }
+    },
+    {
+      "vernacularName": "niittysinisiipi",
+      "scientificName": "Cyaniris semiargus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60865",
+      "vernacularNameMultiLang": {
+        "fi": "niittysinisiipi",
+        "sv": "ängsblåvinge"
+      }
+    },
+    {
+      "vernacularName": "juolukkasinisiipi",
+      "scientificName": "Agriades optilete",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60858",
+      "vernacularNameMultiLang": {
+        "fi": "juolukkasinisiipi",
+        "sv": "violett blåvinge"
+      }
+    },
+    {
+      "vernacularName": "tundrasinisiipi",
+      "scientificName": "Agriades aquilo",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60856",
+      "vernacularNameMultiLang": {
+        "fi": "tundrasinisiipi",
+        "sv": "högnordisk blåvinge"
+      }
+    },
+    {
+      "vernacularName": "hopeasinisiipi",
+      "scientificName": "Polyommatus amandus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60866",
+      "vernacularNameMultiLang": {
+        "fi": "hopeasinisiipi",
+        "sv": "silverblåvinge"
+      }
+    },
+    {
+      "vernacularName": "hohtosinisiipi",
+      "scientificName": "Polyommatus icarus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60867",
+      "vernacularNameMultiLang": {
+        "fi": "hohtosinisiipi",
+        "sv": "puktörneblåvinge"
+      }
+    },
+    {
+      "vernacularName": "harjusinisiipi",
+      "scientificName": "Pseudophilotes vicrama",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60833",
+      "vernacularNameMultiLang": {
+        "fi": "harjusinisiipi",
+        "sv": "åsblåvinge"
+      }
+    },
+    {
+      "vernacularName": "pikkukultasiipi",
+      "scientificName": "Lycaena phlaeas",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60816",
+      "vernacularNameMultiLang": {
+        "fi": "pikkukultasiipi",
+        "sv": "mindre guldvinge"
+      }
+    },
+    {
+      "vernacularName": "luhtakultasiipi",
+      "scientificName": "Lycaena helle",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60817",
+      "vernacularNameMultiLang": {
+        "fi": "luhtakultasiipi",
+        "sv": "violett guldvinge"
+      }
+    },
+    {
+      "vernacularName": "isokultasiipi",
+      "scientificName": "Lycaena dispar",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60818",
+      "vernacularNameMultiLang": {
+        "fi": "isokultasiipi",
+        "sv": "kärrguldvinge"
+      }
+    },
+    {
+      "vernacularName": "loistokultasiipi",
+      "scientificName": "Lycaena virgaureae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60819",
+      "vernacularNameMultiLang": {
+        "fi": "loistokultasiipi",
+        "sv": "vitfläckig guldvinge"
+      }
+    },
+    {
+      "vernacularName": "tummakultasiipi",
+      "scientificName": "Lycaena tityrus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60820",
+      "vernacularNameMultiLang": {
+        "fi": "tummakultasiipi",
+        "sv": "sotguldvinge"
+      }
+    },
+    {
+      "vernacularName": "ketokultasiipi",
+      "scientificName": "Lycaena hippothoe",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60821",
+      "vernacularNameMultiLang": {
+        "fi": "ketokultasiipi",
+        "sv": "violettkantad guldvinge"
+      }
+    },
+    {
+      "vernacularName": "kangasperhonen",
+      "scientificName": "Callophrys rubi",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60811",
+      "vernacularNameMultiLang": {
+        "fi": "kangasperhonen",
+        "sv": "grönsnabbvinge"
+      }
+    },
+    {
+      "vernacularName": "jalavanopsasiipi",
+      "scientificName": "Satyrium w-album",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60808",
+      "vernacularNameMultiLang": {
+        "fi": "jalavanopsasiipi",
+        "sv": "almsnabbvinge"
+      }
+    },
+    {
+      "vernacularName": "tuominopsasiipi",
+      "scientificName": "Satyrium pruni",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60809",
+      "vernacularNameMultiLang": {
+        "fi": "tuominopsasiipi",
+        "sv": "busksnabbvinge"
+      }
+    },
+    {
+      "vernacularName": "ruostenopsasiipi",
+      "scientificName": "Thecla betulae",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60799",
+      "vernacularNameMultiLang": {
+        "fi": "ruostenopsasiipi",
+        "sv": "eldsnabbvinge"
+      }
+    },
+    {
+      "vernacularName": "tamminopsasiipi",
+      "scientificName": "Favonius quercus",
+      "informalTaxonGroups": [
+        "MVL.232",
+        "MVL.31",
+        "MVL.181",
+        "MVL.237"
+      ],
+      "id": "MX.60803",
+      "vernacularNameMultiLang": {
+        "fi": "tamminopsasiipi",
+        "sv": "eksnabbvinge"
+      }
+    }
+  ],
+  "total": 124,
+  "pageSize": 10000,
+  "currentPage": 1,
+  "lastPage": 1,
+  "intellectualRights": "MZ.intellectualRightsCC-BY-4.0",
+  "@context": "https://apitest.laji.fi/context/taxon-elastic-fi"
+}

@@ -133,23 +133,21 @@ export const dictionarifyByKey = <T extends Record<string, unknown>>(objects: T[
 	}, {});
 
 export const getPropertyContextName = (context?: string) =>
-	typeof context === "string" ? context : "document";
+	typeof context === "string" ? context : "MY.document";
 
-export const getRootField = (master: Pick<Master, "context">): Field => {
-	return {name: unprefixProp(getPropertyContextName(master.context))};
-};
+export const getRootField = (master: Pick<Master, "context">): Field => ({
+	name: getPropertyContextName(master.context)
+});
 
-export const getRootProperty = (rootField: Field): Property => {
-	return {
-		property: rootField.name,
-		isEmbeddable: true,
-		range: [rootField.name],
-		label: {},
-		shortName: unprefixProp(rootField.name),
-		required: true,
-		minOccurs: "1",
-		maxOccurs: "1",
-		multiLanguage: false,
-		domain: []
-	};
-};
+export const getRootProperty = (rootField: Field): Property => ({
+	property: rootField.name,
+	isEmbeddable: true,
+	range: rootField.name,
+	label: {},
+	shortName: unprefixProp(rootField.name),
+	required: true,
+	minOccurs: "1",
+	maxOccurs: "1",
+	multiLanguage: false,
+	domain: []
+});

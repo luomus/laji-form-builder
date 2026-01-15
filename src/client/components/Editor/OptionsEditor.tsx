@@ -15,7 +15,7 @@ import MetadataService from "src/services/metadata-service";
 import { editorContentNmspc, EditorContentTab, EditorToolbar, GenericEditorContent } from "./Editor";
 
 export const mapRangeToUiSchema = async (property: Property, metadataService: MetadataService, lang: Lang) => {
-	const range = property.range[0];
+	const range = property.range;
 
 	if (range === "MY.document" || range === PropertyRange.keyValue) {
 		return {"ui:field": "TextareaEditorField"};
@@ -52,7 +52,7 @@ export type FormOptionsEditorProps = Stylable & {
 }
 
 const formProperty = {
-	range: ["MHL.form"],
+	range: "MHL.form",
 	property: "MHL.form",
 	isEmbeddable: true,
 	label: {},

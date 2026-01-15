@@ -55,7 +55,7 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 			}
 			const properties = property.isEmbeddable
 				? await this.context.metadataService.getPropertiesForEmbeddedProperty(
-					property.range[0],
+					property.range,
 					undefined,
 					signal)
 				: [];
@@ -72,7 +72,7 @@ export default class BasicEditor extends React.PureComponent<GenericFieldEditorP
 		);
 
 		if (property.isEmbeddable) {
-			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
+			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range);
 		} else {
 			return [];
 		}

@@ -162,7 +162,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 			}
 			const properties = property.isEmbeddable
 				? await this.context.metadataService.getPropertiesForEmbeddedProperty(
-					property.range[0],
+					property.range,
 					undefined,
 					signal)
 				: [];
@@ -179,7 +179,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 		);
 
 		if (property.isEmbeddable) {
-			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
+			return await this.context.metadataService.getPropertiesForEmbeddedProperty(property.range);
 		} else {
 			return [];
 		}
@@ -207,7 +207,7 @@ class Field extends React.PureComponent<FieldProps, FieldState> {
 					<Clickable className={expandClassName}
 					           onClick={fields.length ? this.toggleExpand : undefined}
 					           key="expand" />
-					<Clickable className={this.nmspc("label")}>{name}</Clickable>
+					<Clickable className={this.nmspc("label")}>{unprefixProp(name)}</Clickable>
 					{this.state.properties === false
 						? null
 						: this.state.properties?.length

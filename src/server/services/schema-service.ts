@@ -8,7 +8,7 @@ import merge from "deepmerge";
 import ConverterService from "./converter-service";
 import ApiClient from "../../api-client";
 
-type Species = {
+type Taxon = {
 	id: string;
 	vernacularName?: string;
 	scientificName?: string;
@@ -127,34 +127,34 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 			(schemaFormat.schema as any).properties.gatherings?.items?.properties
 				.units?.items?.properties.informalTaxonGroups;
 
-		const speciesToUnit = (s: Species) => {
+		const taxonToUnit = (t: Taxon) => {
 			if (!identificationsSchema) {
 				// eslint-disable-next-line max-len
 				throw new Error("Form with prepopulateWithInformalTaxonGroups or prepopulateWithTaxonSets in options must have field \"identifications\"");
 			}
 
 			const identification: any = {};
-			const map: Record<string, keyof Species> = {
+			const map: Record<string, keyof Taxon> = {
 				"taxonID": "id",
 				"taxonVerbatim": "vernacularName",
 				"taxon": "scientificName"
 			};
 			Object.keys(map).forEach(k => {
 				if (identificationsSchema.properties[k]) {
-					identification[k] = s[map[k]] || "";
+					identification[k] = t[map[k]] || "";
 				}
 			});
 			const unit: JSONObject = { identifications: [identification] };
-			if (informalTaxonGroupsSchema && s.informalTaxonGroups) {
-				unit.informalTaxonGroups = s.informalTaxonGroups;
+			if (informalTaxonGroupsSchema && t.informalTaxonGroups) {
+				unit.informalTaxonGroups = t.informalTaxonGroups;
 			}
 			return unit;
 		};
 
 		const units = [
-			...(await this.getUnitsFromInformalTaxonGroups(prepopulateWithInformalTaxonGroups)),
-			...(await this.getUnitsFromTaxonSets(prepopulateWithTaxonSets))
-		].map((s: Species) => speciesToUnit(s));
+			...(await this.getTaxaFromInformalTaxonGroups(prepopulateWithInformalTaxonGroups)),
+			...(await this.getTaxaFromTaxonSets(prepopulateWithTaxonSets))
+		].map((t: Taxon) => taxonToUnit(t));
 		return {
 			...schemaFormat,
 			options: {
@@ -171,29 +171,33 @@ export default class SchemaService extends ConverterService<SchemaFormat> {
 		};
 	}
 
-	private async fetchTaxa(endpoint: string, query: JSONObject): Promise<Species[]> {
+	private async fetchTaxa(endpoint: string, filters?: JSONObject): Promise<Taxon[]> {
 		return (await this.apiClient.fetchJSON(endpoint, {
 			selectedFields: "id,scientificName,vernacularName,informalTaxonGroups",
 			lang: "fi",
 			pageSize: 10000,
-			...query, 
+		}, {
+			method: "POST",
+			body: filters
 		})).results;
 	}
 
-	private getUnitsFromInformalTaxonGroups(informalTaxonGroups?: string[]) {
+	private getTaxaFromInformalTaxonGroups(informalTaxonGroups?: string[]) {
 		if (!informalTaxonGroups) {
 			return [];
 		}
 		const BIOTA = "MX.37600";
 		const endpoint = `/taxa/${BIOTA}/species`;
-		return this.fetchTaxa(endpoint, {
-			informalGroupFilters: informalTaxonGroups,
-			taxonRanks: "MX.species",
-			onlyFinnish: true,
-		});
+		return this.fetchTaxa(endpoint, 
+			{
+				finnish: true,
+				informalTaxonGroups,
+				taxonRank: "MX.species"
+			}
+		);
 	}
 
-	private async getUnitsFromTaxonSets(taxonSets?: string[]) {
+	private async getTaxaFromTaxonSets(taxonSets?: string[]) {
 		if (!taxonSets) {
 			return [];
 		}

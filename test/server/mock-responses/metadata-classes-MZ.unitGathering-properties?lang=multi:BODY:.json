@@ -1,0 +1,120 @@
+{
+  "results": [
+    {
+      "property": "MY.dateBegin",
+      "label": {
+        "en": "Start date",
+        "sv": "Startdatum",
+        "fi": "Alku"
+      },
+      "domain": [
+        "MZ.gatheringEvent",
+        "TDFX.traitSubject",
+        "MZ.unitGathering",
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateBegin"
+    },
+    {
+      "property": "MY.dateEnd",
+      "label": {
+        "en": "End date",
+        "fi": "Loppu",
+        "sv": "Slutdatum"
+      },
+      "domain": [
+        "TDFX.traitSubject",
+        "MY.gathering",
+        "MZ.gatheringEvent",
+        "MZ.unitGathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 4,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "dateEnd"
+    },
+    {
+      "property": "MY.geometry",
+      "label": {
+        "fi": "Koordinaatit",
+        "en": "Coordinates"
+      },
+      "domain": [
+        "MZ.unitGathering",
+        "MY.gathering",
+        "MZ.gatheringEvent"
+      ],
+      "range": "MZ.geometry",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "geometry"
+    },
+    {
+      "property": "MY.habitatDescription",
+      "label": {
+        "en": "Habitat description",
+        "fi": "Elinympäristön kuvaus",
+        "sv": "Habitatbeskrivning"
+      },
+      "domain": [
+        "MY.gathering",
+        "MZ.unitGathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "habitatDescription",
+      "comment": {
+        "en": "Informal description of the habitat."
+      }
+    },
+    {
+      "property": "MY.substrate",
+      "label": {
+        "en": "Substrate",
+        "fi": "Kasvualusta",
+        "sv": "Substrat"
+      },
+      "domain": [
+        "MZ.unitGathering",
+        "MY.gathering"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "substrate",
+      "comment": {
+        "en": "Type of substrate or name of substrate species."
+      }
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

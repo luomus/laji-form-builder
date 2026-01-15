@@ -123,15 +123,15 @@ export default class FieldService {
 				}, {} as Record<string, string[]>);
 			};
 			const recursively = async (field: Field, property: Property) => {
-				const range = property.range[0];
+				const range = property.range;
 				if (await this.metadataService.isAltRange(range)) {
-					const rangeModel = await this.metadataService.getRange(range);
+					const rangeModel = await this.metadataService.getAlt(range);
 					if (rangeModel.some(item => item.altParent)) { 
 						return {[unprefixProp(property.property)]: {altParent: toParentMap(rangeModel)}};
 					}
 				} else if (field.fields) {
 					let collectedTrees = {};
-					const properties = await this.metadataService.getPropertiesForEmbeddedProperty(property.range[0]);
+					const properties = await this.metadataService.getPropertiesForEmbeddedProperty(property.range);
 					for (const _field of field.fields) {
 						let prop = properties.find(p => unprefixProp(p.property) === _field.name);
 						if (!prop) {
@@ -163,7 +163,8 @@ export default class FieldService {
 				const taxonSets = any.replace("...taxonSet:", "").split(",");
 				const taxonSetResults = await Promise.all(taxonSets.map(taxonSet => this.apiClient.fetchJSON(
 					"/taxa",
-					{pageSize: 1000, taxonSets: taxonSet, selectedFields: "id"}
+					{pageSize: 1000, selectedFields: "id"},
+					{ method: "POST", body: { taxonSets: taxonSet } }
 				)));
 				return taxonSetResults
 					.reduce((flat, result) => [...flat, ...result.results], [])
@@ -303,7 +304,7 @@ const defaultDateValidator: DefaultValidator = {
  * Pointer, the schema structure matching the pointer will use that validator, overriding any other validators.
  */
 const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
-	"document": {
+	"MY.document": {
 		"geometry": defaultGeometryValidator,
 		"/gatherings/geometry": defaultGatheringGeometryValidator,
 		"dateBegin": defaultDateValidator,
@@ -387,7 +388,7 @@ export const mapUnknownFieldWithTypeToProperty = (field: Field): Property => {
 	}
 	return {
 		property: field.name,
-		range: [mapFieldType(field.type)],
+		range: mapFieldType(field.type),
 		shortName: field.name,
 		label: {},
 		isEmbeddable: false,
@@ -400,9 +401,33 @@ export const mapUnknownFieldWithTypeToProperty = (field: Field): Property => {
 };
 
 export const getRootField = (master: Pick<Master, "context">): Field => {
-	if (master.context && master.context.match(/[^.]+\..+/)) {
-		throw new UnprocessableError("Don't use namespace prefix for context");
+	if (master.context === "document") {
+		master.context = "MY.document";
 	}
+	if (master.context === "namedPlace") {
+		master.context = "MNP.namedPlace";
+	}
+	if (master.context === "organization") {
+		master.context = "MOS.organization";
+	}
+	if (master.context === "specimenTransaction") {
+		master.context = "HRX.specimenTransaction";
+	}
+	if (master.context === "dataset") {
+		master.context = "GX.dataset";
+	};
+	if (master.context === "audio") {
+		master.context = "MM.audio";
+	}
+	if (master.context === "annotation") {
+		master.context = "MAN.annotation";
+	}
+	if (master.context === "image") {
+		master.context = "MM.image";
+	};
+	// if (master.context && master.context.match(/[^.]+\..+/)) {
+	// 	throw new UnprocessableError("Don't use namespace prefix for context");
+	// }
 	return _getRootField(master);
 };
 

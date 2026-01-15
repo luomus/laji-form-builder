@@ -1,0 +1,608 @@
+{
+  "results": [
+    {
+      "property": "MY.associatedObservationTaxa",
+      "label": {
+        "en": "Associated observation taxa",
+        "fi": "Seuralaislajihavainnot",
+        "sv": "Observationerna av följearter"
+      },
+      "domain": [
+        "MY.gathering",
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 35,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "associatedObservationTaxa",
+      "comment": {
+        "en": "Write associated observation taxa names here, separated by a semicolon (;). E.g.: \"Betula pendula; Betula pubescens; Poaceae\". These will form their own units of the type observation."
+      }
+    },
+    {
+      "property": "MY.author",
+      "label": {
+        "fi": "Auktori",
+        "en": "Taxon author",
+        "sv": "Auktor"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "author",
+      "comment": {
+        "en": "Author for the taxon"
+      }
+    },
+    {
+      "property": "MY.det",
+      "label": {
+        "sv": "Det.",
+        "en": "Det.",
+        "fi": "Määrittäjä (det.)"
+      },
+      "domain": [
+        "MY.documentIdentification",
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 3,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "det",
+      "comment": {
+        "en": "Name of the identifier (person) preferably in format \"lastname, firstname\""
+      }
+    },
+    {
+      "property": "MY.detDate",
+      "label": {
+        "fi": "Määritysaika",
+        "en": "Det. date",
+        "sv": "Bestämningsdatum"
+      },
+      "domain": [
+        "MY.identification",
+        "MY.documentIdentification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "detDate",
+      "comment": {
+        "en": "Date or year when the identification was done, preferably in format \"d.m.Y\" or \"Y\""
+      }
+    },
+    {
+      "property": "MY.detMethod",
+      "label": {
+        "fi": "Määritystapa",
+        "en": "Det method",
+        "sv": "Bestämningsmetod"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "MY.detMethodEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "detMethod"
+    },
+    {
+      "property": "MY.detVerbatim",
+      "label": {
+        "en": "Det verbatim from the label or other original source",
+        "sv": "Det ord för ord",
+        "fi": "Määrittäjä (det.) sanatarkasti alkuperäislähteestä"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 17,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "detVerbatim",
+      "comment": {
+        "en": "Name of the identifier and date of identification in original format (e.g. from the label), errors and all"
+      }
+    },
+    {
+      "property": "MY.genusQualifier",
+      "label": {
+        "en": "Genus qualifier",
+        "fi": "Suvun qualifier",
+        "sv": "Släkte qualifier"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 8,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "genusQualifier",
+      "comment": {
+        "en": "Additional qualifier or specifier at genus level (e.g. aff., cf.)"
+      }
+    },
+    {
+      "property": "MY.identificationBasis",
+      "label": {
+        "fi": "Määritysperuste",
+        "en": "Identification basis",
+        "sv": "Bestämningsgrund"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "MY.identificationBasisEnum",
+      "minOccurs": "0",
+      "maxOccurs": "unbounded",
+      "required": false,
+      "hasMany": true,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "identificationBasis"
+    },
+    {
+      "property": "MY.identificationNotes",
+      "label": {
+        "en": "Identification notes",
+        "fi": "Lisätietoja määrityksestä",
+        "sv": "Anteckningar av identifieringen"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 15,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "identificationNotes",
+      "comment": {
+        "en": "Additional information on the identification, basis or such"
+      }
+    },
+    {
+      "property": "MY.infraAuthor",
+      "label": {
+        "en": "Infra author",
+        "fi": "Laji alemman taksonin auktori",
+        "sv": "Auktorn av nedre taxon"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 6,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "infraAuthor",
+      "comment": {
+        "en": "Author for the taxon below species level/infra epithet"
+      }
+    },
+    {
+      "property": "MY.infraEpithet",
+      "label": {
+        "en": "Infra name",
+        "fi": "Lajia alemman taksonin nimi",
+        "sv": "Namnet av nedre taxon"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 5,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "infraEpithet",
+      "comment": {
+        "en": "Taxon name for the epithet below species level"
+      }
+    },
+    {
+      "property": "MY.infraRank",
+      "label": {
+        "en": "Infra rank",
+        "fi": "Lajia alemman taksonin taso",
+        "sv": "Rangen av nedre taxon"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "MY.infraRanks",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 4,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "infraRank",
+      "comment": {
+        "en": "Taxonomic level of the epithet below species level"
+      }
+    },
+    {
+      "property": "MY.infrasubspecificSubdivision",
+      "label": {
+        "fi": "Alalajin alapuolinen jaottelu",
+        "sv": "Indelning av underarten",
+        "en": "Infrasubspecific subdivision"
+      },
+      "domain": [
+        "MY.unit",
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 24,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "infrasubspecificSubdivision",
+      "comment": {
+        "en": "Pathovars, serovars and other infrasubspecific subdivisions of microbes."
+      }
+    },
+    {
+      "property": "MY.isPartOf",
+      "label": {
+        "en": "Is part of"
+      },
+      "domain": [
+        "MY.gathering",
+        "MY.collection",
+        "HRA.permitClass",
+        "MY.unit",
+        "MY.identification",
+        "MY.typeSpecimen",
+        "MF.sample",
+        "MY.measurementClass",
+        "MF.preparationClass"
+      ],
+      "range": "rdfs:Resource",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 24,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "isPartOf",
+      "comment": {
+        "en": "Which parent or larger collection this is part of."
+      }
+    },
+    {
+      "property": "MY.isTaxonGroup",
+      "label": {
+        "en": "Is taxon group"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:boolean",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "isTaxonGroup"
+    },
+    {
+      "property": "MY.preferredIdentification",
+      "label": {
+        "en": "Preferred identification",
+        "sv": "Rekommenderad identifikation",
+        "fi": "Suositeltu määritys"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 16,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "preferredIdentification",
+      "comment": {
+        "en": "This can be used to select one of the identifications as 'recommended', which is the used as default when displaying information about the specimen."
+      }
+    },
+    {
+      "property": "MY.sec",
+      "label": {
+        "fi": "Lajikäsite (sec)",
+        "sv": "Artbegrepp (sec)",
+        "en": "Taxon concept (sec)"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 14,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sec",
+      "comment": {
+        "en": "Publication reference for the taxon concept, that was used in identification"
+      }
+    },
+    {
+      "property": "MY.speciesQualifier",
+      "label": {
+        "fi": "Lajin qualifier",
+        "sv": "Art qualifier",
+        "en": "Species qualifier"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 9,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "speciesQualifier",
+      "comment": {
+        "en": "Additional qualifier at species level (e.g. aff., cf., sp. n., coll.)"
+      }
+    },
+    {
+      "property": "MY.taxon",
+      "label": {
+        "fi": "Laji",
+        "en": "Species",
+        "sv": "Art"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 2,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxon",
+      "comment": {
+        "en": "Taxon name"
+      }
+    },
+    {
+      "property": "MY.taxonID",
+      "label": {
+        "en": "Taxon alternative ID",
+        "sv": "Taxon alternativt ID",
+        "fi": "Taksonin vaihtoehtoisia tunnisteita"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 12,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonID",
+      "comment": {
+        "en": "ID for the taxon if has some other than an MX code"
+      }
+    },
+    {
+      "property": "MY.taxonRank",
+      "label": {
+        "fi": "Taksonominen taso",
+        "sv": "Taxonomisk rang",
+        "en": "Taxon rank"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "MX.taxonRankEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonRank",
+      "comment": {
+        "en": "Taxonomic level for the identification"
+      }
+    },
+    {
+      "property": "MY.taxonSpecifier",
+      "label": {
+        "en": "Taxon specifier"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonSpecifier"
+    },
+    {
+      "property": "MY.taxonURI",
+      "label": {
+        "en": "Taxon URI",
+        "fi": "Taksonin tunniste"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "MX.taxon",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonURI"
+    },
+    {
+      "property": "MY.taxonVerbatim",
+      "label": {
+        "en": "Taxon verbatim",
+        "fi": "Taksoni sanatarkasti",
+        "sv": "Taxon ord för ord"
+      },
+      "domain": [
+        "MY.identification"
+      ],
+      "range": "xsd:string",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 7,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "taxonVerbatim",
+      "comment": {
+        "en": "Taxon name in original format (e.g. from the label), errors and all"
+      }
+    },
+    {
+      "property": "MZ.publicityRestrictions",
+      "label": {
+        "en": "Publicity restrictions",
+        "fi": "Julkisuusrajoitukset",
+        "sv": "Publicitet restriktioner"
+      },
+      "domain": [
+        "MY.unit",
+        "MM.model",
+        "HRX.specimenTransaction",
+        "MM.video",
+        "MM.audio",
+        "MM.pdf",
+        "MY.collection",
+        "MY.document",
+        "MY.gathering",
+        "MY.identification",
+        "HRA.transaction",
+        "MY.typeSpecimen",
+        "MM.image"
+      ],
+      "range": "MZ.publicityRestrictionsEnum",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": 33,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "publicityRestrictions",
+      "comment": {
+        "en": "PUBLIC: all data can be published; PROTECTED: exact locality is hidden (100*100km square); PRIVATE: most of the data is hidden. Empty value means same as public."
+      }
+    },
+    {
+      "property": "sortOrder",
+      "label": {},
+      "domain": [
+        "MKV.habitatObject",
+        "MM.audio",
+        "MM.video",
+        "MKV.endangermentObject",
+        "DDF.dataField",
+        "MM.model",
+        "TDF.traitEnumValue",
+        "HBDF.term",
+        "MM.image",
+        "MY.identification",
+        "MX.taxon"
+      ],
+      "range": "xsd:integer",
+      "minOccurs": "0",
+      "maxOccurs": "1",
+      "required": false,
+      "hasMany": false,
+      "sortOrder": -1,
+      "isEmbeddable": false,
+      "multiLanguage": false,
+      "shortName": "sortOrder"
+    }
+  ],
+  "@context": "https://apitest.laji.fi/context/metadata-property-multi"
+}

@@ -1,0 +1,37 @@
+{
+  "results": [
+    {
+      "id": "MX.53474"
+    },
+    {
+      "id": "MX.204729"
+    },
+    {
+      "id": "MX.5077966"
+    },
+    {
+      "id": "MX.5077967"
+    },
+    {
+      "id": "MX.5077968"
+    },
+    {
+      "id": "MX.5077969"
+    },
+    {
+      "id": "MX.5077970"
+    },
+    {
+      "id": "MX.5077971"
+    },
+    {
+      "id": "MX.5077965"
+    }
+  ],
+  "total": 9,
+  "pageSize": 1000,
+  "currentPage": 1,
+  "lastPage": 1,
+  "intellectualRights": "MZ.intellectualRightsCC-BY-4.0",
+  "@context": "https://apitest.laji.fi/context/taxon-elastic-en"
+}
