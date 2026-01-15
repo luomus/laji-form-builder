@@ -415,7 +415,7 @@ export const getRootField = (master: Pick<Master, "context">): Field => {
 	}
 	if (master.context === "dataset") {
 		master.context = "GX.dataset";
-	};
+	}
 	if (master.context === "audio") {
 		master.context = "MM.audio";
 	}
@@ -424,7 +424,7 @@ export const getRootField = (master: Pick<Master, "context">): Field => {
 	}
 	if (master.context === "image") {
 		master.context = "MM.image";
-	};
+	}
 	// if (master.context && master.context.match(/[^.]+\..+/)) {
 	// 	throw new UnprocessableError("Don't use namespace prefix for context");
 	// }

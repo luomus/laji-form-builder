@@ -52,7 +52,7 @@ export class ApiClientImplementation implements ApiClientAbstract {
 			options.headers = {
 				...(options?.headers || {}),
 				"Content-Type": "application/json"
-			}
+			};
 		}
 		if (this.personToken) {
 			options.headers["Person-Token"] = this.personToken;
