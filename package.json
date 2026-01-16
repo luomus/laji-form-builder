@@ -13,7 +13,7 @@
     "start:dev": "nodemon src/server/start-dev.ts --ignore test --ignore src/client",
     "start:prod": "node build/main.js",
     "test": "npm run test:server && npm run test:client",
-    "test:client": "npx playwright test",
+    "test:client": "npx playwright test  --project chromium --project firefox",
     "test:client:lightweight": "npx playwright test --project chromium",
     "test:client:docker": "npm run test:client:docker:build && npm run test:client:docker:run",
     "test:client:docker:build": "docker build -t laji-form-builder-client-test -f client-test.Dockerfile .",
