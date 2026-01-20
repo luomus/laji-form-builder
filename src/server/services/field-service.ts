@@ -264,6 +264,7 @@ const defaultGatheringGeometryValidator: DefaultValidator = merge(
 					includeGatheringUnits: true,
 					message: {
 						missingGeometries: "@gatheringGeometryValidationAtLeastOne",
+						polygonsWithHoles: "@polygonsWithHoles"
 					}
 				},
 				translations: {
@@ -272,6 +273,11 @@ const defaultGatheringGeometryValidator: DefaultValidator = merge(
 						sv: "Platsen måste ha åtminstone en figur.",
 						fi: "Paikalla täytyy olla vähintään yksi kuvio."
 					},
+					"@polygonsWithHoles": {
+						en: "Polygons must not have holes",
+						sv: "Polygoner får inte ha hål",
+						fi: "Polygonilla ei saa olla reikiä"
+					}
 				},
 				mergeStrategy: "replace"
 			}
