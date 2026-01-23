@@ -205,7 +205,7 @@ export const addEmptyOptions = <T extends {options?: CommonFormat["options"]}>(f
 		({...form, options: form.options || {}});
 
 type DefaultValidatorItem = {
-	validator: JSONObject;
+	options: JSONObject;
 	translations?: Record<string, Record<Lang, string>>;
 	mergeStrategy?: "replace" | "merge" // Defaults to "replace".
 }
@@ -218,8 +218,8 @@ type DefaultValidator = {
 const defaultGeometryValidator: DefaultValidator = {
 	validators: {
 		geometry: {
-			validator: {
-				maximumSize: 10,
+			options: {
+				requireShape: true,
 				message: {
 					missingGeometries: "@geometryValidationAtLeastOne",
 					invalidBoundingBoxHectares: "@geometryHectaresMaxValidation",
@@ -228,9 +228,10 @@ const defaultGeometryValidator: DefaultValidator = {
 					invalidRadius: "@geometryValidation",
 					invalidCoordinates: "@geometryValidation",
 					invalidGeometries: "@geometryValidation",
-					noOverlap: "@geometryValidation"
+					noOverlap: "@geometryValidation",
+					polygonsWithHoles: "@geometryPolygonsWithHolesValidation"
 				},
-				boundingBoxMaxHectares: 5000000
+				boundingBoxMaxHectares: 1000000
 			},
 			translations: {
 				"@geometryValidation": {
@@ -239,56 +240,53 @@ const defaultGeometryValidator: DefaultValidator = {
 					fi: "Epäkelpo kuvio"
 				},
 				"@geometryValidationAtLeastOne": {
-					en: "Must have at least one feature.",
-					sv: "Måste ha åtminstone en figur.",
-					fi: "Täytyy olla vähintään yksi kuvio."
+					en: "Must have at least one feature",
+					sv: "Måste ha åtminstone en figur",
+					fi: "Täytyy olla vähintään yksi kuvio"
 				},
 				"@geometryHectaresMaxValidation": {
 					en: "Too big area. Maximum is %{max} hectares",
 					sv: "För stort område. Maximalt är %{max} hektar",
 					fi: "Liian iso alue. Maksimi on %{max} hehtaaria",
-				}
+				},
+				"@geometryPolygonsWithHolesValidation": {
+					en: "Polygons with holes are not allowed",
+					sv: "Polygoner med hål är inte tillåtna",
+					fi: "Polygonilla ei saa olla reikiä"
+				},
 			},
 			mergeStrategy: "merge"
 		}
 	}
 };
 
-const defaultGatheringGeometryValidator: DefaultValidator = merge(
-	defaultGeometryValidator,
-	{
-		validators: {
-			geometry: {
-				validator: {
-					requireShape: true,
-					includeGatheringUnits: true,
-					message: {
-						missingGeometries: "@gatheringGeometryValidationAtLeastOne",
-						polygonsWithHoles: "@polygonsWithHoles"
-					}
+const defaultGatheringGeometryWarnings: DefaultValidator = {
+	validators: defaultGeometryValidator.validators,
+	warnings: {
+		geometry: {
+			options: {
+				boundingBoxMaxHectares: 500000,
+				includeGatheringUnits: true,
+				message: {
+					invalidBoundingBoxHectares: "@geometryHectaresMaxValidationWarning"
+				}
+			},
+			translations: {
+				"@geometryHectaresMaxValidationWarning": {
+					en: "It's a very large area",
+					sv: "Det är ett mycket stort område.",
+					fi: "Alue on hyvin iso",
 				},
-				translations: {
-					"@gatheringGeometryValidationAtLeastOne": {
-						en: "Gathering must have at least one feature.",
-						sv: "Platsen måste ha åtminstone en figur.",
-						fi: "Paikalla täytyy olla vähintään yksi kuvio."
-					},
-					"@polygonsWithHoles": {
-						en: "Polygons must not have holes",
-						sv: "Polygoner får inte ha hål",
-						fi: "Polygonilla ei saa olla reikiä"
-					}
-				},
-				mergeStrategy: "replace"
-			}
+			},
+			mergeStrategy: "merge"
 		}
 	}
-);
+};
 
 const defaultDateValidator: DefaultValidator = {
 	validators: {
 		datetime: {
-			validator: {
+			options: {
 				earliest: "1000-01-01",
 				tooEarly: "@dateTooEarlyValidation"
 			},
@@ -305,14 +303,14 @@ const defaultDateValidator: DefaultValidator = {
 };
 
 /* 
- * Validation is done context-aware, so that e.g. { document: { geometry: <validator> } } will validate each MY.geometry
- * (MY.document's geometry), but not e.g. MNP.geometry (MNP.namedPlace's geometry). If the field pointer is a JSON
- * Pointer, the schema structure matching the pointer will use that validator, overriding any other validators.
+ * Validation is done context-aware, so that e.g. { "MY.document": { geometry: <validator> } } will validate each
+ * MY.geometry (MY.document's geometry), but not e.g. MNP.geometry (MNP.namedPlace's geometry). If the field pointer is
+ * a JSON Pointer, the schema structure matching the pointer will use that validator, overriding any other validators.
  */
 const defaultValidators: Record<string, Record<string, DefaultValidator>> = {
 	"MY.document": {
 		"geometry": defaultGeometryValidator,
-		"/gatherings/geometry": defaultGatheringGeometryValidator,
+		"/gatherings/geometry": defaultGatheringGeometryWarnings,
 		"dateBegin": defaultDateValidator,
 		"dateEnd": defaultDateValidator
 	}
@@ -327,48 +325,50 @@ const addDefaultValidators = <T extends Pick<ExpandedMaster, "fields" | "transla
 	const recursively = (fields: Field[], path: string) => {
 		fields.forEach(field => {
 			const nextPath = `${path}/${field.name}`;
-			const _defaultValidators = contextDefaultValidators[nextPath]?.["validators"]
-				|| contextDefaultValidators[field.name]?.["validators"];
+			(["validators", "warnings"] as const).forEach(validationLevel => {
+				const _defaultValidators = contextDefaultValidators[nextPath]?.[validationLevel]
+					|| contextDefaultValidators[field.name]?.[validationLevel];
 
-			_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
-				const defaultValidator = _defaultValidators[validatorName];
-				const {mergeStrategy = "replace"} = defaultValidator;
-				if (field.validators && validatorName in (field.validators)) {
-					if (field.validators[validatorName] === false) {
-						delete field.validators![validatorName];
-						return;
+				_defaultValidators && Object.keys(_defaultValidators).forEach(validatorName => {
+					const defaultValidator = _defaultValidators[validatorName];
+					const {mergeStrategy = "replace"} = defaultValidator;
+					if (field[validationLevel] && validatorName in (field[validationLevel]!)) {
+						if (field[validationLevel]![validatorName] === false) {
+							delete field[validationLevel]![validatorName];
+							return;
+						}
+						if (mergeStrategy === "replace") {
+							return;
+						}
 					}
-					if (mergeStrategy === "replace") {
-						return;
+					if (!field[validationLevel]) {
+						field[validationLevel] = {};
 					}
-				}
-				if (!field.validators) {
-					field.validators = {};
-				}
-				if (mergeStrategy === "merge" && field.validators[validatorName]) {
-					field.validators[validatorName] = merge(
-						defaultValidator.validator,
-						field.validators[validatorName] as JSONObject
-					);
-				} else { // "replace" strategy, used also if strategy is "merge" but there is nothing to merge.
-					field.validators[validatorName] = defaultValidator.validator;
-				}
-				if (defaultValidator.translations) {
-					master.translations = {
-						...(master.translations || {}),
-						fi: (master.translations?.fi || {}),
-						sv: (master.translations?.sv || {}),
-						en: (master.translations?.en || {}),
-					};
-					Object.keys(defaultValidator.translations).forEach(translationKey => {
-						Object.keys(defaultValidator.translations![translationKey]).forEach((lang: Lang) => {
-							if (!(translationKey in (master.translations as Translations)[lang]!)) {
-								(master.translations as Translations)[lang]![translationKey] =
-									defaultValidator.translations![translationKey][lang];
-							}
+					if (mergeStrategy === "merge" && field[validationLevel]![validatorName]) {
+						field[validationLevel]![validatorName] = merge(
+							defaultValidator.options,
+							field[validationLevel]![validatorName] as JSONObject
+						);
+					} else { // "replace" strategy, used also if strategy is "merge" but there is nothing to merge.
+						field[validationLevel]![validatorName] = defaultValidator.options;
+					}
+					if (defaultValidator.translations) {
+						master.translations = {
+							...(master.translations || {}),
+							fi: (master.translations?.fi || {}),
+							sv: (master.translations?.sv || {}),
+							en: (master.translations?.en || {}),
+						};
+						Object.keys(defaultValidator.translations).forEach(translationKey => {
+							Object.keys(defaultValidator.translations![translationKey]).forEach((lang: Lang) => {
+								if (!(translationKey in (master.translations as Translations)[lang]!)) {
+									(master.translations as Translations)[lang]![translationKey] =
+										defaultValidator.translations![translationKey][lang];
+								}
+							});
 						});
-					});
-				}
+					}
+				});
 			});
 			recursively(field.fields || [], nextPath);
 		});
