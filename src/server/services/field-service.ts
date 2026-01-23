@@ -231,7 +231,8 @@ const defaultGeometryValidator: DefaultValidator = {
 					noOverlap: "@geometryValidation",
 					polygonsWithHoles: "@geometryPolygonsWithHolesValidation"
 				},
-				boundingBoxMaxHectares: 1000000
+				boundingBoxMaxHectares: 1000000,
+				polygonsWithHoles: true
 			},
 			translations: {
 				"@geometryValidation": {
