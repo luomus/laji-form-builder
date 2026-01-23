@@ -16,9 +16,10 @@ import {
 } from "@luomus/laji-form/lib/utils";
 import { AnyJSONEditor } from "src/client/components/components";
 import { Context } from "src/client/components/Context";
-import { FieldProps } from "@luomus/laji-form/lib/components/LajiForm";
 import { isJSONObjectOrUndefined, JSONObject, JSONSchema } from "src/model";
 import { GenericFieldEditorProps } from "./FieldEditor";
+import { FieldProps } from "@rjsf/utils";
+
 
 const PREFIX = "$";
 

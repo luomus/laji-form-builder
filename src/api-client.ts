@@ -48,7 +48,9 @@ export class ApiClientImplementation implements ApiClientAbstract {
 			}
 		};
 		if (options.body) {
-			options.body = JSON.stringify(options.body);
+			if (typeof options.body !== "string") {
+				options.body = JSON.stringify(options.body);
+			}
 			options.headers = {
 				...(options?.headers || {}),
 				"Content-Type": "application/json"

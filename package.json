@@ -39,7 +39,7 @@
     "react-jsonschema-form"
   ],
   "dependencies": {
-    "@luomus/laji-form": "^15.1.8",
+    "@luomus/laji-form": "^15.1.86",
     "@luomus/parse-prop-types": "^0.3.0",
     "@types/deep-diff": "^1.0.2",
     "@types/memoizee": "^0.4.3",
