@@ -219,7 +219,6 @@ const defaultGeometryValidator: DefaultValidator = {
 	validators: {
 		geometry: {
 			options: {
-				requireShape: true,
 				message: {
 					missingGeometries: "@geometryValidationAtLeastOne",
 					invalidBoundingBoxHectares: "@geometryHectaresMaxValidation",
@@ -262,7 +261,7 @@ const defaultGeometryValidator: DefaultValidator = {
 };
 
 const defaultGatheringGeometryWarnings: DefaultValidator = {
-	validators: defaultGeometryValidator.validators,
+	validators: merge(defaultGeometryValidator.validators as any, { geometry: { options: { requireShape: true } } }),
 	warnings: {
 		geometry: {
 			options: {

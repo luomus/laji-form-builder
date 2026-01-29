@@ -873,7 +873,8 @@ describe("fields", () => {
 			it("is added", async () => {
 				const form = { fields: [ { name: "gatheringEvent", fields: [ { name: "geometry" } ]} ]};
 				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.requireShape).toBeTruthy();
+				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.requireShape)
+					.toBeUndefined();
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("Täytyy olla vähintään yksi kuvio");
 			});
@@ -902,7 +903,6 @@ describe("fields", () => {
 					}
 				};
 				const schemaFormat: any = await fieldService.masterToSchemaFormat(form, LANG);
-				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.requireShape).toBeTruthy();
 				expect(schemaFormat.validators.gatheringEvent.properties.geometry.geometry.message.missingGeometries)
 					.toBe("foo");
 			});
