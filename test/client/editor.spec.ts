@@ -10,7 +10,7 @@ test.describe("Editor", () => {
 	let builder: BuilderPO;
 	test.beforeAll(async ({browser}) => {
 		page = await browser.newPage();
-		(await browser.newContext()).route(/https:\/\/apitest.laji.fi\/v0\/named-places*/, route => route.abort());
+		(await browser.newContext()).route(/https:\/\/apitest.laji.fi\/named-places*/, route => route.abort());
 		builder = await createBuilder(page, "JX.519");
 		await builder.waitUntilLoaded();
 	});
@@ -35,7 +35,8 @@ test.describe("Editor", () => {
 			});
 
 			test("changes preview form lang", async () => {
-				await expect(builder.formPreview.$locate("gatheringEvent.legPublic").locator("strong"))
+				await expect(builder.formPreview.$locate("gatheringEvent.legPublic")
+					.locator("label[for='root_gatheringEvent_legPublic']"))
 					.toHaveText("Observatörernas namn är offentliga");
 			});
 

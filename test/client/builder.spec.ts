@@ -73,7 +73,8 @@ test.describe("Builder", () => {
 			});
 
 			test("changes preview form lang", async () => {
-				await expect(builder.formPreview.$locate("gatheringEvent.legPublic").locator("strong"))
+				await expect(builder.formPreview.$locate("gatheringEvent.legPublic")
+					.locator("label[for='root_gatheringEvent_legPublic']"))
 					.toHaveText("Observatörernas namn är offentliga");
 			});
 
