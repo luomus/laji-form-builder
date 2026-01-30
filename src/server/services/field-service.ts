@@ -407,33 +407,9 @@ export const mapUnknownFieldWithTypeToProperty = (field: Field): Property => {
 };
 
 export const getRootField = (master: Pick<Master, "context">): Field => {
-	if (master.context === "document") {
-		master.context = "MY.document";
+	if (master.context && !master.context.includes(".")) {
+		throw new UnprocessableError("Missing namespace prefix for context. It should be something like 'MY.document'");
 	}
-	if (master.context === "namedPlace") {
-		master.context = "MNP.namedPlace";
-	}
-	if (master.context === "organization") {
-		master.context = "MOS.organization";
-	}
-	if (master.context === "specimenTransaction") {
-		master.context = "HRX.specimenTransaction";
-	}
-	if (master.context === "dataset") {
-		master.context = "GX.dataset";
-	}
-	if (master.context === "audio") {
-		master.context = "MM.audio";
-	}
-	if (master.context === "annotation") {
-		master.context = "MAN.annotation";
-	}
-	if (master.context === "image") {
-		master.context = "MM.image";
-	}
-	// if (master.context && master.context.match(/[^.]+\..+/)) {
-	// 	throw new UnprocessableError("Don't use namespace prefix for context");
-	// }
 	return _getRootField(master);
 };
 
