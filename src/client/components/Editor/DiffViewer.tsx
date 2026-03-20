@@ -3,8 +3,8 @@ import { Master, JSON } from "src/model";
 import { Context } from "src/client/components/Context";
 import { gnmspc, isSignalAbortError, nmspc, runAbortable } from "src/client/utils";
 import diff, { Diff, DiffDeleted, DiffEdit, DiffNew, DiffArray } from "deep-diff";
-import memoize from "memoizee";
 import { Spinner } from "src/client/components/components";
+import { omit } from "src/utils";
 
 export type DiffViewerProps = {
 	master: Master;
@@ -30,7 +30,7 @@ const DiffViewerModal = ({master}: DiffViewerProps) => {
 		return () => abortController?.abort();
 	}, [formService, id]);
 	return remoteMaster
-		? <DiffsViewer diffs={getDiff(remoteMaster as JSON, master as JSON)} />
+		? <DiffsViewer diffs={getDiff(omit(remoteMaster, "@context") as JSON, omit(master, "@context"))} />
 		: <Spinner />;
 };
 
@@ -50,7 +50,7 @@ type PatchedDiff<LHS, RHS = LHS> = PatchedDiffNew<RHS>
 
 type NonArrayDiff = PatchedDiffNew<JSON> | PatchedDiffEdit<JSON> | PatchedDiffDeleted<JSON>;
 
-export const getDiff = memoize((obj1: JSON, obj2: JSON) => {
+export const getDiff = (obj1: JSON, obj2: JSON) => {
 	// The diff is used for JSON only. Undefined keys will be removed when the JSON is stringified,
 	// so we filter them out here.
 	const mapUndefined = (diff: NonArrayDiff): NonArrayDiff | undefined => {
@@ -75,7 +75,7 @@ export const getDiff = memoize((obj1: JSON, obj2: JSON) => {
 	};
 	const diffs =	diff(obj1, obj2) as PatchedDiff<JSON>[];
 	return diffs ? flattenArrays(diffs) : [];
-});
+};
 
 const DiffPath = ({path}: Diff<JSON>) => <span>{path?.join(".")}</span>;
 

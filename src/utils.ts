@@ -151,3 +151,20 @@ export const getRootProperty = (rootField: Field): Property => ({
 	multiLanguage: false,
 	domain: []
 });
+
+export const omitForKeys = <T extends Record<string, unknown>, K extends keyof T = keyof T>(...keys: K[]) =>
+	(obj: T): Omit<T, K> => {
+		const dict = new Set(keys);
+		return (Object.keys(obj) as K[]).reduce((filtered, key) => {
+			if (!dict.has(key)) {
+				filtered[key] = obj[key];
+			}
+			return filtered;
+		}, {} as T) as Omit<T, K>;
+	};
+
+export const omit = <T extends Record<string, unknown>, K extends keyof T>(
+	obj: T,
+	...keys: K[]
+) => omitForKeys<T, K>(...keys)(obj);
+

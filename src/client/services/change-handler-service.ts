@@ -4,7 +4,10 @@ import { fieldPointerToUiSchemaPointer } from "../utils";
 import {
 	Property, PropertyRange, Lang, Master, SchemaFormat, Field, CompleteTranslations, ExpandedMaster, JSON
 } from "../../model";
-import { getDiff } from "../components/Editor/DiffViewer";
+import { getDiff as _getDiff } from "../components/Editor/DiffViewer";
+import memoize from "memoizee";
+
+const getDiff = memoize(_getDiff);
 
 const expandTranslations = (translations: Master["translations"]): CompleteTranslations => ({
 	fi: {}, sv: {}, en: {}, ...(translations || {})
