@@ -174,13 +174,18 @@ export class Editor extends React.PureComponent<EditorProps, EditorState> {
 			? (
 				<div style={containerStyle} ref={this.containerRef} className={editorContentNmspc()}>
 					{content}
-					{this.props.jsonEditorOpen && <FormJSONEditorModal value={master}
-					                                                   onHide={this.hideJSONEditor}
-					                                                   onSave={this.onWantsToSave}
-					                                                   onChange={this.props.onMasterChange} />}
-					{this.state.saveModalOpen && <SaveModal master={this.state.saveModalOpen}
-					                                        onSave={this.onSaveCurrent}
-					                                        onHide={this.hideSaveConfirm} />}
+					{this.props.jsonEditorOpen &&
+						<FormJSONEditorModal value={master}
+						                     onHide={this.hideJSONEditor}
+						                     onSave={this.onWantsToSave}
+						                     onChange={this.props.onMasterChange}
+						                     isNew={isValid(master) && !master.id || false} />
+					}
+					{this.state.saveModalOpen &&
+						<SaveModal master={this.state.saveModalOpen}
+						           onSave={this.onSaveCurrent}
+						           onHide={this.hideSaveConfirm} />
+					}
 				</div>
 			) : null;
 	}
@@ -446,11 +451,12 @@ type FormJSONEditorProps = Omit<JSONEditorModalProps<Master>, "onChange" | "onSu
 	{
 		value: MaybeError<Master>;
 		onChange: EditorProps["onMasterChange"];
-		onSave: (master: Master) => void
+		onSave: (master: Master) => void;
+		isNew: boolean
 	};
 
 const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
-	{onSave, onChange, ...props}: FormJSONEditorProps)
+	{onSave, onChange, isNew, ...props}: FormJSONEditorProps)
 {
 	const {translations} = React.useContext(Context);
 
@@ -466,16 +472,18 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 		onChange({type: "master", value}),
 	[onChange]);
 
-	return <>
-		<JSONEditorModal {...props}
+	const saveTranslationsKey = isNew
+		? "save"
+		: "editor.save.button";
+
+	return <JSONEditorModal {...props}
 		                 value={isValid(props.value) ? props.value : undefined}
 										 validator={isMaster}
 		                 onSubmit={onSaveChanges}
 		                 onSubmitDraft={onSubmitDraft}
 		                 onChange={setTmpValue}
 										 header={translations["editor.json.modal.header"]}
-		                 submitLabel={translations["save"]} />
-	</>;
+		                 submitLabel={translations[saveTranslationsKey]} />
 });
 
 type JSONEditorModalProps<T extends JSON | undefined> = Pick<SubmittableJSONEditorProps<T>,
