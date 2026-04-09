@@ -19,7 +19,7 @@ export default class FormService extends UsesMemoization {
 	private fetchJSON(path: string, query?: Record<string, unknown>, options?: Record<string, unknown>) {
 		return this.formApiClient
 			? this.formApiClient.fetchJSON(path, query as any, options)
-			: this.apiClient.fetchJSON(`/forms/${path}`, query as any, options);
+			: this.apiClient.fetchJSON(`/forms${path}`, query as any, options);
 	}
 
 	getMaster = this.memoize((id: string, signal?: AbortSignal): Promise<Master> => {

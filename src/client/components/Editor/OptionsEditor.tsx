@@ -239,7 +239,7 @@ export default React.memo(React.forwardRef<HTMLDivElement, FormOptionsEditorProp
 
 	const getJSON = React.useCallback(() => formData, [formData]);
 
-	return  (
+	return (
 		<div className={gnmspc("options-editor")} ref={ref} style={{width: "100%"}}>
 			<GenericEditorContent json={getJSON()}
 			                      onJSONChange={onLajiFormChange}
