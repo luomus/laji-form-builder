@@ -514,6 +514,11 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON | und
 		onChange?.(value);
 	}, [onChange]);
 
+	const hideAndSubmit = React.useCallback(value => {
+		onSubmit(value);
+		onHide();
+	}, [onHide, onSubmit]);
+
 	const onHideCheckForChanges = React.useCallback(() => {
 		tmpValue !== undefined && JSON.stringify(tmpValue) !== JSON.stringify(value)
 			&& confirm(translations["editor.json.confirm"])
@@ -527,7 +532,8 @@ const JSONEditorModal = React.memo(function JSONEditorModal<T extends JSON | und
 			<SubmittableJSONEditor {...props}
 			                       value={isValid(value) ? value : undefined}
 			                       onSubmitDraft={onSubmitDraft}
-			                       onSubmit={onSubmit}
+			                       onSubmit={hideAndSubmit}
+			                       onCancel={onHide}
 			                       onChange={_onChange} />
 		</GenericModal>
 	);

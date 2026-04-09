@@ -278,5 +278,10 @@
 		"fi": "Lomake perii toisen lomakkeen kentällä 'baseFormID' tai 'fieldsFormID'",
 		"sv": "Näytä lomakkeiden perintäpuu",
 		"en": "Open the form inheritance tree"
+	},
+	"cancel": {
+		"fi": "Peru",
+		"sv": "Peru",
+		"en": "Cancel"
 	}
 }

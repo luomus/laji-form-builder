@@ -107,11 +107,14 @@ export type SubmittableJSONEditorProps<T extends JSON | undefined> =
 	& {
 	onSubmit: (value: T) => void;
 	onSubmitDraft?: (value: T) => void;
+	onCancel?: (value: T) => void;
 	submitLabel?: string;
+	displayCancel?: boolean
 } & Classable;
 
 export function SubmittableJSONEditor<T extends JSON>(
-	{value, onSubmit, validator, onSubmitDraft, onChange, className, submitLabel}: SubmittableJSONEditorProps<T>
+	{value, onSubmit, validator, onSubmitDraft, onChange, className, submitLabel, onCancel}
+	: SubmittableJSONEditorProps<T>
 ) {
 	const {translations} = React.useContext(Context);
 	const [json, _setJSON] = React.useState(value);
@@ -148,6 +151,12 @@ export function SubmittableJSONEditor<T extends JSON>(
 			          variant={"default"}
 			          className={`${className ? className + "-" : CSS_NAMESPACE}preview-btn`}
 				>{translations["wizard.option.json.import.draft"]}
+				</Button>
+			)}
+			{onCancel && (
+				<Button onClick={onCancel}
+			          variant={"default"}
+				>{translations["cancel"]}
 				</Button>
 			)}
 		</div>
