@@ -483,7 +483,7 @@ const FormJSONEditorModal = React.memo(function FormJSONEditorModal(
 		                 onSubmitDraft={onSubmitDraft}
 		                 onChange={setTmpValue}
 										 header={translations["editor.json.modal.header"]}
-		                 submitLabel={translations[saveTranslationsKey]} />
+		                 submitLabel={translations[saveTranslationsKey]} />;
 });
 
 type JSONEditorModalProps<T extends JSON | undefined> = Pick<SubmittableJSONEditorProps<T>,
