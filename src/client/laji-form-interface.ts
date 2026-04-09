@@ -14,8 +14,8 @@ class _LajiFormInterface {
 		return (new RJSF({
 			schema: {},
 			uiSchema: {},
-			fields: lajiForm.getFields(),
-			widgets: lajiForm.getWidgets(),
+			fields: lajiForm.getFields() as any,
+			widgets: lajiForm.getWidgets() as any,
 			validator
 		})as any).getRegistry();
 	})
