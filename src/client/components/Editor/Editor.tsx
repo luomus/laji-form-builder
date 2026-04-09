@@ -589,9 +589,10 @@ type EditorContentUITabProps = {renderUI: () => React.ReactElement | null, overf
 export const EditorContent = {
 	Toolbar: EditorContentToolbar,
 	Tab: {
-		JSON: <T extends JSON | undefined>({onJSONChange, json, validator, topOffset}
-		: EditorContentJSONTabProps<T>) => {
-			const [jsonEditorOpen, _openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
+		JSON: <T extends JSON | undefined>({
+			onJSONChange, json, validator, topOffset
+		}: EditorContentJSONTabProps<T>) => {
+			const [jsonEditorOpen, openJSONEditor, closeJSONEditor] = useBooleanSetter(false);
 
 			const {theme ,translations} = React.useContext(Context);
 			const {Glyphicon} = theme;
@@ -611,7 +612,7 @@ export const EditorContent = {
 						                 value={json} />
 					)}
 					<Tooltip tooltip={translations["jsonEditor.openModal"]} id="json-editor--modal" placement="left">
-						<Button onClick={_openJSONEditor}
+						<Button onClick={openJSONEditor}
 						        small
 						        style={buttonStyle} >
 							<Glyphicon glyph="new-window" />
