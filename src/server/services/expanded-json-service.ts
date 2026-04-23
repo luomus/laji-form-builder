@@ -35,7 +35,8 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 		const expanded = await this.expandField(
 			{...rootField, fields: master.fields},
 			rootProperty,
-			translations
+			translations,
+			""
 		);
 		return {
 			...master,
@@ -47,20 +48,20 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 	/**
 	 * Returns the expanded fields and mutates the translations to have the alt labels.
 	 */
-	async expandField(field: Field, property: Property, translations: CompleteTranslations)
+	async expandField(field: Field, property: Property, translations: CompleteTranslations, path: string)
 	: Promise<ExpandedField> {
 		return reduceWith(field, property, 
-			this.expandChildren(translations),
+			this.expandChildren(translations, path),
 			this.mapRange(translations),
 			mapEmbeddable,
 			mapMaxOccurs,
 			filterWhitelist,
 			filterBlacklist,
-			addLabel(translations)
+			addLabel(translations, path)
 		);
 	}
 
-	expandChildren = (translations: CompleteTranslations) => async (field: Field, property: Property) => {
+	expandChildren = (translations: CompleteTranslations, path: string) => async (field: Field, property: Property) => {
 		if (!property.isEmbeddable || !field.fields) {
 			return field;
 		}
@@ -71,7 +72,7 @@ export default class ExpandedJSONService extends ConverterService<ExpandedJSONFo
 				if (!prop) {
 					prop = mapUnknownFieldWithTypeToProperty(field);
 				}
-				return this.expandField(field, prop, translations);
+				return this.expandField(field, prop, translations, `${path}/${field.name}`);
 			})
 		)};
 	}
@@ -191,9 +192,9 @@ const filterList = (listName: "whitelist" | "blacklist", white = true) => (field
 const filterWhitelist = filterList("whitelist");
 const filterBlacklist = filterList("blacklist", false);
 
-const addLabel = (translations: CompleteTranslations) => (field: ExpandedField, property: Property) => {
+const addLabel = (translations: CompleteTranslations, path: string) => (field: ExpandedField, property: Property) => {
 	if (!("label" in field)) {
-		const labelKey = `@${field.name}`;
+		const labelKey = `@_populated${path.replace(/\//g, "_")}`;
 		LANGS.forEach(lang => {
 			translations[lang][labelKey] = property.label[lang] || "";
 		});

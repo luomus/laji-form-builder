@@ -845,8 +845,8 @@ describe("fields", () => {
 			it("for json format", async () => {
 				const form = { fields: [ { name: "gatherings" } ]};
 				const jsonFormat = await fieldService.masterToExpandedJSONFormat(form);
-				expect(jsonFormat.fields?.[0]?.label).toBe("@gatherings");
-				expect(jsonFormat.translations?.fi?.["@gatherings"]).toBe("Keruutapahtumat");
+				expect(jsonFormat.fields?.[0]?.label).toBe("@_populated_gatherings");
+				expect(jsonFormat.translations?.fi?.["@_populated_gatherings"]).toBe("Keruutapahtumat");
 			});
 		});
 	});
