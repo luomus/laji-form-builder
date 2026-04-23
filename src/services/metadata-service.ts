@@ -6,17 +6,11 @@ import UsesMemoization from "./uses-memoization";
 export default class MetadataService extends UsesMemoization {
 	private apiClient: ApiClient;
 	private lang: Lang;
-	private allAlts: Record<string, Range[]> | undefined;
 
 	constructor(apiClient: ApiClient, lang: Lang) {
 		super();
 		this.apiClient = apiClient;
 		this.lang = lang;
-	}
-
-	flush() {
-		super.flush();
-		this.allAlts = undefined;
 	}
 
 	setLang(lang: Lang) {
@@ -48,25 +42,11 @@ export default class MetadataService extends UsesMemoization {
 			: {};
 	}
 
-	getAlt = this.memoize((property: string): Promise<Range[]> =>
-		this.allAlts && Promise.resolve(this.allAlts[property])
-		|| this.apiClient.fetchJSON(
-			// eslint-disable-next-line max-len
-			`/metadata/alts/${property}`,
-			{lang: "multi"}
-		)
-	)
+	getAlt = this.memoize(async (property: string): Promise<Range[]> => (await this.getAllAlts())[property])
 
-	getAllAlts = async () => {
-		if (this.allAlts) {
-			return this.allAlts;
-		}
-		const alts = await (
+	getAllAlts = this.memoize(async () => 
 			this.apiClient.fetchJSON("/metadata/alts", {lang: "multi"}) as Promise<Record<string, Range[]>>
-		);
-		this.allAlts = alts;
-		return alts;
-	}
+	);
 
 	isAltRange = async (range: string) => !!(await this.getAllAlts())[range];
 
